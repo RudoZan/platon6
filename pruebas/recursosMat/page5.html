@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráficas Interactivas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            gap: 30px;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .activity-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .controls-panel {
+            flex: 1;
+            min-width: 300px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .graph-container {
+            flex: 2;
+            min-width: 500px;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: block;
+            background: white;
+            width: 100%;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .function-selector {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .value-display {
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .equation-display {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            color: #333;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        .page-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .page-number:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-number.active {
+            background: white;
+            border-color: #667eea;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gráficas Interactivas de Funciones</h1>
+        <div class="activity-container">
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="functionType">Tipo de Función:</label>
+                    <select id="functionType" class="function-selector">
+                        <option value="linear">Función Lineal (y = mx + b)</option>
+                        <option value="quadratic">Función Cuadrática (y = ax² + bx + c)</option>
+                    </select>
+                </div>
+
+                <div id="linearControls">
+                    <div class="control-group">
+                        <label for="mSlider">Pendiente (m): <span class="value-display" id="mValue">1</span></label>
+                        <div class="slider-container">
+                            <input type="range" id="mSlider" class="slider" min="-5" max="5" step="0.1" value="1">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="bSlider">Ordenada al origen (b): <span class="value-display" id="bValue">0</span></label>
+                        <div class="slider-container">
+                            <input type="range" id="bSlider" class="slider" min="-10" max="10" step="0.5" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="quadraticControls" style="display: none;">
+                    <div class="control-group">
+                        <label for="aSlider">Coeficiente a: <span class="value-display" id="aValue">1</span></label>
+                        <div class="slider-container">
+                            <input type="range" id="aSlider" class="slider" min="-3" max="3" step="0.1" value="1">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="bQuadSlider">Coeficiente b: <span class="value-display" id="bQuadValue">0</span></label>
+                        <div class="slider-container">
+                            <input type="range" id="bQuadSlider" class="slider" min="-5" max="5" step="0.1" value="0">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="cSlider">Coeficiente c: <span class="value-display" id="cValue">0</span></label>
+                        <div class="slider-container">
+                            <input type="range" id="cSlider" class="slider" min="-10" max="10" step="0.5" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-display" id="equationDisplay">
+                    y = x
+                </div>
+            </div>
+
+            <div class="graph-container">
+                <canvas id="graphCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="page-navigation">
+        <a href="index.html" class="page-number">1</a>
+        <a href="page2.html" class="page-number">2</a>
+        <a href="page3.html" class="page-number">3</a>
+        <a href="page4.html" class="page-number">4</a>
+        <a href="page5.html" class="page-number active">5</a>
+        <a href="page6.html" class="page-number">6</a>
+        <a href="page7.html" class="page-number">7</a>
+        <a href="page8.html" class="page-number">8</a>
+        <a href="page9.html" class="page-number">9</a>
+        <a href="page10.html" class="page-number">10</a>
+        <a href="page11.html" class="page-number">11</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = 700;
+        canvas.height = 500;
+
+        // Parámetros de la función
+        let functionType = 'linear';
+        let m = 1, b = 0; // Para función lineal
+        let a = 1, bQuad = 0, c = 0; // Para función cuadrática
+
+        // Configuración del plano
+        const originX = canvas.width / 2;
+        const originY = canvas.height / 2;
+        const scale = 40; // Píxeles por unidad
+        const units = 8;
+
+        // Dibujar el plano cartesiano
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Cuadrícula
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+
+            // Líneas verticales
+            for (let i = -units; i <= units; i++) {
+                const x = originX + i * scale;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+
+            // Líneas horizontales
+            for (let i = -units; i <= units; i++) {
+                const y = originY + i * scale;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Ejes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+
+            // Eje X
+            ctx.beginPath();
+            ctx.moveTo(0, originY);
+            ctx.lineTo(canvas.width, originY);
+            ctx.stroke();
+
+            // Eje Y
+            ctx.beginPath();
+            ctx.moveTo(originX, 0);
+            ctx.lineTo(originX, canvas.height);
+            ctx.stroke();
+
+            // Flechas
+            ctx.fillStyle = '#333';
+            // Flecha X
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - 15, originY - 5);
+            ctx.lineTo(canvas.width, originY);
+            ctx.lineTo(canvas.width - 15, originY + 5);
+            ctx.fill();
+
+            // Flecha Y
+            ctx.beginPath();
+            ctx.moveTo(originX - 5, 15);
+            ctx.lineTo(originX, 0);
+            ctx.lineTo(originX + 5, 15);
+            ctx.fill();
+
+            // Etiquetas
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('X', canvas.width - 25, originY - 15);
+            ctx.fillText('Y', originX + 15, 25);
+
+            // Números en los ejes
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            for (let i = -units; i <= units; i++) {
+                if (i === 0) continue;
+                const x = originX + i * scale;
+                ctx.fillText(i.toString(), x, originY + 20);
+            }
+
+            ctx.textAlign = 'right';
+            for (let i = -units; i <= units; i++) {
+                if (i === 0) continue;
+                const y = originY - i * scale;
+                ctx.fillText(i.toString(), originX - 15, y);
+            }
+
+            // Origen
+            ctx.fillText('0', originX - 15, originY + 20);
+        }
+
+        // Dibujar la función
+        function drawFunction() {
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            if (functionType === 'linear') {
+                // Función lineal: y = mx + b
+                let firstPoint = true;
+                for (let x = -units; x <= units; x += 0.1) {
+                    const y = m * x + b;
+                    const canvasX = originX + x * scale;
+                    const canvasY = originY - y * scale; // Invertir Y
+
+                    if (canvasY >= 0 && canvasY <= canvas.height) {
+                        if (firstPoint) {
+                            ctx.moveTo(canvasX, canvasY);
+                            firstPoint = false;
+                        } else {
+                            ctx.lineTo(canvasX, canvasY);
+                        }
+                    }
+                }
+            } else {
+                // Función cuadrática: y = ax² + bx + c
+                let firstPoint = true;
+                for (let x = -units; x <= units; x += 0.1) {
+                    const y = a * x * x + bQuad * x + c;
+                    const canvasX = originX + x * scale;
+                    const canvasY = originY - y * scale; // Invertir Y
+
+                    if (canvasY >= 0 && canvasY <= canvas.height) {
+                        if (firstPoint) {
+                            ctx.moveTo(canvasX, canvasY);
+                            firstPoint = false;
+                        } else {
+                            ctx.lineTo(canvasX, canvasY);
+                        }
+                    }
+                }
+            }
+
+            ctx.stroke();
+        }
+
+        // Actualizar ecuación mostrada
+        function updateEquation() {
+            const equationDisplay = document.getElementById('equationDisplay');
+            if (functionType === 'linear') {
+                let equation = 'y = ';
+                if (m !== 0) {
+                    if (m === 1) equation += 'x';
+                    else if (m === -1) equation += '-x';
+                    else equation += m.toFixed(1) + 'x';
+                }
+                if (b !== 0) {
+                    if (b > 0 && m !== 0) equation += ' + ';
+                    equation += b.toFixed(1);
+                }
+                if (m === 0 && b === 0) equation = 'y = 0';
+                equationDisplay.textContent = equation;
+            } else {
+                let equation = 'y = ';
+                if (a !== 0) {
+                    if (a === 1) equation += 'x²';
+                    else if (a === -1) equation += '-x²';
+                    else equation += a.toFixed(1) + 'x²';
+                }
+                if (bQuad !== 0) {
+                    if (bQuad > 0 && a !== 0) equation += ' + ';
+                    if (bQuad === 1) equation += 'x';
+                    else if (bQuad === -1) equation += '-x';
+                    else equation += bQuad.toFixed(1) + 'x';
+                }
+                if (c !== 0) {
+                    if (c > 0 && (a !== 0 || bQuad !== 0)) equation += ' + ';
+                    equation += c.toFixed(1);
+                }
+                if (a === 0 && bQuad === 0 && c === 0) equation = 'y = 0';
+                equationDisplay.textContent = equation;
+            }
+        }
+
+        // Redibujar todo
+        function redraw() {
+            drawGrid();
+            drawFunction();
+            updateEquation();
+        }
+
+        // Event listeners
+        document.getElementById('functionType').addEventListener('change', (e) => {
+            functionType = e.target.value;
+            if (functionType === 'linear') {
+                document.getElementById('linearControls').style.display = 'block';
+                document.getElementById('quadraticControls').style.display = 'none';
+            } else {
+                document.getElementById('linearControls').style.display = 'none';
+                document.getElementById('quadraticControls').style.display = 'block';
+            }
+            redraw();
+        });
+
+        // Sliders para función lineal
+        document.getElementById('mSlider').addEventListener('input', (e) => {
+            m = parseFloat(e.target.value);
+            document.getElementById('mValue').textContent = m.toFixed(1);
+            redraw();
+        });
+
+        document.getElementById('bSlider').addEventListener('input', (e) => {
+            b = parseFloat(e.target.value);
+            document.getElementById('bValue').textContent = b.toFixed(1);
+            redraw();
+        });
+
+        // Sliders para función cuadrática
+        document.getElementById('aSlider').addEventListener('input', (e) => {
+            a = parseFloat(e.target.value);
+            document.getElementById('aValue').textContent = a.toFixed(1);
+            redraw();
+        });
+
+        document.getElementById('bQuadSlider').addEventListener('input', (e) => {
+            bQuad = parseFloat(e.target.value);
+            document.getElementById('bQuadValue').textContent = bQuad.toFixed(1);
+            redraw();
+        });
+
+        document.getElementById('cSlider').addEventListener('input', (e) => {
+            c = parseFloat(e.target.value);
+            document.getElementById('cValue').textContent = c.toFixed(1);
+            redraw();
+        });
+
+        // Dibujar inicialmente
+        redraw();
+    </script>
+</body>
+</html>
+

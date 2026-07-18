@@ -1,0 +1,2265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calen English Class — Control Panel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #1b3a2d; color: #e8e4d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .open-btn { padding: 8px 16px; background: #e8732a; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        .open-btn:hover { background: #c75f1e; }
+        .selectors { display: none; }
+        .selectors label { color: #9cb8a8; font-size: 0.85rem; align-self: center; }
+        .selectors select { padding: 6px 10px; background: #234a3a; color: white; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+        .kids-section { padding: 10px 20px; background: #163028; border-bottom: 1px solid #2a5a42; }
+        .kids-toggle { background: none; border: none; color: #f0a830; font-weight: bold; font-size: 0.85rem; cursor: pointer; padding: 4px 0; }
+        .kids-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 8px; }
+        .kid-row { display: flex; align-items: center; gap: 5px; }
+        .kid-row input[type="checkbox"] { accent-color: #e8732a; width: 16px; height: 16px; cursor: pointer; }
+        .kid-row input[type="text"] { width: 100%; padding: 5px 8px; background: #122a1f; border: 1px solid #2a5a42; border-radius: 4px; color: white; font-size: 0.8rem; }
+        .kid-row input[type="text"]:focus { outline: none; border-color: #5ec4b6; }
+        .kids-btns { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #555; border-radius: 22px; transition: 0.3s; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+        .switch input:checked + .slider { background: #e8732a; }
+        .switch input:checked + .slider:before { transform: translateX(18px); }
+        .switch-label { font-size: 0.8rem; color: #aaa; }
+        .kid-btn { padding: 3px 8px; border: none; border-radius: 4px; font-size: 0.7rem; font-weight: bold; cursor: pointer; color: white; background: #2a6b4a; }
+        .kid-btn:hover { background: #1e5a3a; }
+        .kid-btn.active { background: #e8732a; }
+        .kid-btn-alone { padding: 3px 8px; border: none; border-radius: 4px; font-size: 0.7rem; font-weight: bold; cursor: pointer; color: white; background: #3a5a48; }
+        .kid-btn-alone:hover { background: #2a4a38; }
+        .items-container { padding: 10px 20px; overflow-y: auto; flex: 1; }
+        .activity-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #2a5a42; }
+        .activity-title { color: #f0a830; font-size: 1.3rem; font-weight: bold; }
+        .item-row { display: flex; align-items: center; gap: 6px; padding: 6px 8px; margin-bottom: 4px; background: #163028; border-radius: 6px; transition: background 0.15s; }
+        .item-row:hover { background: #1e4035; }
+        .item-num { color: #777; font-size: 0.75rem; font-weight: bold; min-width: 20px; text-align: center; }
+        .item-label { flex: 1; font-size: 0.85rem; color: #ccc; }
+        .item-sublabel { font-size: 0.7rem; color: #888; display: block; }
+        .btn { padding: 5px 10px; border: none; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; color: white; white-space: nowrap; }
+        .btn-mid { background: #2a6b4a; }
+        .btn-mid:hover { background: #1e5a3a; }
+        .btn-bot { background: #3a7a5a; }
+        .btn-bot:hover { background: #2a6b4a; }
+        .btn-red { background: #e8732a; }
+        .btn-red:hover { background: #c75f1e; }
+        .btn-gray { background: #3a5a48; }
+        .btn-gray:hover { background: #2a4a38; }
+        .btn-img { background: #5ec4b6; color: #122a1f; }
+        .btn-img:hover { background: #4ab0a2; }
+        .btn-hide { background: #c75f1e; }
+        .btn-hide:hover { background: #a84d15; }
+        .btn-flag { background: #2a6b8a; }
+        .btn-flag:hover { background: #1e5a78; }
+        .clear-bar { padding: 10px 20px; background: #122a1f; border-top: 1px solid #2a5a42; display: flex; gap: 8px; position: sticky; bottom: 0; }
+        .img-missing { opacity: 0.4; font-size: 0.65rem; color: #e8732a; }
+        .welcome { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70vh; gap: 20px; }
+        .welcome h2 { font-size: 1.5rem; color: #f0a830; }
+        .welcome p { color: #aaa; font-size: 0.95rem; }
+        .welcome-btn { padding: 20px 40px; border: 2px solid #2a5a42; border-radius: 12px; background: #122a1f; color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.2s; min-width: 250px; text-align: center; }
+        .welcome-btn:hover { border-color: #5ec4b6; background: #1e4035; }
+        .welcome-btns { display: flex; gap: 20px; }
+        .act-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
+        .act-card { padding: 18px 16px; background: #122a1f; border: 2px solid #2a5a42; border-radius: 10px; cursor: pointer; transition: all 0.2s; text-align: center; font-size: 0.95rem; font-weight: bold; }
+        .act-card:hover { border-color: #5ec4b6; background: #1e4035; }
+        .photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; }
+        .photo-grid-compact { grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 14px; }
+        .photo-grid-compact .photo-card img { height: 44px; }
+        .photo-grid-compact .photo-card-wrap { gap: 2px; }
+        .photo-card-wrap { display: flex; flex-direction: column; gap: 5px; }
+        .photo-card { padding: 0; overflow: hidden; }
+        .photo-card img { width: 100%; height: 70px; object-fit: cover; display: block; transition: filter 0.2s; }
+        .photo-card.current { border-color: #f0a830; box-shadow: 0 0 0 2px #f0a830; }
+        .photo-card.seen img { filter: grayscale(1) brightness(0.7); }
+        .photo-words { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+        .photo-word-btn { padding: 2px 6px; font-size: 0.65rem; font-weight: bold; color: white; background: #2a6b4a; border: none; border-radius: 4px; cursor: pointer; }
+        .photo-word-btn:hover { background: #3a8a5a; }
+        .photo-word-btn.active { background: #e8732a; }
+        .photo-word-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .photo-word-btn:disabled:hover { background: #2a6b4a; }
+        .group-header { color: #5ec4b6; font-size: 0.85rem; font-weight: bold; padding: 8px 8px 4px; margin-top: 8px; border-top: 1px solid #2a5a42; }
+        .mode-bar { display: flex; gap: 8px; margin-bottom: 10px; }
+        .mode-btn { padding: 7px 14px; border: 2px solid #2a5a42; border-radius: 6px; background: #122a1f; color: #9cb8a8; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
+        .mode-btn.active { border-color: #5ec4b6; color: white; background: #1e4035; }
+        .game-scene { background: #122a1f; border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+        .game-scene-title { font-size: 0.8rem; color: #5ec4b6; font-weight: bold; margin-bottom: 6px; }
+        .game-scene-text { font-size: 0.95rem; color: #e8e4d9; line-height: 1.5; margin-bottom: 12px; }
+        .game-options { display: flex; flex-direction: column; gap: 6px; }
+        .game-opt { padding: 10px 14px; background: #2a6b4a; color: white; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: bold; cursor: pointer; text-align: left; transition: background 0.15s; }
+        .game-opt:hover { background: #3a8a5a; }
+        .game-opt.disabled { opacity: 0.3; cursor: not-allowed; }
+        .game-nav { display: flex; gap: 8px; margin-top: 12px; }
+        .game-flag { font-size: 0.75rem; color: #f0a830; margin-top: 6px; }
+        .act-card small { display: block; color: #888; font-weight: normal; font-size: 0.75rem; margin-top: 4px; }
+
+        body { display: flex; align-items: stretch; }
+        .sidebar {
+            width: 280px; flex-shrink: 0; background: #122a1f; border-right: 2px solid #2a5a42;
+            padding: 16px; display: flex; flex-direction: column; gap: 18px;
+            height: 100vh; position: sticky; top: 0; overflow-y: auto;
+            transition: width 0.15s ease;
+        }
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .sidebar-title { font-size: 1.1rem; }
+        .main-header { text-align: center; padding: 18px 20px 10px; }
+        .main-header .window-tag { font-size: 1.6rem; font-weight: bold; color: #9cb8a8; margin-right: 8px; }
+        .main-header .course-name { font-size: 1.6rem; font-weight: bold; color: #f0a830; }
+        .review-stamp {
+            display: inline-block;
+            border: 2px solid #e8732a;
+            color: #e8732a;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            transform: rotate(-6deg);
+            opacity: 0.85;
+            flex-shrink: 0;
+        }
+        .suggestion-panel { max-width: 900px; margin: 0 auto 14px; background: #163028; border-radius: 8px; padding: 12px 16px; }
+        .suggestion-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #f0a830; font-weight: bold; font-size: 0.9rem; }
+        .suggestion-body { margin-top: 10px; color: #cdded4; font-size: 0.85rem; line-height: 1.55; }
+        .suggestion-body p { margin: 0 0 8px; }
+        .suggestion-body ol { margin: 0 0 8px; padding-left: 20px; }
+        .suggestion-body li { margin-bottom: 6px; }
+        .suggestion-body strong { color: #5ec4b6; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 6px; }
+        .sidebar-nav .btn, .sidebar > .open-btn { width: 100%; text-align: center; }
+        .sidebar-clock { font-size: 2rem; font-weight: bold; text-align: center; letter-spacing: 1px; color: #5ec4b6; }
+        .sidebar-block-title { color: #9cb8a8; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .sidebar-divider { border: none; border-top: 1px solid #2a5a42; margin: 0; }
+        .stages-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .stages-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+        .stage-item { padding: 7px 9px; border-radius: 6px; background: #163028; font-size: 0.78rem; color: #ccc; cursor: pointer; display: flex; justify-content: space-between; gap: 6px; }
+        .stage-item:hover { background: #1e4035; }
+        .stage-item.active { background: #e8732a; color: white; font-weight: bold; }
+        .stage-time { color: #888; white-space: nowrap; }
+        .stage-item.active .stage-time { color: rgba(255,255,255,0.85); }
+        .sidebar-resources { display: flex; flex-direction: column; gap: 6px; }
+        .sidebar-camara { display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem; }
+        .sidebar-camara label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .main-area { flex: 1; min-width: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+        body.sidebar-collapsed .sidebar { width: 44px; padding: 16px 8px; overflow: hidden; }
+        body.sidebar-collapsed .sidebar > *:not(.sidebar-header) { display: none; }
+        body.sidebar-collapsed .sidebar-header { justify-content: center; }
+        body.sidebar-collapsed .sidebar-title { display: none; }
+        .sidebar-hide-btn {
+            flex-shrink: 0; width: 26px; height: 26px; border: none; border-radius: 6px;
+            background: #234a3a; color: #e8e4d9; font-size: 0.85rem; cursor: pointer;
+        }
+        .sidebar-hide-btn:hover { background: #2a5a42; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <h1 class="sidebar-title">🌎 Calen English Class</h1>
+        <button class="sidebar-hide-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Hide sidebar">«</button>
+    </div>
+
+    <div class="sidebar-nav">
+        <button class="btn btn-gray" onclick="goHome()">← Home</button>
+        <button class="btn btn-gray" onclick="goActivities()" style="display:none;" id="btnBackActivities">← Activities</button>
+    </div>
+
+    <button class="open-btn" onclick="openPresentation()">Open Presentation Window</button>
+
+    <div class="sidebar-clock" id="sidebarClock">00:00:00</div>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-block">
+        <div class="stages-header">
+            <span class="sidebar-block-title" style="margin-bottom:0;">Stages</span>
+            <button class="btn btn-mid" id="btnStartStages" onclick="onStartPauseClick()">▶ Start</button>
+        </div>
+        <ul class="stages-list" id="stagesList"></ul>
+    </div>
+
+    <div class="sidebar-block">
+        <div class="sidebar-block-title">Resources</div>
+        <div class="sidebar-resources">
+            <button class="btn btn-gray" onclick="openReference('5to-6to')">Ref 5°-6°</button>
+            <button class="btn btn-gray" onclick="openReference('7mo-8vo')">Ref 7°-8°</button>
+            <button class="btn btn-gray" onclick="openBases()">Bases Curriculares</button>
+            <button class="btn btn-gray" onclick="openPronunciacion()">Pronunciación</button>
+        </div>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-block">
+        <div class="sidebar-block-title">Camera</div>
+        <div class="sidebar-camara">
+            <label><input type="checkbox" id="camShowToggle" checked onchange="onCamOptionChange()"> Show camera</label>
+            <label><input type="radio" name="camMode" value="normal" checked onchange="onCamOptionChange()"> Normal</label>
+            <label><input type="radio" name="camMode" value="blur" onchange="onCamOptionChange()"> Blur background</label>
+            <label><input type="radio" name="camMode" value="image" onchange="onCamOptionChange()"> Background image</label>
+        </div>
+    </div>
+</aside>
+
+<main class="main-area">
+
+<div id="welcomeScreen" class="welcome">
+    <h2>Calen English Class</h2>
+    <p>Select a course to begin:</p>
+    <div class="welcome-btns">
+        <button class="welcome-btn" onclick="selectCourse('5to-6to')">5th & 6th Grade<br><small style="color:#aaa;">Languages</small></button>
+        <button class="welcome-btn" onclick="selectCourse('7mo-8vo')">7th & 8th Grade<br><small style="color:#aaa;">Sports</small></button>
+    </div>
+</div>
+
+<div id="appContent" style="display:none;">
+    <div class="main-header" id="mainHeader">
+        <span class="window-tag">Control Window</span>
+        <span class="course-name" id="mainHeaderCourse"></span>
+    </div>
+
+    <div class="selectors">
+        <label>Course:</label>
+        <select id="courseSelect" onchange="onCourseChange()"></select>
+        <label>Activity:</label>
+        <select id="activitySelect" onchange="onActivitySelect()">
+            <option value="">— Select activity —</option>
+        </select>
+    </div>
+
+    <div class="kids-section">
+        <div class="kids-btns" style="margin-bottom:8px; display:flex; align-items:center;">
+            <span style="color:#f0a830; font-weight:bold; font-size:0.85rem;">Kids Names</span>
+            <div style="margin-left:auto; display:flex; align-items:center; gap:5px; margin-right:15px;">
+                <label class="switch"><input type="checkbox" id="namesSwitch" onchange="onNamesSwitchChange()" checked><span class="slider"></span></label>
+                <span class="switch-label">Show on screen</span>
+            </div>
+            <button class="btn btn-gray" id="kidsToggleBtn" onclick="toggleKidsPanel()" style="padding:3px 10px; font-size:0.75rem;">Hide</button>
+        </div>
+        <div class="kids-grid" id="kidsGrid"></div>
+    </div>
+
+    <div class="suggestion-panel" id="suggestionPanel" style="display:none;">
+        <div class="suggestion-header">
+            <span>📘 Didactic Suggestion</span>
+            <button class="btn btn-gray" id="suggestionToggleBtn" onclick="toggleSuggestion()" style="padding:3px 10px; font-size:0.75rem;">Hide</button>
+        </div>
+        <div class="suggestion-body" id="suggestionBody"></div>
+    </div>
+
+    <div class="items-container" id="itemsContainer"></div>
+
+    <div class="clear-bar" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <button class="btn btn-red" onclick="send('clear-all',''); renderActivity();">Clear Screen</button>
+        <div style="display:flex; align-items:center; gap:5px;">
+            <label class="switch"><input type="checkbox" id="debugGridSwitch" onchange="onDebugGridSwitchChange()"><span class="slider"></span></label>
+            <span class="switch-label" style="color:#e74c3c; font-weight:bold; font-size:0.85rem;">Debug Bars</span>
+        </div>
+    </div>
+</div>
+
+</main>
+
+<script src="game1/house-map.js?v=2"></script>
+<script src="game1/game-data.js?v=2"></script>
+<script>
+const channel = new BroadcastChannel('english-with-video');
+function send(type, text, image, big) {
+    if (type === 'side-image') {
+        channel.postMessage({ type, image: image || null });
+    } else if (type === 'side-emoji') {
+        channel.postMessage({ type, text: text || '' });
+    } else {
+        channel.postMessage({ type, text, image, big: !!big });
+    }
+}
+function openPresentation() { window.open('presentation.html', 'presentation', 'width=960,height=720'); }
+function goHome() {
+    document.getElementById('appContent').style.display = 'none';
+    document.getElementById('welcomeScreen').style.display = 'flex';
+    clearContainer();
+    document.getElementById('mainHeaderCourse').textContent = '';
+    document.getElementById('suggestionPanel').style.display = 'none';
+    document.getElementById('btnBackActivities').style.display = 'none';
+    send('clear-middle', '');
+    send('clear-bottom', '');
+    send('side-image', '', null);
+    send('side-emoji', '');
+    send('photo', '', null);
+    send('photo-word', '');
+    channel.postMessage({ type: 'country-photo', image: null });
+    channel.postMessage({ type: 'country-list', show: false });
+    localStorage.removeItem('english-game-state');
+}
+function goActivities() {
+    activitySelect.value = '';
+    renderActivityMenu();
+}
+function openReference(course) {
+    if (course === '5to-6to') {
+        window.open('Reference/5to -6to.html', 'ref56', 'width=900,height=700');
+    } else {
+        window.open('Reference/7mo y 8vo unit3_sports_teacher_reference.html', 'ref78', 'width=900,height=700');
+    }
+}
+function openBases() {
+    window.open('Reference/bases-curriculares.html', 'bases', 'width=900,height=700');
+}
+function openPronunciacion() {
+    window.open('Reference/pronunciacion-mineduc.html', 'pronunciacion', 'width=900,height=700');
+}
+
+// ══════════════════════════════════════
+// SIDEBAR SHOW/HIDE
+// ══════════════════════════════════════
+function applySidebarToggleBtn(collapsed) {
+    const btn = document.getElementById('sidebarToggleBtn');
+    btn.textContent = collapsed ? '»' : '«';
+    btn.title = collapsed ? 'Show sidebar' : 'Hide sidebar';
+}
+
+function toggleSidebar() {
+    const collapsed = !document.body.classList.contains('sidebar-collapsed');
+    document.body.classList.toggle('sidebar-collapsed', collapsed);
+    localStorage.setItem('english-sidebar-collapsed', collapsed ? '1' : '');
+    applySidebarToggleBtn(collapsed);
+}
+
+const sidebarStartsCollapsed = !!localStorage.getItem('english-sidebar-collapsed');
+if (sidebarStartsCollapsed) document.body.classList.add('sidebar-collapsed');
+applySidebarToggleBtn(sidebarStartsCollapsed);
+
+// ══════════════════════════════════════
+// SIDEBAR CLOCK
+// ══════════════════════════════════════
+function updateClock() {
+    const now = new Date();
+    const p = n => String(n).padStart(2, '0');
+    document.getElementById('sidebarClock').textContent =
+        `${p(now.getHours())}:${p(now.getMinutes())}:${p(now.getSeconds())}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ══════════════════════════════════════
+// CLASS STAGES — highlight + countdown per stage
+// ══════════════════════════════════════
+const STAGES = [
+    { name: 'Warm-up (Ice-Break)', minutes: 5 },
+    { name: 'Presentation', minutes: 10 },
+    { name: 'Guided Practice', minutes: 10 },
+    { name: 'Communicative Practice', minutes: 20 },
+    { name: 'Assessment', minutes: 10 },
+    { name: 'Wrap-up', minutes: 5 },
+];
+let stageIndex = -1;
+let stageSecondsLeft = 0;
+let stageTimerId = null;
+
+function formatStageTime(totalSeconds) {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function renderStages() {
+    const list = document.getElementById('stagesList');
+    list.innerHTML = '';
+    STAGES.forEach((stage, i) => {
+        const li = document.createElement('li');
+        li.className = 'stage-item' + (i === stageIndex ? ' active' : '');
+        const seconds = i === stageIndex ? stageSecondsLeft : stage.minutes * 60;
+        li.innerHTML = `<span>${stage.name}</span><span class="stage-time">(${formatStageTime(seconds)})</span>`;
+        li.onclick = () => selectStage(i);
+        list.appendChild(li);
+    });
+    updateStartPauseBtn();
+}
+
+function updateStartPauseBtn() {
+    const btn = document.getElementById('btnStartStages');
+    if (stageTimerId) {
+        btn.textContent = '⏸ Pause';
+    } else if (stageIndex >= 0 && stageSecondsLeft > 0) {
+        btn.textContent = '▶ Resume';
+    } else {
+        btn.textContent = '▶ Start';
+    }
+}
+
+function onStartPauseClick() {
+    if (stageTimerId) {
+        clearInterval(stageTimerId);
+        stageTimerId = null;
+        renderStages();
+    } else if (stageIndex >= 0 && stageSecondsLeft > 0) {
+        stageTimerId = setInterval(tickStage, 1000);
+        renderStages();
+    } else {
+        startStages();
+    }
+}
+
+function startStages() { selectStage(0); }
+
+function selectStage(i) {
+    if (i === stageIndex && stageTimerId) {
+        // Ya está corriendo esta etapa: cada clic le resta un minuto (ajuste rápido de tiempo).
+        adjustStageTime(-60);
+        return;
+    }
+    stageIndex = i;
+    stageSecondsLeft = STAGES[i].minutes * 60;
+    if (stageTimerId) clearInterval(stageTimerId);
+    stageTimerId = setInterval(tickStage, 1000);
+    renderStages();
+}
+
+function adjustStageTime(deltaSeconds) {
+    stageSecondsLeft += deltaSeconds;
+    if (stageSecondsLeft <= 0) {
+        if (stageIndex < STAGES.length - 1) {
+            selectStage(stageIndex + 1);
+            return;
+        }
+        stageSecondsLeft = 0;
+        clearInterval(stageTimerId);
+        stageTimerId = null;
+    }
+    renderStages();
+}
+
+function tickStage() {
+    stageSecondsLeft--;
+    if (stageSecondsLeft <= 0) {
+        if (stageIndex < STAGES.length - 1) {
+            selectStage(stageIndex + 1);
+            return;
+        }
+        clearInterval(stageTimerId);
+        stageTimerId = null;
+        stageSecondsLeft = 0;
+    }
+    renderStages();
+}
+
+renderStages();
+
+// ══════════════════════════════════════
+// CAMERA CONFIG — sent to the presentation window
+// ══════════════════════════════════════
+function onCamOptionChange() {
+    const show = document.getElementById('camShowToggle').checked;
+    const mode = document.querySelector('input[name="camMode"]:checked').value;
+    channel.postMessage({ type: 'camera-show', value: show });
+    channel.postMessage({ type: 'camera-mode', mode });
+}
+
+// ══════════════════════════════════════
+// KIDS NAMES
+// ══════════════════════════════════════
+const KID_COUNT = 9;
+const kidsGrid = document.getElementById('kidsGrid');
+for (let i = 0; i < KID_COUNT; i++) {
+    const row = document.createElement('div');
+    row.className = 'kid-row';
+    row.innerHTML = `
+        <button class="kid-btn" id="kb${i}" onclick="toggleKid(${i})">Show</button>
+        <button class="kid-btn-alone" onclick="soloKid(${i})">Alone</button>
+        <input type="text" id="kn${i}" placeholder="Name" oninput="onKidNameChange()">
+    `;
+    kidsGrid.appendChild(row);
+}
+
+function toggleKid(i) {
+    const btn = document.getElementById(`kb${i}`);
+    if (btn.classList.contains('active')) {
+        btn.classList.remove('active');
+        btn.textContent = 'Show';
+    } else {
+        btn.classList.add('active');
+        btn.textContent = 'Hide';
+    }
+    if (document.getElementById('namesSwitch').checked) {
+        updateNamesDisplay();
+    }
+}
+
+function soloKid(i) {
+    for (let j = 0; j < KID_COUNT; j++) {
+        const btn = document.getElementById(`kb${j}`);
+        const isTarget = j === i;
+        btn.classList.toggle('active', isTarget);
+        btn.textContent = isTarget ? 'Hide' : 'Show';
+    }
+    if (document.getElementById('namesSwitch').checked) {
+        updateNamesDisplay();
+    }
+}
+
+function toggleSuggestion() {
+    const body = document.getElementById('suggestionBody');
+    const btn = document.getElementById('suggestionToggleBtn');
+    const hidden = body.style.display === 'none';
+    body.style.display = hidden ? '' : 'none';
+    btn.textContent = hidden ? 'Hide' : 'Show';
+}
+
+function toggleKidsPanel() {
+    const grid = document.getElementById('kidsGrid');
+    const btn = document.getElementById('kidsToggleBtn');
+    const hidden = grid.style.display === 'none';
+    grid.style.display = hidden ? '' : 'none';
+    btn.textContent = hidden ? 'Hide' : 'Show';
+}
+
+function onKidNameChange() {
+    if (document.getElementById('namesSwitch').checked) {
+        updateNamesDisplay();
+    }
+}
+
+function onNamesSwitchChange() {
+    if (document.getElementById('namesSwitch').checked) {
+        updateNamesDisplay();
+    } else {
+        send('names', '');
+    }
+}
+
+function onDebugGridSwitchChange() {
+    const checked = document.getElementById('debugGridSwitch').checked;
+    channel.postMessage({ type: 'debug-grid', show: checked });
+}
+
+function updateNamesDisplay() {
+    const names = [];
+    for (let i = 0; i < KID_COUNT; i++) {
+        if (document.getElementById(`kb${i}`).classList.contains('active')) {
+            const n = document.getElementById(`kn${i}`).value.trim();
+            if (n) names.push(n);
+        }
+    }
+    send('names', names.join('  |  '));
+}
+
+// ══════════════════════════════════════
+// ACTIVITY DATA
+// ══════════════════════════════════════
+const IMG = 'Images/';
+const FLAG = 'Images/flags/';
+const PHOTOS = 'photos/';
+const CPHOTOS = 'curso-fotos-paises/';
+const COUNTRY_FLAG_CODE = {
+    Brazil: 'br', Japan: 'jp', France: 'fr', China: 'cn', Germany: 'de',
+    Italy: 'it', Russia: 'ru', Mexico: 'mx', 'United Kingdom': 'gb',
+    Australia: 'au', Canada: 'ca', Spain: 'es', 'South Africa': 'za'
+};
+
+const COUNTRY_PHOTOS = [
+    { src: CPHOTOS + 'brasil_foto1_christ_the_redeemer.webp', country: 'Brazil', place: 'Christ the Redeemer' },
+    { src: CPHOTOS + 'brasil_foto2_copacabana_beach.webp', country: 'Brazil', place: 'Copacabana Beach' },
+    { src: CPHOTOS + 'brasil_mapa.webp', country: 'Brazil', place: 'Map', originX: 53, originY: 43 },
+
+    { src: CPHOTOS + 'japon_foto1_mount_fuji.webp', country: 'Japan', place: 'Mount Fuji' },
+    { src: CPHOTOS + 'japon_foto2_itsukushima_shrine.webp', country: 'Japan', place: 'Itsukushima Shrine' },
+    { src: CPHOTOS + 'japon_mapa.webp', country: 'Japan', place: 'Map', originX: 82, originY: 44 },
+
+    { src: CPHOTOS + 'francia_foto1_eiffel_tower.webp', country: 'France', place: 'Eiffel Tower' },
+    { src: CPHOTOS + 'francia_foto2_arc_de_triomphe.webp', country: 'France', place: 'Arc de Triomphe' },
+    { src: CPHOTOS + 'francia_mapa.webp', country: 'France', place: 'Map', originX: 36, originY: 65 },
+
+    { src: CPHOTOS + 'china_foto1_forbidden_city.webp', country: 'China', place: 'Forbidden City' },
+    { src: CPHOTOS + 'china_foto2_great_wall_of_china.webp', country: 'China', place: 'Great Wall of China' },
+    { src: CPHOTOS + 'china_mapa.webp', country: 'China', place: 'Map', originX: 58, originY: 53 },
+
+    { src: CPHOTOS + 'alemania_foto1_brandenburg_gate.webp', country: 'Germany', place: 'Brandenburg Gate' },
+    { src: CPHOTOS + 'alemania_foto2_bavarian_couple.png', country: 'Germany', place: 'Traditional Bavarian Couple' },
+    { src: CPHOTOS + 'alemania_mapa.webp', country: 'Germany', place: 'Map', originX: 46, originY: 54 },
+
+    { src: CPHOTOS + 'italia_foto1_colosseum.webp', country: 'Italy', place: 'Colosseum' },
+    { src: CPHOTOS + 'italia_foto2_leaning_tower_of_pisa.webp', country: 'Italy', place: 'Leaning Tower of Pisa' },
+    { src: CPHOTOS + 'italia_mapa.webp', country: 'Italy', place: 'Map', originX: 48, originY: 81 },
+
+    { src: CPHOTOS + 'rusia_foto1_saint_basils_cathedral.webp', country: 'Russia', place: "Saint Basil's Cathedral" },
+    { src: CPHOTOS + 'rusia_foto2_the_kremlin.webp', country: 'Russia', place: 'The Kremlin' },
+    { src: CPHOTOS + 'rusia_mapa.webp', country: 'Russia', place: 'Map', originX: 64, originY: 26 },
+
+    { src: CPHOTOS + 'mexico_foto1_chichen_itza.webp', country: 'Mexico', place: 'Chichen Itza' },
+    { src: CPHOTOS + 'mexico_foto2_zocalo_dia_de_muertos.webp', country: 'Mexico', place: 'Day of the Dead in the Zócalo' },
+    { src: CPHOTOS + 'mexico_mapa.webp', country: 'Mexico', place: 'Map', originX: 50, originY: 84 },
+
+    { src: CPHOTOS + 'reinounido_foto1_big_ben.webp', country: 'United Kingdom', place: 'Big Ben' },
+    { src: CPHOTOS + 'reinounido_foto2_tower_bridge.webp', country: 'United Kingdom', place: 'Tower Bridge' },
+    { src: CPHOTOS + 'reinounido_mapa.webp', country: 'United Kingdom', place: 'Map', originX: 35, originY: 48 },
+
+    { src: CPHOTOS + 'australia_foto1_sydney_opera_house.webp', country: 'Australia', place: 'Sydney Opera House' },
+    { src: CPHOTOS + 'australia_foto2_uluru.webp', country: 'Australia', place: 'Uluru' },
+    { src: CPHOTOS + 'australia_mapa.webp', country: 'Australia', place: 'Map', originX: 40, originY: 74 },
+
+    { src: CPHOTOS + 'canada_foto1_canadian_rockies.webp', country: 'Canada', place: 'Canadian Rockies' },
+    { src: CPHOTOS + 'canada_foto2_lake_louise.webp', country: 'Canada', place: 'Lake Louise' },
+    { src: CPHOTOS + 'canada_mapa.webp', country: 'Canada', place: 'Map', originX: 52, originY: 31 },
+
+    { src: CPHOTOS + 'espana_foto1_sagrada_familia.webp', country: 'Spain', place: 'Sagrada Familia' },
+    { src: CPHOTOS + 'espana_foto2_flamenco_dancer.webp', country: 'Spain', place: 'Flamenco Dance' },
+    { src: CPHOTOS + 'espana_mapa.webp', country: 'Spain', place: 'Map', originX: 51, originY: 61 },
+
+    { src: CPHOTOS + 'sudafrica_foto1_traditional_celebration.webp', country: 'South Africa', place: 'Traditional Celebration' },
+    { src: CPHOTOS + 'sudafrica_foto2_african_safari.webp', country: 'South Africa', place: 'African Safari' },
+    { src: CPHOTOS + 'sudafrica_mapa.webp', country: 'South Africa', place: 'Map', originX: 54, originY: 96 },
+];
+const CALEN_PHOTOS = [
+    { src: PHOTOS + 'IMG_6081_reducida.jpg', words: ['boat', 'sea', 'sky', 'rope'] },
+    { src: PHOTOS + 'IMG_6355_reducida.jpg', words: ['kayak', 'pier', 'people', 'water'] },
+    { src: PHOTOS + 'IMG_6356_reducida.jpg', words: ['tent', 'people', 'house', 'tree'] },
+    { src: PHOTOS + 'IMG_6357_reducida.jpg', words: ['church', 'lamp', 'hill', 'stage'] },
+    { src: PHOTOS + 'IMG_6851_reducida.jpg', words: ['bird', 'buoy', 'water', 'mountain'] },
+    { src: PHOTOS + 'IMG_6862_reducida.jpg', words: ['man', 'boat', 'church', 'rock'] },
+    { src: PHOTOS + 'IMG_6873_reducida.jpg', words: ['kayak', 'paddle', 'sky', 'water'] },
+    { src: PHOTOS + 'IMG_6935_reducida.jpg', words: ['truck', 'bag', 'hill', 'boots'] },
+    { src: PHOTOS + 'IMG_7910_reducida.jpg', words: ['swan', 'lake', 'water', 'wing'] },
+    { src: PHOTOS + 'IMG_7911_reducida.jpg', words: ['sea lion', 'buoy', 'water', 'tail'] },
+];
+
+const ALREADY_KNOW_ENGLISH = [
+    { group: "Words we use every day" },
+    { q: "¿Cómo se llama un lugar donde se instalan carpas para acampar?", a: "CAMPING", icon: "⛺" },
+    { q: "¿Cómo se llama esa foto de un artista famoso que uno puede pegar en su pieza?", a: "POSTER", sideImg: IMG+"poster.png" },
+    { q: "¿Cómo le dices a dos panes con jamón y queso?", a: "SANDWICH", icon: "🥪" },
+    { q: "¿Cómo se llama la luz fuerte que aparece por un instante al sacar una foto?", a: "FLASH", icon: "📸" },
+    { q: "¿Cómo se llama esa masa redonda con jamón y queso que viene de Italia?", a: "PIZZA", icon: "🍕" },
+    { q: "¿Cómo se llama esa comida de Japón que son rollos de arroz con carne?", a: "SUSHI", sideImg: IMG+"sushi.png" },
+    { q: "¿Cómo se llama el deporte que juegan 5 jugadores por lado, le dan bote a la pelota constantemente y deben encestarla en un aro con tablero?", a: "BASKETBALL", icon: "🏀" },
+    { q: "En fútbol, ¿cómo se llama cuando el jugador está adelantado?", a: "OFFSIDE", icon: "🚩" },
+    { q: "¿Cómo se llama cuando te sacas una foto a ti mismo?", a: "SELFIE", icon: "🤳" },
+    { q: "¿Cómo se llama una tabla con ruedas sobre la que te paras?", a: "SKATEBOARD", icon: "🛹" },
+    { q: "En fútbol, ¿cómo se llama en inglés al tiro de esquina?", a: "CORNER", icon: "⚽" },
+    { q: "¿Cómo se llaman los pantalones de mezclilla?", a: "JEANS", icon: "👖" },
+    { q: "¿Cómo se llama el auto con chofer que puedes pedir que te lleve donde quieras?", a: "TAXI", icon: "🚕" },
+    { q: "¿Cómo se llama el deporte que juegan 2 o 4 jugadores con raqueta, una pelota pequeña y una red baja entre medio?", a: "TENNIS", icon: "🎾" },
+    { group: "Digital world" },
+    { q: "¿Cómo se llama la aplicación de celular para mandar mensajes?", a: "WHATSAPP", sideImg: IMG+"whatsapp.png" },
+    { q: "¿Cuál es el sitio más famoso para ver videos en internet?", a: "YOUTUBE", sideImg: IMG+"youtube.png" },
+    { q: "¿Cómo se le dice a alguien que adquiere fama en TikTok o Instagram?", a: "INFLUENCER", sideImg: IMG+"influencer.png" },
+    { q: "Si te gusta mucho un video en TikTok o Instagram, tú le das un...", a: "LIKE", icon: "👍" },
+    { q: "¿Cómo se llama quien juega muchos videojuegos?", a: "GAMER", sideImg: IMG+"gamer.png" },
+    { q: "¿Qué dice la pantalla cuando pierdes un juego?", a: "GAME OVER", icon: "🎮" },
+    { q: "¿Cómo se llama la clave secreta para entrar a tu cuenta?", a: "PASSWORD", icon: "🔑" },
+    { q: "¿Cómo se llama el correo que mandas por internet?", a: "EMAIL", icon: "📧" },
+    { q: "¿Cómo se llama cuando conversas con alguien escribiendo mensajes en el celular o computador?", a: "CHAT", icon: "💬" },
+    { q: "¿Cómo se llama la tecnología para conectar audífonos sin cable al celular?", a: "BLUETOOTH", icon: "🔵" },
+    { group: "Things we say" },
+    { q: "¿Qué canción cantas en los cumpleaños en inglés?", a: "HAPPY BIRTHDAY", icon: "🎂" },
+    { q: "¿Cómo se llama la fiesta del 31 de octubre en que la gente se disfraza y pide dulces?", a: "HALLOWEEN", icon: "🎃" },
+    { q: "¿Cómo se llama la fiesta que se hace para un bebé cuando nace o está a punto de nacer?", a: "BABY SHOWER", icon: "👶" },
+    { q: "¿Cómo se dice 'gracias' en inglés?", a: "THANK YOU", icon: "🙏" },
+    { q: "¿Cómo se dice 'te quiero' en inglés?", a: "I LOVE YOU", icon: "❤️" },
+    { q: "¿Cómo saludas en inglés?", a: "HELLO", icon: "👋" },
+    { q: "¿Cómo pides disculpas en inglés?", a: "SORRY", icon: "😔" },
+    { q: "¿Qué dices en inglés a alguien para que se detenga?", a: "STOP", icon: "✋" },
+    { q: "¿Qué botón aprietas para que empiece un video o una canción?", a: "PLAY", icon: "▶️" },
+];
+
+const GUESS_THE_COUNTRY_SUGGESTION = `
+<p>This activity supports the unit's broader goal of exploring <strong>cultural diversity</strong> around the world.</p>
+<p><strong>Suggested sequence:</strong></p>
+<ol>
+    <li><strong>Explain Rules:</strong> Before starting, explain the activity to students: they will see images from different countries and must guess which country each one shows, answering in English.</li>
+    <li><strong>Review Countries:</strong> Click <strong>"Show All Countries"</strong> to display the full list. Go through it together, asking students to say each country's name first in Spanish, then in English. Saying it in Spanish first forces them to notice the real pronunciation difference. If they only say it in English, they tend to just apply a Spanish accent to a similar sounding word. Repeat both names yourself to reinforce correct pronunciation.</li>
+    <li><strong>Select Photos:</strong> Once the whole list has been reviewed, freely choose which photos to show (either all of them, or only some) depending on the time available and how the class is responding.</li>
+    <li><strong>Zoom Reveal:</strong> The <strong>"Zoom reveal"</strong> option makes each image reveal gradually, building anticipation and giving students a sense that they have time to think while more of the image appears.</li>
+    <li><strong>Accept Guesses:</strong> As students call out guesses, don't confirm or reject them right away; instead, treat every guess as a possibility. If a student answers in Spanish, ask them to also say it in English, whether or not it's the correct country, and repeat their guess back to reinforce pronunciation either way.</li>
+    <li><strong>Check Agreement:</strong> Before revealing the answer, ask if everyone agrees, inviting quieter students in particular to say whether they agree or what country they think it is.</li>
+    <li><strong>Reveal Answer:</strong> If there's agreement, press <strong>"Show Name"</strong> to reveal the country and place.</li>
+    <li><strong>Provide Clues:</strong> If there's no clear agreement, or nobody has guessed correctly, don't reveal the answer yet. Tell students you'll show another photo of the same country and repeat the same strategy. Only reveal the country if it still hasn't been guessed after three photos. At any point, feel free to give extra clues like a famous figure, a historical fact, or anything else that can help.</li>
+</ol>
+<p>Keep in mind that the real goal here isn't actually guessing the country. It's building students' willingness to communicate what they think the answer is, and through that process, repeatedly practice country names in English, reinforcing memory and correct pronunciation.</p>
+`;
+
+const PENDING_SUGGESTION = "";
+
+
+
+const HELLO_WORLD_SUGGESTION = `
+<p>This activity explores language identity and greetings across different cultures. Note that you can present the countries in any order and deviate from the standard flow to suit your classroom dynamics.</p>
+<p><strong>Suggested button sequence (from left to right):</strong></p>
+<ol>
+    <li><strong>Show Flag:</strong> Reveal the flag first and ask: <em>"Which country does this flag belong to?"</em></li>
+    <li><strong>Show Country:</strong> Once students guess, click the button to show the country name, then ask: <em>"What language do people speak in that country?"</em></li>
+    <li><strong>Show Language:</strong> After they answer, click the language button to display it on screen.</li>
+    <li><strong>Show Picture:</strong> Click the "Picture" button to reveal the image, then ask: <em>"How do people greet each other in that language/country?"</em></li>
+    <li><strong>Show Greeting:</strong> Once guessed, click the greeting button to display it on screen and practice saying it together.</li>
+</ol>
+`;
+
+const PLAY_GO_DO_SUGGESTION = `
+<p>The goal of this activity is to review which verbs are used depending on the sports activity.</p>
+<ul>
+    <li><strong>Selection:</strong> You can select any activity freely. It is not necessary to go through all of them, nor is it required to follow a strict order; choose based on class interest and time availability.</li>
+    <li><strong>Question:</strong> Click the <strong>"Sport"</strong> button to display the image and ask the question: <em>"What verb do you use with...?"</em></li>
+    <li><strong>Support:</strong> If students struggle to answer, click the <strong>"¿Cómo diría...?"</strong> button. This will show a Spanish sentence on screen for students to translate directly.</li>
+    <li><strong>Reveal:</strong> Finally, whether they succeed in answering or not, click the <strong>"Answer"</strong> button to display the correct answer on screen.</li>
+</ul>
+`;
+
+const PLAY_GO_DO_WHICH_CORRECT_SUGGESTION = `
+<p>The goal of this activity is to help students distinguish correct lexical patterns (Play/Go/Do) by comparing two sentences side-by-side.</p>
+<ul>
+    <li><strong>Dynamics:</strong> Select any sentence from the three columns. The first sentence you click will appear on the left side of the presentation screen, and the second on the right. You can select sentences freely (both can be correct, both incorrect, or one of each).</li>
+    <li><strong>Class Interaction:</strong> Ask the class: <em>"Which sentence is correct?"</em>. Encourage them to explain why.</li>
+    <li><strong>Support:</strong> Notice that correct sentences in your panel are marked with a green checkmark (✅). Sentences you have already used will show orange dots (●) inside the button indicating how many times they have been compared in the session.</li>
+    <li><strong>Reveal:</strong> Click the <strong>"Reveal Answers"</strong> button. A large checkmark (✓) or cross (✗) will appear under each sentence on the projection screen.</li>
+    <li><strong>Reset:</strong> Clicking any new sentence after revealing will automatically clear the screen and start a new comparison.</li>
+</ul>
+`;
+
+const COURSES = {
+"5to-6to": {
+    label: "5th & 6th Grade — Languages",
+    sections: [
+    {
+        title: "Content Reference Activities",
+        activities: [
+    {
+        name: "🌍 Country → Language",
+        type: "multi-mode",
+        suggestion: PENDING_SUGGESTION,
+        modes: [
+            {
+                label: "Mode 1: What language...?",
+                qLabel: "Question",
+                aLabel: "Answer",
+                items: [
+                    { q: "What language do people speak in Brazil?", a: "In Brazil, people speak Portuguese.", sideImg: FLAG+'br.png' },
+                    { q: "What language do people speak in Japan?", a: "In Japan, people speak Japanese.", sideImg: FLAG+'jp.png' },
+                    { q: "What language do people speak in France?", a: "In France, people speak French.", sideImg: FLAG+'fr.png' },
+                    { q: "What language do people speak in China?", a: "In China, people speak Chinese.", sideImg: FLAG+'cn.png' },
+                    { q: "What language do people speak in Germany?", a: "In Germany, people speak German.", sideImg: FLAG+'de.png' },
+                    { q: "What language do people speak in Italy?", a: "In Italy, people speak Italian.", sideImg: FLAG+'it.png' },
+                    { q: "What language do people speak in Russia?", a: "In Russia, people speak Russian.", sideImg: FLAG+'ru.png' },
+                    { q: "What language do people speak in Mexico?", a: "In Mexico, people speak Spanish.", sideImg: FLAG+'mx.png' },
+                    { q: "What language do people speak in the United Kingdom?", a: "In the UK, people speak English.", sideImg: FLAG+'gb.png' },
+                    { q: "What language do people speak in Australia?", a: "In Australia, people speak English.", sideImg: FLAG+'au.png' },
+                    { q: "What languages do people speak in Canada?", a: "In Canada, people speak English and French.", sideImg: FLAG+'ca.png' },
+                    { q: "What language do people speak in Spain?", a: "In Spain, people speak Spanish.", sideImg: FLAG+'es.png' },
+                    { q: "What languages do people speak in South Africa?", a: "In South Africa, people speak English and other languages.", sideImg: FLAG+'za.png' },
+                ]
+            },
+            {
+                label: "Mode 2: In (country) people speak...",
+                qLabel: "Sentence",
+                aLabel: "Complete",
+                items: [
+                    { q: "In Brazil, people speak...", a: "Portuguese", sideImg: FLAG+'br.png' },
+                    { q: "In Japan, people speak...", a: "Japanese", sideImg: FLAG+'jp.png' },
+                    { q: "In France, people speak...", a: "French", sideImg: FLAG+'fr.png' },
+                    { q: "In China, people speak...", a: "Chinese", sideImg: FLAG+'cn.png' },
+                    { q: "In Germany, people speak...", a: "German", sideImg: FLAG+'de.png' },
+                    { q: "In Italy, people speak...", a: "Italian", sideImg: FLAG+'it.png' },
+                    { q: "In Russia, people speak...", a: "Russian", sideImg: FLAG+'ru.png' },
+                    { q: "In Mexico, people speak...", a: "Spanish", sideImg: FLAG+'mx.png' },
+                    { q: "In the United Kingdom, people speak...", a: "English", sideImg: FLAG+'gb.png' },
+                    { q: "In Australia, people speak...", a: "English", sideImg: FLAG+'au.png' },
+                    { q: "In Canada, people speak...", a: "English and French", sideImg: FLAG+'ca.png' },
+                    { q: "In Spain, people speak...", a: "Spanish", sideImg: FLAG+'es.png' },
+                    { q: "In South Africa, people speak...", a: "English and other languages", sideImg: FLAG+'za.png' },
+                ]
+            }
+        ]
+    },
+    {
+        name: "💪 Can you...?",
+        type: "can-you",
+        suggestion: PENDING_SUGGESTION,
+        items: [
+            { q: "Can you speak French?", yes: "Yes, I can speak French.", no: "No, I can't speak French.", sideImg: FLAG+'fr.png' },
+            { q: "Can you speak Japanese?", yes: "Yes, I can speak Japanese.", no: "No, I can't speak Japanese.", sideImg: FLAG+'jp.png' },
+            { q: "Can you speak Chinese?", yes: "Yes, I can speak Chinese.", no: "No, I can't speak Chinese.", sideImg: FLAG+'cn.png' },
+            { q: "Can you speak German?", yes: "Yes, I can speak German.", no: "No, I can't speak German.", sideImg: FLAG+'de.png' },
+            { q: "Can you speak Italian?", yes: "Yes, I can speak Italian.", no: "No, I can't speak Italian.", sideImg: FLAG+'it.png' },
+            { q: "Can you speak Portuguese?", yes: "Yes, I can speak Portuguese.", no: "No, I can't speak Portuguese.", sideImg: FLAG+'br.png' },
+            { q: "Can you speak Russian?", yes: "Yes, I can speak Russian.", no: "No, I can't speak Russian.", sideImg: FLAG+'ru.png' },
+            { q: "Can you speak Arabic?", yes: "Yes, I can speak Arabic.", no: "No, I can't speak Arabic.", icon: "🌍" },
+            { q: "Can you speak English?", yes: "Yes, I can speak English!", no: "No, I can't speak English.", sideImg: FLAG+'gb.png' },
+            { q: "Can you speak Spanish?", yes: "Yes, I can speak Spanish!", no: "No, I can't speak Spanish.", sideImg: FLAG+'es.png' },
+        ]
+    },
+    {
+        name: "✅❌ Do or Don't",
+        type: "question-answer",
+        suggestion: PENDING_SUGGESTION,
+        qLabel: "Show",
+        aLabel: "Answer",
+        items: [
+            { q: "Study every day", a: "✅ DO! Study every day.", icon: "📚" },
+            { q: "Watch movies in English", a: "✅ DO! Watch movies.", icon: "🎬" },
+            { q: "Listen to songs in English", a: "✅ DO! Listen to songs.", icon: "🎵" },
+            { q: "Read comic books", a: "✅ DO! Read comic books.", icon: "📖" },
+            { q: "Be curious", a: "✅ DO! Be curious.", icon: "🔍" },
+            { q: "Be patient", a: "✅ DO! Be patient.", icon: "⏳" },
+            { q: "Have fun!", a: "✅ DO! Have fun!", icon: "🎉" },
+            { q: "Play language games", a: "✅ DO! Play language games.", icon: "🎲" },
+            { q: "Be shy", a: "❌ DON'T be shy!", icon: "🙈" },
+            { q: "Give up", a: "❌ DON'T give up!", icon: "💪" },
+            { q: "Be lazy", a: "❌ DON'T be lazy!", icon: "😴" },
+            { q: "Get distracted", a: "❌ DON'T get distracted!", icon: "📵" },
+        ]
+    },
+    {
+        name: "👋 Hello Around the World",
+        type: "hello-world",
+        suggestion: HELLO_WORLD_SUGGESTION,
+        items: [
+            { q: "Bonjour!", a: "French 🇫🇷", country: "France", sideImg: FLAG+'fr.png', picture: CPHOTOS+'francia_hello_bonjour.webp' },
+            { q: "Ciao!", a: "Italian 🇮🇹", country: "Italy", sideImg: FLAG+'it.png', picture: CPHOTOS+'italia_hello_ciao.webp' },
+            { q: "Hallo!", a: "German 🇩🇪", country: "Germany", sideImg: FLAG+'de.png', picture: CPHOTOS+'alemania_hello_hallo.webp' },
+            { q: "Olá!", a: "Portuguese 🇧🇷", country: "Brazil", sideImg: FLAG+'br.png', picture: CPHOTOS+'brasil_hello_ola.webp' },
+            { q: "Konnichiwa!", a: "Japanese 🇯🇵", country: "Japan", sideImg: FLAG+'jp.png', picture: CPHOTOS+'japon_hello_konnichiwa.webp' },
+            { q: "Nǐ hǎo!", a: "Chinese 🇨🇳", country: "China", sideImg: FLAG+'cn.png', picture: CPHOTOS+'china_hello_nihao.webp' },
+            { q: "Mari Mari!", a: "Mapudungun 🇨🇱", country: "Chile", sideImg: FLAG+'cl.png', picture: CPHOTOS+'chile_hello_marimari.webp' },
+            { q: "Hola!", a: "Spanish 🇪🇸", country: "Spain", sideImg: FLAG+'es.png', picture: CPHOTOS+'espana_hello_hola.webp' },
+            { q: "Hello!", a: "English 🇬🇧", country: "United Kingdom", sideImg: FLAG+'gb.png', picture: CPHOTOS+'reinounido_hello_hello.webp' },
+            { q: "Buongiorno!", a: "Italian 🇮🇹 (Good morning)", country: "Italy", sideImg: FLAG+'it.png', picture: CPHOTOS+'italia_hello_buongiorno.webp' },
+            { q: "Oui!", a: "French 🇫🇷 (means 'yes')", country: "France", sideImg: FLAG+'fr.png', picture: CPHOTOS+'francia_hello_oui.webp' },
+        ]
+    },
+    {
+        name: "🗣️ Same Word, Different Country",
+        type: "same-word",
+        suggestion: PENDING_SUGGESTION,
+        items: [
+            { es: "Dulces", us: "candy", uk: "sweets", au: "lollies", icon: "🍬" },
+            { es: "Zapatillas", us: "sneakers", uk: "trainers", au: "runners", icon: "👟" },
+            { es: "Papas fritas", us: "French fries", uk: "chips", au: "hot chips", icon: "🍟" },
+            { es: "Ascensor", us: "elevator", uk: "lift", au: "lift", icon: "🛗" },
+            { es: "Semáforo", us: "traffic lights", uk: "traffic lights", au: "robots (South Africa)", icon: "🚦" },
+        ]
+    },
+    {
+        name: "🔊 /iː/ Sound Game",
+        type: "question-answer",
+        suggestion: PENDING_SUGGESTION,
+        qLabel: "Word",
+        aLabel: "Answer",
+        items: [
+            { q: "Japanese", a: "✅ YES! /iː/ — JapanESE", icon: "🔊" },
+            { q: "cheese", a: "✅ YES! /iː/ — chEEse", icon: "🔊" },
+            { q: "speak", a: "✅ YES! /iː/ — spEAk", icon: "🔊" },
+            { q: "three", a: "✅ YES! /iː/ — thrEE", icon: "🔊" },
+            { q: "beach", a: "✅ YES! /iː/ — bEAch", icon: "🔊" },
+            { q: "sea", a: "✅ YES! /iː/ — sEA", icon: "🔊" },
+            { q: "tea", a: "✅ YES! /iː/ — tEA", icon: "🔊" },
+            { q: "easy", a: "✅ YES! /iː/ — EAsy", icon: "🔊" },
+            { q: "eagle", a: "✅ YES! /iː/ — EAgle", icon: "🔊" },
+            { q: "green", a: "✅ YES! /iː/ — grEEn", icon: "🔊" },
+            { q: "hello", a: "❌ NO! Not /iː/", icon: "🔇" },
+            { q: "car", a: "❌ NO! Not /iː/", icon: "🔇" },
+            { q: "ball", a: "❌ NO! Not /iː/", icon: "🔇" },
+            { q: "match", a: "❌ NO! Not /iː/", icon: "🔇" },
+            { q: "French", a: "❌ NO! Not /iː/", icon: "🔇" },
+        ]
+    },
+    {
+        name: "👅 Tongue Twister Race",
+        type: "question-answer",
+        suggestion: PENDING_SUGGESTION,
+        qLabel: "Show",
+        aLabel: "Faster!",
+        items: [
+            { q: "Tea with cream for me, please.", a: "🏆 Say it faster!", icon: "👅" },
+            { q: "It's easy to see the eagle on the green tree.", a: "🏆 Say it faster!", icon: "👅" },
+            { q: "Please freeze the cheese with ease.", a: "🏆 Say it faster!", icon: "👅" },
+            { q: "She sees the sea and the sea sees her.", a: "🏆 Say it faster!", icon: "👅" },
+        ]
+    },
+        ]
+    },
+    {
+        title: "Custom Activities",
+        activities: [
+            { name: "🧠 I Already Know English", type: "already-know", items: ALREADY_KNOW_ENGLISH, suggestion: PENDING_SUGGESTION },
+            { name: "📖 Interactive Story", type: "game", items: [], suggestion: PENDING_SUGGESTION },
+            { name: "📸 Calen Photos", type: "photo-gallery", items: CALEN_PHOTOS, suggestion: PENDING_SUGGESTION },
+            { name: "🌍 Guess the Country", type: "country-photos", items: COUNTRY_PHOTOS, suggestion: GUESS_THE_COUNTRY_SUGGESTION },
+        ]
+    }
+    ]
+},
+
+"7mo-8vo": {
+    label: "7th & 8th Grade — Sports",
+    sections: [
+    {
+        title: "Content Reference Activities",
+        activities: [
+    {
+        name: "⚽ Play / Go / Do — What verb...?",
+        type: "question-answer",
+        suggestion: PLAY_GO_DO_SUGGESTION,
+        qLabel: "Sport",
+        aLabel: "Answer",
+        items: [
+            { q: "What verb do you use with basketball?", a: "PLAY basketball", sideImg: IMG+'play-basketball.png', icon: "🏀", trans: "yo juego básquetbol" },
+            { q: "What verb do you use with soccer?", a: "PLAY soccer    or    PLAY football", sideImg: IMG+'play-soccer.png', icon: "⚽", trans: "yo juego fútbol" },
+            { q: "What verb do you use with tennis?", a: "PLAY tennis", sideImg: IMG+'play-tennis.png', icon: "🎾", trans: "yo juego tenis" },
+            { q: "What verb do you use with handball?", a: "PLAY handball", sideImg: IMG+'play-handball.png', icon: "🤾", trans: "yo juego balonmano" },
+            { q: "What verb do you use with swimming?", a: "GO swimming", sideImg: IMG+'go-swimming.png', icon: "🏊", trans: "yo voy a nadar" },
+            { q: "What verb do you use with skiing?", a: "GO skiing", sideImg: IMG+'go-skiing.png', icon: "⛷️", trans: "yo voy a esquiar" },
+            { q: "What verb do you use with running?", a: "GO running", sideImg: IMG+'go-running.png', icon: "🏃", trans: "yo voy a correr" },
+            { q: "What verb do you use with camping?", a: "GO camping", icon: "⛺", trans: "yo voy de camping" },
+            { q: "What verb do you use with karate?", a: "DO karate", icon: "🥋", trans: "yo hago karate" },
+            { q: "What verb do you use with boxing?", a: "DO boxing", icon: "🥊", trans: "yo practico boxeo" },
+            { q: "What verb do you use with video games?", a: "PLAY video games", icon: "🎮", trans: "yo juego videojuegos" },
+            { q: "What verb do you use with cards?", a: "PLAY cards", icon: "🃏", trans: "yo juego a las cartas" },
+            { q: "What verb do you use with dancing?", a: "GO dancing", icon: "💃", trans: "yo voy a bailar" },
+        ]
+    },
+    {
+        name: "⚽ Play / Go / Do — Which is correct?",
+        type: "which-correct",
+        suggestion: PLAY_GO_DO_WHICH_CORRECT_SUGGESTION,
+        items: [
+            { sport: "basketball", correct: "play" },
+            { sport: "soccer", correct: "play" },
+            { sport: "tennis", correct: "play" },
+            { sport: "handball", correct: "play" },
+            { sport: "swimming", correct: "go" },
+            { sport: "skiing", correct: "go" },
+            { sport: "running", correct: "go" },
+            { sport: "camping", correct: "go" },
+            { sport: "karate", correct: "do" },
+            { sport: "boxing", correct: "do" },
+            { sport: "video games", correct: "play" },
+            { sport: "cards", correct: "play" },
+            { sport: "dancing", correct: "go" }
+        ]
+    },
+    {
+        name: "🤔 In my opinion...",
+        type: "question-answer",
+        suggestion: PENDING_SUGGESTION,
+        qLabel: "Activity",
+        aLabel: "Opinion",
+        items: [
+            { q: "What do you think about basketball?", a: "In my opinion, basketball is exciting!", sideImg: IMG+'play-basketball.png', icon: "🏀" },
+            { q: "What do you think about soccer?", a: "In my opinion, soccer is fun!", sideImg: IMG+'play-soccer.png', icon: "⚽" },
+            { q: "What do you think about swimming?", a: "In my opinion, swimming is relaxing!", sideImg: IMG+'go-swimming.png', icon: "🏊" },
+            { q: "What do you think about tennis?", a: "In my opinion, tennis is interesting!", sideImg: IMG+'play-tennis.png', icon: "🎾" },
+            { q: "What do you think about skiing?", a: "In my opinion, skiing is dangerous!", sideImg: IMG+'go-skiing.png', icon: "⛷️" },
+            { q: "What do you think about running?", a: "In my opinion, running is boring / fun!", sideImg: IMG+'go-running.png', icon: "🏃" },
+            { q: "What do you think about handball?", a: "In my opinion, handball is exciting!", sideImg: IMG+'play-handball.png', icon: "🤾" },
+            { q: "What do you think about boxing?", a: "In my opinion, boxing is dangerous!", icon: "🥊" },
+            { q: "What do you think about video games?", a: "In my opinion, playing video games is cool!", icon: "🎮" },
+            { q: "What do you think about karate?", a: "In my opinion, karate is interesting!", icon: "🥋" },
+        ]
+    },
+    {
+        name: "🏷️ Whose is this?",
+        type: "question-answer",
+        suggestion: PENDING_SUGGESTION,
+        qLabel: "Object",
+        aLabel: "Answer",
+        items: [
+            { q: "⚽ Whose ball is this?", a: "It is Messi's.", icon: "⚽" },
+            { q: "🏀 Whose basketball is this?", a: "It is LeBron's.", icon: "🏀" },
+            { q: "🎾 Whose racket is this?", a: "It is Serena Williams's.", icon: "🎾" },
+            { q: "🥊 Whose boxing gloves are these?", a: "They are Canelo's.", icon: "🥊" },
+            { q: "🏎️ Whose car is this?", a: "It is Lewis Hamilton's.", icon: "🏎️" },
+            { q: "🎿 Whose skis are these?", a: "They are Lindsey Vonn's.", icon: "🎿" },
+            { q: "🏆 Whose trophy is this?", a: "It is Argentina's.", icon: "🏆" },
+        ]
+    },
+    {
+        name: "⏳ While vs When",
+        type: "question-answer",
+        suggestion: PENDING_SUGGESTION,
+        qLabel: "Clue",
+        aLabel: "Sentence",
+        items: [
+            { q: "Mbappé / defend  ↔  Messi / play", a: "While Mbappé was defending, Messi was playing.", icon: "⚽" },
+            { q: "I / run with ball  →  defender / kick ankle", a: "I was running with the ball when a defender kicked my ankle.", icon: "🏃" },
+            { q: "We / play soccer  →  it / start to rain", a: "While we were playing soccer, it started to rain.", icon: "🌧️" },
+            { q: "She / swim  →  referee / blow whistle", a: "She was swimming when the referee blew the whistle.", icon: "🏊" },
+            { q: "They / dance  ↔  they / listen to music", a: "While they were dancing, they were listening to music.", icon: "💃" },
+            { q: "I / watch TV  →  lights / go out", a: "I was watching TV when the lights went out.", icon: "📺" },
+            { q: "He / ride bicycle  →  he / fall down", a: "He was riding his bicycle when he fell down.", icon: "🚲" },
+            { q: "We / play cards  ↔  Mom / cook dinner", a: "While we were playing cards, Mom was cooking dinner.", icon: "🃏" },
+        ]
+    },
+    {
+        name: "🎭 Sports Charades",
+        type: "question-answer",
+        suggestion: PENDING_SUGGESTION,
+        qLabel: "Act it out!",
+        aLabel: "Answer",
+        items: [
+            { q: "🎭 Act this out!", a: "He/She was KICKING the ball!", icon: "🦵" },
+            { q: "🎭 Act this out!", a: "He/She was BOUNCING the ball!", icon: "⛹️" },
+            { q: "🎭 Act this out!", a: "He/She was THROWING the ball!", icon: "🤾" },
+            { q: "🎭 Act this out!", a: "He/She was CATCHING the ball!", icon: "🧤" },
+            { q: "🎭 Act this out!", a: "He/She was HITTING the ball!", icon: "🏏" },
+            { q: "🎭 Act this out!", a: "He/She was RIDING a bicycle!", icon: "🚲" },
+            { q: "🎭 Act this out!", a: "He/She was SWIMMING!", icon: "🏊" },
+            { q: "🎭 Act this out!", a: "He/She was TAKING photos!", icon: "📸" },
+            { q: "🎭 Act this out!", a: "He/She was PLAYING cards!", icon: "🃏" },
+            { q: "🎭 Act this out!", a: "He/She was DANCING!", icon: "💃" },
+        ]
+    },
+    {
+        name: "📋 Biography Builder",
+        type: "question-answer",
+        suggestion: PENDING_SUGGESTION,
+        qLabel: "Data",
+        aLabel: "Biography",
+        items: [
+            { q: "LeBron James | USA | Dec 30, 1984 | Akron, Ohio | Basketball", a: "LeBron James is a famous American basketball player. He was born on December 30, 1984, in Akron, Ohio.", sideImg: FLAG+'us.png' },
+            { q: "Lionel Messi | Argentina | Jun 24, 1987 | Rosario | Soccer", a: "Lionel Messi is a famous Argentine soccer player. He was born on June 24, 1987, in Rosario.", sideImg: FLAG+'ar.png' },
+            { q: "Serena Williams | USA | Sep 26, 1981 | Michigan | Tennis", a: "Serena Williams is a famous American tennis player. She was born on September 26, 1981, in Michigan.", sideImg: FLAG+'us.png' },
+            { q: "Roger Federer | Switzerland | Aug 8, 1981 | Basel | Tennis", a: "Roger Federer is a famous Swiss tennis player. He was born on August 8, 1981, in Basel.", sideImg: FLAG+'ch.png' },
+            { q: "Francisca Mardones | Chile | Shot Put | Paralympic", a: "Francisca Mardones is a famous Chilean paralympic athlete. She had an accident. Now she plays paralympic sports.", sideImg: FLAG+'cl.png' },
+            { q: "Saina Nehwal | India | Mar 17, 1990 | Haryana | Badminton", a: "Saina Nehwal is a famous Indian badminton player. She was born on March 17, 1990, in Haryana.", sideImg: FLAG+'in.png' },
+        ]
+    },
+    {
+        name: "🔢 Story Sequence",
+        type: "question-answer",
+        suggestion: PENDING_SUGGESTION,
+        qLabel: "Event",
+        aLabel: "Ordered",
+        items: [
+            { q: "The World Cup Final began in Qatar.", a: "First, the World Cup Final began in Qatar.", icon: "1️⃣" },
+            { q: "Argentina scored in the first half.", a: "Next, Argentina scored in the first half.", icon: "2️⃣" },
+            { q: "Mbappé scored two quick goals for France!", a: "Then, Mbappé scored two quick goals for France!", icon: "3️⃣" },
+            { q: "The match went to extra time.", a: "After that, the match went to extra time.", icon: "4️⃣" },
+            { q: "Argentina scored in the 109th minute.", a: "As soon as Argentina scored, France scored again!", icon: "5️⃣" },
+            { q: "France missed two penalties in the shootout.", a: "Finally, France missed two penalties.", icon: "6️⃣" },
+            { q: "Argentina won the World Cup! 🏆", a: "In the end, Argentina won the World Cup!", icon: "🏆" },
+        ]
+    },
+        ]
+    },
+    {
+        title: "Custom Activities",
+        activities: [
+            { name: "🧠 I Already Know English", type: "already-know", items: ALREADY_KNOW_ENGLISH, suggestion: PENDING_SUGGESTION },
+            { name: "📖 Interactive Story", type: "game", items: [], suggestion: PENDING_SUGGESTION },
+            { name: "📸 Calen Photos", type: "photo-gallery", items: CALEN_PHOTOS, suggestion: PENDING_SUGGESTION },
+        ]
+    }
+    ]
+}
+};
+
+// ══════════════════════════════════════
+// RENDERING
+// ══════════════════════════════════════
+const courseSelect = document.getElementById('courseSelect');
+const activitySelect = document.getElementById('activitySelect');
+const container = document.getElementById('itemsContainer');
+
+function clearContainer() {
+    const sug = document.getElementById('suggestionPanel');
+    if (sug && container.contains(sug)) {
+        container.parentNode.insertBefore(sug, container);
+    }
+    container.innerHTML = '';
+}
+
+let shownQuestion = null;
+let shownWord = null;
+let shownFlag = null;
+let shownTrans = null;
+
+// Guess the Country: qué fotos ya se mostraron esta sesión (se resetea solo al recargar la página)
+const seenCountryPhotos = new Set();
+let currentCountryPhoto = null;
+
+function getAllActivities(course) {
+    const all = [];
+    course.sections.forEach(s => s.activities.forEach(a => all.push(a)));
+    return all;
+}
+
+Object.keys(COURSES).forEach(k => {
+    const o = document.createElement('option');
+    o.value = k; o.textContent = COURSES[k].label;
+    courseSelect.appendChild(o);
+});
+
+function selectCourse(courseKey) {
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+    courseSelect.value = courseKey;
+    onCourseChange();
+}
+
+function onCourseChange() {
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+    const course = COURSES[courseSelect.value];
+    document.getElementById('mainHeaderCourse').textContent = course.label;
+    document.getElementById('btnBackActivities').style.display = 'inline-block';
+    activitySelect.innerHTML = '<option value="">— Select activity —</option>';
+    let globalIdx = 0;
+    course.sections.forEach((section, si) => {
+        if (si > 0) {
+            const sep = document.createElement('option');
+            sep.disabled = true;
+            sep.textContent = '──────────────';
+            activitySelect.appendChild(sep);
+        }
+        const grp = document.createElement('option');
+        grp.disabled = true;
+        grp.textContent = section.title;
+        grp.style.fontWeight = 'bold';
+        activitySelect.appendChild(grp);
+        section.activities.forEach(act => {
+            const o = document.createElement('option');
+            o.value = globalIdx;
+            o.textContent = '  ' + act.name;
+            activitySelect.appendChild(o);
+            globalIdx++;
+        });
+    });
+    renderActivityMenu();
+}
+
+function onActivitySelect() {
+    if (activitySelect.value === '') {
+        renderActivityMenu();
+    } else {
+        renderActivity();
+    }
+}
+
+function renderActivityMenu() {
+    clearContainer();
+    document.getElementById('suggestionPanel').style.display = 'none';
+    send('clear-middle', '');
+    send('clear-bottom', '');
+    send('side-image', '', null);
+    send('side-emoji', '');
+    send('photo', '', null);
+    send('photo-word', '');
+    channel.postMessage({ type: 'country-photo', image: null });
+    channel.postMessage({ type: 'country-list', show: false });
+    localStorage.removeItem('english-game-state');
+    const course = COURSES[courseSelect.value];
+    let globalIdx = 0;
+
+    course.sections.forEach(section => {
+        const sectionTitle = document.createElement('div');
+        sectionTitle.className = 'group-header';
+        sectionTitle.style.marginBottom = '8px';
+        sectionTitle.style.fontSize = '0.95rem';
+        sectionTitle.style.borderTop = 'none';
+        container.appendChild(sectionTitle);
+        sectionTitle.textContent = section.title;
+
+        const menu = document.createElement('div');
+        menu.className = 'act-menu';
+
+        section.activities.forEach(act => {
+            const card = document.createElement('div');
+            card.className = 'act-card';
+            const count = act.items ? act.items.length : (act.modes ? act.modes[0].items.length : 0);
+            card.innerHTML = `${act.name}<small>${count} items</small>`;
+            const idx = globalIdx;
+            card.onclick = () => {
+                activitySelect.value = idx;
+                renderActivity();
+            };
+            menu.appendChild(card);
+            globalIdx++;
+        });
+
+        container.appendChild(menu);
+    });
+}
+
+function renderActivity() {
+    clearContainer();
+    shownQuestion = null;
+    shownWord = null;
+    shownFlag = null;
+    shownTrans = null;
+    send('clear-middle', '');
+    send('clear-bottom', '');
+    send('side-image', '', null);
+    send('side-emoji', '');
+    send('photo', '', null);
+    send('photo-word', '');
+    send('corner-photo', '', null);
+    send('country-name', '');
+    channel.postMessage({ type: 'country-photo', image: null });
+    channel.postMessage({ type: 'country-list', show: false });
+
+    const debugGridSwitch = document.getElementById('debugGridSwitch');
+    if (debugGridSwitch) {
+        channel.postMessage({ type: 'debug-grid', show: debugGridSwitch.checked });
+    }
+
+    const course = COURSES[courseSelect.value];
+    const all = getAllActivities(course);
+    const act = all[activitySelect.value];
+
+    const title = document.createElement('div');
+    title.className = 'activity-title-row';
+    const titleText = document.createElement('span');
+    titleText.className = 'activity-title';
+    titleText.textContent = act.name;
+    title.appendChild(titleText);
+    if (!act.reviewed) {
+        const stamp = document.createElement('span');
+        stamp.className = 'review-stamp';
+        stamp.textContent = 'Under Review';
+        title.appendChild(stamp);
+    }
+    container.appendChild(title);
+
+    const suggestionPanel = document.getElementById('suggestionPanel');
+    const suggestionBody = document.getElementById('suggestionBody');
+    const suggestionToggleBtn = document.getElementById('suggestionToggleBtn');
+    
+    // El panel de sugerencias se muestra siempre en todas las actividades
+    suggestionPanel.style.display = '';
+    container.appendChild(suggestionPanel);
+
+    if (act.suggestion) {
+        suggestionBody.innerHTML = act.suggestion;
+        suggestionBody.style.display = '';
+        suggestionToggleBtn.textContent = 'Hide';
+    } else {
+        suggestionBody.innerHTML = '';
+        suggestionBody.style.display = 'none';
+        suggestionToggleBtn.textContent = 'Show';
+    }
+
+    if (act.type === 'already-know') {
+        renderAlreadyKnow(act, 'Show Question', 'Show Word', 'Hide Question', 'Hide Word');
+    } else if (act.type === 'which-correct') {
+        renderWhichCorrect(act);
+    } else if (act.type === 'question-answer') {
+        renderAlreadyKnow(act, act.qLabel || 'Question', act.aLabel || 'Answer', 'Hide ' + (act.qLabel || 'Question'), 'Hide ' + (act.aLabel || 'Answer'));
+    } else if (act.type === 'multi-mode') {
+        renderMultiMode(act);
+    } else if (act.type === 'same-word') {
+        renderSameWord(act);
+    } else if (act.type === 'can-you') {
+        renderCanYou(act);
+    } else if (act.type === 'game') {
+        renderGame();
+    } else if (act.type === 'photo-gallery') {
+        renderPhotoGallery(act);
+    } else if (act.type === 'country-photos') {
+        renderCountryPhotos(act);
+    } else if (act.type === 'hello-world') {
+        renderHelloWorld(act);
+    } else {
+        renderDefault(act);
+    }
+}
+
+// ══════════════════════════════════════
+// ALREADY KNOW ENGLISH — special render
+// ══════════════════════════════════════
+function renderAlreadyKnow(act, showQLabel, showALabel, hideQLabel, hideALabel) {
+    let itemNum = 0;
+    act.items.forEach((item, i) => {
+        if (item.group) {
+            const header = document.createElement('div');
+            header.className = 'group-header';
+            header.textContent = item.group;
+            container.appendChild(header);
+            return;
+        }
+        itemNum++;
+        const row = document.createElement('div');
+        row.className = 'item-row';
+
+        const num = document.createElement('span');
+        num.className = 'item-num';
+        num.textContent = itemNum;
+
+        const label = document.createElement('span');
+        label.className = 'item-label';
+        label.innerHTML = `${item.q}<span class="item-sublabel">${item.a}</span>`;
+
+        const flagMode = !!act.flagButton;
+        const bigText = !!act.bigText;
+
+        const btnQ = document.createElement('button');
+        btnQ.className = 'btn btn-mid';
+        btnQ.textContent = showQLabel;
+        btnQ.dataset.idx = i;
+        btnQ.dataset.state = 'show';
+        btnQ.dataset.type = 'q';
+
+        btnQ.onclick = () => {
+            if (btnQ.dataset.state === 'show') {
+                if (shownWord !== null && shownWord !== i) {
+                    send('clear-bottom', '');
+                    resetAllBtns('w', showALabel);
+                    shownWord = null;
+                }
+                if (shownTrans !== null) {
+                    send('clear-bottom', '');
+                    resetAllBtns('t', '¿Cómo diría...?');
+                    shownTrans = null;
+                }
+                if (flagMode) {
+                    if (shownFlag !== null && shownFlag !== i) {
+                        send('side-image', '', null);
+                        resetAllBtns('f', 'Show Flag');
+                        shownFlag = null;
+                    }
+                } else {
+                    if (item.sideImg) { send('side-image', '', item.sideImg); }
+                    else { send('side-emoji', item.icon || ''); }
+                }
+                send('middle', item.q, null, bigText);
+                resetAllBtns('q', showQLabel);
+                shownQuestion = i;
+                btnQ.textContent = hideQLabel;
+                btnQ.className = 'btn btn-hide';
+                btnQ.dataset.state = 'hide';
+            } else {
+                send('clear-middle', '');
+                if (!flagMode) {
+                    send('side-image', '', null);
+                    send('side-emoji', '');
+                }
+                shownQuestion = null;
+                btnQ.textContent = showQLabel;
+                btnQ.className = 'btn btn-mid';
+                btnQ.dataset.state = 'show';
+            }
+        };
+
+        const btnW = document.createElement('button');
+        btnW.className = 'btn btn-bot';
+        btnW.textContent = showALabel;
+        btnW.dataset.idx = i;
+        btnW.dataset.state = 'show';
+        btnW.dataset.type = 'w';
+
+        btnW.onclick = () => {
+            if (btnW.dataset.state === 'show') {
+                if (shownQuestion !== null && shownQuestion !== i) {
+                    send('clear-middle', '');
+                    resetAllBtns('q', showQLabel);
+                    shownQuestion = null;
+                }
+                if (shownTrans !== null) {
+                    resetAllBtns('t', '¿Cómo diría...?');
+                    shownTrans = null;
+                }
+                if (flagMode) {
+                    if (shownFlag !== null && shownFlag !== i) {
+                        send('side-image', '', null);
+                        resetAllBtns('f', 'Show Flag');
+                        shownFlag = null;
+                    }
+                } else {
+                    if (item.sideImg) { send('side-image', '', item.sideImg); }
+                    else { send('side-emoji', item.icon || ''); }
+                }
+                send('bottom', item.a, null, bigText);
+                resetAllBtns('w', showALabel);
+                shownWord = i;
+                btnW.textContent = hideALabel;
+                btnW.className = 'btn btn-hide';
+                btnW.dataset.state = 'hide';
+            } else {
+                send('clear-bottom', '');
+                if (!flagMode) {
+                    send('side-image', '', null);
+                    send('side-emoji', '');
+                }
+                shownWord = null;
+                btnW.textContent = showALabel;
+                btnW.className = 'btn btn-bot';
+                btnW.dataset.state = 'show';
+            }
+        };
+
+        row.appendChild(num);
+        row.appendChild(label);
+        row.appendChild(btnQ);
+
+        if (item.trans) {
+            const btnTrans = document.createElement('button');
+            btnTrans.className = 'btn btn-mid';
+            btnTrans.style.background = '#e67e22';
+            btnTrans.style.color = 'white';
+            btnTrans.textContent = '¿Cómo diría...?';
+            btnTrans.dataset.idx = i;
+            btnTrans.dataset.state = 'show';
+            btnTrans.dataset.type = 't';
+
+            btnTrans.onclick = () => {
+                if (btnTrans.dataset.state === 'show') {
+                    if (shownTrans !== null && shownTrans !== i) {
+                        resetAllBtns('t', '¿Cómo diría...?');
+                        shownTrans = null;
+                    }
+                    send('bottom', `¿Cómo diría: "${item.trans}"?`);
+                    shownTrans = i;
+                    btnTrans.textContent = 'Ocultar';
+                    btnTrans.className = 'btn btn-hide';
+                    btnTrans.style.background = '';
+                    btnTrans.style.color = '';
+                    btnTrans.dataset.state = 'hide';
+
+                    if (shownWord === i) {
+                        send('clear-bottom', '');
+                        resetAllBtns('w', showALabel);
+                        shownWord = null;
+                    }
+                } else {
+                    send('clear-bottom', '');
+                    shownTrans = null;
+                    btnTrans.textContent = '¿Cómo diría...?';
+                    btnTrans.className = 'btn btn-mid';
+                    btnTrans.style.background = '#e67e22';
+                    btnTrans.style.color = 'white';
+                    btnTrans.dataset.state = 'show';
+                }
+            };
+            row.appendChild(btnTrans);
+        }
+
+        row.appendChild(btnW);
+
+        if (flagMode) {
+            const btnF = document.createElement('button');
+            btnF.className = 'btn btn-flag';
+            btnF.textContent = 'Show Flag';
+            btnF.dataset.idx = i;
+            btnF.dataset.state = 'show';
+            btnF.dataset.type = 'f';
+
+            btnF.onclick = () => {
+                if (btnF.dataset.state === 'show') {
+                    if (shownFlag !== null && shownFlag !== i) {
+                        resetAllBtns('f', 'Show Flag');
+                    }
+                    if (item.sideImg) { send('side-image', '', item.sideImg); }
+                    else { send('side-emoji', item.icon || ''); }
+                    shownFlag = i;
+                    btnF.textContent = 'Hide Flag';
+                    btnF.className = 'btn btn-hide';
+                    btnF.dataset.state = 'hide';
+                } else {
+                    send('side-image', '', null);
+                    send('side-emoji', '');
+                    shownFlag = null;
+                    btnF.textContent = 'Show Flag';
+                    btnF.className = 'btn btn-flag';
+                    btnF.dataset.state = 'show';
+                }
+            };
+
+            row.appendChild(btnF);
+        }
+
+        container.appendChild(row);
+    });
+}
+
+function resetAllBtns(type, showLabel) {
+    container.querySelectorAll('.item-row').forEach(row => {
+        row.querySelectorAll('button').forEach(btn => {
+            if (btn.dataset.state !== undefined && btn.dataset.type === type) {
+                btn.textContent = showLabel;
+                if (type === 'q') {
+                    btn.className = 'btn btn-mid';
+                } else if (type === 'w') {
+                    btn.className = 'btn btn-bot';
+                } else if (type === 'f') {
+                    btn.className = 'btn btn-flag';
+                } else if (type === 't') {
+                    btn.className = 'btn btn-mid';
+                    btn.style.background = '#e67e22';
+                    btn.style.color = 'white';
+                }
+                btn.dataset.state = 'show';
+            }
+        });
+    });
+}
+
+function renderWhichCorrect(act) {
+    if (!act.state) {
+        act.state = {
+            selectedLeft: null,
+            selectedRight: null,
+            revealed: false,
+            usedCounts: {}
+        };
+    }
+    
+    channel.postMessage({ type: 'which-correct-init' });
+    
+    if (act.state.selectedLeft) {
+        channel.postMessage({ type: 'which-correct-left', text: act.state.selectedLeft.text });
+    }
+    if (act.state.selectedRight) {
+        channel.postMessage({ type: 'which-correct-right', text: act.state.selectedRight.text });
+    }
+    if (act.state.revealed) {
+        channel.postMessage({
+            type: 'which-correct-reveal',
+            leftCorrect: act.state.selectedLeft ? act.state.selectedLeft.isCorrect : null,
+            rightCorrect: act.state.selectedRight ? act.state.selectedRight.isCorrect : null
+        });
+    }
+
+    let area = document.getElementById('whichCorrectControlArea');
+    if (!area) {
+        area = document.createElement('div');
+        area.id = 'whichCorrectControlArea';
+        container.appendChild(area);
+    } else {
+        area.innerHTML = '';
+    }
+
+    const actionBar = document.createElement('div');
+    actionBar.style.display = 'flex';
+    actionBar.style.gap = '15px';
+    actionBar.style.marginBottom = '20px';
+    actionBar.style.justifyContent = 'center';
+
+    const btnReveal = document.createElement('button');
+    btnReveal.className = 'btn btn-mid';
+    btnReveal.style.background = '#27ae60';
+    btnReveal.style.color = 'white';
+    btnReveal.textContent = 'Reveal Answers';
+    btnReveal.onclick = () => {
+        if (act.state.selectedLeft || act.state.selectedRight) {
+            act.state.revealed = true;
+            channel.postMessage({
+                type: 'which-correct-reveal',
+                leftCorrect: act.state.selectedLeft ? act.state.selectedLeft.isCorrect : null,
+                rightCorrect: act.state.selectedRight ? act.state.selectedRight.isCorrect : null
+            });
+        }
+    };
+
+    const btnClear = document.createElement('button');
+    btnClear.className = 'btn btn-gray';
+    btnClear.textContent = 'Clear selections';
+    btnClear.onclick = () => {
+        act.state.selectedLeft = null;
+        act.state.selectedRight = null;
+        act.state.revealed = false;
+        channel.postMessage({ type: 'which-correct-clear' });
+        renderWhichCorrect(act);
+    };
+
+    actionBar.appendChild(btnReveal);
+    actionBar.appendChild(btnClear);
+    area.appendChild(actionBar);
+
+    const columnsContainer = document.createElement('div');
+    columnsContainer.style.display = 'flex';
+    columnsContainer.style.gap = '15px';
+    columnsContainer.style.width = '100%';
+
+    const verbs = ['play', 'go', 'do'];
+    
+    verbs.forEach((verb) => {
+        const col = document.createElement('div');
+        col.style.flex = '1';
+        col.style.background = 'rgba(255, 255, 255, 0.05)';
+        col.style.borderRadius = '8px';
+        col.style.padding = '10px';
+        col.style.display = 'flex';
+        col.style.flexDirection = 'column';
+        col.style.gap = '8px';
+
+        const colTitle = document.createElement('div');
+        colTitle.style.textAlign = 'center';
+        colTitle.style.fontWeight = 'bold';
+        colTitle.style.color = '#f0a830';
+        colTitle.style.marginBottom = '8px';
+        colTitle.style.textTransform = 'uppercase';
+        colTitle.textContent = verb;
+        col.appendChild(colTitle);
+
+        act.items.forEach((item, itemIdx) => {
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+            row.style.gap = '6px';
+            row.style.width = '100%';
+
+            const isCorrect = item.correct === verb;
+            const phraseText = `I ${verb} ${item.sport}`;
+            const phraseKey = `${verb}-${itemIdx}`;
+
+            const btn = document.createElement('button');
+            btn.style.display = 'flex';
+            btn.style.alignItems = 'center';
+            btn.style.justifyContent = 'flex-start';
+            btn.style.height = '28px';
+            btn.style.flex = '1';
+            btn.style.minWidth = '0';
+            btn.style.textAlign = 'left';
+            btn.style.padding = '3px 8px';
+            btn.style.fontSize = '0.85rem';
+            btn.style.whiteSpace = 'nowrap';
+            btn.style.overflow = 'hidden';
+            btn.style.textOverflow = 'ellipsis';
+            btn.style.boxSizing = 'border-box';
+            
+            const isLeftSelected = act.state.selectedLeft && act.state.selectedLeft.key === phraseKey;
+            const isRightSelected = act.state.selectedRight && act.state.selectedRight.key === phraseKey;
+            
+            if (isLeftSelected || isRightSelected) {
+                btn.className = 'btn';
+                btn.style.border = '2px solid #f0a830';
+                btn.style.background = '#f0a830';
+                btn.style.color = '#111111';
+                btn.style.fontWeight = 'bold';
+            } else {
+                btn.className = 'btn btn-mid';
+                btn.style.border = '';
+                btn.style.background = '';
+                btn.style.color = '';
+                btn.style.fontWeight = '';
+            }
+
+            const count = act.state.usedCounts[phraseKey] || 0;
+            const dots = count > 0 ? '  ' + '●'.repeat(count) : '';
+            btn.textContent = phraseText + (isCorrect ? '  ✅' : '') + dots;
+
+            btn.onclick = () => {
+                if (act.state.revealed) {
+                    act.state.selectedLeft = null;
+                    act.state.selectedRight = null;
+                    act.state.revealed = false;
+                    channel.postMessage({ type: 'which-correct-clear' });
+                }
+
+                if (!act.state.selectedLeft) {
+                    act.state.selectedLeft = { text: phraseText, isCorrect, key: phraseKey };
+                    act.state.usedCounts[phraseKey] = (act.state.usedCounts[phraseKey] || 0) + 1;
+                    channel.postMessage({ type: 'which-correct-left', text: phraseText });
+                } else if (!act.state.selectedRight && act.state.selectedLeft.key !== phraseKey) {
+                    act.state.selectedRight = { text: phraseText, isCorrect, key: phraseKey };
+                    act.state.usedCounts[phraseKey] = (act.state.usedCounts[phraseKey] || 0) + 1;
+                    channel.postMessage({ type: 'which-correct-right', text: phraseText });
+                }
+                
+                renderWhichCorrect(act);
+            };
+
+            row.appendChild(btn);
+            col.appendChild(row);
+        });
+
+        columnsContainer.appendChild(col);
+    });
+
+    area.appendChild(columnsContainer);
+}
+
+// ══════════════════════════════════════
+// SAME WORD — show Spanish + multiple English variants
+// ══════════════════════════════════════
+function capFirst(s) {
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
+function renderSameWord(act) {
+    let activeItem = null;
+    let shownParts = { middle: '', bottom: '' };
+
+    act.items.forEach((item, i) => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.style.flexWrap = 'wrap';
+
+        const num = document.createElement('span');
+        num.className = 'item-num';
+        num.textContent = (i + 1);
+
+        const label = document.createElement('span');
+        label.className = 'item-label';
+        label.innerHTML = `${item.icon} ${item.es}<span class="item-sublabel">🇺🇸 ${item.us} | 🇬🇧 ${item.uk} | 🇦🇺 ${item.au}</span>`;
+
+        const btnEs = document.createElement('button');
+        btnEs.className = 'btn btn-mid';
+        btnEs.textContent = '🇪🇸 Español';
+        btnEs.onclick = () => {
+            if (activeItem !== null && activeItem !== i) {
+                send('clear-bottom', '');
+                shownParts.bottom = '';
+            }
+            send('middle', item.es);
+            if (item.icon) send('side-emoji', item.icon);
+            shownParts.middle = item.es;
+            activeItem = i;
+        };
+
+        const btnUs = document.createElement('button');
+        btnUs.className = 'btn btn-bot';
+        btnUs.textContent = '🇺🇸 USA';
+        btnUs.onclick = () => {
+            if (activeItem !== null && activeItem !== i) {
+                send('middle', item.es);
+                if (item.icon) send('side-emoji', item.icon);
+                shownParts.middle = item.es;
+            }
+            send('bottom', '🇺🇸 ' + capFirst(item.us));
+            activeItem = i;
+        };
+
+        const btnUk = document.createElement('button');
+        btnUk.className = 'btn btn-bot';
+        btnUk.textContent = '🇬🇧 UK';
+        btnUk.onclick = () => {
+            if (activeItem !== null && activeItem !== i) {
+                send('middle', item.es);
+                if (item.icon) send('side-emoji', item.icon);
+                shownParts.middle = item.es;
+            }
+            send('bottom', '🇬🇧 ' + capFirst(item.uk));
+            activeItem = i;
+        };
+
+        const btnAu = document.createElement('button');
+        btnAu.className = 'btn btn-bot';
+        btnAu.textContent = '🇦🇺 Other';
+        btnAu.onclick = () => {
+            if (activeItem !== null && activeItem !== i) {
+                send('middle', item.es);
+                if (item.icon) send('side-emoji', item.icon);
+                shownParts.middle = item.es;
+            }
+            send('bottom', '🇦🇺 ' + capFirst(item.au));
+            activeItem = i;
+        };
+
+        const btnAll = document.createElement('button');
+        btnAll.className = 'btn btn-red';
+        btnAll.textContent = 'All';
+        btnAll.onclick = () => {
+            send('middle', item.es);
+            send('bottom', '🇺🇸 ' + capFirst(item.us) + '   |   🇬🇧 ' + capFirst(item.uk) + '   |   🇦🇺 ' + capFirst(item.au));
+            if (item.icon) send('side-emoji', item.icon);
+            activeItem = i;
+        };
+
+        row.appendChild(num);
+        row.appendChild(label);
+        row.appendChild(btnEs);
+        row.appendChild(btnUs);
+        row.appendChild(btnUk);
+        row.appendChild(btnAu);
+        row.appendChild(btnAll);
+        container.appendChild(row);
+    });
+}
+
+// ══════════════════════════════════════
+// HELLO AROUND THE WORLD — Flag / Picture / Country name / Language / Greeting
+// Cinco botones independientes por fila; cada uno se puede mostrar/ocultar
+// por su cuenta, sin depender de los otros.
+// ══════════════════════════════════════
+function stripFlagEmoji(text) {
+    return text.replace(/[\u{1F1E6}-\u{1F1FF}]{2}\s*/gu, '').replace(/\s+/g, ' ').trim();
+}
+
+function renderHelloWorld(act) {
+    // por tipo de botón: índice de la fila actualmente mostrada (o null)
+    const shown = { flag: null, picture: null, country: null, language: null, greeting: null };
+    // por tipo de botón: referencia al <button> de cada fila (para poder resetearlo)
+    const btns = { flag: [], picture: [], country: [], language: [], greeting: [] };
+    // función de ocultar por tipo (no depende de la fila, solo limpia el canal)
+    const hideFns = {};
+    // fila cuyo contenido está actualmente visible (en cualquier tipo); si se
+    // toca un botón de otra fila, primero se limpia todo lo de esta.
+    let currentItem = null;
+
+    function resetType(type) {
+        const i = shown[type];
+        if (i === null) return;
+        hideFns[type]();
+        const btn = btns[type][i];
+        btn.textContent = btn.dataset.label;
+        btn.className = 'btn ' + btn.dataset.btnClass;
+        btn.dataset.state = 'show';
+        shown[type] = null;
+    }
+
+    function clearItem(i) {
+        Object.keys(shown).forEach(type => {
+            if (shown[type] === i) resetType(type);
+        });
+    }
+
+    function makeToggle(type, label, btnClass, i, onShow, onHide) {
+        const btn = document.createElement('button');
+        btn.className = 'btn ' + btnClass;
+        btn.textContent = label;
+        btn.dataset.state = 'show';
+        btn.dataset.label = label;
+        btn.dataset.btnClass = btnClass;
+        hideFns[type] = onHide;
+        btn.onclick = () => {
+            if (btn.dataset.state === 'show') {
+                if (currentItem !== null && currentItem !== i) {
+                    clearItem(currentItem);
+                }
+                onShow();
+                shown[type] = i;
+                currentItem = i;
+                btn.textContent = 'Hide ' + label;
+                btn.className = 'btn btn-hide';
+                btn.dataset.state = 'hide';
+            } else {
+                onHide();
+                shown[type] = null;
+                btn.textContent = label;
+                btn.className = 'btn ' + btnClass;
+                btn.dataset.state = 'show';
+                if (currentItem === i && !Object.values(shown).includes(i)) {
+                    currentItem = null;
+                }
+            }
+        };
+        btns[type][i] = btn;
+        return btn;
+    }
+
+    act.items.forEach((item, i) => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+
+        const num = document.createElement('span');
+        num.className = 'item-num';
+        num.textContent = (i + 1);
+
+        const label = document.createElement('span');
+        label.className = 'item-label';
+        label.innerHTML = `${item.q}<span class="item-sublabel">${item.a}</span>`;
+
+        row.appendChild(num);
+        row.appendChild(label);
+
+        row.appendChild(makeToggle('flag', 'Flag', 'btn-flag', i,
+            () => send('side-image', '', item.sideImg),
+            () => send('side-image', '', null)
+        ));
+
+        row.appendChild(makeToggle('country', 'Country name', 'btn-gray', i,
+            () => send('country-name', item.country || ''),
+            () => send('country-name', '')
+        ));
+
+        row.appendChild(makeToggle('language', 'Language', 'btn-bot', i,
+            () => send('middle', stripFlagEmoji(item.a), null, true),
+            () => send('clear-middle', '')
+        ));
+
+        const picBtn = makeToggle('picture', 'Picture', 'btn-img', i,
+            () => send('corner-photo', '', item.picture),
+            () => send('corner-photo', '', null)
+        );
+        if (!item.picture) {
+            picBtn.disabled = true;
+            picBtn.title = 'No hay foto disponible para este país todavía';
+            picBtn.style.opacity = '0.4';
+        }
+        row.appendChild(picBtn);
+
+        row.appendChild(makeToggle('greeting', 'Greeting', 'btn-mid', i,
+            () => send('bottom', item.q, null, true),
+            () => send('clear-bottom', '')
+        ));
+
+        container.appendChild(row);
+    });
+}
+
+// ══════════════════════════════════════
+// MULTI-MODE — activity with mode selector
+// ══════════════════════════════════════
+function renderMultiMode(act) {
+    const modeBar = document.createElement('div');
+    modeBar.className = 'mode-bar';
+
+    act.modes.forEach((mode, mi) => {
+        const btn = document.createElement('button');
+        btn.className = 'mode-btn' + (mi === 0 ? ' active' : '');
+        btn.textContent = mode.label;
+        btn.onclick = () => {
+            modeBar.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // Remove items but keep mode bar and title
+            const items = container.querySelectorAll('.item-row, .group-header');
+            items.forEach(el => el.remove());
+            send('clear-middle', '');
+            send('clear-bottom', '');
+            send('side-emoji', '');
+            shownQuestion = null;
+            shownWord = null;
+            shownTrans = null;
+            renderAlreadyKnow(
+                { items: mode.items },
+                mode.qLabel || 'Question',
+                mode.aLabel || 'Answer',
+                'Hide ' + (mode.qLabel || 'Question'),
+                'Hide ' + (mode.aLabel || 'Answer')
+            );
+        };
+        modeBar.appendChild(btn);
+    });
+
+    container.appendChild(modeBar);
+
+    // Render first mode by default
+    const first = act.modes[0];
+    renderAlreadyKnow(
+        { items: first.items },
+        first.qLabel || 'Question',
+        first.aLabel || 'Answer',
+        'Hide ' + (first.qLabel || 'Question'),
+        'Hide ' + (first.aLabel || 'Answer')
+    );
+}
+
+// ══════════════════════════════════════
+// CAN YOU — three buttons: Question, Yes, No
+// ══════════════════════════════════════
+function renderCanYou(act) {
+    let activeItem = null;
+
+    act.items.forEach((item, i) => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+
+        const num = document.createElement('span');
+        num.className = 'item-num';
+        num.textContent = (i + 1);
+
+        const label = document.createElement('span');
+        label.className = 'item-label';
+        label.innerHTML = `${item.q}<span class="item-sublabel">✅ ${item.yes} &nbsp; ❌ ${item.no}</span>`;
+
+        const btnQ = document.createElement('button');
+        btnQ.className = 'btn btn-mid';
+        btnQ.textContent = 'Question';
+
+        btnQ.onclick = () => {
+            if (activeItem !== null && activeItem !== i) {
+                send('clear-bottom', '');
+            }
+            send('middle', item.q);
+            if (item.sideImg) { send('side-image', '', item.sideImg); }
+            else if (item.icon) { send('side-emoji', item.icon); }
+            activeItem = i;
+        };
+
+        const btnYes = document.createElement('button');
+        btnYes.className = 'btn btn-bot';
+        btnYes.textContent = 'Yes ✅';
+        btnYes.style.background = '#2e7d32';
+
+        btnYes.onclick = () => {
+            if (activeItem !== null && activeItem !== i) {
+                send('middle', item.q);
+                if (item.sideImg) { send('side-image', '', item.sideImg); }
+                else if (item.icon) { send('side-emoji', item.icon); }
+            }
+            send('bottom', item.yes);
+            activeItem = i;
+        };
+
+        const btnNo = document.createElement('button');
+        btnNo.className = 'btn btn-bot';
+        btnNo.textContent = 'No ❌';
+        btnNo.style.background = '#c62828';
+
+        btnNo.onclick = () => {
+            if (activeItem !== null && activeItem !== i) {
+                send('middle', item.q);
+                if (item.sideImg) { send('side-image', '', item.sideImg); }
+                else if (item.icon) { send('side-emoji', item.icon); }
+            }
+            send('bottom', item.no);
+            activeItem = i;
+        };
+
+        row.appendChild(num);
+        row.appendChild(label);
+        row.appendChild(btnQ);
+        row.appendChild(btnYes);
+        row.appendChild(btnNo);
+        container.appendChild(row);
+    });
+}
+
+// ══════════════════════════════════════
+// DEFAULT render for other activities
+// ══════════════════════════════════════
+function renderDefault(act) {
+    act.items.forEach((item, i) => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+
+        const num = document.createElement('span');
+        num.className = 'item-num';
+        num.textContent = (i + 1);
+
+        const label = document.createElement('span');
+        label.className = 'item-label';
+        if (item.hint) {
+            label.innerHTML = `<strong>${item.hint}</strong><span class="item-sublabel">${item.a}</span>`;
+        } else {
+            label.innerHTML = `${item.q}<span class="item-sublabel">${item.a}</span>`;
+        }
+
+        const btnMid = document.createElement('button');
+        btnMid.className = 'btn btn-mid';
+        btnMid.textContent = 'Mid';
+        btnMid.onclick = () => send('middle', item.q, item.img || null);
+
+        const btnBot = document.createElement('button');
+        btnBot.className = 'btn btn-bot';
+        btnBot.textContent = 'Bot';
+        btnBot.onclick = () => send('bottom', item.a);
+
+        row.appendChild(num);
+        row.appendChild(label);
+
+        if (item.img) {
+            const btnImg = document.createElement('button');
+            btnImg.className = 'btn btn-img';
+            btnImg.textContent = 'Side Img';
+            btnImg.onclick = () => send('side-image', '', item.img);
+            row.appendChild(btnImg);
+        } else if (item.img === null && act.items.some(x => x.img)) {
+            const miss = document.createElement('span');
+            miss.className = 'img-missing';
+            miss.textContent = '(no img)';
+            row.appendChild(miss);
+        }
+
+        row.appendChild(btnMid);
+        row.appendChild(btnBot);
+        container.appendChild(row);
+    });
+}
+
+// ══════════════════════════════════════
+// GAME — minimal control panel view
+// ══════════════════════════════════════
+function renderGame() {
+    send('clear-middle', '');
+    send('clear-bottom', '');
+    send('side-emoji', '');
+
+    channel.postMessage({ type: 'game-mode' });
+    localStorage.setItem('english-game-state', JSON.stringify({ mode: 'game' }));
+
+    const info = document.createElement('div');
+    info.style.cssText = 'text-align:center; color:#9cb8a8; padding:60px 20px; font-size:1.1rem; line-height:2;';
+    info.innerHTML = 'The interactive story is running in the <strong style="color:#f0a830;">Presentation</strong> window.';
+    container.appendChild(info);
+}
+
+// ══════════════════════════════════════
+// CALEN PHOTOS — galería de fotos, clic para mostrar en Presentation
+// ══════════════════════════════════════
+function renderPhotoGallery(act) {
+    const grid = document.createElement('div');
+    grid.className = 'photo-grid';
+    const allWordBtns = [];
+
+    act.items.forEach(photo => {
+        const wrap = document.createElement('div');
+        wrap.className = 'photo-card-wrap';
+
+        const card = document.createElement('div');
+        card.className = 'act-card photo-card';
+        card.innerHTML = `<img src="${photo.src}" alt="">`;
+        wrap.appendChild(card);
+
+        const words = document.createElement('div');
+        words.className = 'photo-words';
+        const wordBtns = [];
+        photo.words.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'photo-word-btn';
+            btn.textContent = word;
+            btn.disabled = true;
+            btn.onclick = () => {
+                btn.classList.toggle('active');
+                const shown = wordBtns.filter(b => b.classList.contains('active')).map(b => b.textContent);
+                send('photo-word', shown.join('\n'));
+            };
+            wordBtns.push(btn);
+            allWordBtns.push(btn);
+            words.appendChild(btn);
+        });
+        wrap.appendChild(words);
+
+        card.onclick = () => {
+            send('photo', '', photo.src);
+            send('photo-word', '');
+            allWordBtns.forEach(b => { b.classList.remove('active'); b.disabled = true; });
+            wordBtns.forEach(b => b.disabled = false);
+        };
+
+        grid.appendChild(wrap);
+    });
+    container.appendChild(grid);
+}
+
+// ══════════════════════════════════════
+// GUESS THE COUNTRY — fotos con zoom-reveal y nombre bajo control del profe
+// ══════════════════════════════════════
+function renderCountryPhotos(act) {
+    const zoomEnabled = localStorage.getItem('country-zoom-enabled') !== 'false'; // default true
+
+    const bar = document.createElement('div');
+    bar.style.cssText = 'display:flex; align-items:center; gap:10px; margin-bottom:14px; padding:10px 12px; background:#163028; border-radius:8px; flex-wrap:wrap;';
+
+    const zoomWrap = document.createElement('div');
+    zoomWrap.style.cssText = 'display:flex; align-items:center; gap:8px;';
+    const zoomLabel = document.createElement('span');
+    zoomLabel.style.cssText = 'font-size:0.85rem; color:#f0a830; font-weight:bold;';
+    zoomLabel.textContent = '🔍 Zoom reveal';
+    const zoomSwitch = document.createElement('label');
+    zoomSwitch.className = 'switch';
+    const zoomInput = document.createElement('input');
+    zoomInput.type = 'checkbox';
+    zoomInput.checked = zoomEnabled;
+    const zoomSlider = document.createElement('span');
+    zoomSlider.className = 'slider';
+    zoomSwitch.appendChild(zoomInput);
+    zoomSwitch.appendChild(zoomSlider);
+    zoomInput.onchange = () => {
+        localStorage.setItem('country-zoom-enabled', zoomInput.checked ? 'true' : 'false');
+    };
+    zoomWrap.appendChild(zoomLabel);
+    zoomWrap.appendChild(zoomSwitch);
+
+    const revealBtn = document.createElement('button');
+    revealBtn.className = 'btn btn-red';
+    revealBtn.textContent = '🏷️ Show Name';
+    let nameShown = false;
+    revealBtn.onclick = () => {
+        nameShown = !nameShown;
+        channel.postMessage({ type: 'country-reveal', show: nameShown });
+        revealBtn.textContent = nameShown ? '🙈 Hide Name' : '🏷️ Show Name';
+        revealBtn.classList.toggle('btn-red', !nameShown);
+        revealBtn.classList.toggle('btn-gray', nameShown);
+    };
+
+    const listBtn = document.createElement('button');
+    listBtn.className = 'btn btn-gray';
+    listBtn.textContent = '🌍 Show All Countries';
+    let listShown = false;
+    function hideCountryList() {
+        if (!listShown) return;
+        listShown = false;
+        channel.postMessage({ type: 'country-list', show: false });
+        listBtn.textContent = '🌍 Show All Countries';
+    }
+    listBtn.onclick = () => {
+        listShown = !listShown;
+        if (listShown) {
+            const seen = new Set();
+            const countries = [];
+            act.items.forEach(p => {
+                if (seen.has(p.country)) return;
+                seen.add(p.country);
+                countries.push({ country: p.country, code: COUNTRY_FLAG_CODE[p.country] || '' });
+            });
+            channel.postMessage({ type: 'country-list', show: true, countries });
+            listBtn.textContent = '🙈 Hide All Countries';
+        } else {
+            channel.postMessage({ type: 'country-list', show: false });
+            listBtn.textContent = '🌍 Show All Countries';
+        }
+    };
+
+    const hint = document.createElement('span');
+    hint.style.cssText = 'font-size:0.75rem; color:#9cb8a8; margin-left:auto;';
+    hint.textContent = 'Click a photo to show it — the zoom switch applies to all photos.';
+
+    bar.appendChild(zoomWrap);
+    bar.appendChild(revealBtn);
+    bar.appendChild(listBtn);
+    bar.appendChild(hint);
+    container.appendChild(bar);
+
+    const grid = document.createElement('div');
+    grid.className = 'photo-grid photo-grid-compact';
+
+    const cardsBySrc = new Map();
+
+    act.items.forEach(photo => {
+        const wrap = document.createElement('div');
+        wrap.className = 'photo-card-wrap';
+
+        const card = document.createElement('div');
+        card.className = 'act-card photo-card';
+        if (photo.src === currentCountryPhoto) card.classList.add('current');
+        else if (seenCountryPhotos.has(photo.src)) card.classList.add('seen');
+        card.innerHTML = `<img src="${photo.src}" alt="">`;
+        wrap.appendChild(card);
+        cardsBySrc.set(photo.src, card);
+
+        const cap = document.createElement('div');
+        cap.style.cssText = 'font-size:0.6rem; color:#9cb8a8; text-align:center; line-height:1.2;';
+        cap.innerHTML = `<strong style="color:#5ec4b6;">${photo.country}</strong><br>${photo.place}`;
+        wrap.appendChild(cap);
+
+        card.onclick = () => {
+            nameShown = false;
+            revealBtn.textContent = '🏷️ Show Name';
+            revealBtn.classList.add('btn-red');
+            revealBtn.classList.remove('btn-gray');
+            hideCountryList();
+
+            if (currentCountryPhoto && currentCountryPhoto !== photo.src) {
+                seenCountryPhotos.add(currentCountryPhoto);
+                const prevCard = cardsBySrc.get(currentCountryPhoto);
+                if (prevCard) { prevCard.classList.remove('current'); prevCard.classList.add('seen'); }
+            }
+            currentCountryPhoto = photo.src;
+            card.classList.remove('seen');
+            card.classList.add('current');
+
+            const zoomNow = localStorage.getItem('country-zoom-enabled') !== 'false';
+            channel.postMessage({
+                type: 'country-photo',
+                image: photo.src,
+                country: photo.country,
+                place: photo.place,
+                zoom: zoomNow,
+                originX: photo.originX,
+                originY: photo.originY
+            });
+        };
+
+        grid.appendChild(wrap);
+    });
+    container.appendChild(grid);
+}
+
+</script>
+
+</body>
+</html>

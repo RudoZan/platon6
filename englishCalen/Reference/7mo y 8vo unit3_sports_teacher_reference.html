@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Reference – Unit 3: Sports & Free-Time Activities · 7° Básico</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --purple: #7F77DD;
+    --purple-light: #EEEDFE;
+    --purple-dark: #3C3489;
+    --teal: #1D9E75;
+    --teal-light: #E1F5EE;
+    --teal-dark: #085041;
+    --coral: #D85A30;
+    --coral-light: #FAECE7;
+    --coral-dark: #712B13;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --amber-dark: #412402;
+    --blue: #378ADD;
+    --blue-light: #E6F1FB;
+    --blue-dark: #0C447C;
+    --green: #639922;
+    --green-light: #EAF3DE;
+    --green-dark: #27500A;
+    --text: #2C2C2A;
+    --text-muted: #5F5E5A;
+    --bg: #fafaf8;
+    --card-bg: #ffffff;
+    --border: #D3D1C7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: #4B2D8F;
+    color: white;
+    padding: 28px 40px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; right: -20px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: 120px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .header h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 13px; opacity: 0.75; margin-top: 4px; }
+  .header .meta { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  .header .badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px; padding: 3px 10px;
+    text-transform: uppercase;
+  }
+
+  /* ── TABS ── */
+  .nav-tabs {
+    background: white;
+    border-bottom: 1.5px solid var(--border);
+    display: flex; gap: 0;
+    padding: 0 40px;
+    overflow-x: auto;
+  }
+  .nav-tab {
+    padding: 12px 18px;
+    font-size: 13px; font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1.5px;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+    user-select: none;
+  }
+  .nav-tab:hover { color: var(--purple); }
+  .nav-tab.active { color: var(--purple-dark); border-bottom-color: var(--purple); }
+  .dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; margin-right: 6px; vertical-align: middle;
+  }
+
+  /* ── MAIN ── */
+  .main { padding: 28px 40px 60px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── INTRO BOX ── */
+  .section-intro {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .section-intro .icon-box {
+    width: 40px; height: 40px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .section-intro h2 { font-size: 16px; font-weight: 800; margin-bottom: 3px; }
+  .section-intro p { font-size: 13px; color: var(--text-muted); }
+
+  /* ── GRIDS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .full-width { grid-column: 1 / -1; }
+
+  /* ── CARD ── */
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .card h3 {
+    font-size: 12px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.6px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card h3 .dot { width: 9px; height: 9px; }
+
+  /* ── WORD PILLS ── */
+  .word-list { display: flex; flex-wrap: wrap; gap: 7px; }
+  .word {
+    display: inline-flex; align-items: center;
+    font-size: 13px; font-weight: 600;
+    border-radius: 6px; padding: 4px 10px;
+    border: 1px solid;
+  }
+
+  /* ── PHRASE LIST ── */
+  .phrase-list { list-style: none; }
+  .phrase-list li {
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0efe8;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .phrase-list li:last-child { border-bottom: none; }
+  .phrase-list li::before {
+    content: '›';
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .phrase-en { font-weight: 700; }
+  .phrase-es { font-size: 11.5px; color: var(--text-muted); font-style: italic; }
+
+  /* ── STRUCTURE BOX ── */
+  .structure-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 14px;
+    font-style: italic;
+    margin-bottom: 8px;
+  }
+
+  /* ── TIP BOX ── */
+  .tip-box {
+    border-radius: 8px; padding: 12px 16px;
+    font-size: 12.5px;
+    border-left: 4px solid;
+    margin-top: 20px;
+  }
+  .tip-box strong { font-weight: 800; }
+
+  /* ── TABLE ── */
+  .table-ref {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  .table-ref th {
+    text-align: left;
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 12px;
+    background: var(--bg);
+    border-bottom: 1.5px solid var(--border);
+  }
+  .table-ref td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0efe8;
+    vertical-align: top;
+  }
+  .table-ref tr:last-child td { border-bottom: none; }
+
+  /* ── LEVEL PILL ── */
+  .level-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-radius: 20px; padding: 4px 12px;
+    margin-bottom: 20px;
+    border: 1.5px solid;
+  }
+  .level-teal   { background: var(--teal-light);   color: var(--teal-dark);   border-color: #5DCAA5; }
+  .level-purple { background: var(--purple-light); color: var(--purple-dark); border-color: #AFA9EC; }
+  .level-coral  { background: var(--coral-light);  color: var(--coral-dark);  border-color: #F0997B; }
+
+  /* ── COLOR FAMILIES ── */
+  .c-purple .word { background: var(--purple-light); color: var(--purple-dark); border-color: #AFA9EC; }
+  .c-teal   .word { background: var(--teal-light);   color: var(--teal-dark);   border-color: #5DCAA5; }
+  .c-coral  .word { background: var(--coral-light);  color: var(--coral-dark);  border-color: #F0997B; }
+  .c-amber  .word { background: var(--amber-light);  color: var(--amber-dark);  border-color: #EF9F27; }
+  .c-blue   .word { background: var(--blue-light);   color: var(--blue-dark);   border-color: #85B7EB; }
+  .c-green  .word { background: var(--green-light);  color: var(--green-dark);  border-color: #97C459; }
+
+  .c-purple h3 { color: var(--purple-dark); }
+  .c-teal   h3 { color: var(--teal-dark); }
+  .c-coral  h3 { color: var(--coral-dark); }
+  .c-amber  h3 { color: var(--amber-dark); }
+  .c-blue   h3 { color: var(--blue-dark); }
+  .c-green  h3 { color: var(--green-dark); }
+
+  .c-purple .phrase-list li::before { color: var(--purple); }
+  .c-teal   .phrase-list li::before { color: var(--teal); }
+  .c-coral  .phrase-list li::before { color: var(--coral); }
+  .c-amber  .phrase-list li::before { color: var(--amber); }
+  .c-blue   .phrase-list li::before { color: var(--blue); }
+  .c-green  .phrase-list li::before { color: var(--green); }
+
+  .tip-purple { background: var(--purple-light); border-color: var(--purple); color: var(--purple-dark); }
+  .tip-teal   { background: var(--teal-light);   border-color: var(--teal);   color: var(--teal-dark); }
+  .tip-coral  { background: var(--coral-light);  border-color: var(--coral);  color: var(--coral-dark); }
+  .tip-amber  { background: var(--amber-light);  border-color: var(--amber);  color: var(--amber-dark); }
+  .tip-blue   { background: var(--blue-light);   border-color: var(--blue);   color: var(--blue-dark); }
+  .tip-green  { background: var(--green-light);  border-color: var(--green);  color: var(--green-dark); }
+
+  /* ── CHUNK ROW ── */
+  .chunk-row {
+    background: var(--bg);
+    border-left: 3px solid var(--purple);
+    border-radius: 0 6px 6px 0;
+    padding: 7px 12px;
+    margin-bottom: 6px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text);
+  }
+  .chunk-label {
+    font-size: 10px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text-muted);
+    font-family: 'Nunito', sans-serif;
+    font-style: normal;
+    margin-bottom: 2px;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    .nav-tabs { display: none; }
+    .section { display: block !important; page-break-before: always; }
+    .section:first-of-type { page-break-before: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     HEADER
+     ══════════════════════════════════════════ -->
+<div class="header">
+  <h1>Teacher Reference · Unit 3: Sports &amp; Free-Time Activities</h1>
+  <div class="subtitle">Referencia docente — Vocabulario, chunks y estructuras clave · ING 7° Básico · MINEDUC Chile</div>
+  <div class="meta">
+    <span class="badge">7° Básico</span>
+    <span class="badge">English</span>
+    <span class="badge">Chile – MINEDUC</span>
+    <span class="badge">CLT · Scaffolding · TBL · Lexical Approach</span>
+    <span class="badge">2 Lessons + Project</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     NAV TABS
+     ══════════════════════════════════════════ -->
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="showTab(0)">
+    <span class="dot" style="background:#1D9E75;"></span>Lesson 1 · Time Out!
+  </div>
+  <div class="nav-tab" onclick="showTab(1)">
+    <span class="dot" style="background:#7F77DD;"></span>Lesson 2 · Sports Highlights
+  </div>
+  <div class="nav-tab" onclick="showTab(2)">
+    <span class="dot" style="background:#D85A30;"></span>Grammar · Structures
+  </div>
+  <div class="nav-tab" onclick="showTab(3)">
+    <span class="dot" style="background:#BA7517;"></span>Chunks · Lexical Approach
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══════════════════════════════════════════
+     TAB 0 — LESSON 1: TIME OUT!
+     ══════════════════════════════════════════ -->
+<div class="section active" id="tab0">
+  <div class="level-pill level-teal">⚽ Lesson 1 · Time Out!</div>
+
+  <div class="section-intro">
+    <div class="icon-box" style="background:#E1F5EE;">🏃</div>
+    <div>
+      <h2 style="color:#085041;">Lesson 1 · Time Out! · Vocabulario central</h2>
+      <p><strong>Función comunicativa:</strong> Clasificar y nombrar deportes y actividades de tiempo libre · Expresar opiniones sobre actividades · Leer un artículo de noticias deportivas · Identificar elementos de una noticia · Describir acciones simultáneas en el pasado (Past Continuous) · OA: Escuchar, leer e interactuar oralmente sobre deportes y ocio.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- SPORTS -->
+    <div class="card c-teal">
+      <h3><span class="dot" style="background:#1D9E75;"></span>Sports — Deportes</h3>
+      <div class="word-list">
+        <span class="word">play basketball</span>
+        <span class="word">play soccer</span>
+        <span class="word">go skiing</span>
+        <span class="word">go swimming</span>
+        <span class="word">go running</span>
+        <span class="word">do karate</span>
+        <span class="word">play handball</span>
+        <span class="word">play tennis</span>
+        <span class="word">play cards</span>
+        <span class="word">boxing</span>
+        <span class="word">wrestling</span>
+        <span class="word">long jump</span>
+        <span class="word">javelin</span>
+        <span class="word">chariot racing</span>
+        <span class="word">paralympic sports</span>
+      </div>
+      <div class="tip-box tip-teal" style="margin-top:12px; font-size:12px;">
+        <strong>Nota léxica:</strong> Usar <em>play</em> con deportes de equipo/pelota, <em>go</em> con actividades -ing, <em>do</em> con artes marciales/individuales. Enseñar estos patrones como chunks desde el inicio.
+      </div>
+    </div>
+
+    <!-- FREE-TIME ACTIVITIES -->
+    <div class="card c-purple">
+      <h3><span class="dot" style="background:#7F77DD;"></span>Free-Time Activities — Actividades de tiempo libre</h3>
+      <div class="word-list">
+        <span class="word">dance</span>
+        <span class="word">play video games</span>
+        <span class="word">go camping</span>
+        <span class="word">draw and paint</span>
+        <span class="word">take photos</span>
+        <span class="word">play cards</span>
+        <span class="word">listen to music</span>
+        <span class="word">watch movies</span>
+        <span class="word">read books</span>
+        <span class="word">scootering</span>
+      </div>
+      <div class="tip-box tip-purple" style="margin-top:12px; font-size:12px;">
+        <strong>TBL – Actividad clasificadora:</strong> Los alumnos reciben tarjetas con actividades y deben colocarlas en la categoría correcta (sports / free-time) justificando con un ejemplo: <em>"Playing basketball is a sport."</em>
+      </div>
+    </div>
+
+    <!-- OPINION ADJECTIVES -->
+    <div class="card c-coral">
+      <h3><span class="dot" style="background:#D85A30;"></span>Opinion Adjectives — Adjetivos de opinión</h3>
+      <div class="word-list">
+        <span class="word">exciting</span>
+        <span class="word">fun</span>
+        <span class="word">interesting</span>
+        <span class="word">dangerous</span>
+        <span class="word">boring</span>
+        <span class="word">cool</span>
+        <span class="word">relaxing</span>
+        <span class="word">embarrassing</span>
+        <span class="word">happy</span>
+        <span class="word">desperate</span>
+        <span class="word">excited</span>
+        <span class="word">extremely happy</span>
+      </div>
+    </div>
+
+    <!-- NEWS ARTICLE ELEMENTS -->
+    <div class="card c-amber">
+      <h3><span class="dot" style="background:#BA7517;"></span>News Article Structure — Partes de una noticia</h3>
+      <table class="table-ref">
+        <thead>
+          <tr><th>Elemento</th><th>Definición</th><th>Ejemplo de la unidad</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Headline</strong></td><td>Título principal</td><td><em>The greatest Soccer World Cup final ever!</em></td></tr>
+          <tr><td><strong>Byline</strong></td><td>Nombre del autor</td><td><em>By Ben Morse</em></td></tr>
+          <tr><td><strong>Lead</strong></td><td>Párrafo introductorio</td><td><em>Last December in Qatar…</em></td></tr>
+          <tr><td><strong>Story</strong></td><td>Desarrollo de los hechos</td><td>Los 79 minutos iniciales…</td></tr>
+          <tr><td><strong>Ending</strong></td><td>Conclusión o cierre</td><td><em>It was the greatest final of all time, FIFA informed.</em></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- KEY PHRASES L1 -->
+    <div class="card c-teal full-width">
+      <h3><span class="dot" style="background:#1D9E75;"></span>Key Phrases — Frases clave · Lesson 1</h3>
+      <div class="grid-2" style="gap:0;">
+        <ul class="phrase-list">
+          <li><span><span class="phrase-en">What's your favorite sport?</span><br><span class="phrase-es">¿Cuál es tu deporte favorito?</span></span></li>
+          <li><span><span class="phrase-en">My favorite sport is handball because I like team sports.</span><br><span class="phrase-es">Mi deporte favorito es el handball porque me gustan los deportes en equipo.</span></span></li>
+          <li><span><span class="phrase-en">Did you practice it last week?</span><br><span class="phrase-es">¿Lo practicaste la semana pasada?</span></span></li>
+          <li><span><span class="phrase-en">No, I didn't play handball last week.</span><br><span class="phrase-es">No, no jugué handball la semana pasada.</span></span></li>
+          <li><span><span class="phrase-en">Which free-time activities do you enjoy?</span><br><span class="phrase-es">¿Qué actividades de tiempo libre disfrutas?</span></span></li>
+          <li><span><span class="phrase-en">I like playing cards.</span><br><span class="phrase-es">Me gusta jugar cartas.</span></span></li>
+        </ul>
+        <ul class="phrase-list">
+          <li><span><span class="phrase-en">What do you think about playing video games?</span><br><span class="phrase-es">¿Qué opinas sobre jugar videojuegos?</span></span></li>
+          <li><span><span class="phrase-en">In my opinion, playing video games is fun.</span><br><span class="phrase-es">En mi opinión, jugar videojuegos es divertido.</span></span></li>
+          <li><span><span class="phrase-en">I think we should have basketball at school, too.</span><br><span class="phrase-es">Creo que también deberíamos tener basketball en la escuela.</span></span></li>
+          <li><span><span class="phrase-en">Playing basketball is a sport. Dancing is a free-time activity.</span><br><span class="phrase-es">Jugar basketball es un deporte. Bailar es una actividad de tiempo libre.</span></span></li>
+          <li><span><span class="phrase-en">While soccer player Mbappé was defending, Messi was playing…</span><br><span class="phrase-es">Mientras Mbappé defendía, Messi estaba jugando…</span></span></li>
+          <li><span><span class="phrase-en">It was the greatest Soccer World Cup final of all time.</span><br><span class="phrase-es">Fue la mejor final de la Copa del Mundo de todos los tiempos.</span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SEQUENCE CONNECTORS (used in article) -->
+    <div class="card c-blue full-width">
+      <h3><span class="dot" style="background:#378ADD;"></span>Sequence Connectors — Conectores de secuencia (texto informativo)</h3>
+      <div class="word-list">
+        <span class="word">First</span>
+        <span class="word">Next</span>
+        <span class="word">Then</span>
+        <span class="word">After that</span>
+        <span class="word">As soon as</span>
+        <span class="word">Finally</span>
+        <span class="word">While</span>
+        <span class="word">As the match was coming to an end</span>
+        <span class="word">In the end</span>
+        <span class="word">Both… and…</span>
+      </div>
+      <div class="tip-box tip-blue" style="margin-top:12px; font-size:12px;">
+        <strong>Scaffolding:</strong> Usar el artículo del Mundial (p.42) para identificar estos conectores antes de pedir a los alumnos que redacten su propia noticia deportiva. Son el andamio textual más importante de la lección de escritura.
+      </div>
+    </div>
+
+  </div><!-- /grid-2 -->
+
+  <div class="tip-box tip-teal" style="margin-top:24px;">
+    <strong>💡 Sugerencia docente – Lesson 1 (CLT + Scaffolding):</strong> Comienza con el texto de beneficios de los deportes (p.39) como activador de vocabulario y opinión. Antes de la lectura del artículo del Mundial, pide a los alumnos que predigan el contenido solo desde el titular — estrategia de anticipación explícita del libro. Para la escritura, usa el artículo de Federer (p.44) como modelo visible: identificar Headline → Byline → Lead → Story → Ending antes de producir. El andamio visual de las partes de la noticia es clave para el TBL de escritura.
+  </div>
+
+</div><!-- /tab0 -->
+
+
+<!-- ══════════════════════════════════════════
+     TAB 1 — LESSON 2: SPORTS HIGHLIGHTS
+     ══════════════════════════════════════════ -->
+<div class="section" id="tab1">
+  <div class="level-pill level-purple">🏆 Lesson 2 · Sports Highlights</div>
+
+  <div class="section-intro">
+    <div class="icon-box" style="background:#EEEDFE;">🏅</div>
+    <div>
+      <h2 style="color:#3C3489;">Lesson 2 · Sports Highlights · Vocabulario de acción y biografía</h2>
+      <p><strong>Función comunicativa:</strong> Describir acciones en el campo de juego · Escuchar un informe sobre un deportista famoso (LeBron James) · Narrar una anécdota deportiva personal · Leer una fábula con moraleja deportiva · Escribir la biografía de un/a deportista · Past Continuous interrumpido (when / while) · OA: hablar de experiencias deportivas pasadas, leer comprensivamente, escribir biografía.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- BALL ACTIONS -->
+    <div class="card c-teal">
+      <h3><span class="dot" style="background:#1D9E75;"></span>Ball Actions — Acciones con el balón</h3>
+      <div class="word-list">
+        <span class="word">hit the ball</span>
+        <span class="word">catch the ball</span>
+        <span class="word">kick the ball</span>
+        <span class="word">bounce the ball</span>
+        <span class="word">throw the ball</span>
+        <span class="word">pass the ball</span>
+        <span class="word">run with the ball</span>
+      </div>
+      <div class="tip-box tip-teal" style="margin-top:12px; font-size:12px;">
+        <strong>Nota léxica:</strong> Enseñar siempre con "the ball" como unidad — son colocaciones fijas. Ejemplo de extensión: <em>"In basketball, they bounce and throw the ball."</em>
+      </div>
+    </div>
+
+    <!-- SPORT EXPRESSIONS -->
+    <div class="card c-purple">
+      <h3><span class="dot" style="background:#7F77DD;"></span>Sport Expressions — Expresiones deportivas</h3>
+      <div class="word-list">
+        <span class="word">ride a bicycle</span>
+        <span class="word">ride a horse</span>
+        <span class="word">score a goal</span>
+        <span class="word">lose a game</span>
+        <span class="word">win a match</span>
+        <span class="word">run 2 miles</span>
+        <span class="word">drive a racing car</span>
+        <span class="word">blow the whistle</span>
+        <span class="word">commit a foul</span>
+        <span class="word">converted a penalty</span>
+        <span class="word">scored in the shootout</span>
+        <span class="word">missed two penalties</span>
+      </div>
+    </div>
+
+    <!-- SOCCER VOCABULARY -->
+    <div class="card c-coral">
+      <h3><span class="dot" style="background:#D85A30;"></span>Soccer Vocabulary — Vocabulario de fútbol</h3>
+      <div class="word-list">
+        <span class="word">penalty</span>
+        <span class="word">penalty box</span>
+        <span class="word">penalty shootout</span>
+        <span class="word">goal</span>
+        <span class="word">foul</span>
+        <span class="word">referee</span>
+        <span class="word">midfield</span>
+        <span class="word">nil-nil</span>
+        <span class="word">defenders</span>
+        <span class="word">cup final</span>
+        <span class="word">striker</span>
+        <span class="word">substituted</span>
+        <span class="word">semi-finals</span>
+        <span class="word">extra time</span>
+        <span class="word">trophy</span>
+      </div>
+    </div>
+
+    <!-- BIOGRAPHY VOCABULARY -->
+    <div class="card c-amber">
+      <h3><span class="dot" style="background:#BA7517;"></span>Biography Vocabulary — Vocabulario de biografía</h3>
+      <div class="word-list">
+        <span class="word">was born in</span>
+        <span class="word">grew up</span>
+        <span class="word">at the age of</span>
+        <span class="word">began training</span>
+        <span class="word">won the championship</span>
+        <span class="word">signed with</span>
+        <span class="word">moved back to</span>
+        <span class="word">led the team</span>
+        <span class="word">retired</span>
+        <span class="word">career</span>
+        <span class="word">hard life</span>
+        <span class="word">could focus on</span>
+        <span class="word">life improved</span>
+      </div>
+    </div>
+
+    <!-- KEY PHRASES L2 -->
+    <div class="card c-purple full-width">
+      <h3><span class="dot" style="background:#7F77DD;"></span>Key Phrases — Frases clave · Lesson 2</h3>
+      <div class="grid-2" style="gap:0;">
+        <ul class="phrase-list">
+          <li><span><span class="phrase-en">What were you doing yesterday afternoon?</span><br><span class="phrase-es">¿Qué estabas haciendo ayer por la tarde?</span></span></li>
+          <li><span><span class="phrase-en">I was playing with my dog in the garden.</span><br><span class="phrase-es">Estaba jugando con mi perro en el jardín.</span></span></li>
+          <li><span><span class="phrase-en">Grace and I were having a good time at the pool.</span><br><span class="phrase-es">Grace y yo nos estábamos divirtiendo en la piscina.</span></span></li>
+          <li><span><span class="phrase-en">I was running with the ball when suddenly one of their defenders kicked my ankle.</span><br><span class="phrase-es">Estaba corriendo con el balón cuando de repente uno de sus defensas me pateó el tobillo.</span></span></li>
+          <li><span><span class="phrase-en">I missed a big cup final when I was 11.</span><br><span class="phrase-es">Me perdí una gran final de copa cuando tenía 11 años.</span></span></li>
+        </ul>
+        <ul class="phrase-list">
+          <li><span><span class="phrase-en">While he was living with the Walkers, he could focus on school.</span><br><span class="phrase-es">Mientras vivía con los Walkers, podía concentrarse en la escuela.</span></span></li>
+          <li><span><span class="phrase-en">LeBron was attending high school when he led his team to three state titles.</span><br><span class="phrase-es">LeBron asistía a la escuela secundaria cuando llevó a su equipo a tres títulos estatales.</span></span></li>
+          <li><span><span class="phrase-en">She is a famous [sport] player. She was born on [date] in [place].</span><br><span class="phrase-es">Ella es una famosa jugadora de [deporte]. Nació el [fecha] en [lugar].</span></span></li>
+          <li><span><span class="phrase-en">She began [sport] training at the age of [number].</span><br><span class="phrase-es">Comenzó a entrenarse en [deporte] a la edad de [número].</span></span></li>
+          <li><span><span class="phrase-en">Slow but steady progress wins the race.</span><br><span class="phrase-es">El progreso lento pero constante gana la carrera. (moraleja)</span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- TAPATI / ANCIENT KNOWLEDGE -->
+    <div class="card c-green full-width">
+      <h3><span class="dot" style="background:#639922;"></span>Ancient Knowledge — Deportes Rapa Nui (Tāpati Festival)</h3>
+      <div class="word-list">
+        <span class="word">Tāpati Rapa Nui</span>
+        <span class="word">Tau'a Rapa Nui (Triathlon)</span>
+        <span class="word">Vaka 'ama</span>
+        <span class="word">Aka Venga</span>
+        <span class="word">Haka pei</span>
+        <span class="word">Haka Honu</span>
+        <span class="word">Haka Ngaru</span>
+        <span class="word">paddle across</span>
+        <span class="word">slide down the hill</span>
+        <span class="word">glides on the waves</span>
+        <span class="word">reed fibers (pora)</span>
+        <span class="word">banana trunk sledge</span>
+        <span class="word">totora float</span>
+        <span class="word">traditional clothes</span>
+        <span class="word">Takona / Tātū</span>
+      </div>
+      <div class="tip-box tip-green" style="margin-top:12px; font-size:12px;">
+        <strong>Miniproject – Think Green:</strong> Conectar con culturas indígenas de Chile: los alumnos eligen una comunidad (Mapuche, Aymará, etc.) e investigan sus deportes y actividades de tiempo libre. Presentación digital como entregable final. Refuerza el enfoque comunicativo intercultural del currículo MINEDUC.
+      </div>
+    </div>
+
+  </div><!-- /grid-2 -->
+
+  <div class="tip-box tip-purple" style="margin-top:24px;">
+    <strong>💡 Sugerencia docente – Lesson 2 (TBL + Scaffolding):</strong> El <strong>Speaking anecdote</strong> (p.49) es la tarea TBL central de esta lección. Andamia la producción oral en tres pasos: (1) escuchar y leer el modelo de anécdota, (2) identificar chunks clave (<em>"I was running when…"</em> / <em>"While we were playing…"</em>), (3) producir una anécdota propia. Para la escritura de la biografía, usar la tabla organizadora gráfica antes de redactar — es el andamio principal. La fábula de la liebre y la tortuga (p.50) conecta bien con valores del deporte: <strong>perseverancia, paciencia, humildad</strong>.
+  </div>
+
+</div><!-- /tab1 -->
+
+
+<!-- ══════════════════════════════════════════
+     TAB 2 — GRAMMAR STRUCTURES
+     ══════════════════════════════════════════ -->
+<div class="section" id="tab2">
+  <div class="level-pill level-teal">⚙️ Grammar Focus · Estructuras gramaticales</div>
+
+  <div class="section-intro">
+    <div class="icon-box" style="background:#E1F5EE;">📐</div>
+    <div>
+      <h2 style="color:#085041;">Grammar Structures · Unit 3: Sports &amp; Free-Time Activities</h2>
+      <p><strong>Estructuras centrales:</strong> Past Continuous (acciones simultáneas) · Past Continuous interrumpido por Simple Past · Conectores <em>while / when / as</em> · Simple Past para narración · Posesivos interrogativos (<em>Whose…?</em>) · Presente Simple para opinión e identidad.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- PAST CONTINUOUS - ONGOING -->
+    <div class="card c-teal">
+      <h3><span class="dot" style="background:#1D9E75;"></span>Past Continuous — Acciones simultáneas (Lesson 1)</h3>
+      <div class="structure-box">While [subject] was/were + verb-ing…, [subject] was/were + verb-ing…</div>
+      <div class="structure-box">While Mbappé was defending, Messi was playing his last opportunity.</div>
+      <div class="structure-box">As the match was coming to an end, the players were beginning to taste glory.</div>
+      <div class="structure-box">Exercise / watch a video → He was exercising while he was watching a video.</div>
+      <div class="tip-box tip-teal" style="margin-top:10px; font-size:12px;">
+        <strong>Uso:</strong> Dos acciones en desarrollo simultáneo en el pasado. Conector clave: <em>while</em>. Las dos formas verbales llevan <em>was/were + -ing</em>. Reforzar con imágenes (p.43 — exercise/watch a video · dance/listen to music).
+      </div>
+    </div>
+
+    <!-- PAST CONTINUOUS INTERRUPTED -->
+    <div class="card c-purple">
+      <h3><span class="dot" style="background:#7F77DD;"></span>Past Continuous Interrumpido — Simple Past (Lesson 2)</h3>
+      <div class="structure-box">When [simple past], [subject] was/were + verb-ing…</div>
+      <div class="structure-box">[Subject] was/were + verb-ing… when [simple past].</div>
+      <div class="structure-box">I was running with the ball when a defender kicked my ankle.</div>
+      <div class="structure-box">LeBron was attending high school when he led his team to three titles.</div>
+      <div class="structure-box">While he was living with the Walkers, he could focus on basketball.</div>
+      <div class="tip-box tip-purple" style="margin-top:10px; font-size:12px;">
+        <strong>Uso:</strong> Una acción larga (Past Continuous) es interrumpida por una acción corta/puntual (Simple Past). Conector clave: <em>when</em>. El juego de mímica Charades (p.52) consolida esta estructura con humor.
+      </div>
+    </div>
+
+    <!-- CONTRAST TABLE -->
+    <div class="card c-coral full-width">
+      <h3><span class="dot" style="background:#D85A30;"></span>Punto crítico — Contraste esencial: While vs. When</h3>
+      <div class="grid-2" style="gap:16px;">
+        <div>
+          <p style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Confusión frecuente en 7° básico — trabajar con ejemplos paralelos:</p>
+          <table class="table-ref">
+            <thead><tr><th>While + Cont. + Cont.</th><th>When + Simple Past interr.</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><em>While he was defending, she was scoring.</em><br><small style="color:#888">Dos acciones largas simultáneas</small></td>
+                <td><em>She was running when the referee blew the whistle.</em><br><small style="color:#888">Acción larga interrumpida</small></td>
+              </tr>
+              <tr>
+                <td><em>While we were playing, it started to rain.</em></td>
+                <td><em>I was watching TV when the lights went out.</em></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <p style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Regla visual para los alumnos:</p>
+          <div class="structure-box">"While" → dos líneas paralelas (igual duración)</div>
+          <div class="structure-box">"When" → una línea larga cortada por un punto</div>
+          <div class="tip-box tip-coral" style="margin-top:10px; font-size:12px;">
+            <strong>Actividad sugerida:</strong> Charades (p.52) — los alumnos actúan las tarjetas y el observador forma la oración completa con <em>while/when</em> según lo que ve. Muy efectivo como actividad de cierre.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIMPLE PAST -->
+    <div class="card c-amber">
+      <h3><span class="dot" style="background:#BA7517;"></span>Simple Past — Narración de eventos (ambas lecciones)</h3>
+      <div class="structure-box">Argentina scored a goal in the 109th minute.</div>
+      <div class="structure-box">France missed two penalties and that made Argentina win.</div>
+      <div class="structure-box">Federer won his first grand slam title at Wimbledon in 2003.</div>
+      <div class="structure-box">LeBron was born in Akron, Ohio, USA.</div>
+      <div class="structure-box">Did you practice it last week? → No, I didn't play handball last week.</div>
+      <div class="tip-box tip-amber" style="margin-top:10px; font-size:12px;">
+        <strong>Uso:</strong> Narración de eventos terminados en el pasado. Muy presente en el artículo del Mundial (p.42), la audición sobre LeBron (p.48) y la escritura de la biografía (p.51).
+      </div>
+    </div>
+
+    <!-- POSSESSIVE WHOSE -->
+    <div class="card c-green">
+      <h3><span class="dot" style="background:#639922;"></span>Possessive — Whose…? (Let's Get Started)</h3>
+      <div class="structure-box">Whose [object] is this? → It is [person]'s.</div>
+      <div class="structure-box">Whose car is this? → It is Lewis Hamilton's.</div>
+      <div class="structure-box">Whose boxing gloves are these? → They are [name]'s.</div>
+      <div class="tip-box tip-green" style="margin-top:10px; font-size:12px;">
+        <strong>Nota:</strong> La actividad de emparejamiento (p.40) deportistas/objetos es un excelente activador de vocabulario y el posesivo <em>Whose</em> se presenta en contexto real y motivador.
+      </div>
+    </div>
+
+    <!-- HIGH VALUE STRUCTURES TABLE -->
+    <div class="card c-blue full-width">
+      <h3><span class="dot" style="background:#378ADD;"></span>Key Sentence Structures — Estructuras de alta rentabilidad</h3>
+      <table class="table-ref">
+        <thead>
+          <tr><th>Estructura</th><th>Ejemplo</th><th>Función comunicativa</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>While + was/were -ing…, + was/were -ing…</strong></td>
+            <td>While Mbappé was defending, Messi was playing.</td>
+            <td>Describir dos acciones pasadas simultáneas</td>
+          </tr>
+          <tr>
+            <td><strong>[Subject] was -ing… when + Simple Past.</strong></td>
+            <td>I was running when a defender kicked my ankle.</td>
+            <td>Narrar una acción interrumpida</td>
+          </tr>
+          <tr>
+            <td><strong>Whose [object] is this? → It is [name]'s.</strong></td>
+            <td>Whose racket is this? It is Serena's.</td>
+            <td>Identificar pertenencia</td>
+          </tr>
+          <tr>
+            <td><strong>[Name] is a famous [sport] player. She/He was born on [date] in [place]. She/He began [sport] at the age of [n].</strong></td>
+            <td>Saina Nehwal is a famous Indian badminton singles player. She was born on March 17, 1990 in Haryana.</td>
+            <td>Escribir/contar una biografía deportiva</td>
+          </tr>
+          <tr>
+            <td><strong>In my opinion, [activity] is [adjective].</strong></td>
+            <td>In my opinion, playing video games is fun.</td>
+            <td>Expresar opinión sobre deportes/actividades</td>
+          </tr>
+          <tr>
+            <td><strong>[Name] had [past event]. Now, [name] [present situation].</strong></td>
+            <td>Francisca Mardones had an accident. Now she plays paralympic sports.</td>
+            <td>Contrastar pasado y presente (tabla p.40)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /grid-2 -->
+
+  <div class="tip-box tip-blue" style="margin-top:24px;">
+    <strong>💡 Sugerencia docente – Grammar (Scaffolding + CLT):</strong> Presenta las estructuras gramaticales siempre en contexto narrativo real — no como reglas aisladas. Usa el artículo del Mundial (p.42) para el Past Continuous simultáneo y la anécdota del partido (p.49) para el interrumpido. La actividad Charades (p.52) es el cierre perfecto en TBL: los alumnos producen las oraciones con <em>while/when</em> de forma espontánea y lúdica. Para la tabla pasado/presente (p.40), comparar con los deportistas chilenos e internacionales motiva la producción oral.
+  </div>
+
+</div><!-- /tab2 -->
+
+
+<!-- ══════════════════════════════════════════
+     TAB 3 — CHUNKS & LEXICAL APPROACH
+     ══════════════════════════════════════════ -->
+<div class="section" id="tab3">
+  <div class="level-pill level-coral">🧩 Chunks · Lexical Approach</div>
+
+  <div class="section-intro">
+    <div class="icon-box" style="background:#FAECE7;">🔗</div>
+    <div>
+      <h2 style="color:#712B13;">Chunks y expresiones formulaicas — Lexical Approach · Unit 3</h2>
+      <p><strong>Principio:</strong> El lenguaje se aprende mejor como bloques de significado (chunks) que como palabras aisladas. Enseña estas frases como unidades completas — los alumnos las almacenan y recuperan de forma holística, acelerando la fluidez oral en contextos deportivos y narrativos.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- OPINION CHUNKS -->
+    <div class="card c-teal">
+      <h3><span class="dot" style="background:#1D9E75;"></span>Chunks de opinión sobre deportes</h3>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Los más frecuentes y productivos de la unidad — enseñar desde el día 1.</p>
+      <div class="chunk-row"><div class="chunk-label">Opinión positiva</div>In my opinion, [activity] is [adjective].</div>
+      <div class="chunk-row"><div class="chunk-label">Preferencia</div>My favorite sport is [sport] because I like [reason].</div>
+      <div class="chunk-row"><div class="chunk-label">Propuesta</div>I think we should have [sport] at school.</div>
+      <div class="chunk-row"><div class="chunk-label">Pregunta</div>What do you think about [activity]?</div>
+      <div class="chunk-row"><div class="chunk-label">Pregunta de experiencia</div>Have you played [sport]? When?</div>
+      <div class="chunk-row"><div class="chunk-label">Clasificación</div>Playing [sport] is a sport. [Activity] is a free-time activity.</div>
+    </div>
+
+    <!-- NARRATIVE CHUNKS -->
+    <div class="card c-purple">
+      <h3><span class="dot" style="background:#7F77DD;"></span>Chunks narrativos — Past Continuous</h3>
+      <div class="chunk-row"><div class="chunk-label">Acción simultánea</div>While [subject] was [verb]-ing, [subject] was [verb]-ing.</div>
+      <div class="chunk-row"><div class="chunk-label">Acción interrumpida</div>I was [verb]-ing when [Simple Past].</div>
+      <div class="chunk-row"><div class="chunk-label">Anécdota inicio</div>It was last year while we were playing…</div>
+      <div class="chunk-row"><div class="chunk-label">Clímax</div>Suddenly, [Simple Past event].</div>
+      <div class="chunk-row"><div class="chunk-label">Resolución</div>In the end, [result].</div>
+      <div class="chunk-row"><div class="chunk-label">Cierre</div>We won the game [score]-nil!</div>
+    </div>
+
+    <!-- BIOGRAPHY CHUNKS -->
+    <div class="card c-blue">
+      <h3><span class="dot" style="background:#378ADD;"></span>Chunks de biografía deportiva</h3>
+      <div class="chunk-row"><div class="chunk-label">Presentación</div>[Name] is a famous [nationality] [sport] player.</div>
+      <div class="chunk-row"><div class="chunk-label">Nacimiento</div>He/She was born on [date] in [place].</div>
+      <div class="chunk-row"><div class="chunk-label">Inicio</div>He/She began [sport] training at the age of [n].</div>
+      <div class="chunk-row"><div class="chunk-label">Logros</div>He/She has won over [n] international titles.</div>
+      <div class="chunk-row"><div class="chunk-label">Pasado→Presente</div>[Name] had [event]. Now, [name] [present situation].</div>
+      <div class="chunk-row"><div class="chunk-label">Cierre</div>He/She didn't go/have/win… but today…</div>
+    </div>
+
+    <!-- SOCIAL DISCOURSE CHUNKS -->
+    <div class="card c-amber">
+      <h3><span class="dot" style="background:#BA7517;"></span>Chunks de discurso social — pragmática deportiva</h3>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Aparecen en diálogos y actividades sin glosa explícita. Alto valor pragmático.</p>
+      <div class="word-list">
+        <span class="word">make friends</span>
+        <span class="word">have fun</span>
+        <span class="word">have a good time</span>
+        <span class="word">want to win</span>
+        <span class="word">get angry</span>
+        <span class="word">sing songs</span>
+        <span class="word">taste glory</span>
+        <span class="word">feel extremely happy</span>
+        <span class="word">give your opinion</span>
+        <span class="word">slow but steady</span>
+        <span class="word">keep your boasting until you win</span>
+        <span class="word">felt pain straight away</span>
+        <span class="word">I couldn't continue</span>
+        <span class="word">well done!</span>
+        <span class="word">great match!</span>
+        <span class="word">bad luck!</span>
+      </div>
+      <div class="tip-box tip-amber" style="margin-top:12px; font-size:12px;">
+        <strong>Actividad:</strong> "Sports Chunk Wall" — pegar estas expresiones en tarjetas en el salón y desafiar a los alumnos a usarlas en cada conversación/anécdota deportiva durante la unidad.
+      </div>
+    </div>
+
+    <!-- CONNECTORS CHUNKS -->
+    <div class="card c-coral">
+      <h3><span class="dot" style="background:#D85A30;"></span>Chunks de secuencia para narrar</h3>
+      <div class="chunk-row"><div class="chunk-label">Inicio</div>First, Argentina's captain converted a penalty.</div>
+      <div class="chunk-row"><div class="chunk-label">Continuación</div>Next / Then, [event].</div>
+      <div class="chunk-row"><div class="chunk-label">Giro dramático</div>After that, there was the extra time.</div>
+      <div class="chunk-row"><div class="chunk-label">Clímax</div>As soon as Argentina scored, France scored too!</div>
+      <div class="chunk-row"><div class="chunk-label">Resultado</div>Finally, France missed two penalties.</div>
+      <div class="chunk-row"><div class="chunk-label">Moraleja/cierre</div>In the end, [winner] won the [cup/race/match].</div>
+    </div>
+
+    <!-- SPORTS IDENTITY CHUNKS -->
+    <div class="card c-green">
+      <h3><span class="dot" style="background:#639922;"></span>Chunks de identidad deportiva</h3>
+      <div class="chunk-row"><div class="chunk-label">Posesión</div>Whose [object] is this? → It is [name]'s.</div>
+      <div class="chunk-row"><div class="chunk-label">Hábito pasado</div>[Name] played [sport] for [team/years].</div>
+      <div class="chunk-row"><div class="chunk-label">Situación presente</div>Now [name] has/plays/is…</div>
+      <div class="chunk-row"><div class="chunk-label">Descripción</div>You [kick/throw/bounce] the ball with your [body part].</div>
+      <div class="chunk-row"><div class="chunk-label">Conexión deporte-naturaleza</div>In the [Haka pei], participants slide down the hill at 80 km/h.</div>
+      <div class="chunk-row"><div class="chunk-label">Impacto deportivo</div>Sports can improve your communication skills and relationships.</div>
+    </div>
+
+    <!-- CHUNK PRIORITY TABLE -->
+    <div class="card c-teal full-width">
+      <h3><span class="dot" style="background:#1D9E75;"></span>Tabla de prioridad — ¿Qué enseñar primero?</h3>
+      <table class="table-ref">
+        <thead>
+          <tr>
+            <th>Prioridad</th>
+            <th>Chunk / estructura</th>
+            <th>Dónde aparece</th>
+            <th>Por qué es importante</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>⭐⭐⭐</td>
+            <td><strong>In my opinion, [activity] is [adjective].</strong></td>
+            <td>Lesson 1, p.41 · Vocabulary in Context</td>
+            <td>Expresión de opinión — se reutiliza en todo el libro y unidades siguientes</td>
+          </tr>
+          <tr>
+            <td>⭐⭐⭐</td>
+            <td><strong>While [subject] was -ing, [subject] was -ing.</strong></td>
+            <td>Lesson 1, p.43 · Language in Use · p.52 Charades</td>
+            <td>Estructura gramatical central de la unidad — necesaria para writing y speaking</td>
+          </tr>
+          <tr>
+            <td>⭐⭐⭐</td>
+            <td><strong>I was [verb]-ing when [Simple Past].</strong></td>
+            <td>Lesson 2, p.49 · Speaking anecdote · p.52 Charades</td>
+            <td>Narrativa de experiencia personal — clave para la tarea TBL de speaking</td>
+          </tr>
+          <tr>
+            <td>⭐⭐</td>
+            <td><strong>[Name] is a famous [sport] player. She was born on… in…</strong></td>
+            <td>Lesson 2, p.51 · Writing biography</td>
+            <td>Estructura de la biografía — entregable final de escritura</td>
+          </tr>
+          <tr>
+            <td>⭐⭐</td>
+            <td><strong>My favorite sport is [sport] because I like [reason].</strong></td>
+            <td>p.39 unit opener · p.41 Vocabulary · p.42 Reading</td>
+            <td>Expresión de preferencia — primer chunk productivo de la unidad</td>
+          </tr>
+          <tr>
+            <td>⭐⭐</td>
+            <td><strong>First… Next… Then… After that… Finally…</strong></td>
+            <td>p.42 World Cup article · p.44 Writing model</td>
+            <td>Conectores de secuencia — imprescindibles para el artículo de noticias</td>
+          </tr>
+          <tr>
+            <td>⭐</td>
+            <td><strong>Whose [object] is this? → It is [name]'s.</strong></td>
+            <td>p.40 Let's Get Started</td>
+            <td>Posesivo interrogativo — vocabulario de activación de la unidad</td>
+          </tr>
+          <tr>
+            <td>⭐</td>
+            <td><strong>Slow but steady progress wins the race.</strong></td>
+            <td>p.50 The Hare and the Tortoise</td>
+            <td>Expresión idiomática y moraleja — conexión con valores del deporte</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /grid-2 -->
+
+  <div class="tip-box tip-coral" style="margin-top:24px;">
+    <strong>💡 Sugerencia docente – Lexical Approach:</strong> Construye un <strong>"Mural de Deportes"</strong> colaborativo: un gran póster con imágenes de deportes y actividades donde los alumnos van pegando tarjetas con chunks usados en clase (<em>"While I was swimming, I saw a dolphin"</em>, <em>"In my opinion, do karate is exciting"</em>) durante toda la unidad. Al finalizar, el mural es evidencia visible del aprendizaje léxico. También crea una <strong>Chunk Wall</strong> separada con los conectores de secuencia (<em>"First / Next / Then / Finally"</em>) — úsalos como referencia visible durante todas las actividades de escritura y habla.
+  </div>
+
+</div><!-- /tab3 -->
+
+</div><!-- /main -->
+
+<script>
+function showTab(n) {
+  document.querySelectorAll('.section').forEach((s, i) => {
+    s.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === n);
+  });
+}
+</script>
+
+</body>
+</html>

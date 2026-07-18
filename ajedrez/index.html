@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ajedrez — Platón 6</title>
+<style>
+  :root {
+    --bg-1: #241a10;
+    --bg-2: #140e08;
+    --oro: #c9a24b;
+    --oro-claro: #e0c37a;
+    --texto: #f0e6d6;
+    --claro: #f0d9b5;
+    --oscuro: #8b5a2b;
+    --marco: #3a2a18;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: radial-gradient(ellipse at top, rgba(36,26,16,0.55), rgba(20,14,8,0.72)), url('ajedrezFondo.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    color: var(--texto);
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 30px 16px 50px;
+  }
+
+  h1 {
+    font-size: 2rem; letter-spacing: 0.08em; color: var(--oro-claro);
+    text-shadow: 0 2px 12px rgba(0,0,0,.5); margin-bottom: 4px; text-align: center;
+  }
+  .subtitulo { color: #b8a888; font-size: 0.85rem; margin-bottom: 22px; text-align: center; }
+
+  .acciones-panel { display: flex; flex-direction: column; gap: 8px; }
+  .acciones-panel button {
+    padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--oro);
+    background: rgba(255,255,255,0.04); color: var(--oro-claro); font-weight: bold;
+    font-size: 0.78rem; cursor: pointer; font-family: inherit; transition: background .15s;
+  }
+  .acciones-panel button:hover { background: rgba(201,162,75,0.18); }
+  .acciones-panel button:disabled { opacity: .35; cursor: not-allowed; }
+  .acciones-panel button:disabled:hover { background: rgba(255,255,255,0.04); }
+
+  .zona-juego {
+    display: flex; gap: 20px; align-items: flex-start; justify-content: center; flex-wrap: wrap;
+    width: 100%; max-width: 1120px;
+  }
+
+  .panel-config, .panel-entrenamiento {
+    width: 230px; background: rgba(0,0,0,0.25); border: 1.5px solid rgba(201,162,75,0.4);
+    border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 14px;
+  }
+  .panel-config h2, .panel-entrenamiento h2 {
+    font-size: 0.9rem; color: var(--oro-claro); letter-spacing: .04em;
+    border-bottom: 1px solid rgba(201,162,75,0.3); padding-bottom: 8px;
+  }
+
+  .tabs-entrenamiento { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tab-entrenamiento {
+    flex: 1 1 auto; padding: 6px 4px; border-radius: 6px; border: 1.5px solid rgba(201,162,75,0.4);
+    background: rgba(255,255,255,0.03); color: #b8a888; font-family: inherit; font-size: 0.68rem;
+    font-weight: bold; cursor: pointer; transition: background .15s, color .15s;
+  }
+  .tab-entrenamiento:hover { background: rgba(201,162,75,0.12); }
+  .tab-entrenamiento.activo { background: rgba(201,162,75,0.22); color: var(--oro-claro); border-color: var(--oro); }
+
+  .lista-entrenamiento { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+  .lista-entrenamiento.oculto { display: none; }
+  .item-entrenamiento {
+    text-align: left; padding: 7px 10px; border-radius: 6px; border: 1.5px solid rgba(201,162,75,0.3);
+    background: rgba(255,255,255,0.03); color: var(--texto); font-family: inherit; font-size: 0.76rem;
+    cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  .item-entrenamiento:hover { background: rgba(201,162,75,0.12); }
+  .item-entrenamiento.activo { background: rgba(201,162,75,0.22); border-color: var(--oro); color: var(--oro-claro); }
+
+  .notacion-entrenamiento {
+    border-top: 1px solid rgba(201,162,75,0.3); padding-top: 10px; font-size: 0.78rem;
+  }
+  .notacion-entrenamiento.oculto { display: none; }
+  .notacion-entrenamiento h3 {
+    font-size: 0.8rem; color: var(--oro-claro); margin-bottom: 6px; font-weight: bold;
+  }
+  .notacion-entrenamiento p { line-height: 1.7; color: var(--texto); }
+  .num-jugada { color: #9c8b6e; }
+  .jugada-san { color: var(--texto); }
+  .jugada-san.jugada-actual { color: var(--oro-claro); font-weight: bold; }
+
+  .salir-entrenamiento {
+    padding: 7px 10px; border-radius: 6px; border: 1.5px solid var(--oro);
+    background: rgba(255,255,255,0.04); color: var(--oro-claro); font-weight: bold;
+    font-size: 0.76rem; cursor: pointer; font-family: inherit; transition: background .15s;
+  }
+  .salir-entrenamiento:hover { background: rgba(201,162,75,0.18); }
+  .salir-entrenamiento.oculto { display: none; }
+
+  .reproductor-entrenamiento { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+  .reproductor-entrenamiento button {
+    flex: 1 1 auto; padding: 6px 4px; border-radius: 6px; border: 1.5px solid var(--oro);
+    background: rgba(255,255,255,0.04); color: var(--oro-claro); font-size: 0.95rem;
+    cursor: pointer; font-family: inherit; transition: background .15s;
+  }
+  .reproductor-entrenamiento button:hover:not(:disabled) { background: rgba(201,162,75,0.18); }
+  .reproductor-entrenamiento button:disabled { opacity: .3; cursor: not-allowed; }
+  .contador-reproduccion { text-align: center; font-size: 0.7rem; color: #9c8b6e; margin-top: 6px; }
+  .switch-row {
+    display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--texto); cursor: pointer;
+  }
+  .switch-row input { accent-color: var(--oro); width: 16px; height: 16px; cursor: pointer; flex: none; }
+  .config-item { display: flex; flex-direction: column; gap: 5px; font-size: 0.8rem; }
+  .config-item label { color: var(--texto); }
+  .config-item select {
+    padding: 6px 8px; border-radius: 6px; border: 1.5px solid var(--oro); background: rgba(255,255,255,0.05);
+    color: var(--oro-claro); font-family: inherit; font-size: 0.78rem; cursor: pointer;
+  }
+  .config-item.deshabilitado, .switch-row.deshabilitado { opacity: .4; pointer-events: none; }
+  .panel-estado {
+    font-size: 0.76rem; color: var(--oro-claro); min-height: 1.2em; line-height: 1.45;
+    border-top: 1px solid rgba(201,162,75,0.3); padding-top: 10px;
+  }
+
+  .historial-movimientos {
+    border-top: 1px solid rgba(201,162,75,0.3); padding-top: 10px; font-size: 0.76rem;
+    max-height: 160px; overflow-y: auto;
+  }
+  .historial-movimientos.oculto { display: none; }
+  .historial-movimientos h3 {
+    font-size: 0.78rem; color: var(--oro-claro); margin-bottom: 6px; font-weight: bold;
+  }
+  .historial-movimientos p { line-height: 1.7; color: var(--texto); }
+
+  .fila-bandeja { display: flex; gap: 10px; align-items: stretch; width: 100%; max-width: 560px; margin: 0 auto; }
+
+  .reloj {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    flex: 0 0 auto; padding: 6px 16px;
+    background: rgba(0,0,0,0.25); border: 1.5px solid rgba(201,162,75,0.4); border-radius: 10px;
+  }
+  .reloj.oculto { display: none; }
+  .reloj-etiqueta { font-size: 0.62rem; color: #9c8b6e; text-transform: uppercase; letter-spacing: 0.06em; }
+  .reloj-tiempo {
+    font-size: 1.15rem; font-weight: bold; color: var(--texto); letter-spacing: 0.03em;
+    font-variant-numeric: tabular-nums; transition: color .15s;
+  }
+  .reloj-tiempo.activo { color: var(--oro-claro); }
+  .reloj-tiempo.poco-tiempo { color: #e0685a; }
+
+  .bandeja {
+    display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; align-content: center;
+    flex: 1 1 auto; min-width: 0; min-height: 56px; padding: 8px;
+    background: rgba(0,0,0,0.25); border: 1.5px dashed rgba(201,162,75,0.4); border-radius: 10px;
+  }
+  .bandeja-etiqueta {
+    font-size: 0.7rem; color: #9c8b6e; text-transform: uppercase; letter-spacing: 0.08em;
+    width: 100%; text-align: center; margin-bottom: 2px;
+  }
+  .bandeja.arrastrando-sobre { border-color: var(--oro); background: rgba(201,162,75,0.1); }
+
+  .tablero-envoltorio {
+    display: flex; margin: 14px 0; padding: 14px; background: var(--marco); position: relative;
+    border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,.5), inset 0 0 0 1px rgba(201,162,75,0.3);
+  }
+
+  .mensaje-final {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.62); border-radius: 10px; z-index: 5;
+  }
+  .mensaje-final.oculto { display: none; }
+  .mensaje-final-caja {
+    background: var(--marco); border: 2px solid var(--oro); border-radius: 10px;
+    padding: 22px 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.6); max-width: 82%;
+  }
+  .mensaje-final-caja p {
+    font-size: 1.15rem; color: var(--oro-claro); margin-bottom: 14px; font-weight: bold; line-height: 1.4;
+  }
+  .mensaje-final-caja button {
+    padding: 7px 18px; border-radius: 6px; border: 1.5px solid var(--oro);
+    background: rgba(255,255,255,0.06); color: var(--oro-claro); font-weight: bold;
+    font-size: 0.8rem; cursor: pointer; font-family: inherit; transition: background .15s;
+  }
+  .mensaje-final-caja button:hover { background: rgba(201,162,75,0.2); }
+  .filas-numeros {
+    display: flex; flex-direction: column; justify-content: space-around; align-items: center;
+    width: 20px; margin-right: 4px;
+  }
+  .filas-numeros span { font-size: 0.75rem; color: var(--oro); height: 62px; display: flex; align-items: center; }
+
+  .tablero-envoltorio.sin-coordenadas .filas-numeros,
+  .tablero-envoltorio.sin-coordenadas .columnas-letras { display: none; }
+
+  .tablero-centro { display: flex; flex-direction: column; }
+  .tablero {
+    display: grid; grid-template-columns: repeat(8, 62px); grid-template-rows: repeat(8, 62px);
+    border: 2px solid var(--oro);
+  }
+  .casilla {
+    display: flex; align-items: center; justify-content: center; position: relative;
+    cursor: pointer; user-select: none;
+  }
+  .casilla.clara { background: var(--claro); }
+  .casilla.oscura { background: var(--oscuro); }
+  .casilla.arrastrando-sobre { box-shadow: inset 0 0 0 3px var(--oro-claro); }
+
+  .casilla.destino-valido::after {
+    content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(201,162,75,0.55); pointer-events: none;
+  }
+  .casilla.destino-valido.con-pieza::after {
+    width: 100%; height: 100%; border-radius: 6px; background: transparent;
+    box-shadow: inset 0 0 0 4px rgba(201,162,75,0.65);
+  }
+
+  .columnas-letras { display: flex; justify-content: space-around; margin-top: 4px; }
+  .columnas-letras span { font-size: 0.75rem; color: var(--oro); width: 62px; text-align: center; }
+
+  .pieza {
+    font-size: 3.1rem; line-height: 1; cursor: grab; transition: transform .1s; position: relative;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); will-change: transform;
+  }
+  .pieza:hover { transform: scale(1.08); }
+  .pieza:active { cursor: grabbing; }
+  .pieza.blanca { color: #ffffff; -webkit-text-stroke: 1.5px #8a8a8a; }
+  .pieza.negra { color: #111111; -webkit-text-stroke: 1.5px #8a8a8a; }
+  .pieza.seleccionada { transform: scale(1.12); filter: drop-shadow(0 0 8px var(--oro-claro)); }
+  .pieza.pieza-capturada { font-size: 1.6rem; cursor: default; }
+  .pieza.pieza-capturada:hover { transform: none; }
+  .pieza[draggable="false"] { cursor: default; }
+
+  .aviso {
+    max-width: 560px; text-align: center; font-size: 0.78rem; color: #9c8b6e; margin-top: 18px; line-height: 1.6;
+  }
+
+  @media (max-width: 560px) {
+    .tablero { grid-template-columns: repeat(8, 38px); grid-template-rows: repeat(8, 38px); }
+    .columnas-letras span { width: 38px; }
+    .filas-numeros span { height: 38px; }
+    .pieza { font-size: 2rem; }
+    .panel-config, .panel-entrenamiento { width: 100%; max-width: 320px; }
+  }
+</style>
+</head>
+<body>
+
+  <h1>♜ Ajedrez ♜</h1>
+  <p class="subtitulo">Modo libre o partida con reglas — puedes jugar contra el computador</p>
+
+  <div class="zona-juego">
+    <aside class="panel-entrenamiento">
+      <h2>Entrenamiento</h2>
+
+      <div class="tabs-entrenamiento">
+        <button class="tab-entrenamiento activo" data-tab="piezas">Pieza por pieza</button>
+        <button class="tab-entrenamiento" data-tab="aperturas">Aperturas</button>
+        <button class="tab-entrenamiento" data-tab="mates">Mates</button>
+      </div>
+
+      <div class="lista-entrenamiento" id="listaPiezas"></div>
+      <div class="lista-entrenamiento oculto" id="listaAperturas"></div>
+      <div class="lista-entrenamiento oculto" id="listaMates"></div>
+
+      <div class="notacion-entrenamiento oculto" id="notacionEntrenamiento">
+        <h3 id="notacionTitulo"></h3>
+        <p id="notacionTexto"></p>
+        <div class="reproductor-entrenamiento">
+          <button id="btnRepInicio" title="Ir al inicio">⏮</button>
+          <button id="btnRepAnterior" title="Movimiento anterior">‹</button>
+          <button id="btnRepPlayPausa" title="Reproducir">▶</button>
+          <button id="btnRepSiguiente" title="Movimiento siguiente">›</button>
+          <button id="btnRepFin" title="Ir al final">⏭</button>
+        </div>
+        <p class="contador-reproduccion" id="contadorReproduccion">0 / 0</p>
+      </div>
+
+      <button class="salir-entrenamiento oculto" id="btnSalirEntrenamiento">Salir del entrenamiento</button>
+    </aside>
+
+    <div>
+      <div class="fila-bandeja">
+        <div class="reloj oculto" id="relojFilaSuperior">
+          <span class="reloj-etiqueta">Negras</span>
+          <span class="reloj-tiempo" id="relojNegras">3:00</span>
+        </div>
+        <div class="bandeja" id="bandejaSuperior">
+          <span class="bandeja-etiqueta">Fuera del tablero</span>
+        </div>
+      </div>
+
+      <div class="tablero-envoltorio">
+        <div class="filas-numeros" id="filasNumeros"></div>
+        <div class="tablero-centro">
+          <div class="tablero" id="tablero"></div>
+          <div class="columnas-letras" id="columnasLetras"></div>
+        </div>
+        <div class="mensaje-final oculto" id="mensajeFinal">
+          <div class="mensaje-final-caja">
+            <p id="mensajeFinalTexto"></p>
+            <button id="btnCerrarMensajeFinal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="fila-bandeja">
+        <div class="reloj oculto" id="relojFilaInferior">
+          <span class="reloj-etiqueta">Blancas</span>
+          <span class="reloj-tiempo" id="relojBlancas">3:00</span>
+        </div>
+        <div class="bandeja" id="bandejaInferior">
+          <span class="bandeja-etiqueta">Fuera del tablero</span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel-config">
+      <h2>Configuración</h2>
+
+      <div class="acciones-panel">
+        <button id="btnInicial">Posición inicial</button>
+        <button id="btnVaciar">Vaciar tablero</button>
+        <button id="btnVoltear">Voltear tablero</button>
+      </div>
+
+      <label class="switch-row">
+        <input type="checkbox" id="chkComputador">
+        Jugar contra el computador
+      </label>
+
+      <div class="config-item deshabilitado" id="nivelContenedor">
+        <label for="selNivel">Nivel del computador</label>
+        <select id="selNivel">
+          <option value="1">1 — Muy fácil</option>
+          <option value="2">2 — Fácil</option>
+          <option value="3" selected>3 — Medio</option>
+          <option value="4">4 — Difícil</option>
+          <option value="5">5 — Muy difícil</option>
+        </select>
+      </div>
+
+      <label class="switch-row">
+        <input type="checkbox" id="chkReloj">
+        Usar reloj
+      </label>
+
+      <div class="config-item deshabilitado" id="tiempoContenedor">
+        <label for="selTiempo">Tiempo de juego</label>
+        <select id="selTiempo">
+          <option value="60-0">1 min · Bala</option>
+          <option value="60-1">1 min + 1s · Bala</option>
+          <option value="180-0">3 min · Blitz</option>
+          <option value="180-2" selected>3 min + 2s · Blitz</option>
+          <option value="300-0">5 min · Blitz</option>
+          <option value="300-3">5 min + 3s · Blitz</option>
+          <option value="600-0">10 min · Rápidas</option>
+          <option value="900-10">15 min + 10s · Rápidas</option>
+          <option value="1800-0">30 min · Clásica</option>
+        </select>
+      </div>
+
+      <label class="switch-row">
+        <input type="checkbox" id="chkLegal">
+        Solo movimientos legales
+      </label>
+
+      <label class="switch-row deshabilitado" id="filaMostrarValidos">
+        <input type="checkbox" id="chkMostrarValidos" checked>
+        Indicar movidas válidas
+      </label>
+
+      <label class="switch-row">
+        <input type="checkbox" id="chkCoordenadas" checked>
+        Mostrar letras y números
+      </label>
+
+      <label class="switch-row">
+        <input type="checkbox" id="chkSonido" checked>
+        Sonido
+      </label>
+
+      <label class="switch-row deshabilitado" id="filaRegistrarMovimientos">
+        <input type="checkbox" id="chkRegistrarMovimientos" checked>
+        Registrar movimientos
+      </label>
+
+      <div class="historial-movimientos oculto" id="historialMovimientos">
+        <h3>Movimientos</h3>
+        <p id="historialTexto"></p>
+      </div>
+
+      <p class="panel-estado" id="estadoPartida"></p>
+    </aside>
+  </div>
+
+  <p class="aviso" id="avisoTexto">
+    Modo libre: mueve las piezas donde quieras, o sácalas fuera del tablero.
+    Activa "Solo movimientos legales" para jugar una partida real (con turnos, jaque y jaque mate),
+    y "Jugar contra el computador" para enfrentarte a la IA — tú siempre juegas con las piezas blancas.
+  </p>
+
+<script type="module">
+  import { Chess } from 'https://cdn.jsdelivr.net/npm/chess.js@0.13.4/chess.min.js';
+
+  const LETRAS = ['a','b','c','d','e','f','g','h'];
+  // Se usan los glifos rellenos ("negros") para ambos colores: los glifos
+  // huecos (♔♕♖♗♘♙) no tienen relleno real y se ven transparentes al pintarlos.
+  const GLIFOS_RELLENOS = { K:'♚', Q:'♛', R:'♜', B:'♝', N:'♞', P:'♟' };
+  const GLIFOS = { b: GLIFOS_RELLENOS, n: GLIFOS_RELLENOS };
+  const VALORES = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+
+  let piezas = {};
+  let contadorId = 0;
+  let seleccionId = null;
+  let volteado = false;
+
+  // --- Estado del modo "partida con reglas" ---
+  let modoLegal = false;
+  let contraComputador = false;
+  let nivelComputador = 3;
+  let mostrarValidos = true;
+  let mostrarCoordenadas = true;
+  let sonidoActivado = true;
+  let registrarMovimientos = true;
+  let pensandoComputador = false;
+  const colorHumano = 'w'; // el humano siempre juega blancas
+  let juego = null; // instancia de Chess (chess.js), solo existe en modoLegal
+  let capturadas = { b: [], n: [] };
+  let entrenamientoActivo = null; // { tipo: 'piezas'|'apertura'|'mate', nombre }
+  let juegoTerminadoMostrado = false;
+
+  // --- Reloj de ajedrez ---
+  let relojActivado = false;
+  let tiempoBase = 180;
+  let incrementoReloj = 2;
+  let tiempoRestante = { w: 180, b: 180 }; // notación de chess.js: 'w' blancas, 'b' negras
+  let intervaloReloj = null;
+  let tiempoAgotadoPara = null; // 'w' | 'b' | null
+
+  // --- Datos de entrenamiento ---
+
+  const FEN_INICIAL = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+  const NIVELES_MATERIAL = [
+    { nombre: 'Peones', fen: '4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1',
+      descripcion: 'Solo juegan el rey y los peones de ambos bandos.' },
+    { nombre: 'Caballos', fen: '1n2k1n1/pppppppp/8/8/8/8/PPPPPPPP/1N2K1N1 w - - 0 1',
+      descripcion: 'Juegan el rey, los peones y los caballos.' },
+    { nombre: 'Alfiles', fen: '1nb1kbn1/pppppppp/8/8/8/8/PPPPPPPP/1NB1KBN1 w - - 0 1',
+      descripcion: 'Juegan el rey, los peones, los caballos y los alfiles.' },
+    { nombre: 'Reina', fen: '1nbqkbn1/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBN1 w - - 0 1',
+      descripcion: 'Juegan el rey, los peones, los caballos, los alfiles y las reinas.' },
+    { nombre: 'Torres — sin reina', fen: 'rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq - 0 1',
+      descripcion: 'Juegan el rey, los peones, los caballos, los alfiles y las torres (sin reina).' },
+  ];
+
+  const APERTURAS = [
+    { nombre: 'Apertura Italiana', movidas: ['e4','e5','Nf3','Nc6','Bc4'] },
+    { nombre: 'Ruy López (Española)', movidas: ['e4','e5','Nf3','Nc6','Bb5'] },
+    { nombre: 'Defensa Siciliana', movidas: ['e4','c5'] },
+    { nombre: 'Defensa Francesa', movidas: ['e4','e6'] },
+    { nombre: 'Defensa Caro-Kann', movidas: ['e4','c6'] },
+    { nombre: 'Gambito de Dama', movidas: ['d4','d5','c4'] },
+    { nombre: 'Apertura Inglesa', movidas: ['c4','e5','Nc3'] },
+    { nombre: 'Defensa India de Rey', movidas: ['d4','Nf6','c4','g6','Nc3','Bg7'] },
+    { nombre: 'Apertura Réti', movidas: ['Nf3','d5','c4'] },
+    { nombre: 'Gambito de Rey', movidas: ['e4','e5','f4'] },
+  ];
+
+  const MATES = [
+    { nombre: 'Mate del loco', tipo: 'partida', movidas: ['f3','e5','g4','Qh4#'] },
+    { nombre: 'Mate pastor', tipo: 'partida', movidas: ['e4','e5','Bc4','Bc5','Qh5','Nf6','Qxf7#'] },
+    { nombre: 'Mate de pasillo', tipo: 'posicion',
+      fen: '6k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1', movidas: ['Rd8#'] },
+    { nombre: 'Mate de la escalera', tipo: 'posicion',
+      fen: 'k7/2R5/8/8/8/8/8/6KR w - - 0 1', movidas: ['Rh8#'] },
+    { nombre: 'Mate de dama y rey', tipo: 'posicion',
+      fen: 'k7/7Q/1K6/8/8/8/8/8 w - - 0 1', movidas: ['Qb7#'] },
+  ];
+
+  // --- Sonido (sintetizado con Web Audio, sin archivos externos) ---
+
+  let audioCtx = null;
+
+  function obtenerAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  function tono(frecuencia, duracion, tipoOnda, retraso, volumen) {
+    const ctx = obtenerAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = tipoOnda || 'sine';
+    osc.frequency.value = frecuencia;
+    const t0 = ctx.currentTime + (retraso || 0);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(volumen || 0.15, t0 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duracion);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duracion + 0.02);
+  }
+
+  function reproducirSonido(tipo) {
+    if (!sonidoActivado) return;
+    try {
+      if (tipo === 'captura') {
+        tono(300, 0.05, 'square', 0, 0.14);
+        tono(180, 0.12, 'square', 0.04, 0.12);
+      } else if (tipo === 'jaque') {
+        tono(700, 0.09, 'triangle', 0, 0.16);
+        tono(880, 0.13, 'triangle', 0.1, 0.16);
+      } else if (tipo === 'fin') {
+        tono(660, 0.12, 'sine', 0, 0.16);
+        tono(880, 0.12, 'sine', 0.13, 0.16);
+        tono(990, 0.2, 'sine', 0.26, 0.16);
+      } else if (tipo === 'invalido') {
+        tono(160, 0.13, 'sawtooth', 0, 0.12);
+      } else {
+        tono(520, 0.09, 'sine', 0, 0.13);
+      }
+    } catch (err) {
+      // Web Audio no disponible; se ignora en silencio
+    }
+  }
+
+  // --- Animación de desplazamiento (técnica FLIP) ---
+
+  function capturarRect(square) {
+    const el = document.querySelector(`.casilla[data-square="${square}"] .pieza`);
+    return el ? el.getBoundingClientRect() : null;
+  }
+
+  function animarDesde(square, rectOrigen) {
+    if (!rectOrigen) return;
+    const el = document.querySelector(`.casilla[data-square="${square}"] .pieza`);
+    if (!el) return;
+    const rectDestino = el.getBoundingClientRect();
+    const dx = rectOrigen.left - rectDestino.left;
+    const dy = rectOrigen.top - rectDestino.top;
+    if (dx === 0 && dy === 0) return;
+    el.style.transition = 'none';
+    el.style.transform = `translate(${dx}px, ${dy}px)`;
+    el.getBoundingClientRect(); // fuerza reflow antes de animar
+    requestAnimationFrame(() => {
+      el.style.transition = 'transform 0.25s ease';
+      el.style.transform = '';
+    });
+    el.addEventListener('transitionend', () => { el.style.transition = ''; }, { once: true });
+  }
+
+  function cuadradosEnroque(resultado) {
+    if (resultado.flags.includes('k')) return resultado.color === 'w' ? ['h1', 'f1'] : ['h8', 'f8'];
+    if (resultado.flags.includes('q')) return resultado.color === 'w' ? ['a1', 'd1'] : ['a8', 'd8'];
+    return null;
+  }
+
+  // --- Reloj de ajedrez ---
+
+  function formatearTiempo(segundos) {
+    segundos = Math.max(0, Math.round(segundos));
+    const m = Math.floor(segundos / 60);
+    const s = segundos % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function actualizarRelojUI() {
+    const elBlancas = document.getElementById('relojBlancas');
+    const elNegras = document.getElementById('relojNegras');
+    elBlancas.textContent = formatearTiempo(tiempoRestante.w);
+    elNegras.textContent = formatearTiempo(tiempoRestante.b);
+    const enJuego = modoLegal && relojActivado && !entrenamientoActivo && juego &&
+      !juego.game_over() && !tiempoAgotadoPara;
+    elBlancas.classList.toggle('activo', enJuego && juego.turn() === 'w');
+    elNegras.classList.toggle('activo', enJuego && juego.turn() === 'b');
+    elBlancas.classList.toggle('poco-tiempo', tiempoRestante.w <= 20);
+    elNegras.classList.toggle('poco-tiempo', tiempoRestante.b <= 20);
+  }
+
+  function detenerTicReloj() {
+    if (intervaloReloj) clearInterval(intervaloReloj);
+    intervaloReloj = null;
+  }
+
+  function iniciarTicReloj() {
+    if (intervaloReloj) return;
+    if (!relojActivado || !modoLegal || entrenamientoActivo || !juego || juego.game_over() || tiempoAgotadoPara) return;
+    intervaloReloj = setInterval(() => {
+      if (!relojActivado || !modoLegal || entrenamientoActivo || !juego || juego.game_over() || tiempoAgotadoPara) {
+        detenerTicReloj();
+        return;
+      }
+      const turno = juego.turn();
+      tiempoRestante[turno] = Math.max(0, tiempoRestante[turno] - 1);
+      actualizarRelojUI();
+      if (tiempoRestante[turno] <= 0) {
+        detenerTicReloj();
+        manejarTiempoAgotado(turno);
+      }
+    }, 1000);
+  }
+
+  function manejarTiempoAgotado(colorChess) {
+    tiempoAgotadoPara = colorChess;
+    seleccionId = null;
+    const ganador = colorChess === 'w' ? 'negras' : 'blancas';
+    document.getElementById('estadoPartida').textContent = `Tiempo agotado — ganan las ${ganador}.`;
+    reproducirSonido('fin');
+    juegoTerminadoMostrado = true;
+    mostrarMensajeFinal(`¡Se acabó el tiempo! Ganan las ${ganador}.`);
+    actualizarRelojUI();
+    render();
+  }
+
+  function reiniciarReloj() {
+    detenerTicReloj();
+    tiempoRestante = { w: tiempoBase, b: tiempoBase };
+    tiempoAgotadoPara = null;
+    actualizarRelojUI();
+  }
+
+  // --- Entrenamiento ---
+
+  function prepararModoEntrenamiento() {
+    if (!modoLegal) activarModoLegal(true);
+    detenerTicReloj();
+  }
+
+  function formatearNotacion(movidas) {
+    let html = '';
+    movidas.forEach((san, i) => {
+      if (i % 2 === 0) html += `<span class="num-jugada">${i / 2 + 1}.</span> `;
+      html += `<span class="jugada-san" data-indice="${i}">${san}</span> `;
+    });
+    return html;
+  }
+
+  function marcarNotacionActual(indice) {
+    document.querySelectorAll('#notacionTexto .jugada-san').forEach(el => {
+      el.classList.toggle('jugada-actual', Number(el.dataset.indice) === indice);
+    });
+  }
+
+  function mostrarNotacion(titulo, movidas) {
+    document.getElementById('notacionTitulo').textContent = titulo;
+    document.getElementById('notacionTexto').innerHTML = formatearNotacion(movidas);
+    document.getElementById('notacionEntrenamiento').classList.remove('oculto');
+  }
+
+  function ocultarNotacion() {
+    document.getElementById('notacionEntrenamiento').classList.add('oculto');
+  }
+
+  function actualizarHistorialMovimientos() {
+    const contenedor = document.getElementById('historialMovimientos');
+    const visible = modoLegal && !entrenamientoActivo && registrarMovimientos && juego;
+    contenedor.classList.toggle('oculto', !visible);
+    if (!visible) return;
+    const historial = juego.history();
+    document.getElementById('historialTexto').innerHTML = historial.length
+      ? formatearNotacion(historial)
+      : '<span style="color:#9c8b6e">— sin jugadas —</span>';
+    contenedor.scrollTop = contenedor.scrollHeight;
+  }
+
+  function mostrarMensajeFinal(texto) {
+    document.getElementById('mensajeFinalTexto').textContent = texto;
+    document.getElementById('mensajeFinal').classList.remove('oculto');
+  }
+
+  function ocultarMensajeFinal() {
+    document.getElementById('mensajeFinal').classList.add('oculto');
+  }
+
+  // --- Reproductor paso a paso (aperturas y mates) ---
+
+  let secuenciaActual = null; // array de SAN, o null si no hay secuencia activa
+  let fenInicialSecuencia = FEN_INICIAL;
+  let indiceReproduccion = 0;
+  let temporizadorReproduccion = null;
+
+  function actualizarControlesReproductor() {
+    if (!secuenciaActual) return;
+    const enInicio = indiceReproduccion <= 0;
+    const enFin = indiceReproduccion >= secuenciaActual.length;
+    document.getElementById('btnRepInicio').disabled = enInicio;
+    document.getElementById('btnRepAnterior').disabled = enInicio;
+    document.getElementById('btnRepSiguiente').disabled = enFin;
+    document.getElementById('btnRepFin').disabled = enFin;
+    document.getElementById('btnRepPlayPausa').disabled = enFin;
+    document.getElementById('contadorReproduccion').textContent =
+      `${indiceReproduccion} / ${secuenciaActual.length}`;
+  }
+
+  function irAMovimiento(nuevoIndice, animar) {
+    if (!secuenciaActual) return;
+    nuevoIndice = Math.max(0, Math.min(nuevoIndice, secuenciaActual.length));
+    const avanzaUnPaso = animar && nuevoIndice === indiceReproduccion + 1;
+
+    juego.load(fenInicialSecuencia);
+    let resultado = null;
+    for (let i = 0; i < nuevoIndice; i++) resultado = juego.move(secuenciaActual[i]);
+
+    const rectOrigen = (avanzaUnPaso && resultado) ? capturarRect(resultado.from) : null;
+
+    capturadas = { b: [], n: [] };
+    juego.history({ verbose: true }).forEach(m => {
+      if (!m.captured) return;
+      const colorCapturadaChess = m.color === 'w' ? 'b' : 'w';
+      const colorCapturadaNuestro = colorCapturadaChess === 'w' ? 'b' : 'n';
+      capturadas[colorCapturadaNuestro].push(m.captured.toUpperCase());
+    });
+
+    juegoTerminadoMostrado = false;
+    ocultarMensajeFinal();
+    sincronizarPiezasDesdeChess();
+    render();
+    if (rectOrigen) animarDesde(resultado.to, rectOrigen);
+
+    if (avanzaUnPaso && resultado) {
+      if (juego.in_checkmate()) reproducirSonido('fin');
+      else if (juego.in_check()) reproducirSonido('jaque');
+      else if (resultado.captured) reproducirSonido('captura');
+      else reproducirSonido('mover');
+    }
+
+    indiceReproduccion = nuevoIndice;
+    marcarNotacionActual(nuevoIndice - 1);
+    actualizarEstadoPartida();
+    actualizarControlesReproductor();
+
+    if (nuevoIndice >= secuenciaActual.length && contraComputador &&
+        !juego.game_over() && juego.turn() !== colorHumano) {
+      setTimeout(turnoComputador, 350);
+    }
+  }
+
+  function reproducirAuto() {
+    document.getElementById('btnRepPlayPausa').textContent = '⏸';
+    const paso = () => {
+      if (!secuenciaActual || indiceReproduccion >= secuenciaActual.length) { pausarAuto(); return; }
+      irAMovimiento(indiceReproduccion + 1, true);
+      if (!secuenciaActual || indiceReproduccion >= secuenciaActual.length) { pausarAuto(); return; }
+      temporizadorReproduccion = setTimeout(paso, 1500);
+    };
+    temporizadorReproduccion = setTimeout(paso, 1500);
+  }
+
+  function pausarAuto() {
+    if (temporizadorReproduccion) clearTimeout(temporizadorReproduccion);
+    temporizadorReproduccion = null;
+    document.getElementById('btnRepPlayPausa').textContent = '▶';
+  }
+
+  function alternarReproduccionAuto() {
+    if (temporizadorReproduccion) { pausarAuto(); return; }
+    if (!secuenciaActual || indiceReproduccion >= secuenciaActual.length) return;
+    reproducirAuto();
+  }
+
+  function iniciarNivelMaterial(nivel) {
+    prepararModoEntrenamiento();
+    pausarAuto();
+    secuenciaActual = null;
+    juego.load(nivel.fen);
+    capturadas = { b: [], n: [] };
+    juegoTerminadoMostrado = false;
+    ocultarMensajeFinal();
+    sincronizarPiezasDesdeChess();
+    render();
+    actualizarEstadoPartida();
+    ocultarNotacion();
+    entrenamientoActivo = { tipo: 'piezas', nombre: nivel.nombre };
+    document.getElementById('btnSalirEntrenamiento').classList.remove('oculto');
+    document.getElementById('avisoTexto').textContent =
+      `Entrenamiento — ${nivel.nombre}. ${nivel.descripcion}`;
+  }
+
+  function iniciarApertura(apertura) {
+    prepararModoEntrenamiento();
+    pausarAuto();
+    fenInicialSecuencia = FEN_INICIAL;
+    secuenciaActual = apertura.movidas;
+    entrenamientoActivo = { tipo: 'apertura', nombre: apertura.nombre };
+    document.getElementById('btnSalirEntrenamiento').classList.remove('oculto');
+    document.getElementById('avisoTexto').textContent =
+      `Entrenamiento — apertura: ${apertura.nombre}.`;
+    mostrarNotacion(apertura.nombre, apertura.movidas);
+    irAMovimiento(0, false);
+  }
+
+  function iniciarMate(mate) {
+    prepararModoEntrenamiento();
+    pausarAuto();
+    fenInicialSecuencia = mate.tipo === 'posicion' ? mate.fen : FEN_INICIAL;
+    secuenciaActual = mate.movidas;
+    entrenamientoActivo = { tipo: 'mate', nombre: mate.nombre };
+    document.getElementById('btnSalirEntrenamiento').classList.remove('oculto');
+    document.getElementById('avisoTexto').textContent =
+      `Entrenamiento — mate: ${mate.nombre}.`;
+    mostrarNotacion(mate.nombre, mate.movidas);
+    irAMovimiento(0, false);
+  }
+
+  function salirEntrenamiento() {
+    entrenamientoActivo = null;
+    pausarAuto();
+    secuenciaActual = null;
+    ocultarNotacion();
+    document.getElementById('btnSalirEntrenamiento').classList.add('oculto');
+    document.querySelectorAll('.item-entrenamiento').forEach(b => b.classList.remove('activo'));
+    juego.reset();
+    capturadas = { b: [], n: [] };
+    juegoTerminadoMostrado = false;
+    ocultarMensajeFinal();
+    reiniciarReloj();
+    sincronizarPiezasDesdeChess();
+    render();
+    actualizarEstadoPartida();
+    iniciarTicReloj();
+    document.getElementById('avisoTexto').textContent =
+      'Partida con reglas: se respetan turnos, capturas, jaque y jaque mate. Tú juegas con las piezas blancas.';
+  }
+
+  function poblarListaEntrenamiento(contenedorId, items, manejarClick) {
+    const contenedor = document.getElementById(contenedorId);
+    items.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'item-entrenamiento';
+      btn.textContent = item.nombre;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.item-entrenamiento').forEach(b => b.classList.remove('activo'));
+        btn.classList.add('activo');
+        manejarClick(item);
+      });
+      contenedor.appendChild(btn);
+    });
+  }
+
+  function crearPieza(tipo, color, ubicacion) {
+    const id = 'pz' + (contadorId++);
+    piezas[id] = { tipo, color, ubicacion };
+    return id;
+  }
+
+  function posicionInicial() {
+    piezas = {}; contadorId = 0; seleccionId = null;
+    const filaBack = ['R','N','B','Q','K','B','N','R'];
+    filaBack.forEach((tipo, i) => {
+      crearPieza(tipo, 'n', LETRAS[i] + '8');
+      crearPieza(tipo, 'b', LETRAS[i] + '1');
+    });
+    LETRAS.forEach(l => {
+      crearPieza('P', 'n', l + '7');
+      crearPieza('P', 'b', l + '2');
+    });
+    render();
+  }
+
+  function vaciarTablero() {
+    Object.values(piezas).forEach(p => { p.ubicacion = 'bandeja'; });
+    seleccionId = null;
+    render();
+  }
+
+  function piezaEnUbicacion(ubicacion, excluirId) {
+    return Object.keys(piezas).find(id => id !== excluirId && piezas[id].ubicacion === ubicacion);
+  }
+
+  function moverA(destino) {
+    if (!seleccionId) return;
+    const origen = piezas[seleccionId].ubicacion;
+    const rectOrigen = origen !== 'bandeja' ? capturarRect(origen) : null;
+    let huboCaptura = false;
+    if (destino !== 'bandeja') {
+      const ocupanteId = piezaEnUbicacion(destino, seleccionId);
+      if (ocupanteId) { piezas[ocupanteId].ubicacion = 'bandeja'; huboCaptura = true; }
+    }
+    piezas[seleccionId].ubicacion = destino;
+    seleccionId = null;
+    render();
+    if (destino !== 'bandeja') animarDesde(destino, rectOrigen);
+    reproducirSonido(huboCaptura ? 'captura' : 'mover');
+  }
+
+  // --- Puente con chess.js (modo legal) ---
+
+  function sincronizarPiezasDesdeChess() {
+    piezas = {}; contadorId = 0; seleccionId = null;
+    const tablero = juego.board();
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const casilla = tablero[r][c];
+        if (!casilla) continue;
+        const square = LETRAS[c] + (8 - r);
+        const colorNuestro = casilla.color === 'w' ? 'b' : 'n';
+        crearPieza(casilla.type.toUpperCase(), colorNuestro, square);
+      }
+    }
+  }
+
+  function activarModoLegal(activar) {
+    modoLegal = activar;
+    document.getElementById('chkLegal').checked = activar;
+    document.getElementById('filaMostrarValidos').classList.toggle('deshabilitado', !activar);
+    document.getElementById('filaRegistrarMovimientos').classList.toggle('deshabilitado', !activar);
+    document.getElementById('btnVaciar').disabled = activar;
+    document.getElementById('avisoTexto').textContent = activar
+      ? 'Partida con reglas: se respetan turnos, capturas, jaque y jaque mate. Tú juegas con las piezas blancas.'
+      : 'Modo libre: mueve las piezas donde quieras, o sácalas fuera del tablero.';
+    if (activar) {
+      juego = new Chess();
+      capturadas = { b: [], n: [] };
+      juegoTerminadoMostrado = false;
+      ocultarMensajeFinal();
+      sincronizarPiezasDesdeChess();
+      reiniciarReloj();
+      iniciarTicReloj();
+    } else {
+      contraComputador = false;
+      document.getElementById('chkComputador').checked = false;
+      document.getElementById('nivelContenedor').classList.add('deshabilitado');
+      seleccionId = null;
+      detenerTicReloj();
+    }
+    render();
+    actualizarEstadoPartida();
+  }
+
+  function aplicarMovimiento(resultado) {
+    const pares = [[resultado.from, resultado.to]];
+    const enroque = cuadradosEnroque(resultado);
+    if (enroque) pares.push(enroque);
+    const rectsOrigen = pares.map(([origen]) => capturarRect(origen));
+
+    const huboCaptura = !!resultado.captured;
+    if (huboCaptura) {
+      const colorCapturadaChess = resultado.color === 'w' ? 'b' : 'w';
+      const colorCapturadaNuestro = colorCapturadaChess === 'w' ? 'b' : 'n';
+      capturadas[colorCapturadaNuestro].push(resultado.captured.toUpperCase());
+    }
+
+    if (relojActivado && incrementoReloj > 0) {
+      tiempoRestante[resultado.color] += incrementoReloj;
+    }
+
+    sincronizarPiezasDesdeChess();
+    render();
+    pares.forEach(([, destino], i) => animarDesde(destino, rectsOrigen[i]));
+    actualizarRelojUI();
+
+    if (juego.in_checkmate()) reproducirSonido('fin');
+    else if (juego.in_check()) reproducirSonido('jaque');
+    else if (huboCaptura) reproducirSonido('captura');
+    else reproducirSonido('mover');
+
+    actualizarEstadoPartida();
+    if (contraComputador && !juego.game_over() && juego.turn() !== colorHumano) {
+      setTimeout(turnoComputador, 350);
+    }
+  }
+
+  function intentarMovidaLegal(destino) {
+    if (!seleccionId) return;
+    const origen = piezas[seleccionId].ubicacion;
+    if (origen === destino) { seleccionId = null; render(); return; }
+    const movidas = juego.moves({ square: origen, verbose: true });
+    const movida = movidas.find(m => m.to === destino);
+    if (!movida) { seleccionId = null; render(); reproducirSonido('invalido'); return; }
+    const promocion = movida.flags.includes('p') ? 'q' : undefined;
+    const resultado = juego.move({ from: origen, to: destino, promotion: promocion });
+    seleccionId = null;
+    if (resultado) aplicarMovimiento(resultado); else render();
+  }
+
+  function actualizarEstadoPartida() {
+    actualizarRelojUI();
+    actualizarHistorialMovimientos();
+    const estadoEl = document.getElementById('estadoPartida');
+    if (!modoLegal) { estadoEl.textContent = ''; return; }
+    if (pensandoComputador) { estadoEl.textContent = 'El computador está pensando…'; return; }
+    if (juego.in_checkmate()) {
+      const ganador = juego.turn() === 'w' ? 'negras' : 'blancas';
+      estadoEl.textContent = `Jaque mate — ganan las ${ganador}.`;
+      if (!juegoTerminadoMostrado) {
+        juegoTerminadoMostrado = true;
+        mostrarMensajeFinal(`¡Jaque mate! Ganan las ${ganador}.`);
+      }
+    } else if (juego.game_over()) {
+      estadoEl.textContent = 'Tablas.';
+      if (!juegoTerminadoMostrado) {
+        juegoTerminadoMostrado = true;
+        mostrarMensajeFinal('¡Tablas!');
+      }
+    } else {
+      const turno = juego.turn() === 'w' ? 'blancas' : 'negras';
+      estadoEl.textContent = (juego.in_check() ? '¡Jaque! ' : '') + `Turno de las ${turno}.`;
+    }
+  }
+
+  // --- IA (minimax con poda alfa-beta) ---
+
+  function evaluarPosicion(j) {
+    const tablero = j.board();
+    let puntaje = 0;
+    for (const fila of tablero) {
+      for (const casilla of fila) {
+        if (!casilla) continue;
+        const valor = VALORES[casilla.type];
+        puntaje += casilla.color === 'w' ? valor : -valor;
+      }
+    }
+    return puntaje;
+  }
+
+  function minimax(j, profundidad, alfa, beta, maximizando) {
+    if (profundidad === 0 || j.game_over()) return evaluarPosicion(j);
+    const movidas = j.moves();
+    if (maximizando) {
+      let mejor = -Infinity;
+      for (const m of movidas) {
+        j.move(m);
+        mejor = Math.max(mejor, minimax(j, profundidad - 1, alfa, beta, false));
+        j.undo();
+        alfa = Math.max(alfa, mejor);
+        if (beta <= alfa) break;
+      }
+      return mejor;
+    } else {
+      let mejor = Infinity;
+      for (const m of movidas) {
+        j.move(m);
+        mejor = Math.min(mejor, minimax(j, profundidad - 1, alfa, beta, true));
+        j.undo();
+        beta = Math.min(beta, mejor);
+        if (beta <= alfa) break;
+      }
+      return mejor;
+    }
+  }
+
+  function elegirMovidaIA(j, nivel) {
+    const movidas = j.moves();
+    if (movidas.length === 0) return null;
+    if (nivel === 1) return movidas[Math.floor(Math.random() * movidas.length)];
+
+    const profundidad = { 2: 1, 3: 2, 4: 3, 5: 3 }[nivel] || 2;
+    const maximizando = j.turn() === 'w';
+    let mejores = [];
+    let mejorValor = maximizando ? -Infinity : Infinity;
+
+    for (const m of movidas) {
+      j.move(m);
+      const valor = minimax(j, profundidad - 1, -Infinity, Infinity, !maximizando);
+      j.undo();
+      if (maximizando ? valor > mejorValor : valor < mejorValor) {
+        mejorValor = valor; mejores = [m];
+      } else if (valor === mejorValor) {
+        mejores.push(m);
+      }
+    }
+    // en niveles bajos/medios se elige al azar entre las mejores para variar; nivel 5 siempre juega la mejor
+    if (nivel === 5) return mejores[0];
+    return mejores[Math.floor(Math.random() * mejores.length)];
+  }
+
+  function turnoComputador() {
+    if (!modoLegal || !contraComputador || juego.game_over() || tiempoAgotadoPara) return;
+    pensandoComputador = true;
+    actualizarEstadoPartida();
+    setTimeout(() => {
+      const movida = elegirMovidaIA(juego, nivelComputador);
+      pensandoComputador = false;
+      if (movida) {
+        const resultado = juego.move(movida);
+        if (resultado) aplicarMovimiento(resultado);
+      } else {
+        actualizarEstadoPartida();
+      }
+    }, 60);
+  }
+
+  // --- Interacción (clic y arrastre) ---
+
+  function onClickPieza(id, e) {
+    e.stopPropagation();
+    if (modoLegal) {
+      if (pensandoComputador || tiempoAgotadoPara) return;
+      if (contraComputador && juego.turn() !== colorHumano) return;
+      if (seleccionId === id) { seleccionId = null; render(); return; }
+      if (seleccionId) { intentarMovidaLegal(piezas[id].ubicacion); return; }
+      const suColorChess = piezas[id].color === 'b' ? 'w' : 'b';
+      if (suColorChess === juego.turn()) { seleccionId = id; render(); }
+      return;
+    }
+    if (seleccionId === id) { seleccionId = null; render(); return; }
+    if (seleccionId && piezas[id].ubicacion !== 'bandeja') {
+      moverA(piezas[id].ubicacion);
+    } else {
+      seleccionId = id;
+      render();
+    }
+  }
+
+  function crearElementoPieza(id) {
+    const p = piezas[id];
+    const el = document.createElement('span');
+    el.className = 'pieza ' + (p.color === 'b' ? 'blanca' : 'negra') + (id === seleccionId ? ' seleccionada' : '');
+    el.textContent = GLIFOS[p.color][p.tipo];
+    el.title = (p.color === 'b' ? 'Blanca' : 'Negra');
+    let puedeArrastrar = true;
+    if (modoLegal) {
+      const suColorChess = p.color === 'b' ? 'w' : 'b';
+      puedeArrastrar = !pensandoComputador && !tiempoAgotadoPara
+        && (!contraComputador || juego.turn() === colorHumano)
+        && suColorChess === juego.turn();
+    }
+    el.draggable = puedeArrastrar;
+    el.addEventListener('click', (e) => onClickPieza(id, e));
+    el.addEventListener('dragstart', (e) => {
+      if (!puedeArrastrar) { e.preventDefault(); return; }
+      e.dataTransfer.setData('text/plain', id);
+      seleccionId = id;
+    });
+    return el;
+  }
+
+  function crearFichaCapturada(tipo, color) {
+    const el = document.createElement('span');
+    el.className = 'pieza pieza-capturada ' + (color === 'b' ? 'blanca' : 'negra');
+    el.textContent = GLIFOS_RELLENOS[tipo];
+    return el;
+  }
+
+  function ordenCasillas() {
+    const orden = [];
+    for (let rank = 8; rank >= 1; rank--) {
+      for (let f = 0; f < 8; f++) orden.push(LETRAS[f] + rank);
+    }
+    return volteado ? orden.reverse() : orden;
+  }
+
+  function esClara(square) {
+    const fileIdx = LETRAS.indexOf(square[0]);
+    const rank = parseInt(square[1], 10);
+    return (fileIdx + rank) % 2 === 0;
+  }
+
+  function habilitarSoltar(el, destino) {
+    el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('arrastrando-sobre'); });
+    el.addEventListener('dragleave', () => el.classList.remove('arrastrando-sobre'));
+    el.addEventListener('drop', (e) => {
+      e.preventDefault();
+      el.classList.remove('arrastrando-sobre');
+      const id = e.dataTransfer.getData('text/plain');
+      if (!id) return;
+      if (modoLegal) {
+        if (destino === 'bandeja') { seleccionId = null; render(); return; }
+        seleccionId = id;
+        intentarMovidaLegal(destino);
+      } else {
+        seleccionId = id;
+        moverA(destino);
+      }
+    });
+  }
+
+  function render() {
+    // Movidas válidas de la pieza seleccionada (modo legal)
+    let destinosValidos = [];
+    if (modoLegal && seleccionId && mostrarValidos) {
+      const origen = piezas[seleccionId].ubicacion;
+      destinosValidos = juego.moves({ square: origen, verbose: true }).map(m => m.to);
+    }
+
+    // Tablero
+    const tableroEl = document.getElementById('tablero');
+    tableroEl.innerHTML = '';
+    ordenCasillas().forEach(square => {
+      const casilla = document.createElement('div');
+      casilla.className = 'casilla ' + (esClara(square) ? 'clara' : 'oscura');
+      casilla.dataset.square = square;
+      const idAqui = piezaEnUbicacion(square);
+      if (destinosValidos.includes(square)) {
+        casilla.classList.add('destino-valido');
+        if (idAqui) casilla.classList.add('con-pieza');
+      }
+      casilla.addEventListener('click', () => {
+        if (modoLegal) {
+          if (pensandoComputador || tiempoAgotadoPara) return;
+          if (contraComputador && juego.turn() !== colorHumano) return;
+          if (seleccionId) intentarMovidaLegal(square);
+        } else if (seleccionId) {
+          moverA(square);
+        }
+      });
+      habilitarSoltar(casilla, square);
+      if (idAqui) casilla.appendChild(crearElementoPieza(idAqui));
+      tableroEl.appendChild(casilla);
+    });
+
+    // Etiquetas
+    const filas = volteado ? [1,2,3,4,5,6,7,8] : [8,7,6,5,4,3,2,1];
+    const columnas = volteado ? [...LETRAS].reverse() : LETRAS;
+    const filasEl = document.getElementById('filasNumeros');
+    filasEl.innerHTML = filas.map(n => `<span>${n}</span>`).join('');
+    const columnasEl = document.getElementById('columnasLetras');
+    columnasEl.innerHTML = columnas.map(l => `<span>${l}</span>`).join('');
+
+    // Bandejas
+    const bandejaSup = document.getElementById('bandejaSuperior');
+    const bandejaInf = document.getElementById('bandejaInferior');
+
+    if (modoLegal) {
+      bandejaSup.innerHTML = '<span class="bandeja-etiqueta">Piezas negras capturadas</span>';
+      bandejaInf.innerHTML = '<span class="bandeja-etiqueta">Piezas blancas capturadas</span>';
+      capturadas.n.forEach(tipo => bandejaSup.appendChild(crearFichaCapturada(tipo, 'n')));
+      capturadas.b.forEach(tipo => bandejaInf.appendChild(crearFichaCapturada(tipo, 'b')));
+    } else {
+      const idsBandeja = Object.keys(piezas).filter(id => piezas[id].ubicacion === 'bandeja');
+      const blancas = idsBandeja.filter(id => piezas[id].color === 'b');
+      const negras = idsBandeja.filter(id => piezas[id].color === 'n');
+      bandejaSup.innerHTML = '<span class="bandeja-etiqueta">Fuera del tablero</span>';
+      bandejaInf.innerHTML = '<span class="bandeja-etiqueta">Fuera del tablero</span>';
+      negras.forEach(id => bandejaSup.appendChild(crearElementoPieza(id)));
+      blancas.forEach(id => bandejaInf.appendChild(crearElementoPieza(id)));
+    }
+  }
+
+  [document.getElementById('bandejaSuperior'), document.getElementById('bandejaInferior')].forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (modoLegal) return;
+      if (e.target.closest('.pieza')) return;
+      if (seleccionId) moverA('bandeja');
+    });
+    habilitarSoltar(el, 'bandeja');
+  });
+
+  document.getElementById('btnInicial').onclick = () => {
+    if (modoLegal) {
+      entrenamientoActivo = null;
+      ocultarNotacion();
+      document.getElementById('btnSalirEntrenamiento').classList.add('oculto');
+      document.querySelectorAll('.item-entrenamiento').forEach(b => b.classList.remove('activo'));
+      pausarAuto();
+      secuenciaActual = null;
+      juego.reset();
+      capturadas = { b: [], n: [] };
+      juegoTerminadoMostrado = false;
+      ocultarMensajeFinal();
+      reiniciarReloj();
+      sincronizarPiezasDesdeChess();
+      render();
+      actualizarEstadoPartida();
+      iniciarTicReloj();
+      if (contraComputador && juego.turn() !== colorHumano) setTimeout(turnoComputador, 350);
+    } else {
+      posicionInicial();
+    }
+  };
+  document.getElementById('btnVaciar').onclick = () => { if (!modoLegal) vaciarTablero(); };
+  document.getElementById('btnVoltear').onclick = () => { volteado = !volteado; render(); };
+
+  document.getElementById('chkComputador').addEventListener('change', (e) => {
+    contraComputador = e.target.checked;
+    document.getElementById('nivelContenedor').classList.toggle('deshabilitado', !contraComputador);
+    if (contraComputador && !modoLegal) activarModoLegal(true);
+    if (contraComputador && modoLegal && juego.turn() !== colorHumano) setTimeout(turnoComputador, 350);
+    actualizarEstadoPartida();
+  });
+
+  document.getElementById('selNivel').addEventListener('change', (e) => {
+    nivelComputador = parseInt(e.target.value, 10);
+  });
+
+  document.getElementById('chkReloj').addEventListener('change', (e) => {
+    relojActivado = e.target.checked;
+    document.getElementById('tiempoContenedor').classList.toggle('deshabilitado', !relojActivado);
+    document.getElementById('relojFilaSuperior').classList.toggle('oculto', !relojActivado);
+    document.getElementById('relojFilaInferior').classList.toggle('oculto', !relojActivado);
+    if (relojActivado) {
+      if (!modoLegal) activarModoLegal(true);
+      reiniciarReloj();
+      iniciarTicReloj();
+    } else {
+      detenerTicReloj();
+      tiempoAgotadoPara = null;
+    }
+    actualizarRelojUI();
+  });
+
+  document.getElementById('selTiempo').addEventListener('change', (e) => {
+    const [base, incremento] = e.target.value.split('-').map(Number);
+    tiempoBase = base;
+    incrementoReloj = incremento;
+    reiniciarReloj();
+    iniciarTicReloj();
+  });
+
+  document.getElementById('chkLegal').addEventListener('change', (e) => {
+    if (contraComputador || entrenamientoActivo || relojActivado) { e.target.checked = true; return; }
+    activarModoLegal(e.target.checked);
+  });
+
+  document.getElementById('chkMostrarValidos').addEventListener('change', (e) => {
+    mostrarValidos = e.target.checked;
+    render();
+  });
+
+  document.getElementById('chkCoordenadas').addEventListener('change', (e) => {
+    mostrarCoordenadas = e.target.checked;
+    document.querySelector('.tablero-envoltorio').classList.toggle('sin-coordenadas', !mostrarCoordenadas);
+  });
+
+  document.getElementById('chkSonido').addEventListener('change', (e) => {
+    sonidoActivado = e.target.checked;
+  });
+
+  document.getElementById('chkRegistrarMovimientos').addEventListener('change', (e) => {
+    registrarMovimientos = e.target.checked;
+    actualizarHistorialMovimientos();
+  });
+
+  document.querySelectorAll('.tab-entrenamiento').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab-entrenamiento').forEach(t => t.classList.remove('activo'));
+      tab.classList.add('activo');
+      const destino = tab.dataset.tab;
+      document.getElementById('listaPiezas').classList.toggle('oculto', destino !== 'piezas');
+      document.getElementById('listaAperturas').classList.toggle('oculto', destino !== 'aperturas');
+      document.getElementById('listaMates').classList.toggle('oculto', destino !== 'mates');
+    });
+  });
+
+  document.getElementById('btnSalirEntrenamiento').addEventListener('click', salirEntrenamiento);
+
+  document.getElementById('btnRepInicio').addEventListener('click', () => { pausarAuto(); irAMovimiento(0, false); });
+  document.getElementById('btnRepAnterior').addEventListener('click', () => { pausarAuto(); irAMovimiento(indiceReproduccion - 1, false); });
+  document.getElementById('btnRepSiguiente').addEventListener('click', () => { pausarAuto(); irAMovimiento(indiceReproduccion + 1, true); });
+  document.getElementById('btnRepFin').addEventListener('click', () => { pausarAuto(); irAMovimiento(secuenciaActual ? secuenciaActual.length : 0, false); });
+  document.getElementById('btnRepPlayPausa').addEventListener('click', alternarReproduccionAuto);
+
+  document.getElementById('btnCerrarMensajeFinal').addEventListener('click', ocultarMensajeFinal);
+  document.getElementById('mensajeFinal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) ocultarMensajeFinal();
+  });
+
+  poblarListaEntrenamiento('listaPiezas', NIVELES_MATERIAL, iniciarNivelMaterial);
+  poblarListaEntrenamiento('listaAperturas', APERTURAS, iniciarApertura);
+  poblarListaEntrenamiento('listaMates', MATES, iniciarMate);
+
+  posicionInicial();
+</script>
+
+</body>
+</html>

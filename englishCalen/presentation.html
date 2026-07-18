@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calen English Class</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1b3a2d;
+            color: #e8e4d9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .top-section {
+            display: flex;
+            background: #234a3a;
+            padding: 10px;
+            gap: 10px;
+        }
+        .photo-panel {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #122a1f;
+            z-index: 50;
+        }
+        .photo-panel.active { display: flex; }
+        .photo-panel-photo {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            min-width: 0;
+        }
+        .photo-panel-photo img {
+            max-width: 100%;
+            max-height: 96vh;
+            border-radius: 12px;
+            box-shadow: 0 6px 30px rgba(0,0,0,0.5);
+            object-fit: contain;
+        }
+        .photo-panel-side {
+            width: 340px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 20px 20px 20px 0;
+        }
+        .country-panel {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0d1f18;
+            z-index: 60;
+            overflow: hidden;
+        }
+        .country-panel.active { display: block; }
+        .country-panel-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1);
+            transform-origin: center center;
+        }
+        .country-panel-caption {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            padding: 26px 40px;
+            background: linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0));
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            pointer-events: none;
+        }
+        .country-panel-caption.shown { opacity: 1; transform: translateY(0); }
+        .country-panel-caption .country-name {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+        }
+        .country-panel-caption .place-name {
+            font-size: 3rem;
+            color: #f0a830;
+            font-weight: bold;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+        }
+        .country-list-panel {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: transparent;
+            pointer-events: none;
+            z-index: 65;
+            padding: 50px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+        .country-list-panel.active { display: flex; }
+        .country-list-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f0a830;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+        .country-list-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1100px;
+        }
+        .country-list-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: #234a3a;
+            border-radius: 12px;
+            padding: 14px 18px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+        }
+        .country-list-item img {
+            width: 72px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        .country-list-item span {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #e8e4d9;
+            text-align: center;
+        }
+        .photo-panel-words {
+            flex: 1;
+            background: #234a3a;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #f0a830;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .side-image {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            min-height: 100px;
+            position: relative;
+            gap: 8px;
+        }
+        .side-image-caption {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f0a830;
+            text-align: center;
+            display: none;
+        }
+        .side-image-caption.active { display: block; }
+        .corner-photo-panel {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            bottom: 10px;
+            width: 42%;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+            z-index: 5;
+            border: 2px solid #2a5a42;
+        }
+        .corner-photo-panel.active { display: block; }
+        .corner-photo-panel img { width: 100%; height: 100%; display: block; object-fit: cover; }
+        .side-image img {
+            max-width: 100%;
+            border-radius: 12px;
+            object-fit: contain;
+            display: none;
+        }
+        .side-emoji {
+            font-size: 8rem;
+            line-height: 1;
+            display: none;
+        }
+        .game-info-box {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            height: 100%;
+            padding: 8px 16px;
+            gap: 4px;
+        }
+        .game-info-box.active { display: flex; }
+        .game-info-nav {
+            display: flex;
+            gap: 6px;
+        }
+        .game-info-location {
+            color: #f0a830;
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-align: center;
+            margin-top: auto;
+        }
+        .game-info-desc {
+            color: #9cb8a8;
+            font-size: 1rem;
+            line-height: 1.4;
+            text-align: center;
+            margin-bottom: auto;
+        }
+        .game-info-nav button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            background: rgba(255,255,255,0.12);
+            transition: background 0.15s;
+        }
+        .game-info-nav button:hover { background: rgba(255,255,255,0.22); }
+        .game-info-nav button.red { background: rgba(232,115,42,0.6); }
+        .game-info-nav button.red:hover { background: rgba(232,115,42,0.85); }
+        .video-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            width: 340px;
+            flex-shrink: 0;
+        }
+        .video-container.cam-hidden { display: none; }
+        .country-panel .video-container {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 220px;
+            z-index: 5;
+            border: 2px solid rgba(255,255,255,0.25);
+        }
+        #webcam, #webcamCanvas {
+            width: 100%;
+            display: block;
+            transform: scaleX(-1);
+        }
+        #webcamCanvas { display: none; }
+        .content-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 15px 30px;
+        }
+        .content-box {
+            flex: 1;
+            background: #234a3a;
+            border-radius: 12px;
+            display: grid;
+            grid-template-rows: repeat(10, 10%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            position: relative;
+            padding: 0;
+        }
+        #names {
+            grid-row: 2;
+            color: #f0a830;
+            font-size: 2.2rem;
+            font-weight: normal;
+            text-align: center;
+            min-height: 3.2rem;
+            overflow-wrap: break-word;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #middle {
+            grid-row: 4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            text-align: center;
+            color: #e8e4d9;
+            gap: 10px;
+        }
+        #middle img {
+            max-height: 220px;
+            max-width: 90%;
+            border-radius: 10px;
+            object-fit: contain;
+        }
+        #bottom {
+            grid-row: 6;
+            font-size: 2rem;
+            text-align: center;
+            color: #5ec4b6;
+            min-height: 3rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #middle.big-text { font-size: 2.8rem; font-weight: bold; align-items: stretch; text-align: center; overflow-wrap: break-word; }
+        #bottom.big-text { font-size: 2.4rem; text-align: center; overflow-wrap: break-word; display: flex; align-items: center; justify-content: center; }
+        .content-box.has-photo #names,
+        .content-box.has-photo #middle,
+        .content-box.has-photo #bottom {
+            padding-right: calc(42% + 20px);
+        }
+        .waiting { color: #5a7a6a; font-size: 1.2rem; }
+
+        /* ── Game ── */
+        #gameContainer { display: none; grid-row: 1 / span 10; grid-column: 1; z-index: 10; background: #234a3a; border-radius: 12px; flex-direction: column; }
+        #gameContainer.active { display: flex; }
+
+        .game-story-menu {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .game-story-title { color: #f0a830; font-size: 1.8rem; font-weight: bold; }
+        .game-story-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .game-story-card {
+            padding: 20px 16px;
+            background: #1b3a2d;
+            border: 2px solid #2a5a42;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #e8e4d9;
+        }
+        .game-story-card:hover { border-color: #5ec4b6; background: #1e4035; }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: 110px 1fr 110px;
+            grid-template-rows: auto 1fr auto;
+            gap: 10px;
+            align-items: center;
+            justify-items: center;
+            flex: 1;
+            padding: 10px 0;
+        }
+        .game-center-box {
+            background: #1b3a2d;
+            border-radius: 14px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            border: 2px solid #2a5a42;
+        }
+        .game-center-icon { font-size: 5rem; line-height: 1; }
+        .game-center-text { font-size: 1.6rem; text-align: center; margin-top: 12px; color: #e8e4d9; line-height: 1.4; }
+        .game-dir-btn {
+            background: #2a6b4a;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .game-dir-btn:hover { background: #3a8a5a; }
+        .game-side-btn {
+            background: #3a7a5a;
+            color: white;
+            padding: 16px 6px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .game-side-btn:hover { background: #4a9a6a; }
+        .game-side-arrow { font-size: 1.4rem; }
+        .game-pos-area {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="photo-panel" id="photoPanel">
+        <div class="photo-panel-photo">
+            <img id="photoPanelImg" src="" alt="">
+        </div>
+        <div class="photo-panel-side" id="photoPanelSide">
+            <div class="photo-panel-words" id="photoPanelWords"></div>
+        </div>
+    </div>
+    <div class="country-panel" id="countryPanel">
+        <img class="country-panel-img" id="countryPanelImg" src="" alt="">
+        <div class="country-panel-caption" id="countryPanelCaption">
+            <div class="country-name" id="countryPanelCountry"></div>
+            <div class="place-name" id="countryPanelPlace"></div>
+        </div>
+    </div>
+    <div class="country-list-panel" id="countryListPanel">
+        <div class="country-list-title">🌍 Guess the Country</div>
+        <div class="country-list-grid" id="countryListGrid"></div>
+    </div>
+    <div class="top-section">
+        <div class="side-image" id="sideImage">
+            <div class="game-info-box" id="gameInfoBox">
+                <div class="game-info-nav" id="gameInfoNav">
+                    <button onclick="showStoryMenu()">← Stories</button>
+                    <button class="red" onclick="if(currentGame) startGame(currentGame)">🔄 Restart</button>
+                </div>
+                <div class="game-info-location" id="gameInfoLocation"></div>
+                <div class="game-info-desc" id="gameInfoDesc"></div>
+            </div>
+            <img id="sideImg" src="" alt="">
+            <span class="side-emoji" id="sideEmoji"></span>
+            <div class="side-image-caption" id="sideImageCaption"></div>
+        </div>
+        <div class="video-container" id="videoContainer">
+            <video id="webcam" autoplay playsinline muted></video>
+            <canvas id="webcamCanvas"></canvas>
+        </div>
+    </div>
+    <div class="content-section">
+        <div class="content-box">
+            <!-- Barra de depuración de posiciones -->
+            <div class="debug-grid" id="debugGrid" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; flex-direction: column; pointer-events: none; z-index: 100; box-sizing: border-box;">
+                <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 1</div>
+                <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 2</div>
+                <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 3</div>
+                <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 4</div>
+                <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 5</div>
+                <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 6</div>
+                <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 7</div>
+                <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 8</div>
+                <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 9</div>
+                <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 10</div>
+            </div>
+            <div id="names"></div>
+            <div id="middle"></div>
+            <div id="bottom"></div>
+            <div id="gameContainer"></div>
+            <div class="corner-photo-panel" id="cornerPhotoPanel">
+                <img id="cornerPhotoImg" src="" alt="">
+            </div>
+        </div>
+    </div>
+
+    <script src="game1/house-map.js?v=3"></script>
+    <script src="game1/game-data.js?v=3"></script>
+    <script>
+        const webcam = document.getElementById('webcam');
+        const sideImageDiv = document.getElementById('sideImage');
+
+        function matchSideHeight() {
+            const h = webcam.offsetHeight + 'px';
+            sideImageDiv.style.maxHeight = h;
+            document.getElementById('sideImg').style.maxHeight = h;
+        }
+        webcam.addEventListener('loadedmetadata', matchSideHeight);
+        // La cámara (getUserMedia) y el difuminado/imagen de fondo se manejan
+        // en el <script type="module"> al final del archivo, para poder usar
+        // el segmentador de MediaPipe (ver camera-show / camera-mode).
+        window.addEventListener('resize', matchSideHeight);
+
+        const mid = document.getElementById('middle');
+        const bot = document.getElementById('bottom');
+        const nam = document.getElementById('names');
+        const sideImg = document.getElementById('sideImg');
+        const sideEmoji = document.getElementById('sideEmoji');
+        const sideImageCaption = document.getElementById('sideImageCaption');
+        const cornerPhotoPanel = document.getElementById('cornerPhotoPanel');
+        const cornerPhotoImg = document.getElementById('cornerPhotoImg');
+        const contentBox = document.querySelector('.content-box');
+        const photoPanel = document.getElementById('photoPanel');
+        const photoPanelImg = document.getElementById('photoPanelImg');
+        const countryPanel = document.getElementById('countryPanel');
+        const countryPanelImg = document.getElementById('countryPanelImg');
+        const countryPanelCaption = document.getElementById('countryPanelCaption');
+        const countryPanelCountry = document.getElementById('countryPanelCountry');
+        const countryPanelPlace = document.getElementById('countryPanelPlace');
+        const countryListPanel = document.getElementById('countryListPanel');
+        const countryListGrid = document.getElementById('countryListGrid');
+        const videoContainer = document.getElementById('videoContainer');
+        const COUNTRY_ZOOM_START_SCALE = 3.4;   // qué tan cerca empieza el zoom
+        const COUNTRY_ZOOM_DURATION_MS = 20000; // 20s para revelar el lugar completo
+        let countryZoomTimer = null;
+
+        function showCountryPhoto(d) {
+            clearTimeout(countryZoomTimer);
+            countryPanelCaption.classList.remove('shown');
+            countryPanelCountry.textContent = d.country || '';
+            countryPanelPlace.textContent = d.place || '';
+            countryPanelImg.src = d.image;
+            countryPanel.appendChild(videoContainer);
+            countryPanel.classList.add('active');
+
+            // origen del zoom: por defecto el centro, salvo que la foto
+            // (típicamente un mapa) traiga su propio originX/originY (%)
+            const ox = (typeof d.originX === 'number') ? d.originX : 50;
+            const oy = (typeof d.originY === 'number') ? d.originY : 50;
+            countryPanelImg.style.transformOrigin = `${ox}% ${oy}%`;
+
+            if (d.zoom) {
+                countryPanelImg.style.transition = 'none';
+                countryPanelImg.style.transform = `scale(${COUNTRY_ZOOM_START_SCALE})`;
+                // forzar reflow antes de animar
+                void countryPanelImg.offsetWidth;
+                countryZoomTimer = setTimeout(() => {
+                    countryPanelImg.style.transition = `transform ${COUNTRY_ZOOM_DURATION_MS}ms ease-out`;
+                    countryPanelImg.style.transform = 'scale(1)';
+                }, 60);
+            } else {
+                countryPanelImg.style.transition = 'none';
+                countryPanelImg.style.transform = 'scale(1)';
+            }
+        }
+
+        function hideCountryPhoto() {
+            clearTimeout(countryZoomTimer);
+            countryPanel.classList.remove('active');
+            countryPanelImg.src = '';
+            countryPanelCaption.classList.remove('shown');
+            document.querySelector('.top-section').appendChild(videoContainer);
+        }
+        const gameContainer = document.getElementById('gameContainer');
+        const gameInfoBox = document.getElementById('gameInfoBox');
+
+        function clearSide() {
+            sideImg.style.display = 'none';
+            sideImg.src = '';
+            sideEmoji.style.display = 'none';
+            sideEmoji.textContent = '';
+            gameInfoBox.classList.remove('active');
+        }
+
+        function showNormalMode() {
+            // clearSide() solo debe correr al salir de un juego (donde el panel
+            // lateral mostraba gameInfoBox en vez de la bandera/emoji); si ya
+            // estábamos en modo normal, limpiar acá borra banderas que el
+            // profesor dejó mostradas a propósito.
+            if (gameContainer.classList.contains('active')) {
+                clearSide();
+            }
+            gameContainer.classList.remove('active');
+            disableWhichCorrect();
+            mid.style.display = '';
+            bot.style.display = '';
+        }
+
+        function disableWhichCorrect() {
+            const wcContainer = document.getElementById('whichCorrectContainer');
+            if (wcContainer) {
+                wcContainer.style.display = 'none';
+            }
+            nam.style.display = '';
+            mid.style.display = '';
+            bot.style.display = '';
+        }
+
+        function enableWhichCorrect() {
+            nam.style.display = 'none';
+            mid.style.display = 'none';
+            bot.style.display = 'none';
+            
+            let wcContainer = document.getElementById('whichCorrectContainer');
+            if (!wcContainer) {
+                const contentBox = document.querySelector('.content-box');
+                wcContainer = document.createElement('div');
+                wcContainer.id = 'whichCorrectContainer';
+                wcContainer.style.gridRow = '1 / span 10';
+                wcContainer.style.gridColumn = '1';
+                wcContainer.style.zIndex = '10';
+                wcContainer.style.display = 'flex';
+                wcContainer.style.flexDirection = 'column';
+                wcContainer.style.height = '100%';
+                wcContainer.style.width = '100%';
+                wcContainer.style.background = '#234a3a';
+                wcContainer.style.borderRadius = '12px';
+                wcContainer.style.padding = '20px 25px';
+                wcContainer.style.boxSizing = 'border-box';
+                wcContainer.innerHTML = `
+                    <div class="which-correct-title" style="font-size: 2.8rem; font-weight: bold; color: #f0a830; text-align: center; margin-top: 10px; margin-bottom: 20px; flex-shrink: 0;">Which sentence is correct?</div>
+                    <div class="which-correct-columns" style="display: flex; flex: 1; justify-content: space-around; align-items: center; width: 100%; gap: 40px;">
+                        <!-- Columna Izquierda -->
+                        <div id="wcLeftCol" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;">
+                            <div id="wcLeftText" style="font-size: 2.3rem; color: #e8e4d9; text-align: center; min-height: 6rem; display: flex; align-items: center; justify-content: center; font-weight: bold;"></div>
+                            <div id="wcLeftStatus" style="font-size: 6rem; min-height: 7rem; line-height: 1;"></div>
+                        </div>
+                        <!-- Columna Derecha -->
+                        <div id="wcRightCol" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;">
+                            <div id="wcRightText" style="font-size: 2.3rem; color: #e8e4d9; text-align: center; min-height: 6rem; display: flex; align-items: center; justify-content: center; font-weight: bold;"></div>
+                            <div id="wcRightStatus" style="font-size: 6rem; min-height: 7rem; line-height: 1;"></div>
+                        </div>
+                    </div>
+                `;
+                contentBox.appendChild(wcContainer);
+            } else {
+                wcContainer.style.display = 'flex';
+            }
+            
+            document.getElementById('wcLeftText').textContent = '';
+            document.getElementById('wcLeftStatus').textContent = '';
+            document.getElementById('wcRightText').textContent = '';
+            document.getElementById('wcRightStatus').textContent = '';
+        }
+
+        function showGameMode() {
+            mid.style.display = 'none';
+            bot.style.display = 'none';
+            gameContainer.classList.add('active');
+            sideImg.style.display = 'none';
+            sideEmoji.style.display = 'none';
+            gameInfoBox.classList.add('active');
+        }
+
+        // ══════════════════════════════════════
+        // GAME ENGINE — First-person camera
+        // ══════════════════════════════════════
+        let currentGame = null;
+        let currentLocation = null;
+        let currentView = 0;
+        let gameFlags = {};
+
+        function filterAction(act) {
+            const reqs = Array.isArray(act.requires) ? act.requires : (act.requires ? [act.requires] : []);
+            const nots = Array.isArray(act.requiresNot) ? act.requiresNot : (act.requiresNot ? [act.requiresNot] : []);
+            for (const r of reqs) { if (!gameFlags[r]) return false; }
+            for (const n of nots) { if (gameFlags[n]) return false; }
+            return true;
+        }
+
+        function saveGameState() {
+            const state = { mode: 'game' };
+            if (currentGame && currentLocation) {
+                state.gameIndex = GAME_LIST.indexOf(currentGame);
+                state.location = currentLocation;
+                state.view = currentView;
+                state.flags = gameFlags;
+            }
+            localStorage.setItem('english-game-state', JSON.stringify(state));
+        }
+
+        function restoreGameState() {
+            try {
+                const raw = localStorage.getItem('english-game-state');
+                if (!raw) return;
+                const state = JSON.parse(raw);
+                if (state.mode !== 'game') return;
+                if (state.gameIndex != null && state.location && GAME_LIST[state.gameIndex]) {
+                    currentGame = GAME_LIST[state.gameIndex];
+                    currentLocation = state.location;
+                    currentView = state.view || 0;
+                    gameFlags = state.flags || {};
+                    renderView();
+                } else {
+                    showStoryMenu();
+                }
+            } catch (e) {}
+        }
+
+        function showStoryMenu() {
+            showGameMode();
+            gameContainer.innerHTML = '';
+            document.getElementById('gameInfoLocation').textContent = '📖 Interactive Story';
+            document.getElementById('gameInfoDesc').textContent = 'Choose a story to begin.';
+
+            const menu = document.createElement('div');
+            menu.className = 'game-story-menu';
+
+            const title = document.createElement('div');
+            title.className = 'game-story-title';
+            title.textContent = 'Choose a story';
+            menu.appendChild(title);
+
+            const grid = document.createElement('div');
+            grid.className = 'game-story-grid';
+
+            GAME_LIST.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'game-story-card';
+                card.textContent = game.name;
+                card.onclick = () => startGame(game);
+                grid.appendChild(card);
+            });
+
+            menu.appendChild(grid);
+            gameContainer.appendChild(menu);
+            saveGameState();
+        }
+
+        function startGame(game) {
+            currentGame = game;
+            currentLocation = game.startLocation;
+            currentView = game.startView || 0;
+            gameFlags = {};
+            renderView();
+        }
+
+        function lookLeft() {
+            currentView = (currentView + 3) % 4;
+            renderView();
+        }
+
+        function lookRight() {
+            currentView = (currentView + 1) % 4;
+            renderView();
+        }
+
+        function doAction(act) {
+            if (act.needsItem && !gameFlags[act.needsItem]) {
+                renderView(act.needsItemMsg || "You need something to do that!");
+                return;
+            }
+            if (act.goto) {
+                currentLocation = act.goto;
+                currentView = act.arriveView || 0;
+                renderView();
+                return;
+            }
+            if (act.setFlag) gameFlags[act.setFlag] = true;
+            if (act.clearFlag) delete gameFlags[act.clearFlag];
+            renderView(act.result || null);
+        }
+
+        function renderView(resultText) {
+            const loc = HOUSE_MAP[currentLocation];
+            if (!loc) return;
+            const view = loc.views[currentView];
+            if (!view) return;
+
+            showGameMode();
+            saveGameState();
+
+            // Info box (top-left)
+            document.getElementById('gameInfoLocation').textContent = loc.name;
+            const descEl = document.getElementById('gameInfoDesc');
+            if (resultText) {
+                descEl.innerHTML = view.text + '<br><span style="color:#5ec4b6;">' + resultText + '</span>';
+            } else {
+                descEl.textContent = view.text;
+            }
+
+            // Build compass
+            gameContainer.innerHTML = '';
+            const allActions = [...view.actions, ...(loc.alwaysActions || [])];
+            const visibleActions = allActions.filter(a => filterAction(a));
+            const topActions = visibleActions.filter(a => a.pos === 'top' || (!a.pos && a.goto));
+            const botActions = visibleActions.filter(a => a.pos === 'bottom' || (!a.pos && !a.goto));
+
+            const grid = document.createElement('div');
+            grid.className = 'game-grid';
+
+            // Row 1: top actions
+            grid.appendChild(document.createElement('div'));
+            const topArea = document.createElement('div');
+            topArea.className = 'game-pos-area';
+            topActions.forEach(a => {
+                const btn = document.createElement('button');
+                btn.className = 'game-dir-btn';
+                btn.textContent = a.label;
+                btn.onclick = () => doAction(a);
+                topArea.appendChild(btn);
+            });
+            grid.appendChild(topArea);
+            grid.appendChild(document.createElement('div'));
+
+            // Row 2: look left — center scene — look right
+            const leftBtn = document.createElement('button');
+            leftBtn.className = 'game-side-btn';
+            leftBtn.innerHTML = '<span class="game-side-arrow">◀</span><span>Look left</span>';
+            leftBtn.onclick = lookLeft;
+            grid.appendChild(leftBtn);
+
+            const center = document.createElement('div');
+            center.className = 'game-center-box';
+            const iconEl = document.createElement('div');
+            iconEl.className = 'game-center-icon';
+            iconEl.textContent = view.icon || '';
+            center.appendChild(iconEl);
+            grid.appendChild(center);
+
+            const rightBtn = document.createElement('button');
+            rightBtn.className = 'game-side-btn';
+            rightBtn.innerHTML = '<span>Look right</span><span class="game-side-arrow">▶</span>';
+            rightBtn.onclick = lookRight;
+            grid.appendChild(rightBtn);
+
+            // Row 3: bottom actions (movement)
+            grid.appendChild(document.createElement('div'));
+            const botArea = document.createElement('div');
+            botArea.className = 'game-pos-area';
+            botActions.forEach(a => {
+                const btn = document.createElement('button');
+                btn.className = 'game-dir-btn';
+                btn.textContent = a.label;
+                btn.onclick = () => doAction(a);
+                botArea.appendChild(btn);
+            });
+            grid.appendChild(botArea);
+            grid.appendChild(document.createElement('div'));
+
+            gameContainer.appendChild(grid);
+        }
+
+        restoreGameState();
+
+        // ── BroadcastChannel ──
+        const channel = new BroadcastChannel('english-with-video');
+        channel.onmessage = (e) => {
+            const d = e.data;
+
+            if (d.type === 'game-mode') {
+                showStoryMenu();
+            } else if (d.type === 'names') {
+                nam.textContent = d.text;
+            } else if (d.type === 'which-correct-init') {
+                enableWhichCorrect();
+            } else if (d.type === 'which-correct-left') {
+                const txt = document.getElementById('wcLeftText');
+                const stat = document.getElementById('wcLeftStatus');
+                if (txt) txt.textContent = d.text || '';
+                if (stat) {
+                    stat.textContent = '';
+                    stat.style.border = 'none';
+                    stat.style.background = 'none';
+                }
+                const rStat = document.getElementById('wcRightStatus');
+                if (rStat) {
+                    rStat.textContent = '';
+                    rStat.style.border = 'none';
+                    rStat.style.background = 'none';
+                }
+            } else if (d.type === 'which-correct-right') {
+                const txt = document.getElementById('wcRightText');
+                const stat = document.getElementById('wcRightStatus');
+                if (txt) txt.textContent = d.text || '';
+                if (stat) {
+                    stat.textContent = '';
+                    stat.style.border = 'none';
+                    stat.style.background = 'none';
+                }
+            } else if (d.type === 'which-correct-reveal') {
+                const lStat = document.getElementById('wcLeftStatus');
+                const rStat = document.getElementById('wcRightStatus');
+                if (lStat && d.leftCorrect !== null) {
+                    lStat.textContent = d.leftCorrect ? '✓' : '✗';
+                    lStat.style.fontSize = '4.5rem';
+                    lStat.style.fontWeight = 'bold';
+                    lStat.style.color = d.leftCorrect ? '#2ecc71' : '#e74c3c';
+                    lStat.style.background = d.leftCorrect ? 'rgba(46, 204, 113, 0.15)' : 'rgba(231, 76, 60, 0.15)';
+                    lStat.style.border = `4px solid ${d.leftCorrect ? '#2ecc71' : '#e74c3c'}`;
+                    lStat.style.borderRadius = '50%';
+                    lStat.style.width = '100px';
+                    lStat.style.height = '100px';
+                    lStat.style.display = 'inline-flex';
+                    lStat.style.alignItems = 'center';
+                    lStat.style.justifyContent = 'center';
+                    lStat.style.boxSizing = 'border-box';
+                }
+                if (rStat && d.rightCorrect !== null) {
+                    rStat.textContent = d.rightCorrect ? '✓' : '✗';
+                    rStat.style.fontSize = '4.5rem';
+                    rStat.style.fontWeight = 'bold';
+                    rStat.style.color = d.rightCorrect ? '#2ecc71' : '#e74c3c';
+                    rStat.style.background = d.rightCorrect ? 'rgba(46, 204, 113, 0.15)' : 'rgba(231, 76, 60, 0.15)';
+                    rStat.style.border = `4px solid ${d.rightCorrect ? '#2ecc71' : '#e74c3c'}`;
+                    rStat.style.borderRadius = '50%';
+                    rStat.style.width = '100px';
+                    rStat.style.height = '100px';
+                    rStat.style.display = 'inline-flex';
+                    rStat.style.alignItems = 'center';
+                    rStat.style.justifyContent = 'center';
+                    rStat.style.boxSizing = 'border-box';
+                }
+            } else if (d.type === 'which-correct-clear') {
+                const lTxt = document.getElementById('wcLeftText');
+                const lStat = document.getElementById('wcLeftStatus');
+                const rTxt = document.getElementById('wcRightText');
+                const rStat = document.getElementById('wcRightStatus');
+                if (lTxt) lTxt.textContent = '';
+                if (lStat) {
+                    lStat.textContent = '';
+                    lStat.style.border = 'none';
+                    lStat.style.background = 'none';
+                    lStat.style.width = '';
+                    lStat.style.height = '';
+                }
+                if (rTxt) rTxt.textContent = '';
+                if (rStat) {
+                    rStat.textContent = '';
+                    rStat.style.border = 'none';
+                    rStat.style.background = 'none';
+                    rStat.style.width = '';
+                    rStat.style.height = '';
+                }
+            } else if (d.type === 'debug-grid') {
+                const debugGrid = document.getElementById('debugGrid');
+                if (debugGrid) {
+                    debugGrid.style.display = d.show ? 'flex' : 'none';
+                }
+            } else if (d.type === 'side-image') {
+                clearSide();
+                if (d.image) {
+                    sideImg.src = d.image;
+                    sideImg.style.display = 'block';
+                }
+            } else if (d.type === 'side-emoji') {
+                clearSide();
+                if (d.text) {
+                    sideEmoji.textContent = d.text;
+                    sideEmoji.style.display = 'block';
+                }
+            } else if (d.type === 'country-name') {
+                if (d.text) {
+                    sideImageCaption.textContent = d.text;
+                    sideImageCaption.classList.add('active');
+                } else {
+                    sideImageCaption.textContent = '';
+                    sideImageCaption.classList.remove('active');
+                }
+            } else if (d.type === 'corner-photo') {
+                if (d.image) {
+                    cornerPhotoImg.src = d.image;
+                    cornerPhotoPanel.classList.add('active');
+                    contentBox.classList.add('has-photo');
+                } else {
+                    cornerPhotoImg.src = '';
+                    cornerPhotoPanel.classList.remove('active');
+                    contentBox.classList.remove('has-photo');
+                }
+            } else if (d.type === 'photo') {
+                const photoPanelSide = document.getElementById('photoPanelSide');
+                const topSection = document.querySelector('.top-section');
+                if (d.image) {
+                    photoPanelImg.src = d.image;
+                    photoPanel.classList.add('active');
+                    photoPanelSide.prepend(videoContainer);
+                } else {
+                    photoPanel.classList.remove('active');
+                    photoPanelImg.src = '';
+                    topSection.appendChild(videoContainer);
+                }
+            } else if (d.type === 'country-photo') {
+                if (d.image) {
+                    showCountryPhoto(d);
+                } else {
+                    hideCountryPhoto();
+                }
+            } else if (d.type === 'country-reveal') {
+                countryPanelCaption.classList.toggle('shown', !!d.show);
+            } else if (d.type === 'country-list') {
+                if (d.show) {
+                    countryListGrid.innerHTML = (d.countries || []).map(c => `
+                        <div class="country-list-item">
+                            <img src="Images/flags/${c.code}.png" alt="">
+                            <span>${c.country}</span>
+                        </div>
+                    `).join('');
+                    countryListPanel.classList.add('active');
+                } else {
+                    countryListPanel.classList.remove('active');
+                }
+            } else if (d.type === 'photo-word') {
+                const wordsEl = document.getElementById('photoPanelWords');
+                if (!d.text) {
+                    wordsEl.innerHTML = '';
+                } else {
+                    const wordsList = d.text.split(/[\n|]+/).map(w => w.trim()).filter(w => w);
+                    wordsEl.innerHTML = wordsList.map(w => `<div>${w}</div>`).join('');
+                }
+            } else if (d.type === 'middle') {
+                showNormalMode();
+                mid.innerHTML = '';
+                mid.classList.toggle('big-text', !!d.big);
+                if (d.image) {
+                    const img = document.createElement('img');
+                    img.src = d.image;
+                    mid.appendChild(img);
+                }
+                if (d.text) {
+                    const span = document.createElement('span');
+                    span.textContent = d.text;
+                    mid.appendChild(span);
+                }
+            } else if (d.type === 'bottom') {
+                bot.textContent = d.text || '';
+                bot.classList.toggle('big-text', !!d.big);
+            } else if (d.type === 'clear-middle') {
+                mid.innerHTML = '';
+                mid.classList.remove('big-text');
+            } else if (d.type === 'clear-bottom') {
+                bot.textContent = '';
+                bot.classList.remove('big-text');
+            } else if (d.type === 'clear-all') {
+                showNormalMode();
+                disableWhichCorrect();
+                nam.textContent = '';
+                mid.innerHTML = '';
+                bot.textContent = '';
+                sideImageCaption.textContent = '';
+                sideImageCaption.classList.remove('active');
+                cornerPhotoImg.src = '';
+                cornerPhotoPanel.classList.remove('active');
+                contentBox.classList.remove('has-photo');
+            }
+        };
+    </script>
+
+    <script type="module">
+        // ══════════════════════════════════════
+        // CÁMARA — mostrar/ocultar, difuminar fondo, imagen de fondo
+        // Controlado desde index.html vía BroadcastChannel('english-with-video')
+        // con mensajes { type: 'camera-show', value } y { type: 'camera-mode', mode }.
+        // ══════════════════════════════════════
+        import { ImageSegmenter, FilesetResolver } from './vendor/mediapipe/vision_bundle.mjs';
+
+        const camChannel = new BroadcastChannel('english-with-video');
+        const videoContainer = document.getElementById('videoContainer');
+        const webcamVideo = document.getElementById('webcam');
+        const webcamCanvas = document.getElementById('webcamCanvas');
+        const ctx = webcamCanvas.getContext('2d', { willReadFrequently: true });
+
+        const bgImage = new Image();
+        bgImage.src = 'Images/backgrounds/default.svg';
+
+        let camShow = true;
+        let camMode = 'normal'; // 'normal' | 'blur' | 'image'
+        let stream = null;
+        let imageSegmenter = null;
+        let segmenterLoading = null;
+        let rafId = null;
+        let lastVideoTime = -1;
+
+        async function startStream() {
+            if (stream) return;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                webcamVideo.srcObject = stream;
+            } catch (e) {
+                console.error('Camera error:', e);
+            }
+        }
+
+        function stopStream() {
+            if (!stream) return;
+            stream.getTracks().forEach(t => t.stop());
+            stream = null;
+            webcamVideo.srcObject = null;
+        }
+
+        async function getSegmenter() {
+            if (imageSegmenter) return imageSegmenter;
+            if (!segmenterLoading) segmenterLoading = createSegmenter();
+            return segmenterLoading;
+        }
+
+        async function createSegmenter(delegate) {
+            // CPU en vez de GPU: hay bugs conocidos de MediaPipe donde el delegado GPU
+            // entrega una máscara de segmentación degenerada (sin distinguir persona/fondo)
+            // aunque no arroje ningún error.
+            delegate = delegate || 'CPU';
+            try {
+                const vision = await FilesetResolver.forVisionTasks('vendor/mediapipe/wasm');
+                imageSegmenter = await ImageSegmenter.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: 'vendor/mediapipe/selfie_segmenter.tflite',
+                        delegate
+                    },
+                    runningMode: 'VIDEO',
+                    outputCategoryMask: true,
+                    outputConfidenceMasks: false
+                });
+                console.log('Segmentador de cámara listo (delegate=' + delegate + ')');
+                return imageSegmenter;
+            } catch (e) {
+                console.error('No se pudo iniciar el segmentador (' + delegate + '):', e);
+                if (delegate === 'CPU') {
+                    segmenterLoading = null;
+                    return createSegmenter('GPU');
+                }
+                throw e;
+            }
+        }
+
+        function applyVisibility() {
+            videoContainer.classList.toggle('cam-hidden', !camShow);
+            if (camMode === 'normal') {
+                webcamVideo.style.display = 'block';
+                webcamCanvas.style.display = 'none';
+            } else {
+                webcamVideo.style.display = 'none';
+                webcamCanvas.style.display = 'block';
+            }
+        }
+
+        function renderLoop() {
+            if (!camShow || camMode === 'normal' || !imageSegmenter) {
+                rafId = null;
+                return;
+            }
+            if (webcamVideo.readyState >= 2 && webcamVideo.currentTime !== lastVideoTime) {
+                lastVideoTime = webcamVideo.currentTime;
+                imageSegmenter.segmentForVideo(webcamVideo, performance.now(), drawSegmentedFrame);
+            }
+            rafId = requestAnimationFrame(renderLoop);
+        }
+
+        function drawSegmentedFrame(result) {
+            const w = webcamVideo.videoWidth;
+            const h = webcamVideo.videoHeight;
+            if (!w || !h) { result.categoryMask?.close(); return; }
+            if (webcamCanvas.width !== w || webcamCanvas.height !== h) {
+                webcamCanvas.width = w;
+                webcamCanvas.height = h;
+            }
+
+            // Cuadro con la persona nítida.
+            ctx.drawImage(webcamVideo, 0, 0, w, h);
+            const personFrame = ctx.getImageData(0, 0, w, h);
+
+            // Cuadro de fondo (difuminado o imagen fija).
+            if (camMode === 'blur') {
+                ctx.filter = 'blur(14px)';
+                ctx.drawImage(webcamVideo, 0, 0, w, h);
+                ctx.filter = 'none';
+            } else if (camMode === 'image') {
+                if (bgImage.complete && bgImage.naturalWidth) {
+                    ctx.drawImage(bgImage, 0, 0, w, h);
+                } else {
+                    ctx.fillStyle = '#1b3a2d';
+                    ctx.fillRect(0, 0, w, h);
+                }
+            }
+            const bgFrame = ctx.getImageData(0, 0, w, h);
+
+            // Combina ambos cuadros según la máscara de segmentación.
+            const mask = result.categoryMask;
+            const maskData = mask.getAsUint8Array();
+            if (bgMaskValue === null) {
+                bgMaskValue = detectBgMaskValue(maskData, w, h);
+                const distinctValues = new Set(maskData);
+                console.log('Diagnóstico segmentación — valores distintos en la máscara:', [...distinctValues], '— elegido como fondo:', bgMaskValue);
+            }
+            const out = ctx.createImageData(w, h);
+            for (let i = 0; i < maskData.length; i++) {
+                const src = maskData[i] === bgMaskValue ? bgFrame : personFrame;
+                const o = i * 4;
+                out.data[o] = src.data[o];
+                out.data[o + 1] = src.data[o + 1];
+                out.data[o + 2] = src.data[o + 2];
+                out.data[o + 3] = 255;
+            }
+            ctx.putImageData(out, 0, 0);
+            mask.close();
+        }
+
+        // El valor numérico que el modelo usa para "fondo" no está documentado de forma
+        // confiable (varía según versión/modelo). En vez de asumirlo, se detecta solo:
+        // las 4 esquinas del cuadro son casi siempre fondo en un encuadre de webcam típico.
+        let bgMaskValue = null;
+        function detectBgMaskValue(maskData, w, h) {
+            const corners = [0, w - 1, (h - 1) * w, (h - 1) * w + (w - 1)];
+            const counts = {};
+            corners.forEach(i => { counts[maskData[i]] = (counts[maskData[i]] || 0) + 1; });
+            return Number(Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b));
+        }
+
+        async function applyCamMode() {
+            applyVisibility();
+            if (!camShow || camMode === 'normal') {
+                if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+                return;
+            }
+            try {
+                await getSegmenter();
+            } catch (e) {
+                // Sin segmentador disponible: se deja la cámara en modo normal.
+                camMode = 'normal';
+                applyVisibility();
+                return;
+            }
+            if (!rafId) renderLoop();
+        }
+
+        async function onCamShowChange(show) {
+            camShow = show;
+            if (camShow) await startStream(); else stopStream();
+            applyCamMode();
+        }
+
+        camChannel.onmessage = (e) => {
+            const d = e.data;
+            if (d.type === 'camera-show') {
+                onCamShowChange(!!d.value);
+            } else if (d.type === 'camera-mode') {
+                camMode = d.mode || 'normal';
+                applyCamMode();
+            }
+        };
+
+        onCamShowChange(true);
+    </script>
+</body>
+</html>

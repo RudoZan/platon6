@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorando la dispersión de datos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Explorando la dispersión de datos</h1>
+            <button class="info-icon" id="info-general" title="Información general"></button>
+        </header>
+        
+        <div class="config-panel">
+            <form id="config-form">
+                <div class="form-group">
+                    <label for="num-squares">Cantidad de datos:</label>
+                    <select id="num-squares" name="num-squares">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7" selected>7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="center-column">Centro:</label>
+                    <select id="center-column" name="center-column">
+                        <!-- Las opciones se generarán dinámicamente -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="value-range">Rango de valores:</label>
+                    <select id="value-range" name="value-range">
+                        <option value="2">2</option>
+                        <option value="4">4</option>
+                        <option value="6" selected>6</option>
+                        <option value="8">8</option>
+                        <option value="10">10</option>
+                        <option value="12">12</option>
+                    </select>
+                </div>
+                <div class="reset-controls">
+                    <button type="button" id="reset-btn" class="btn">Reiniciar</button>
+                    <button type="button" class="info-icon-small" id="info-controls" title="Información de parámetros"></button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="game-area">
+            <div class="columns-container" id="columns-container">
+                <!-- Las columnas se generarán dinámicamente -->
+            </div>
+            <div class="level-indicator-wrapper">
+                <div class="level-indicator-container">
+                    <div class="level-indicator-bar">
+                        <div class="level-indicator-marker" id="level-indicator-marker"></div>
+                        <div class="level-indicator-center"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-container">
+                <div class="stats-box">
+                    <div class="stats-title">
+                        Distancias Absolutas del Centro
+                        <button class="info-icon-small" id="info-distances" title="Información"></button>
+                    </div>
+                    <div class="stats-content">
+                        <div class="sum-display" id="sum-display">
+                            Suma: 0 = 0
+                        </div>
+                        <div class="average-display" id="average-display">
+                            Promedio: 0
+                        </div>
+                        <div class="invalid-warning">
+                            (cuando los centros no coinciden estos valores no son matemáticamente válidos)
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-box">
+                    <div class="stats-title">
+                        Distancias del centro al cuadrado
+                        <button class="info-icon-small" id="info-squared" title="Información"></button>
+                    </div>
+                    <div class="stats-content">
+                        <div class="squared-expression-display" id="squared-expression-display">
+                            Suma: 0² = 0
+                        </div>
+                        <div class="sum-display" id="squared-sum-display">
+                            Suma: 0 = 0
+                        </div>
+                        <div class="average-display" id="squared-average-display">
+                            Promedio: 0
+                        </div>
+                        <div class="invalid-warning">
+                            (cuando los centros no coinciden estos valores no son matemáticamente válidos)
+                        </div>
+                    </div>
+                    <button class="comparison-trigger-icon" id="comparison-trigger" title="Explorar diferencias entre medidas"></button>
+                </div>
+            </div>
+            <div class="comparison-panel" id="comparison-panel" style="display: none;">
+                <span class="comparison-close">&times;</span>
+                <div class="comparison-content">
+                    <div class="comparison-text">
+                        <h3>Explorando la Sensibilidad de las Medidas de Dispersión</h3>
+                        <p>Observa cómo distribuciones diferentes pueden tener el mismo <strong>promedio de distancias absolutas</strong> pero diferentes <strong>promedios de distancias al cuadrado</strong>. Esto ocurre porque al elevar al cuadrado, los valores extremos tienen mayor peso en el cálculo.</p>
+                        <p>Selecciona los ejemplos y compara sus medidas. Notarás que aunque tienen el mismo promedio de distancias absolutas, los promedios de distancias al cuadrado muestran diferencias. Esto demuestra que las distancias al cuadrado son más sensibles para detectar valores extremos. <strong>¿Puedes encontrar otros casos similares?</strong></p>
+                    </div>
+                    <div class="example-buttons-vertical">
+                        <button type="button" class="btn-example" data-example="same1">Ejemplo 1</button>
+                        <button type="button" class="btn-example" data-example="same2">Ejemplo 2</button>
+                        <button type="button" class="btn-example" data-example="same3">Ejemplo 3</button>
+                    </div>
+                </div>
+            </div>
+        
+        <!-- Modal para información -->
+        <div id="info-modal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close">&times;</span>
+                <h2 id="modal-title"></h2>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+        </div>
+    </div>
+    
+    <footer class="footer-credit">
+        <p>Desarrollado por Astutosoft 2026</p>
+    </footer>
+    
+    <script src="script.js"></script>
+</body>
+</html>

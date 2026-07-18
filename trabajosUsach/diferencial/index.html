@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comprendiendo la Diferencial (dy vs Δy) — Trabajos USACH</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="corner-bl"></div>
+    <div class="corner-br"></div>
+
+    <header>
+      <div class="header-title">
+        <h1>Comprendiendo la Diferencial de una Función</h1>
+        <p>
+          Exploración interactiva del concepto de diferencial y la relación fundamental 
+          <strong>dy = f'(x) · dx</strong> basada en el video pedagógico del proyecto USACH.
+          Manipula los pasos infinitesimales y experimenta lo que sucede al llevar <strong>dx → 0</strong>.
+        </p>
+      </div>
+      <nav class="nav-tabs">
+        <button class="nav-tab active" onclick="showView(1)">⚡ Simulador dy vs Δy</button>
+        <button class="nav-tab" onclick="showView(2)">☯ Pantalla Dividida (Seno y Coseno)</button>
+        <button class="nav-tab" onclick="showView(3)">🎬 Video Original USACH</button>
+      </nav>
+    </header>
+
+    <!-- ── VISTA 1: SIMULADOR DE dy VS Δy ── -->
+    <div id="view1" class="view active">
+      <div class="section-label">PARTE 1 // MIRANDO A dy DE DISTINTAS MANERAS</div>
+      <p class="guiding-question">¿Qué diferencia existe entre la variación real de la curva (Δy) y la variación diferencial (dy)?</p>
+
+      <div class="grid-dy">
+        <!-- Controles y matemáticas -->
+        <div class="controls-panel">
+          <h3>Parámetros Infinitesimales</h3>
+
+          <div class="slider-group">
+            <label for="x0Slider">Punto Base x₀: <span class="val-display" id="x0Val">1.00</span> rad</label>
+            <input type="range" id="x0Slider" min="0.1" max="6.0" step="0.05" value="1.00" />
+          </div>
+
+          <div class="slider-group">
+            <label for="dxSlider">Incremento Horizontal dx: <span class="val-display" id="dxVal">0.80</span></label>
+            <input type="range" id="dxSlider" min="0.05" max="1.8" step="0.05" value="0.80" />
+          </div>
+
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="chkDy" checked />
+              <span>Mostrar Recta Tangente y <strong>dy = f'(x)·dx</strong></span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="chkDeltaY" checked />
+              <span>Mostrar Secante y Variación Real <strong>Δy</strong></span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="chkZoom" checked />
+              <span>Lupa Zoom 4x (Ver linealidad local)</span>
+            </label>
+          </div>
+
+          <div class="math-dashboard">
+            <div class="math-row">
+              <span class="label">Paso dx:</span>
+              <span class="value" id="valDx">0.8000</span>
+            </div>
+            <div class="math-row">
+              <span class="label">Variación real Δy:</span>
+              <span class="value deltay-val" id="valDeltaY">0.1325</span>
+            </div>
+            <div class="math-row">
+              <span class="label">Diferencial dy (Tangente):</span>
+              <span class="value dy-val" id="valDy">0.4322</span>
+            </div>
+            <div class="math-row">
+              <span class="label">Error de aprox |Δy - dy|:</span>
+              <span class="value error-val" id="valError">0.2997</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfica interactiva -->
+        <div class="canvas-panel">
+          <div class="canvas-wrapper">
+            <canvas id="canvasDy"></canvas>
+          </div>
+          <div class="canvas-footer">
+            <span>CURVA VERDE/AZUL: f(x) = sen(x)</span>
+            <span>AL DISMINUIR dx HACIA 0, dy CONVERGE EXACTAMENTE A Δy</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VISTA 2: PANTALLA DIVIDIDA INTERACTIVA ── -->
+    <div id="view2" class="view">
+      <div class="section-label">PARTE 2 // CONCLUSIÓN CON PANTALLA DIVIDIDA Y SUMAS DE RIEMANN</div>
+      <p class="guiding-question">¿Por qué la acumulación de áreas rectangulares del Coseno equivale al cambio de altura del Seno?</p>
+
+      <div class="split-controls">
+        <div class="control-item">
+          <label style="font-family:var(--mono);font-size:12px;color:var(--cyan);display:block;margin-bottom:6px;">
+            PUNTO ACTIVO DE EVALUACIÓN (x₀): <span id="x0SplitVal" style="color:#fbbf24;font-weight:700;">1.26</span>
+          </label>
+          <input type="range" id="x0SplitSlider" min="0" max="6.28" step="0.04" value="1.26" />
+        </div>
+        <div class="control-item">
+          <label style="font-family:var(--mono);font-size:12px;color:var(--cyan);display:block;margin-bottom:6px;">
+            PARTICIONES DEL INTERVALO [0, 2π] (N): <span id="nSplitVal" style="color:#fbbf24;font-weight:700;">16</span>
+          </label>
+          <input type="range" id="nSplitSlider" min="6" max="50" step="2" value="16" />
+        </div>
+        <div>
+          <button class="btn-action" id="btnSweep">▶ Animar Barrido Coseno</button>
+        </div>
+      </div>
+
+      <div class="split-canvases">
+        <!-- Izquierda: Seno -->
+        <div class="split-box">
+          <h4>
+            <span>Variación Vertical Δy en Sen(x)</span>
+            <span class="tag">Altura escalón: <strong id="valSplitLeft">0.1250</strong></span>
+          </h4>
+          <div class="split-canvas-wrapper">
+            <canvas id="canvasSplitLeft"></canvas>
+          </div>
+        </div>
+
+        <!-- Derecha: Coseno -->
+        <div class="split-box">
+          <h4>
+            <span>Área Rectangular Cos(x) · dx</span>
+            <span class="tag">Área rectángulo: <strong id="valSplitRight">0.1250</strong></span>
+          </h4>
+          <div class="split-canvas-wrapper">
+            <canvas id="canvasSplitRight"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="split-equality-banner">
+        <div class="eq-main">
+          <span class="hl-left">sen(x + dx) - sen(x)</span> = <span class="hl-right">cos(x) · dx</span>
+        </div>
+        <div class="eq-sub">
+          La altura de la pequeña variación en el seno (izquierda) es geométricamente igual al área del rectángulo de ancho dx y altura cos(x) (derecha).
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VISTA 3: VIDEO ORIGINAL Y GUÍA ── -->
+    <div id="view3" class="view">
+      <div class="section-label">RECURSO AUDIOVISUAL // VIDEO ORIGINAL DEL PROYECTO USACH</div>
+      <p class="guiding-question">Observa el video pedagógico Diferencial_4.mp4 con navegación instantánea por temas.</p>
+
+      <div class="video-grid">
+        <div class="video-container">
+          <div class="video-player-wrapper">
+            <video id="mainVideo" controls src="Diferencial_4.mp4">
+              Tu navegador no soporta el elemento de video.
+            </video>
+          </div>
+        </div>
+
+        <div class="chapters-panel">
+          <h3>Marcadores y Capítulos</h3>
+          <div class="chapter-list">
+            <button class="chapter-btn" onclick="jumpToTime(0)">
+              <span class="time-badge">00:00</span>
+              <span>Introducción y selección de intervalo</span>
+            </button>
+            <button class="chapter-btn" onclick="jumpToTime(7)">
+              <span class="time-badge">00:07</span>
+              <span>El incremento infinitesimal dx</span>
+            </button>
+            <button class="chapter-btn" onclick="jumpToTime(42)">
+              <span class="time-badge">00:42</span>
+              <span>Acumulación escalonada de variaciones</span>
+            </button>
+            <button class="chapter-btn" onclick="jumpToTime(79)">
+              <span class="time-badge">01:19</span>
+              <span>Nacimiento de la gráfica del Coseno</span>
+            </button>
+            <button class="chapter-btn" onclick="jumpToTime(115)">
+              <span class="time-badge">01:55</span>
+              <span>El área del rectángulo cos(x) · dx</span>
+            </button>
+            <button class="chapter-btn" onclick="jumpToTime(162)">
+              <span class="time-badge">02:42</span>
+              <span>Pantalla dividida y conclusión final</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="page-footer">
+      <span>EOS_APP // TRABAJOS USACH — CÁLCULO E INTERACTIVIDAD</span>
+      <span class="status-led">MODULO ACTIVO Y SINCRONIZADO</span>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

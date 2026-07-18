@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El proceso de desarrollo de software — Taller de Recursos Digitales Interactivos</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body class="tiene-sidebar" data-module="08" data-page="05" data-root="../">
+
+  <div id="site-header"></div>
+  <div id="site-modulebar"></div>
+  <div id="site-sidebar"></div>
+
+  <main class="contenido">
+    <div class="sello-revision">🔍 En revisión</div>
+    <h1>El proceso de desarrollo de software</h1>
+    <p>Ahora que has construido y publicado tu primer recurso digital, has entrado oficialmente al mundo de la creación de software. Aunque programes con la ayuda de una inteligencia artificial y no escribas todo el código manualmente, es muy importante que conozcas las estrategias y etapas que hacen que un recurso sea confiable, fácil de usar y duradero.</p>
+
+    <h2>1. Planificación y diseño de la interfaz</h2>
+    <p>Antes de abrir VS Code o pedirle código a la IA, dedica unos minutos a planificar tu recurso en papel o mediante un esquema mental simple. Define con claridad lo siguiente:</p>
+    <ul>
+      <li><strong>El flujo de la actividad:</strong> ¿Qué verá el estudiante primero? ¿Qué pasa si responde correctamente? ¿Qué pasa si falla?</li>
+      <li><strong>Las entradas y salidas:</strong> Qué datos ingresará el usuario (números, texto, opciones) y qué resultados mostrará la pantalla.</li>
+      <li><strong>La distribución visual:</strong> Ubicar dónde irá el enunciado, las ayudas visuales y los botones de acción para que el estudiante no se distraiga ni se confunda.</li>
+    </ul>
+
+    <h2>2. Estrategias de prueba (Testing)</h2>
+    <p>La IA suele escribir código funcional muy rápido, pero también puede introducir errores sutiles. Para asegurar la calidad de tu recurso sin ser un experto técnico, debes guiarte por tres niveles de prueba:</p>
+    
+    <div class="bloque-contenido-destacado" style="margin-top: 15px; margin-bottom: 20px;">
+      <p><strong>Pruebas Unitarias (Verificar piezas individuales):</strong> Consiste en aislar y probar una función específica del recurso. Por ejemplo, si tienes una fórmula matemática para validar una respuesta, pruébala ingresando datos correctos e incorrectos para ver si el resultado parcial es el esperado.</p>
+      
+      <p style="margin-top: 10px;"><strong>Pruebas de Integración (Verificar el flujo conjunto):</strong> Consiste en probar que las distintas partes del recurso conversen bien entre sí. Por ejemplo, verificar que al presionar el botón de enviar respuesta se actualice el contador de puntaje, se oculte la pregunta actual y se muestre la tarjeta de explicación.</p>
+      
+      <p style="margin-top: 10px;"><strong>Pruebas de Regresión (Asegurar que nada se rompió):</strong> Es muy común que al corregir un error o agregar una nueva función (como un botón de pista) se rompa algo que ya funcionaba bien antes. Siempre que la IA haga un cambio en tu código, vuelve a probar el recurso completo desde el inicio para verificar que las funciones antiguas siguen intactas.</p>
+    </div>
+
+    <h2>3. Usabilidad, accesibilidad y documentación</h2>
+    <p>Un buen recurso educativo digital debe poder usarse sin explicaciones externas adicionales. Considera estos tres aspectos en el diseño:</p>
+    <ul>
+      <li><strong>Instrucciones claras:</strong> El recurso debe guiar al estudiante de manera intuitiva. Incluye ayudas visuales sencillas o textos cortos que expliquen el formato de respuesta esperado (por ejemplo, si se debe responder con coma o con un formato algebraico específico).</li>
+      <li><strong>Mensajes de error informativos:</strong> Si el estudiante comete un error de formato, el sistema no debe congelarse. Debe mostrar una alerta clara que le explique qué ocurrió y cómo corregirlo.</li>
+      <li><strong>Facilidad de navegación:</strong> Evita pantallas recargadas de información. La autoevaluación, los botones de ayuda y las explicaciones deben aparecer de forma organizada para no provocar fatiga cognitiva.</li>
+    </ul>
+
+    <h2>4. Optimización y rendimiento del recurso (Consideraciones No-Código)</h2>
+    <p>En el desarrollo de software y páginas web, **no todo es código**. Una aplicación puede tener una arquitectura perfecta en JavaScript, pero si sus recursos multimedia son pesados o no están optimizados, la experiencia del usuario colapsará. Los estudiantes suelen acceder a los recursos desde redes escolares lentas, conexiones móviles Wi-Fi saturadas o dispositivos de gama baja.</p>
+    
+    <p>Por ello, la gestión eficiente del **peso de los archivos** y la elección del **formato correcto** es una disciplina clave en el desarrollo web profesional:</p>
+    
+    <ul>
+      <li><strong>El costo invisible del ancho de banda:</strong> Si una página web carga 10 imágenes de 8 MB cada una (80 MB en total), un teléfono celular en red 3G/4G tardará más de un minuto en abrirla o consumirá el plan de datos del estudiante. Optimizar cada archivo al mínimo necesario es un estándar de accesibilidad.</li>
+      <li><strong>Resolución versus Visualización:</strong> Nunca subas una foto de cámara de 4000x3000 px si en la pantalla solo se mostrará en un recuadro de 800x600 px. Redimensionar las dimensiones en píxeles antes de guardar ahorra hasta un 90% de peso sin perder nitidez.</li>
+      <li><strong>Limpieza de código y activos:</strong> Pídele a la IA que elimine fragmentos de código de prueba o estilos repetidos, y elimina siempre de tus carpetas los archivos gráficos de respaldo o versiones anteriores que ya no utilice tu aplicación web.</li>
+    </ul>
+
+    <div class="bloque-contenido-destacado" style="margin-top: 20px; margin-bottom: 25px;">
+      <h3 style="margin-top: 0; color: var(--color-primario);">Guía y comparación de los 4 grandes formatos de imagen en la Web</h3>
+      <p>Elegir el formato de imagen adecuado según el tipo de contenido (foto, ilustración, animación o icono con transparencia) es fundamental para lograr un sitio veloz y nítido:</p>
+
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem;">
+        <thead>
+          <tr style="background: rgba(35, 94, 130, 0.1); border-bottom: 2px solid var(--color-borde); text-align: left;">
+            <th style="padding: 10px;">Formato</th>
+            <th style="padding: 10px;">¿Soporta Transparencia?</th>
+            <th style="padding: 10px;">¿Soporta Animación?</th>
+            <th style="padding: 10px;">Características, Ventajas y Cuándo Usar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--color-borde);">
+            <td style="padding: 10px; font-weight: bold; color: var(--color-acento);">WebP</td>
+            <td style="padding: 10px;">✅ Sí (Canal Alfa)</td>
+            <td style="padding: 10px;">✅ Sí (WebP Animado)</td>
+            <td style="padding: 10px;"><strong>El estándar web moderno de Google.</strong> Combina lo mejor de todos: ofrece una compresión fotográfica superior (pesa ~30% menos que JPG y hasta ~90% menos que PNG) manteniendo una nitidez excepcional y fondo transparente. Compatible con todos los navegadores modernos. <br><em>👉 Cuándo usar: Es la primera opción para prácticamente todo en la web actual (fotos, mapas, iconos recortados y animaciones).</em></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--color-borde);">
+            <td style="padding: 10px; font-weight: bold;">JPG / JPEG</td>
+            <td style="padding: 10px;">❌ No (Fondo blanco)</td>
+            <td style="padding: 10px;">❌ No</td>
+            <td style="padding: 10px;"><strong>El formato clásico para fotografías.</strong> Utiliza compresión "con pérdida" (elimina detalles imperceptibles al ojo) para lograr archivos muy pequeños. <br><em>👉 Cuándo usar: Fotografías realistas, retratos y fondos donde NO necesites transparencia ni recortes.</em></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--color-borde);">
+            <td style="padding: 10px; font-weight: bold;">PNG</td>
+            <td style="padding: 10px;">✅ Sí (Canal Alfa perfecto)</td>
+            <td style="padding: 10px;">❌ No (excepto APNG)</td>
+            <td style="padding: 10px;"><strong>Formato sin pérdida (Lossless).</strong> Guarda cada píxel exactamente como fue creado sin comprimir colores, logrando bordes ultra nítidos y transparencias suaves. Sin embargo, genera archivos sumamente pesados cuando se aplica a fotografías o mapas detallados. <br><em>👉 Cuándo usar: Logotipos, diagramas, capturas de pantalla de texto o gráficos vectoriales donde la extrema nitidez sea indispensable y no se pueda usar WebP o SVG.</em></td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; font-weight: bold;">GIF</td>
+            <td style="padding: 10px;">⚠️ Sí (Pero solo de 1 bit / sin bordes suaves)</td>
+            <td style="padding: 10px;">✅ Sí (El formato clásico animado)</td>
+            <td style="padding: 10px;"><strong>El veterano de las animaciones simples.</strong> Está limitado a una paleta de máximo 256 colores, por lo que las fotos se ven con "puntitos" (dithering) y las transparencias dejan bordes dentados o blancos. Además, sus archivos suelen ser muy pesados en comparación con un video o un WebP animado. <br><em>👉 Cuándo usar: Memes rápidos, pequeños iconos animados simples o retro-compatibilidad extrema donde no se admita MP4 o WebP animado.</em></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="recuerda">
+      <div class="recuerda__titulo">El rol del creador de recursos</div>
+      <p>Al programar con inteligencia artificial, tu rol principal deja de ser el de transcriptor de código y pasa a ser el de diseñador de la experiencia de aprendizaje y supervisor de calidad. Tu criterio pedagógico y tus pruebas minuciosas son las que transforman un trozo de código generado en una verdadera herramienta educativa.</p>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../js/nav-data.js"></script>
+  <script src="../js/nav.js"></script>
+</body>
+</html>

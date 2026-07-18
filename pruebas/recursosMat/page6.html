@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribución Binomial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            gap: 30px;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .problem-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .problem-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .formula-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+            display: none;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        .page-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .page-number:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-number.active {
+            background: white;
+            border-color: #667eea;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Evaluación: Distribución Binomial</h1>
+        <div class="score-display" id="scoreDisplay">Puntuación: 0/0</div>
+
+        <div class="problem-container" id="problemContainer">
+            <div class="problem-text" id="problemText"></div>
+            <div class="formula-box">
+                <strong>Fórmula:</strong> P(X = k) = C(n,k) × p<sup>k</sup> × (1-p)<sup>n-k</sup><br>
+                Donde: n = número de ensayos, k = éxitos, p = probabilidad de éxito
+            </div>
+            <div class="input-group">
+                <label for="userAnswer">Tu respuesta (redondea a 4 decimales):</label>
+                <input type="number" id="userAnswer" step="0.0001" placeholder="0.0000">
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" id="checkBtn">Verificar Respuesta</button>
+                <button class="btn btn-secondary" id="newProblemBtn">Nuevo Problema</button>
+            </div>
+            <div class="feedback" id="feedback"></div>
+            <div class="explanation" id="explanation"></div>
+        </div>
+    </div>
+    <div class="page-navigation">
+        <a href="index.html" class="page-number">1</a>
+        <a href="page2.html" class="page-number">2</a>
+        <a href="page3.html" class="page-number">3</a>
+        <a href="page4.html" class="page-number">4</a>
+        <a href="page5.html" class="page-number">5</a>
+        <a href="page6.html" class="page-number active">6</a>
+        <a href="page7.html" class="page-number">7</a>
+        <a href="page8.html" class="page-number">8</a>
+        <a href="page9.html" class="page-number">9</a>
+        <a href="page10.html" class="page-number">10</a>
+        <a href="page11.html" class="page-number">11</a>
+    </div>
+
+    <script>
+        // Función para calcular combinaciones C(n,k)
+        function combination(n, k) {
+            if (k > n || k < 0) return 0;
+            if (k === 0 || k === n) return 1;
+            k = Math.min(k, n - k);
+            let result = 1;
+            for (let i = 0; i < k; i++) {
+                result = result * (n - i) / (i + 1);
+            }
+            return result;
+        }
+
+        // Función para calcular distribución binomial
+        function binomialProbability(n, k, p) {
+            const comb = combination(n, k);
+            return comb * Math.pow(p, k) * Math.pow(1 - p, n - k);
+        }
+
+        // Problemas de ejemplo
+        const problems = [
+            {
+                text: "Se lanza una moneda justa 5 veces. ¿Cuál es la probabilidad de obtener exactamente 3 caras?",
+                n: 5,
+                k: 3,
+                p: 0.5,
+                explanation: "n = 5 (lanzamientos), k = 3 (caras), p = 0.5 (probabilidad de cara)<br>P(X=3) = C(5,3) × 0.5³ × 0.5² = 10 × 0.125 × 0.25 = 0.3125"
+            },
+            {
+                text: "Un estudiante responde al azar un examen de 10 preguntas de verdadero/falso. ¿Cuál es la probabilidad de que acierte exactamente 7 preguntas?",
+                n: 10,
+                k: 7,
+                p: 0.5,
+                explanation: "n = 10 (preguntas), k = 7 (aciertos), p = 0.5 (probabilidad de acertar)<br>P(X=7) = C(10,7) × 0.5⁷ × 0.5³ = 120 × 0.0078125 × 0.125 = 0.1172"
+            },
+            {
+                text: "En una fábrica, el 20% de los productos son defectuosos. Si se seleccionan 8 productos al azar, ¿cuál es la probabilidad de que exactamente 2 sean defectuosos?",
+                n: 8,
+                k: 2,
+                p: 0.2,
+                explanation: "n = 8 (productos), k = 2 (defectuosos), p = 0.2 (probabilidad de defectuoso)<br>P(X=2) = C(8,2) × 0.2² × 0.8⁶ = 28 × 0.04 × 0.262144 = 0.2936"
+            },
+            {
+                text: "Un jugador de básquetbol tiene un 70% de acierto en tiros libres. Si lanza 6 tiros libres, ¿cuál es la probabilidad de que acierte exactamente 4?",
+                n: 6,
+                k: 4,
+                p: 0.7,
+                explanation: "n = 6 (tiros), k = 4 (aciertos), p = 0.7 (probabilidad de acierto)<br>P(X=4) = C(6,4) × 0.7⁴ × 0.3² = 15 × 0.2401 × 0.09 = 0.3241"
+            },
+            {
+                text: "En una encuesta, el 60% de las personas prefiere el producto A. Si se entrevistan 5 personas, ¿cuál es la probabilidad de que exactamente 3 prefieran el producto A?",
+                n: 5,
+                k: 3,
+                p: 0.6,
+                explanation: "n = 5 (personas), k = 3 (prefieren A), p = 0.6 (probabilidad de preferir A)<br>P(X=3) = C(5,3) × 0.6³ × 0.4² = 10 × 0.216 × 0.16 = 0.3456"
+            }
+        ];
+
+        let currentProblem = null;
+        let score = { correct: 0, total: 0 };
+
+        // Generar nuevo problema
+        function generateNewProblem() {
+            const randomIndex = Math.floor(Math.random() * problems.length);
+            currentProblem = problems[randomIndex];
+            
+            document.getElementById('problemText').textContent = currentProblem.text;
+            document.getElementById('userAnswer').value = '';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('explanation').style.display = 'none';
+            document.getElementById('checkBtn').disabled = false;
+        }
+
+        // Verificar respuesta
+        function checkAnswer() {
+            const userAnswer = parseFloat(document.getElementById('userAnswer').value);
+            const correctAnswer = binomialProbability(currentProblem.n, currentProblem.k, currentProblem.p);
+            const roundedCorrect = Math.round(correctAnswer * 10000) / 10000;
+            
+            const feedback = document.getElementById('feedback');
+            const explanation = document.getElementById('explanation');
+            
+            score.total++;
+            
+            if (Math.abs(userAnswer - roundedCorrect) < 0.0001) {
+                feedback.textContent = '¡Correcto! 🎉';
+                feedback.className = 'feedback correct';
+                score.correct++;
+            } else {
+                feedback.textContent = `Incorrecto. La respuesta correcta es ${roundedCorrect.toFixed(4)}`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            explanation.innerHTML = '<strong>Explicación:</strong><br>' + currentProblem.explanation;
+            
+            feedback.style.display = 'block';
+            explanation.style.display = 'block';
+            document.getElementById('checkBtn').disabled = true;
+            
+            updateScore();
+        }
+
+        // Actualizar puntuación
+        function updateScore() {
+            document.getElementById('scoreDisplay').textContent = 
+                `Puntuación: ${score.correct}/${score.total} (${score.total > 0 ? Math.round((score.correct/score.total)*100) : 0}%)`;
+        }
+
+        // Event listeners
+        document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+        document.getElementById('newProblemBtn').addEventListener('click', generateNewProblem);
+        document.getElementById('userAnswer').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        // Generar primer problema
+        generateNewProblem();
+    </script>
+</body>
+</html>
+

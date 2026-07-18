@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablas de Multiplicar 1-10</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            gap: 30px;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 900px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 36px;
+        }
+
+        .table-container {
+            display: grid;
+            grid-template-columns: repeat(11, 55px);
+            gap: 0;
+            margin-bottom: 30px;
+            border: 1px solid #d1d5db;
+            background: white;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .table-header {
+            background: #e5e7eb;
+            color: #1f2937;
+            padding: 6px 4px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            border: 1px solid #d1d5db;
+            border-radius: 0;
+        }
+
+        .table-item {
+            background: white;
+            color: #1f2937;
+            padding: 6px 4px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: normal;
+            border: 1px solid #d1d5db;
+            border-radius: 0;
+            box-shadow: none;
+            transition: background-color 0.1s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .table-item:hover {
+            background: #f3f4f6;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .table-item:active {
+            background: #e5e7eb;
+            transform: none;
+        }
+
+        .table-item.clicked {
+            background: #dbeafe;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .practice-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .practice-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .practice-problem {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .practice-input {
+            width: 100px;
+            padding: 12px;
+            font-size: 24px;
+            text-align: center;
+            border: 3px solid #667eea;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+
+        .practice-input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+        }
+
+        .practice-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        .page-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .page-number:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-number.active {
+            background: white;
+            border-color: #667eea;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tablas de Multiplicar del 1 al 10</h1>
+        
+        <div class="table-container" id="tableContainer">
+            <!-- Se llenará con JavaScript -->
+        </div>
+
+        <div class="practice-section">
+            <div class="practice-title">Practica las Multiplicaciones</div>
+            <div class="practice-problem" id="practiceProblem">
+                ? × ? = ?
+            </div>
+            <div style="text-align: center;">
+                <input type="number" id="practiceAnswer" class="practice-input" placeholder="?">
+            </div>
+            <div class="practice-buttons">
+                <button class="btn btn-primary" id="checkAnswerBtn">Verificar</button>
+                <button class="btn btn-secondary" id="newProblemBtn">Nuevo Problema</button>
+            </div>
+            <div class="feedback" id="feedback"></div>
+        </div>
+    </div>
+    <div class="page-navigation">
+        <a href="index.html" class="page-number">1</a>
+        <a href="page2.html" class="page-number">2</a>
+        <a href="page3.html" class="page-number">3</a>
+        <a href="page4.html" class="page-number">4</a>
+        <a href="page5.html" class="page-number">5</a>
+        <a href="page6.html" class="page-number">6</a>
+        <a href="page7.html" class="page-number active">7</a>
+        <a href="page8.html" class="page-number">8</a>
+        <a href="page9.html" class="page-number">9</a>
+        <a href="page10.html" class="page-number">10</a>
+        <a href="page11.html" class="page-number">11</a>
+    </div>
+
+    <script>
+        // Crear la tabla de multiplicar del 1 al 10
+        const tableContainer = document.getElementById('tableContainer');
+        
+        // Crear encabezados de fila y columna
+        // Primera fila: encabezados de columna (× 1, × 2, etc.)
+        const headerRow = document.createElement('div');
+        headerRow.className = 'table-header';
+        headerRow.textContent = '';
+        tableContainer.appendChild(headerRow);
+        
+        for (let col = 1; col <= 10; col++) {
+            const header = document.createElement('div');
+            header.className = 'table-header';
+            header.textContent = `× ${col}`;
+            tableContainer.appendChild(header);
+        }
+        
+        // Crear filas de la tabla
+        for (let row = 1; row <= 10; row++) {
+            // Encabezado de fila
+            const rowHeader = document.createElement('div');
+            rowHeader.className = 'table-header';
+            rowHeader.textContent = row.toString();
+            tableContainer.appendChild(rowHeader);
+            
+            // Celdas de la fila
+            for (let col = 1; col <= 10; col++) {
+                const item = document.createElement('div');
+                item.className = 'table-item';
+                item.textContent = row * col;
+                item.addEventListener('click', function() {
+                    this.classList.add('clicked');
+                    setTimeout(() => {
+                        this.classList.remove('clicked');
+                    }, 300);
+                });
+                tableContainer.appendChild(item);
+            }
+        }
+
+        // Sección de práctica
+        let currentNum1 = 1;
+        let currentNum2 = 1;
+
+        function generateNewProblem() {
+            currentNum1 = Math.floor(Math.random() * 10) + 1; // 1-10
+            currentNum2 = Math.floor(Math.random() * 10) + 1; // 1-10
+            document.getElementById('practiceProblem').textContent = `${currentNum1} × ${currentNum2} = ?`;
+            document.getElementById('practiceAnswer').value = '';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('practiceAnswer').focus();
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('practiceAnswer').value);
+            const correctAnswer = currentNum1 * currentNum2;
+            const feedback = document.getElementById('feedback');
+
+            if (userAnswer === correctAnswer) {
+                feedback.textContent = '¡Correcto! 🎉';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = `Incorrecto. La respuesta correcta es ${correctAnswer}`;
+                feedback.className = 'feedback incorrect';
+            }
+
+            feedback.style.display = 'block';
+        }
+
+        // Event listeners
+        document.getElementById('checkAnswerBtn').addEventListener('click', checkAnswer);
+        document.getElementById('newProblemBtn').addEventListener('click', generateNewProblem);
+        document.getElementById('practiceAnswer').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        // Generar primer problema
+        generateNewProblem();
+    </script>
+</body>
+</html>
+

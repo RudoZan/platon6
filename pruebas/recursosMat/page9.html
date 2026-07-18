@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle de la Balanza - Monedas Falsas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 25px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .weighings-counter {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .coins-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+        }
+
+        .coin {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f6d365 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #8b4513;
+            cursor: grab;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            border: 2px solid #8b4513;
+            outline: 2px solid rgba(139, 69, 19, 0.3);
+            outline-offset: 2px;
+            position: relative;
+            margin: 0 auto;
+            user-select: none;
+        }
+
+        .coin:active {
+            cursor: grabbing;
+        }
+
+        .coin.dragging {
+            opacity: 0.5;
+        }
+
+        .coin:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .coin.selected {
+            border-color: #4CAF50;
+            outline-color: rgba(76, 175, 80, 0.5);
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .coin.left-side {
+            border-color: #2196F3;
+            outline-color: rgba(33, 150, 243, 0.5);
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+        }
+
+        .coin.right-side {
+            border-color: #FF9800;
+            outline-color: rgba(255, 152, 0, 0.5);
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+        }
+
+        .balance-container {
+            position: relative;
+            margin: 40px 0;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 20px;
+            min-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .balance-base-button {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+        }
+
+        .balance-base-button.hidden {
+            display: none;
+        }
+
+        /* Anular el hover general de .btn para estos botones específicos */
+        .balance-base-button.btn:hover {
+            transform: translateX(-50%) translateY(-1px) !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .balance-base-button.btn:active {
+            transform: translateX(-50%) translateY(0) !important;
+        }
+
+        .balance-svg-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            height: 350px;
+        }
+
+        .balance-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .balance-plates {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .balance-plate {
+            position: absolute;
+            width: 120px;
+            height: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-end;
+            justify-content: center;
+            padding: 0 5px 5px 5px;
+            gap: 4px;
+            pointer-events: auto;
+            transition: transform 1s ease-in-out;
+        }
+
+        .balance-plate.drag-over {
+            background-color: rgba(76, 175, 80, 0.3);
+            border-radius: 10px;
+            outline: 3px dashed rgba(76, 175, 80, 0.8);
+            outline-offset: -3px;
+        }
+
+        .balance-plate.left.drag-over {
+            outline-color: rgba(33, 150, 243, 0.8);
+            background-color: rgba(33, 150, 243, 0.2);
+        }
+
+        .balance-plate.right.drag-over {
+            outline-color: rgba(255, 152, 0, 0.8);
+            background-color: rgba(255, 152, 0, 0.2);
+        }
+
+        .balance-plate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to bottom, #9facad 0%, #7f8c8d 50%, #6f7c7d 100%);
+            clip-path: polygon(10% 100%, 90% 100%, 100% 30%, 95% 0%, 5% 0%, 0% 30%);
+            border-bottom: 3px solid #5f6c6d;
+            box-shadow: inset 0 -2px 5px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        .balance-plate.left {
+            left: calc(50% - 190px);
+            top: calc(50% - 40px);
+            transform-origin: center bottom;
+        }
+
+        .balance-plate.right {
+            right: calc(50% - 190px);
+            top: calc(50% - 40px);
+            transform-origin: center bottom;
+        }
+
+        .balance-plate.left::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            left: -10px;
+            width: 20px;
+            height: 60px;
+            background: linear-gradient(180deg, #555 0%, #444 100%);
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .balance-plate.right::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            right: -10px;
+            width: 20px;
+            height: 60px;
+            background: linear-gradient(180deg, #555 0%, #444 100%);
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .balance-plate {
+                width: 100px;
+            }
+            .balance-plate::before {
+                height: 35px;
+            }
+            .balance-plate.left {
+                left: calc(50% - 140px);
+            }
+            .balance-plate.right {
+                right: calc(50% - 140px);
+            }
+            .balance-plate.left::after,
+            .balance-plate.right::after {
+                height: 50px;
+                bottom: -50px;
+            }
+            .plate-coin {
+                width: 20px;
+                height: 20px;
+                font-size: 0.65em;
+            }
+        }
+        
+        .balance-svg g {
+            transition: transform 1s ease-in-out;
+        }
+
+        .plate-coin {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f6d365 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: bold;
+            color: #8b4513;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(139, 69, 19, 0.4);
+            position: relative;
+            z-index: 2;
+            margin-top: 5px;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .plate-coin:active {
+            cursor: grabbing;
+        }
+
+        .plate-coin.dragging {
+            opacity: 0.5;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover:not(.balance-base-button) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active:not(.balance-base-button) {
+            transform: translateY(0);
+        }
+
+        .btn-left {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+        }
+
+        .btn-right {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+        }
+
+        .btn-weigh {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            font-size: 1.2em;
+            padding: 15px 30px;
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #9E9E9E 0%, #757575 100%);
+            color: white;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+        }
+
+        .btn-hint {
+            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+            color: white;
+        }
+
+        .result-panel {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+            display: none;
+        }
+
+        .result-panel.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-title {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .result-content {
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .strategy-level {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .victory-message {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hint-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(156, 39, 176, 0.1);
+            border-left: 4px solid #9C27B0;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .hint-panel.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .coins-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .balance-plates {
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .balance-plate {
+                width: 150px;
+                height: 150px;
+            }
+
+            .balance-beam {
+                height: 250px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+        }
+
+        @keyframes coinPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .coin.found {
+            animation: coinPulse 1s ease infinite;
+            border-color: #FFD700;
+            box-shadow: 0 0 20px #FFD700;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 10;
+        }
+
+        .page-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .page-number:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .page-number.active {
+            background: white;
+            border-color: #1e3c72;
+            color: #1e3c72;
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚖️ Puzzle de la Balanza</h1>
+        <p class="subtitle">Encuentra la moneda falsa (más pesada) usando la balanza</p>
+
+        <div class="game-info">
+            <div class="weighings-counter">
+                Pesadas realizadas: <span id="weighingsCount">0</span>
+            </div>
+            <button class="btn btn-hint" onclick="showHint()">💡 Pista</button>
+            <button class="btn btn-reset" onclick="resetGame()">🔄 Reiniciar</button>
+        </div>
+
+        <div class="hint-panel" id="hintPanel">
+            <strong>💡 Pista: Estrategia Óptima</strong>
+            <p>La estrategia más eficiente es dividir las monedas en tres grupos de igual tamaño. Primero pesa dos grupos. Si pesan igual, la moneda falsa está en el tercer grupo. Si uno pesa más, la moneda falsa está en ese grupo. Luego repite el proceso con el grupo identificado dividiéndolo nuevamente en tercios.</p>
+        </div>
+
+        <div class="coins-container" id="coinsContainer"></div>
+
+        <div class="balance-container">
+            <div class="balance-svg-container">
+                <svg class="balance-svg" id="balanceSvg" viewBox="0 0 700 350" preserveAspectRatio="xMidYMax meet">
+                    <!-- Sombra de la base -->
+                    <ellipse cx="350" cy="340" rx="80" ry="8" fill="rgba(0, 0, 0, 0.3)" />
+                    
+                    <!-- Base principal -->
+                    <rect x="300" y="280" width="100" height="50" rx="5" fill="#555" stroke="#333" stroke-width="2"/>
+                    <rect x="310" y="290" width="80" height="40" rx="3" fill="#444"/>
+                    
+                    <!-- Columna central -->
+                    <rect x="340" y="180" width="20" height="100" fill="#555" stroke="#333" stroke-width="2"/>
+                    
+                    <!-- Parte superior redondeada (arco invertido) -->
+                    <path d="M 340 180 L 340 160 Q 340 150 350 150 Q 360 150 360 160 L 360 180 Z" 
+                          fill="#555" stroke="#333" stroke-width="2"/>
+                    
+                    <!-- Pivote (círculo central) -->
+                    <circle cx="350" cy="160" r="8" fill="#666" stroke="#444" stroke-width="2"/>
+                    <circle cx="350" cy="160" r="4" fill="#888"/>
+                    
+                    <!-- Viga horizontal (se animará con transform) -->
+                    <g id="balanceBeam" transform="translate(350, 160) rotate(0)">
+                        <line x1="-250" y1="0" x2="250" y2="0" stroke="#444" stroke-width="6" stroke-linecap="round"/>
+                        <line x1="-250" y1="0" x2="250" y2="0" stroke="#666" stroke-width="4" stroke-linecap="round"/>
+                    </g>
+                </svg>
+                
+                <div class="balance-plates">
+                    <div class="balance-plate left" id="leftPlate"></div>
+                    <div class="balance-plate right" id="rightPlate"></div>
+                </div>
+                
+                <!-- Botón Pesar en la base -->
+                <button class="btn btn-weigh balance-base-button" id="weighButton" onclick="weigh()">⚖️ Pesar</button>
+                
+                <!-- Botón Limpiar en la base (oculto inicialmente) -->
+                <button class="btn btn-clear balance-base-button hidden" id="clearButton" onclick="clearBalance()">🗑️ Limpiar</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-left" onclick="placeOnLeft()">⬅️ Izquierda</button>
+            <button class="btn btn-right" onclick="placeOnRight()">➡️ Derecha</button>
+            <button class="btn btn-hint" id="identifyBtn" onclick="identifyFakeCoin()" style="display: none; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);">✅ Identificar Falsa</button>
+        </div>
+
+        <div class="result-panel" id="resultPanel">
+            <div class="victory-message" id="victoryMessage"></div>
+            <div class="strategy-level" id="strategyLevel"></div>
+            <div class="result-content" id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let coins = [];
+        let fakeCoinIndex = -1;
+        let selectedCoins = new Set();
+        let leftPlateCoins = new Set();
+        let rightPlateCoins = new Set();
+        let weighings = 0;
+        let weighingHistory = [];
+        let gameWon = false;
+
+        function initGame() {
+            fakeCoinIndex = Math.floor(Math.random() * 9);
+            coins = Array.from({ length: 9 }, (_, i) => ({
+                id: i + 1,
+                isFake: i === fakeCoinIndex
+            }));
+            
+            selectedCoins.clear();
+            leftPlateCoins.clear();
+            rightPlateCoins.clear();
+            weighings = 0;
+            weighingHistory = [];
+            gameWon = false;
+            
+            document.getElementById('weighingsCount').textContent = '0';
+            document.getElementById('resultPanel').classList.remove('show');
+            document.getElementById('identifyBtn').style.display = 'none';
+            
+            // Reset balance to neutral position
+            const beam = document.getElementById('balanceBeam');
+            const leftPlateEl = document.getElementById('leftPlate');
+            const rightPlateEl = document.getElementById('rightPlate');
+            
+            const transform = 'translate(350, 160) rotate(0)';
+            if (beam) beam.setAttribute('transform', transform);
+            if (leftPlateEl) leftPlateEl.style.transform = 'rotate(0deg)';
+            if (rightPlateEl) rightPlateEl.style.transform = 'rotate(0deg)';
+            
+            // Asegurar que el botón Pesar esté visible al iniciar
+            const weighButton = document.getElementById('weighButton');
+            const clearButton = document.getElementById('clearButton');
+            if (weighButton) weighButton.classList.remove('hidden');
+            if (clearButton) clearButton.classList.add('hidden');
+            
+            renderCoins();
+            clearBalance();
+        }
+
+        function renderCoins() {
+            const container = document.getElementById('coinsContainer');
+            container.innerHTML = '';
+            
+            // Agregar event listeners para permitir soltar monedas en el contenedor
+            container.ondragover = (e) => {
+                e.preventDefault();
+            };
+            
+            container.ondrop = (e) => {
+                e.preventDefault();
+                handleDrop(e, 'container');
+            };
+            
+            coins.forEach((coin, index) => {
+                const coinEl = document.createElement('div');
+                coinEl.className = 'coin';
+                coinEl.textContent = coin.id;
+                coinEl.dataset.index = index;
+                coinEl.draggable = true;
+                
+                if (leftPlateCoins.has(index)) {
+                    coinEl.classList.add('left-side');
+                } else if (rightPlateCoins.has(index)) {
+                    coinEl.classList.add('right-side');
+                } else if (selectedCoins.has(index)) {
+                    coinEl.classList.add('selected');
+                }
+                
+                // Event listeners para drag and drop
+                coinEl.addEventListener('dragstart', handleDragStart);
+                coinEl.addEventListener('dragend', handleDragEnd);
+                
+                if (!leftPlateCoins.has(index) && !rightPlateCoins.has(index)) {
+                    coinEl.onclick = () => selectCoin(index);
+                }
+                
+                container.appendChild(coinEl);
+            });
+            
+            renderPlates();
+            updateIdentifyButton();
+        }
+
+        function renderPlates() {
+            const leftPlate = document.getElementById('leftPlate');
+            const rightPlate = document.getElementById('rightPlate');
+            
+            leftPlate.innerHTML = '';
+            rightPlate.innerHTML = '';
+            
+            // Limpiar event listeners anteriores
+            leftPlate.ondragover = null;
+            leftPlate.ondrop = null;
+            rightPlate.ondragover = null;
+            rightPlate.ondrop = null;
+            
+            // Agregar event listeners para drag and drop
+            leftPlate.ondragover = (e) => {
+                e.preventDefault();
+                leftPlate.classList.add('drag-over');
+            };
+            
+            leftPlate.ondragleave = () => {
+                leftPlate.classList.remove('drag-over');
+            };
+            
+            leftPlate.ondrop = (e) => {
+                e.preventDefault();
+                leftPlate.classList.remove('drag-over');
+                handleDrop(e, 'left');
+            };
+            
+            rightPlate.ondragover = (e) => {
+                e.preventDefault();
+                rightPlate.classList.add('drag-over');
+            };
+            
+            rightPlate.ondragleave = () => {
+                rightPlate.classList.remove('drag-over');
+            };
+            
+            rightPlate.ondrop = (e) => {
+                e.preventDefault();
+                rightPlate.classList.remove('drag-over');
+                handleDrop(e, 'right');
+            };
+            
+            leftPlateCoins.forEach(index => {
+                const plateCoin = document.createElement('div');
+                plateCoin.className = 'plate-coin';
+                plateCoin.textContent = coins[index].id;
+                plateCoin.draggable = true;
+                plateCoin.dataset.index = index;
+                plateCoin.addEventListener('dragstart', handleDragStart);
+                plateCoin.addEventListener('dragend', handleDragEnd);
+                leftPlate.appendChild(plateCoin);
+            });
+            
+            rightPlateCoins.forEach(index => {
+                const plateCoin = document.createElement('div');
+                plateCoin.className = 'plate-coin';
+                plateCoin.textContent = coins[index].id;
+                plateCoin.draggable = true;
+                plateCoin.dataset.index = index;
+                plateCoin.addEventListener('dragstart', handleDragStart);
+                plateCoin.addEventListener('dragend', handleDragEnd);
+                rightPlate.appendChild(plateCoin);
+            });
+        }
+
+        let draggedCoinIndex = null;
+
+        function handleDragStart(e) {
+            if (gameWon) {
+                e.preventDefault();
+                return;
+            }
+            
+            draggedCoinIndex = parseInt(e.target.dataset.index);
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', e.target.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            // Limpiar drag-over de todos los platos
+            document.getElementById('leftPlate').classList.remove('drag-over');
+            document.getElementById('rightPlate').classList.remove('drag-over');
+        }
+
+        function handleDrop(e, side) {
+            if (gameWon || draggedCoinIndex === null) return;
+            
+            if (side === 'left') {
+                leftPlateCoins.add(draggedCoinIndex);
+                rightPlateCoins.delete(draggedCoinIndex);
+            } else if (side === 'right') {
+                rightPlateCoins.add(draggedCoinIndex);
+                leftPlateCoins.delete(draggedCoinIndex);
+            } else if (side === 'container') {
+                // Devolver moneda al contenedor principal
+                leftPlateCoins.delete(draggedCoinIndex);
+                rightPlateCoins.delete(draggedCoinIndex);
+            }
+            
+            selectedCoins.delete(draggedCoinIndex);
+            draggedCoinIndex = null;
+            renderCoins();
+        }
+
+        function updateIdentifyButton() {
+            const identifyBtn = document.getElementById('identifyBtn');
+            if (weighings > 0) {
+                identifyBtn.style.display = 'inline-block';
+            } else {
+                identifyBtn.style.display = 'none';
+            }
+        }
+
+        function selectCoin(index) {
+            if (gameWon) return;
+            
+            if (leftPlateCoins.has(index) || rightPlateCoins.has(index)) {
+                return;
+            }
+            
+            if (selectedCoins.has(index)) {
+                selectedCoins.delete(index);
+            } else {
+                selectedCoins.add(index);
+            }
+            renderCoins();
+        }
+
+        function placeOnLeft() {
+            if (gameWon) return;
+            
+            selectedCoins.forEach(index => {
+                leftPlateCoins.add(index);
+                rightPlateCoins.delete(index);
+            });
+            selectedCoins.clear();
+            renderCoins();
+        }
+
+        function placeOnRight() {
+            if (gameWon) return;
+            
+            selectedCoins.forEach(index => {
+                rightPlateCoins.add(index);
+                leftPlateCoins.delete(index);
+            });
+            selectedCoins.clear();
+            renderCoins();
+        }
+
+        function clearBalance() {
+            if (gameWon) return;
+            
+            leftPlateCoins.clear();
+            rightPlateCoins.clear();
+            
+            // Reset balance to neutral position
+            const beam = document.getElementById('balanceBeam');
+            const leftPlateEl = document.getElementById('leftPlate');
+            const rightPlateEl = document.getElementById('rightPlate');
+            
+            const transform = 'translate(350, 160) rotate(0)';
+            if (beam) beam.setAttribute('transform', transform);
+            if (leftPlateEl) leftPlateEl.style.transform = 'rotate(0deg)';
+            if (rightPlateEl) rightPlateEl.style.transform = 'rotate(0deg)';
+            
+            // Asegurar que el botón Pesar esté visible al reiniciar
+            const weighButton = document.getElementById('weighButton');
+            const clearButton = document.getElementById('clearButton');
+            if (weighButton) weighButton.classList.remove('hidden');
+            if (clearButton) clearButton.classList.add('hidden');
+            
+            renderCoins();
+        }
+
+        function weigh() {
+            if (gameWon) return;
+            if (leftPlateCoins.size === 0 && rightPlateCoins.size === 0) {
+                alert('Coloca monedas en al menos un lado de la balanza');
+                return;
+            }
+
+            weighings++;
+            document.getElementById('weighingsCount').textContent = weighings;
+
+            const leftWeight = Array.from(leftPlateCoins).filter(i => !coins[i].isFake).length;
+            const rightWeight = Array.from(rightPlateCoins).filter(i => !coins[i].isFake).length;
+            const leftHasFake = Array.from(leftPlateCoins).some(i => coins[i].isFake);
+            const rightHasFake = Array.from(rightPlateCoins).some(i => coins[i].isFake);
+
+            let result;
+            if (leftHasFake && !rightHasFake) {
+                result = 'left';
+            } else if (rightHasFake && !leftHasFake) {
+                result = 'right';
+            } else if (leftWeight === rightWeight && !leftHasFake && !rightHasFake) {
+                result = 'equal';
+            } else {
+                result = 'equal';
+            }
+
+            weighingHistory.push({
+                left: Array.from(leftPlateCoins),
+                right: Array.from(rightPlateCoins),
+                result: result
+            });
+
+            const beam = document.getElementById('balanceBeam');
+            const leftPlateEl = document.getElementById('leftPlate');
+            const rightPlateEl = document.getElementById('rightPlate');
+            
+            setTimeout(() => {
+                let rotation = 0;
+                if (result === 'left') {
+                    rotation = -15;
+                } else if (result === 'right') {
+                    rotation = 15;
+                }
+                
+                const transform = `translate(350, 160) rotate(${rotation})`;
+                if (beam) beam.setAttribute('transform', transform);
+                
+                // Rotar los contenedores HTML de las monedas (los platos)
+                if (result === 'left') {
+                    if (leftPlateEl) leftPlateEl.style.transform = 'rotate(-15deg)';
+                    if (rightPlateEl) rightPlateEl.style.transform = 'rotate(-15deg)';
+                } else if (result === 'right') {
+                    if (leftPlateEl) leftPlateEl.style.transform = 'rotate(15deg)';
+                    if (rightPlateEl) rightPlateEl.style.transform = 'rotate(15deg)';
+                } else {
+                    if (leftPlateEl) leftPlateEl.style.transform = 'rotate(0deg)';
+                    if (rightPlateEl) rightPlateEl.style.transform = 'rotate(0deg)';
+                }
+            }, 100);
+
+            updateIdentifyButton();
+            
+            // Ocultar botón Pesar y mostrar botón Limpiar
+            const weighButton = document.getElementById('weighButton');
+            const clearButton = document.getElementById('clearButton');
+            if (weighButton) weighButton.classList.add('hidden');
+            if (clearButton) clearButton.classList.remove('hidden');
+        }
+
+        function identifyFakeCoin() {
+            if (gameWon) return;
+            
+            if (selectedCoins.size !== 1) {
+                alert('Por favor, selecciona exactamente una moneda para identificar como falsa');
+                return;
+            }
+            
+            const selectedIndex = Array.from(selectedCoins)[0];
+            
+            if (selectedIndex === fakeCoinIndex) {
+                gameWon = true;
+                analyzeStrategy();
+                showResult();
+            } else {
+                alert(`Incorrecto. La moneda #${coins[selectedIndex].id} no es la falsa. Sigue intentando.`);
+                selectedCoins.clear();
+                renderCoins();
+            }
+        }
+
+
+        function analyzeStrategy() {
+            const analysis = {
+                weighings: weighings,
+                strategy: '',
+                reasoning: '',
+                level: ''
+            };
+
+            if (weighingHistory.length === 0) return analysis;
+
+            const firstWeighing = weighingHistory[0];
+            const firstLeftCount = firstWeighing.left.length;
+            const firstRightCount = firstWeighing.right.length;
+            const firstTotal = firstLeftCount + firstRightCount;
+
+            // Detectar si usó división en tercios (3-3-3 o 3-3)
+            const usedThirds = (firstLeftCount === 3 && firstRightCount === 3);
+            
+            // Detectar estrategias de la segunda pesada si existe
+            let secondWeighingThirds = false;
+            if (weighingHistory.length > 1) {
+                const second = weighingHistory[1];
+                secondWeighingThirds = (second.left.length === 1 && second.right.length === 1) ||
+                                       (second.left.length <= 2 && second.right.length <= 2);
+            }
+
+            if (weighings === 2 && usedThirds) {
+                analysis.strategy = 'División en Tercios (Óptima)';
+                analysis.reasoning = 'Dividiste las monedas en grupos de 3-3-3, lo cual es la estrategia más eficiente. Esto te permitió eliminar 6 monedas en la primera pesada y luego identificar la falsa entre las 3 restantes en la segunda pesada usando nuevamente la división en tercios.';
+                analysis.level = 'EXPERTO';
+            } else if (weighings === 2 && !usedThirds) {
+                // Analizar qué estrategia usó
+                if (firstLeftCount === 1 || firstRightCount === 1) {
+                    analysis.strategy = 'Estrategia de Comparación Directa';
+                    analysis.reasoning = 'Lo resolviste en 2 pesadas comparando monedas individuales o grupos muy pequeños. Fue eficiente, aunque no usaste la estrategia óptima de tercios.';
+                    analysis.level = 'AFORTUNADO';
+                } else if (firstLeftCount === 4 && firstRightCount === 4) {
+                    analysis.strategy = 'Estrategia por Mitades';
+                    analysis.reasoning = 'Dividiste las monedas en mitades. Funcionó bien y lo resolviste rápidamente, aunque la estrategia óptima sería dividir en tercios.';
+                    analysis.level = 'INTUITIVO';
+                } else {
+                    analysis.strategy = 'Estrategia Rápida por Intuición';
+                    analysis.reasoning = 'Lo resolviste en 2 pesadas usando una estrategia intuitiva. Probablemente tuviste suerte o una excelente intuición para identificar rápidamente la moneda falsa.';
+                    analysis.level = 'AFORTUNADO';
+                }
+            } else if (weighings === 3) {
+                if (usedThirds) {
+                    analysis.strategy = 'División en Tercios (Metódica)';
+                    analysis.reasoning = 'Usaste la división en tercios correctamente, pero necesitaste una pesada adicional para confirmar. Fuiste muy cuidadoso y metódico verificando cada posibilidad.';
+                    analysis.level = 'METÓDICO';
+                } else if (firstLeftCount === 1 || firstRightCount === 1) {
+                    analysis.strategy = 'Estrategia Uno por Uno';
+                    analysis.reasoning = 'Fuiste comparando las monedas una por una o en grupos pequeños de manera sistemática. Es una estrategia válida y metódica, aunque menos eficiente que dividir en tercios.';
+                    analysis.level = 'EXPLORADOR';
+                } else {
+                    analysis.strategy = 'Estrategia por Mitades o Grupos';
+                    analysis.reasoning = 'Dividiste las monedas en grupos más grandes y fuiste reduciendo sistemáticamente. Funcionó, pero la estrategia óptima sería dividir en tercios desde el inicio.';
+                    analysis.level = 'INTUITIVO';
+                }
+            } else if (weighings === 4 || weighings === 5) {
+                if (firstLeftCount === 1 || firstRightCount === 1) {
+                    analysis.strategy = 'Estrategia de Prueba y Error';
+                    analysis.reasoning = 'Fuiste probando con monedas individuales o pequeños grupos, explorando diferentes posibilidades de manera persistente hasta encontrar la solución.';
+                    analysis.level = 'EXPLORADOR';
+                } else {
+                    analysis.strategy = 'Estrategia Persistente';
+                    analysis.reasoning = 'Mantuviste la determinación y probaste diferentes combinaciones sistemáticamente hasta resolver el puzzle. Tu persistencia y paciencia te llevaron al éxito.';
+                    analysis.level = 'PERSISTENTE';
+                }
+            } else {
+                analysis.strategy = 'Estrategia de Exploración Exhaustiva';
+                analysis.reasoning = 'Probaste muchas combinaciones diferentes hasta encontrar la solución. Tu persistencia y determinación te llevaron al éxito, aunque con más pesadas de las necesarias. ¡Lo importante es que no te rendiste!';
+                analysis.level = 'PERSISTENTE';
+            }
+
+            return analysis;
+        }
+
+        function showResult() {
+            const analysis = analyzeStrategy();
+            const coinEl = document.querySelector(`.coin[data-index="${fakeCoinIndex}"]`);
+            if (coinEl) {
+                coinEl.classList.add('found');
+            }
+
+            document.getElementById('victoryMessage').textContent = `¡Felicidades! Encontraste la moneda falsa: Moneda #${coins[fakeCoinIndex].id}`;
+            document.getElementById('strategyLevel').textContent = `Nivel: ${analysis.level}`;
+            
+            let content = `<strong>Estrategia detectada:</strong> ${analysis.strategy}<br><br>`;
+            content += `<strong>Análisis:</strong> ${analysis.reasoning}<br><br>`;
+            
+            if (weighings === 2 && analysis.strategy.includes('Tercios')) {
+                content += `<strong>🌟 ¡Estrategia Óptima!</strong> Resolviste el puzzle en el mínimo número de pesadas usando la división en tercios, que es la estrategia más eficiente para este tipo de problemas.`;
+            } else if (weighings === 2 && !analysis.strategy.includes('Tercios')) {
+                content += `<strong>¡Bien hecho!</strong> Lo resolviste en 2 pesadas. ¡Sigue practicando para perfeccionar tu técnica!`;
+            }
+            
+            document.getElementById('resultContent').innerHTML = content;
+            document.getElementById('resultPanel').classList.add('show');
+        }
+
+        function showHint() {
+            const hintPanel = document.getElementById('hintPanel');
+            hintPanel.classList.toggle('show');
+        }
+
+        function resetGame() {
+            if (confirm('¿Estás seguro de que quieres reiniciar el juego?')) {
+                initGame();
+                document.getElementById('hintPanel').classList.remove('show');
+            }
+        }
+
+
+        initGame();
+    </script>
+    <div class="page-navigation">
+        <a href="index.html" class="page-number">1</a>
+        <a href="page2.html" class="page-number">2</a>
+        <a href="page3.html" class="page-number">3</a>
+        <a href="page4.html" class="page-number">4</a>
+        <a href="page5.html" class="page-number">5</a>
+        <a href="page6.html" class="page-number">6</a>
+        <a href="page7.html" class="page-number">7</a>
+        <a href="page8.html" class="page-number">8</a>
+        <a href="page9.html" class="page-number active">9</a>
+        <a href="page10.html" class="page-number">10</a>
+        <a href="page11.html" class="page-number">11</a>
+    </div>
+</body>
+</html>
+

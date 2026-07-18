@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platon6</title>
+<style>
+  :root {
+    --color-bg-top: #cdf0f8;
+    --color-bg-bottom: #c2ebf5;
+    --color-primario: #235e82;
+    --color-primario-claro: #4a90c2;
+    --color-acento: #ef9d4f;
+    --color-texto: #1f3a4d;
+    --color-tarjeta: #fdfbf6;
+    --color-borde: #a9d0e2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(180deg, var(--color-bg-top), var(--color-bg-bottom));
+    color: var(--color-texto);
+    min-height: 100vh; padding: 0 20px 20px;
+    display: flex; flex-direction: column;
+  }
+
+  header { text-align: center; padding-top: 36px; margin-bottom: 8px; }
+
+  .hero {
+    max-width: 900px; margin: 0 auto; text-align: center;
+  }
+  .hero img {
+    display: block; width: 100%; max-width: 640px; margin: 0 auto;
+  }
+
+  h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 2.8rem; font-weight: 700; letter-spacing: 0.05em;
+    background: linear-gradient(120deg, var(--color-primario) 0%, #2f7ba8 45%, var(--color-acento) 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    color: var(--color-primario);
+    text-shadow: 0 3px 14px rgba(35, 94, 130, 0.2);
+    margin-bottom: 10px;
+  }
+  .divisor {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 180px; margin: 0 auto 12px;
+  }
+  .divisor::before, .divisor::after {
+    content: ''; flex: 1; height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--color-acento));
+  }
+  .divisor::after { background: linear-gradient(90deg, var(--color-acento), transparent); }
+  .divisor span { color: var(--color-acento); font-size: 0.75rem; transform: rotate(45deg); display: inline-block; }
+  .subtitulo {
+    color: var(--color-primario-claro); font-size: 0.95rem; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .proyectos {
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: 16px; max-width: 1000px; margin: 40px auto 0;
+  }
+  .proyecto {
+    display: block; background: var(--color-tarjeta); border: 2px solid var(--color-borde);
+    border-radius: 10px; padding: 18px 20px; text-decoration: none; color: var(--color-texto);
+    transition: border-color .15s, transform .15s;
+  }
+  .proyecto:hover { border-color: var(--color-acento); transform: translateY(-2px); }
+  .proyecto .titulo { font-weight: bold; font-size: 1rem; color: var(--color-primario); margin-bottom: 4px; }
+  .proyecto .desc { font-size: 0.82rem; color: #5c7d8f; }
+
+  .acceso {
+    text-align: center; max-width: 360px; margin: 0 auto;
+    padding: 26px 24px; border: 1px dashed var(--color-borde); border-radius: 10px;
+    background: rgba(255,255,255,0.35);
+  }
+  .acceso label {
+    display: block; color: var(--color-primario); font-weight: bold; font-size: 0.9rem; margin-bottom: 10px;
+  }
+  .acceso-fila { display: flex; gap: 8px; }
+  .acceso-fila input {
+    flex: 1; padding: 8px 10px; border-radius: 6px; border: 1.5px solid var(--color-borde);
+    background: #fff; color: var(--color-texto); font-size: 0.9rem;
+  }
+  .acceso-fila input:focus { outline: none; border-color: var(--color-primario-claro); }
+  .acceso-fila input.error { border-color: #c0392b; animation: sacudir 0.3s; }
+  @keyframes sacudir {
+    25% { transform: translateX(-4px); } 75% { transform: translateX(4px); }
+  }
+  .acceso-fila button {
+    padding: 8px 16px; border: none; border-radius: 6px; background: var(--color-primario);
+    color: white; font-weight: bold; font-size: 0.85rem; cursor: pointer;
+  }
+  .acceso-fila button:hover { background: var(--color-primario-claro); }
+  .acceso-error { color: #c0392b; font-size: 0.8rem; margin-top: 8px; min-height: 1.2em; }
+
+  footer {
+    text-align: center; margin-top: auto; padding-top: 30px;
+    color: var(--color-primario-claro); font-size: 0.78rem; letter-spacing: 0.03em;
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <h1>Platón 6</h1>
+    <div class="divisor"><span>◆</span></div>
+    <p class="subtitulo">Portal de recursos digitales</p>
+  </header>
+
+  <div class="hero">
+    <img src="imagenes/PortadaPlaton6.png" alt="Platón sosteniendo un libro de matemática y bloques de colores, frente a arquitectura griega clásica">
+  </div>
+
+  <!--
+    Cada proyecto es una carpeta hermana de este index.html (ej. sitio-web/mi-proyecto/),
+    con su propio index.html si lo necesita. Para agregar uno, sumar una tarjeta aquí:
+
+    <a class="proyecto" href="mi-proyecto/index.html">
+      <div class="titulo">Nombre del proyecto</div>
+      <div class="desc">Breve descripción de una línea.</div>
+    </a>
+  -->
+  <div class="proyectos" id="proyectos">
+    <div class="acceso">
+      <label for="inputCodigo">Ingresa el código</label>
+      <div class="acceso-fila">
+        <input type="text" id="inputCodigo" placeholder="código de acceso" autocomplete="off">
+        <button id="btnAccederCodigo">Entrar</button>
+      </div>
+      <p class="acceso-error" id="errorCodigo"></p>
+    </div>
+  </div>
+
+  <footer>- Desarrollado por Astutosoft 2026 -</footer>
+
+<script>
+  // Códigos válidos → ruta del proyecto al que dan acceso.
+  // Agregar uno nuevo por línea, ej: porcentajes: 'porcentajes/index.html',
+  const CODIGOS_VALIDOS = {
+    0: 'listado.html',
+    rdi: 'tallerRecursosEducativos/index.html',
+    algebra: 'pruebas/evaluacionAdaptativa/index.html',
+  };
+
+  const inputCodigo = document.getElementById('inputCodigo');
+  const errorCodigo = document.getElementById('errorCodigo');
+
+  function intentarAcceder() {
+    const codigo = inputCodigo.value.trim().toLowerCase();
+    if (!codigo) return;
+    const ruta = CODIGOS_VALIDOS[codigo];
+    if (ruta) {
+      window.location.href = ruta;
+    } else {
+      errorCodigo.textContent = 'Código no válido.';
+      inputCodigo.classList.add('error');
+      setTimeout(() => inputCodigo.classList.remove('error'), 300);
+    }
+  }
+
+  document.getElementById('btnAccederCodigo').onclick = intentarAcceder;
+  inputCodigo.addEventListener('keydown', e => {
+    if (e.key === 'Enter') intentarAcceder();
+  });
+  inputCodigo.addEventListener('input', () => { errorCodigo.textContent = ''; });
+</script>
+
+</body>
+</html>

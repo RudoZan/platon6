@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criterios de Puntuación — Platón 6</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Importar KaTeX para fórmulas matemáticas hermosas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- MENÚ DE NAVEGACIÓN PERMANENTE DOCENTE -->
+    <nav class="admin-nav" style="display: flex; gap: 15px; margin-top: 15px; margin-bottom: 25px; border-bottom: 2px solid var(--color-borde); padding-bottom: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; width: 100%;">
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <span style="font-weight: bold; color: var(--color-primario); font-family: Georgia, serif; font-size: 1.25rem; margin-right: 15px;">Panel Docente</span>
+        <a class="nav-item" href="admin.html" style="text-decoration: none; color: var(--color-texto); font-weight: 500; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; border: 1.5px solid transparent; transition: all 0.2s; display: inline-block;">Inicio</a>
+        <a class="nav-item" href="bancos.html" style="text-decoration: none; color: var(--color-texto); font-weight: 500; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; border: 1.5px solid transparent; transition: all 0.2s; display: inline-block;">Bancos de Preguntas</a>
+        <a class="nav-item active" href="criterios.html" style="text-decoration: none; color: white; background: var(--color-primario); font-weight: 600; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; display: inline-block;">Criterios de Puntaje</a>
+      </div>
+      <div>
+        <button id="btn-admin-close" class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem; font-weight: 600;">Salir a Alumnos</button>
+      </div>
+    </nav>
+
+    <header class="app-header">
+      <h1>Criterios de Puntuación</h1>
+      <p class="subtitle">Especificaciones pedagógicas y matemáticas del motor adaptativo</p>
+    </header>
+
+    <div class="card" style="padding: 30px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 15px var(--color-sombras);">
+      
+      <div style="border-bottom: 2px solid var(--color-borde); padding-bottom: 15px; margin-bottom: 20px;">
+        <h3 style="margin: 0; color: var(--color-primario); font-size: 1.5rem; font-family: Georgia, serif;">Puntuaciones y Niveles de Logro (Escala 0 a 100 pts)</h3>
+      </div>
+
+      <div class="scoring-doc-content" style="font-size: 0.92rem; line-height: 1.6; color: var(--color-texto);">
+        
+        <h4 style="color: var(--color-primario); font-size: 1.15rem; margin-top: 10px; margin-bottom: 12px; border-left: 4px solid var(--color-primario); padding-left: 10px;">1. Arquitectura del Puntaje Total</h4>
+        <p style="margin-bottom: 15px;">El puntaje final se evalúa sobre 100 puntos exactos desglosados en tres componentes que integran precisión, dificultad, uso de pistas, confianza declarada y disposición al reto opcional:</p>
+        
+        <div style="background: rgba(35, 94, 130, 0.05); border: 1px solid var(--color-borde); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; font-size: 1.05rem; color: var(--color-primario);">
+          Puntaje Total = Dominio Cognitivo (0 a 70 pts) + Calibración Metacognitiva (0 a 15 pts) + Reto y Autonomía (0 a 15 pts)
+        </div>
+
+        <h4 style="color: var(--color-primario); font-size: 1.15rem; margin-top: 25px; margin-bottom: 12px; border-left: 4px solid var(--color-primario); padding-left: 10px;">2. Desglose de las Tres Dimensiones</h4>
+
+        <h5 style="color: var(--color-primario-claro); font-size: 1.05rem; margin-bottom: 8px;">A. Dominio Cognitivo Adaptativo (hasta 70 puntos — Preguntas Q1 a Q5)</h5>
+        <p style="margin-bottom: 10px;">Evalúa las 5 preguntas seleccionadas por el motor. Cada pregunta aporta un máximo de <strong>14 puntos base</strong>, ponderados por la dificultad de la pregunta y penalizados por el uso de ayudas:</p>
+        <p style="font-family: monospace; background: #eee; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; text-align: center;">Puntaje Pregunta (PC) = Valor de Dificultad &times; Factor de Pistas &times; Acierto (1 o 0)</p>
+        
+        <ul style="padding-left: 20px; margin-bottom: 18px;">
+          <li style="margin-bottom: 6px;"><strong>Valor por Nivel de Dificultad:</strong> Nivel 1 (Básico) = 10.0 pts | Nivel 2 (Comprensión - Inicio) = 12.0 pts | Nivel 3 (Aplicación) = 14.0 pts | Nivel 4 (Análisis/Síntesis) = 16.0 pts.</li>
+          <li style="margin-bottom: 6px;"><strong>Descuento por Ayudas (Factor de Pistas):</strong>
+            <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: #d4edda; color: #155724; font-weight: bold; font-size: 0.8rem; margin-left: 4px;">0 Pistas: 100% (sin descuento)</span>
+            <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: #fff3cd; color: #856404; font-weight: bold; font-size: 0.8rem; margin-left: 4px;">1 Pista: 75% (-25% descuento)</span>
+            <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: #f8d7da; color: #721c24; font-weight: bold; font-size: 0.8rem; margin-left: 4px;">2 Pistas: 50% (-50% descuento)</span>
+            <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: #f8d7da; color: #721c24; font-weight: bold; font-size: 0.8rem; margin-left: 4px;">Rendirse: 0 pts</span>
+          </li>
+        </ul>
+
+        <h5 style="color: var(--color-primario-claro); font-size: 1.05rem; margin-bottom: 8px;">B. Calibración Metacognitiva / Gráfico de Confianza (hasta 15 puntos)</h5>
+        <p style="margin-bottom: 10px;">En cada pregunta (\(3 \times 5 = 15\) pts), el estudiante recibe puntaje según el cuadrante del gráfico cartesiano (Precisión vs. Seguridad declarada):</p>
+        <div class="table-responsive" style="margin-bottom: 20px; overflow-x: auto;">
+          <table class="admin-table" style="font-size: 0.88rem; width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: rgba(35, 94, 130, 0.08);">
+                <th style="padding: 10px; border: 1.5px solid var(--color-borde);">Cuadrante Metacognitivo</th>
+                <th style="padding: 10px; border: 1.5px solid var(--color-borde);">Precisión</th>
+                <th style="padding: 10px; border: 1.5px solid var(--color-borde);">Seguridad Declarada</th>
+                <th style="padding: 10px; border: 1.5px solid var(--color-borde);">Puntos</th>
+                <th style="padding: 10px; border: 1.5px solid var(--color-borde);">Criterio Pedagógico</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: bold; color: #155724; background: #d4edda; padding: 10px; border: 1.5px solid var(--color-borde);">I. Maestría Calibrada</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Correcta</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Seguro / Muy seguro</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><strong>+3.0 pts</strong></td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Acierto consciente con autoconfianza plenamente justificada.</td>
+              </tr>
+              <tr>
+                <td style="font-weight: bold; color: #856404; background: #fff3cd; padding: 10px; border: 1.5px solid var(--color-borde);">II. Prudencia / Subestimado</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Correcta</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Nada seguro / Poco seguro</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><strong>+2.0 pts</strong></td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Sabe resolver el ejercicio pero presenta dudas de sí mismo (ansiedad matemática).</td>
+              </tr>
+              <tr>
+                <td style="font-weight: bold; color: #856404; background: #fff3cd; padding: 10px; border: 1.5px solid var(--color-borde);">III. Conciencia del Error</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Incorrecta</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Nada seguro / Poco seguro</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><strong>+1.5 pts</strong></td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Error formativo con autoevaluación realista. El estudiante reconoce su límite conceptual.</td>
+              </tr>
+              <tr>
+                <td style="font-weight: bold; color: #721c24; background: #f8d7da; padding: 10px; border: 1.5px solid var(--color-borde);">IV. Ilusión de Competencia</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Incorrecta</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Seguro / Muy seguro</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><strong>+0.0 pts</strong></td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Punto ciego metacognitivo. Cree dominar el procedimiento pero comete un error conceptual grave.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h5 style="color: var(--color-primario-claro); font-size: 1.05rem; margin-bottom: 8px;">C. Pregunta de Reto Nivel 5 / Desafío Opcional (hasta 15 puntos)</h5>
+        <p style="margin-bottom: 10px;">Completar las 5 preguntas base permite alcanzar un excelente puntaje de hasta 85/100. Los 15 puntos finales premian la disposición y valentía de aceptar y superar el desafío extra (Pregunta 6 opcional):</p>
+        <ul style="padding-left: 20px; margin-bottom: 25px;">
+          <li><strong>No acepta el reto:</strong> 0 puntos en esta dimensión (puntaje tope posible: 85/100).</li>
+          <li><strong>Acepta el reto pero responde incorrectamente (Bono de valentía por intentar):</strong> Reto Más Fácil (+2 pts) | Dificultad Similar (+3 pts) | Más Difícil (+4 pts). Nunca se deja en cero a quien arriesga voluntariamente un desafío.</li>
+          <li><strong>Acepta el reto y responde correctamente:</strong> Reto Más Fácil (+8 pts) | Dificultad Similar (+11 pts) | Más Difícil (+15 pts exactos).</li>
+        </ul>
+
+        <h4 style="color: var(--color-primario); font-size: 1.15rem; margin-top: 25px; margin-bottom: 12px; border-left: 4px solid var(--color-primario); padding-left: 10px;">3. Escala Cualitativa de Niveles de Logro Global</h4>
+        <p style="margin-bottom: 12px;">Según el puntaje numérico acumulado en la escala de 0 a 100, el motor proyecta uno de los cuatro niveles normativos:</p>
+
+        <div class="table-responsive" style="margin-bottom: 25px; overflow-x: auto;">
+          <table class="admin-table" style="font-size: 0.88rem; width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: rgba(35, 94, 130, 0.08);">
+                <th style="width: 130px; padding: 10px; border: 1.5px solid var(--color-borde);">Puntaje Total</th>
+                <th style="width: 150px; padding: 10px; border: 1.5px solid var(--color-borde);">Nivel de Logro</th>
+                <th style="padding: 10px; border: 1.5px solid var(--color-borde);">Indicador Visual</th>
+                <th style="padding: 10px; border: 1.5px solid var(--color-borde);">Descripción del Desempeño</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><strong>90 - 100 pts</strong></td>
+                <td style="font-weight: bold; color: #155724; padding: 10px; border: 1.5px solid var(--color-borde);">Sobresaliente (Maestría)</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><span style="display: inline-block; padding: 4px 10px; border-radius: 4px; background: #2ecc71; color: white; font-weight: bold;">Verde (Alto)</span></td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Dominio algebraico sólido en alta dificultad (Nivel 4), autoconfianza calibrada y éxito consumado en la pregunta de reto.</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><strong>75 - 89 pts</strong></td>
+                <td style="font-weight: bold; color: #155724; padding: 10px; border: 1.5px solid var(--color-borde);">Avanzado (Destacado)</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><span style="display: inline-block; padding: 4px 10px; border-radius: 4px; background: #2ecc71; color: white; font-weight: bold; opacity: 0.85;">Verde (Regular-Alto)</span></td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Precisión notable en preguntas adaptativas de nivel intermedio-alto con baja o nula dependencia de pistas.</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><strong>55 - 74 pts</strong></td>
+                <td style="font-weight: bold; color: #856404; padding: 10px; border: 1.5px solid var(--color-borde);">Intermedio (En Desarrollo)</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><span style="display: inline-block; padding: 4px 10px; border-radius: 4px; background: #f1c40f; color: #222; font-weight: bold;">Amarillo (Medio)</span></td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Dominio de procedimientos básicos (Nivel 1-2). Muestra dependencia de 1 o 2 pistas al ascender dificultad o subestimación constante.</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><strong>0 - 54 pts</strong></td>
+                <td style="font-weight: bold; color: #721c24; padding: 10px; border: 1.5px solid var(--color-borde);">Inicial (Requiere Apoyo)</td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);"><span style="display: inline-block; padding: 4px 10px; border-radius: 4px; background: #e74c3c; color: white; font-weight: bold;">Rojo (Bajo)</span></td>
+                <td style="padding: 10px; border: 1.5px solid var(--color-borde);">Dificultades conceptuales en álgebra elemental, uso reiterado de 2 pistas o rendiciones, y alta presencia de ilusión de competencia.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 style="color: var(--color-primario); font-size: 1.15rem; margin-top: 25px; margin-bottom: 12px; border-left: 4px solid var(--color-primario); padding-left: 10px;">4. Perfiles Diagnósticos Multidimensionales</h4>
+        <p style="margin-bottom: 10px;">El reporte formativo emite además tres indicadores de diagnóstico cualitativo usando la codificación por color verde, amarillo y rojo:</p>
+        <ul style="padding-left: 20px; margin-bottom: 10px; list-style: none;">
+          <li style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span style="display: inline-block; width: 130px; font-weight: bold;">Autonomía (Pistas):</span>
+            <span style="padding: 2px 8px; border-radius: 4px; background: #d4edda; color: #155724; font-weight: bold; font-size: 0.85rem;">Verde: Autónomo</span> <span style="font-size: 0.85rem;">(0 a 1 pista)</span>
+            <span style="padding: 2px 8px; border-radius: 4px; background: #fff3cd; color: #856404; font-weight: bold; font-size: 0.85rem;">Amarillo: Guiado</span> <span style="font-size: 0.85rem;">(2 a 4 pistas)</span>
+            <span style="padding: 2px 8px; border-radius: 4px; background: #f8d7da; color: #721c24; font-weight: bold; font-size: 0.85rem;">Rojo: Dependiente</span> <span style="font-size: 0.85rem;">(5+ pistas o rendición)</span>
+          </li>
+          <li style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span style="display: inline-block; width: 130px; font-weight: bold;">Metacognición:</span>
+            <span style="padding: 2px 8px; border-radius: 4px; background: #d4edda; color: #155724; font-weight: bold; font-size: 0.85rem;">Verde: Calibrado</span> <span style="font-size: 0.85rem;">(Cuadrante I o III)</span>
+            <span style="padding: 2px 8px; border-radius: 4px; background: #fff3cd; color: #856404; font-weight: bold; font-size: 0.85rem;">Amarillo: Subestimado</span> <span style="font-size: 0.85rem;">(Cuadrante II)</span>
+            <span style="padding: 2px 8px; border-radius: 4px; background: #f8d7da; color: #721c24; font-weight: bold; font-size: 0.85rem;">Rojo: Ilusión de competencia</span> <span style="font-size: 0.85rem;">(2+ en Cuadrante IV)</span>
+          </li>
+          <li style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span style="display: inline-block; width: 130px; font-weight: bold;">Reto (Desafío):</span>
+            <span style="padding: 2px 8px; border-radius: 4px; background: #d4edda; color: #155724; font-weight: bold; font-size: 0.85rem;">Verde: Explorador Audaz</span> <span style="font-size: 0.85rem;">(Aceptó reto difícil)</span>
+            <span style="padding: 2px 8px; border-radius: 4px; background: #fff3cd; color: #856404; font-weight: bold; font-size: 0.85rem;">Amarillo: Retador Prudente</span> <span style="font-size: 0.85rem;">(Aceptó reto similar/fácil)</span>
+            <span style="padding: 2px 8px; border-radius: 4px; background: #f8d7da; color: #721c24; font-weight: bold; font-size: 0.85rem;">Rojo: Conservador</span> <span style="font-size: 0.85rem;">(Declinó el reto)</span>
+          </li>
+        </ul>
+
+      </div>
+
+      <div style="margin-top: 25px; text-align: right; border-top: 1px solid var(--color-borde); padding-top: 15px;">
+        <a class="btn-primary" href="admin.html" style="padding: 10px 20px; text-decoration: none; display: inline-block; font-weight: bold;">Entendido / Volver</a>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>- Desarrollado por Astutosoft 2026 -</footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Validar Sesión de Profesor
+      if (sessionStorage.getItem("adminAuthenticated") !== "true") {
+        window.location.href = "admin.html";
+        return;
+      }
+
+      // 2. Control del Botón de Salir
+      const btnAdminClose = document.getElementById("btn-admin-close");
+      if (btnAdminClose) {
+        btnAdminClose.onclick = () => {
+          sessionStorage.removeItem("adminAuthenticated");
+          window.location.href = "index.html";
+        };
+      }
+    });
+  </script>
+</body>
+</html>

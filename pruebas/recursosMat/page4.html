@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engranajes Interactivos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            gap: 30px;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: block;
+            background: #f8f9fa;
+            cursor: grab;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        .page-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .page-number:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-number.active {
+            background: white;
+            border-color: #667eea;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Engranajes Interactivos</h1>
+        <canvas id="canvas"></canvas>
+    </div>
+    <div class="page-navigation">
+        <a href="index.html" class="page-number">1</a>
+        <a href="page2.html" class="page-number">2</a>
+        <a href="page3.html" class="page-number">3</a>
+        <a href="page4.html" class="page-number active">4</a>
+        <a href="page5.html" class="page-number">5</a>
+        <a href="page6.html" class="page-number">6</a>
+        <a href="page7.html" class="page-number">7</a>
+        <a href="page8.html" class="page-number">8</a>
+        <a href="page9.html" class="page-number">9</a>
+        <a href="page10.html" class="page-number">10</a>
+        <a href="page11.html" class="page-number">11</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = 1000;
+        canvas.height = 700;
+
+        // Clase para representar un engranaje
+        class Gear {
+            constructor(x, y, radius, teeth, color, clockwise = true) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.teeth = teeth;
+                this.color = color;
+                this.angle = 0;
+                this.clockwise = clockwise;
+                this.connectedGears = [];
+            }
+
+            // Dibujar el engranaje
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+
+                // Dibujar el cuerpo principal
+                ctx.fillStyle = this.color;
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+
+                ctx.beginPath();
+                // Dibujar dientes con puntas cortadas (truncadas)
+                const outerRadius = this.radius;
+                const innerRadius = this.radius * 0.9; // Valle más superficial para puntas más truncadas
+                const toothFlatWidth = (Math.PI / this.teeth) * 0.5; // Ancho de la punta cortada (muy plana)
+                
+                for (let i = 0; i < this.teeth; i++) {
+                    // Ángulo del centro del diente
+                    const centerAngle = (i * 2 * Math.PI) / this.teeth - Math.PI / 2;
+                    
+                    // Punto de inicio del diente (lado izquierdo del valle)
+                    const startAngle = centerAngle - (Math.PI / this.teeth);
+                    const startX = Math.cos(startAngle) * innerRadius;
+                    const startY = Math.sin(startAngle) * innerRadius;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(startX, startY);
+                    } else {
+                        ctx.lineTo(startX, startY);
+                    }
+                    
+                    // Subir al lado izquierdo de la punta
+                    const leftTipAngle = centerAngle - toothFlatWidth / 2;
+                    const leftTipX = Math.cos(leftTipAngle) * outerRadius;
+                    const leftTipY = Math.sin(leftTipAngle) * outerRadius;
+                    ctx.lineTo(leftTipX, leftTipY);
+                    
+                    // Punta cortada (segmento plano en la parte superior)
+                    const rightTipAngle = centerAngle + toothFlatWidth / 2;
+                    const rightTipX = Math.cos(rightTipAngle) * outerRadius;
+                    const rightTipY = Math.sin(rightTipAngle) * outerRadius;
+                    ctx.lineTo(rightTipX, rightTipY);
+                    
+                    // Bajar al lado derecho del valle
+                    const endAngle = centerAngle + (Math.PI / this.teeth);
+                    const endX = Math.cos(endAngle) * innerRadius;
+                    const endY = Math.sin(endAngle) * innerRadius;
+                    ctx.lineTo(endX, endY);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Dibujar el círculo central
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius * 0.3, 0, Math.PI * 2);
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fill();
+                ctx.stroke();
+
+                // Dibujar el punto central
+                ctx.beginPath();
+                ctx.arc(0, 0, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#333';
+                ctx.fill();
+
+                // Dibujar línea de referencia para indicar la rotación
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, -this.radius * 0.9);
+                ctx.stroke();
+
+                // Dibujar un pequeño círculo al final de la línea
+                ctx.beginPath();
+                ctx.arc(0, -this.radius * 0.9, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#000000';
+                ctx.fill();
+
+                ctx.restore();
+            }
+
+            // Verificar si un punto está dentro del engranaje
+            containsPoint(x, y) {
+                const dx = x - this.x;
+                const dy = y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                return distance <= this.radius * 1.1;
+            }
+
+            // Determinar si un engranaje está en posición adyacente (arriba, abajo, izquierda, derecha)
+            isAdjacent(gear) {
+                const dx = gear.x - this.x;
+                const dy = gear.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Verificar si están cerca (tolerancia de 5 píxeles para considerar adyacentes)
+                const tolerance = 5;
+                
+                // Verificar si está aproximadamente arriba, abajo, izquierda o derecha
+                const isHorizontal = Math.abs(dx) > Math.abs(dy) && Math.abs(dy) < tolerance;
+                const isVertical = Math.abs(dy) > Math.abs(dx) && Math.abs(dx) < tolerance;
+                
+                // También verificar si están conectados (distancia entre centros ≈ suma de radios)
+                const expectedDistance = this.radius + gear.radius;
+                const isConnected = Math.abs(distance - expectedDistance) < tolerance;
+                
+                return (isHorizontal || isVertical) && isConnected;
+            }
+
+            // Rotar el engranaje
+            rotate(deltaAngle, rotated = new Set(), sourceGear = null) {
+                // Normalizar el deltaAngle para evitar saltos grandes
+                while (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
+                while (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
+                
+                // Marcar este engranaje como rotado
+                rotated.add(this);
+                
+                // Rotar este engranaje
+                this.angle += deltaAngle * (this.clockwise ? 1 : -1);
+                
+                // Normalizar el ángulo del engranaje a un rango de -2π a 2π
+                while (this.angle > Math.PI * 2) this.angle -= Math.PI * 2;
+                while (this.angle < -Math.PI * 2) this.angle += Math.PI * 2;
+                
+                // Rotar engranajes conectados (sin doble rotación)
+                // Todos los engranajes conectados rotan en sentido contrario
+                this.connectedGears.forEach(gear => {
+                    if (gear !== this && !rotated.has(gear)) {
+                        const ratio = this.radius / gear.radius;
+                        
+                        // Engranajes conectados siempre rotan en sentido contrario
+                        // Calcular el ángulo de rotación invertido
+                        let invertedDeltaAngle = -deltaAngle * ratio;
+                        
+                        // Aplicar la rotación directamente en sentido contrario
+                        // Invertir también el efecto de clockwise para asegurar sentido contrario
+                        gear.angle += invertedDeltaAngle * (gear.clockwise ? -1 : 1);
+                        
+                        // Normalizar el ángulo
+                        while (gear.angle > Math.PI * 2) gear.angle -= Math.PI * 2;
+                        while (gear.angle < -Math.PI * 2) gear.angle += Math.PI * 2;
+                        
+                        // Marcar como rotado y propagar a sus conexiones
+                        rotated.add(gear);
+                        gear.connectedGears.forEach(connectedGear => {
+                            if (connectedGear !== gear && connectedGear !== this && !rotated.has(connectedGear)) {
+                                const connectedRatio = gear.radius / connectedGear.radius;
+                                let connectedDeltaAngle = -invertedDeltaAngle * connectedRatio;
+                                
+                                connectedGear.angle += connectedDeltaAngle * (connectedGear.clockwise ? -1 : 1);
+                                
+                                while (connectedGear.angle > Math.PI * 2) connectedGear.angle -= Math.PI * 2;
+                                while (connectedGear.angle < -Math.PI * 2) connectedGear.angle += Math.PI * 2;
+                                
+                                rotated.add(connectedGear);
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Conectar con otro engranaje
+            connect(gear) {
+                if (!this.connectedGears.includes(gear)) {
+                    this.connectedGears.push(gear);
+                }
+                if (!gear.connectedGears.includes(this)) {
+                    gear.connectedGears.push(this);
+                }
+            }
+        }
+
+        // Crear engranajes
+        const gears = [];
+
+        // Centro del canvas: x=500, y=350
+        
+        // Engranaje extra grande (radio 160, 48 dientes) - doble del tamaño anterior
+        const gear0 = new Gear(180, 350, 160, 48, '#e17055', true);
+        gears.push(gear0);
+
+        // Engranaje principal grande (radio 120, 36 dientes) - duplicado de 60
+        // Distancia entre centros = 160 + 120 = 280
+        const gear1 = new Gear(460, 350, 120, 36, '#667eea', false);
+        gear0.connect(gear1);
+        gears.push(gear1);
+
+        // Engranaje mediano conectado (radio 80, 24 dientes) - duplicado de 40
+        // Distancia entre centros = 120 + 80 = 200
+        const gear2 = new Gear(660, 350, 80, 24, '#4ecdc4', true);
+        gear1.connect(gear2);
+        gears.push(gear2);
+
+        // Engranaje pequeño (radio 40, 12 dientes) - duplicado de 20
+        // Distancia entre centros = 80 + 40 = 120
+        const gear3 = new Gear(780, 350, 40, 12, '#ff6b6b', false);
+        gear2.connect(gear3);
+        gears.push(gear3);
+
+        // Engranaje mediano arriba (radio 80, 24 dientes)
+        // Distancia entre centros = 120 + 80 = 200
+        const gear4 = new Gear(460, 150, 80, 24, '#f7dc6f', true);
+        gear1.connect(gear4);
+        gears.push(gear4);
+
+        // Engranaje mediano abajo (radio 80, 24 dientes)
+        // Distancia entre centros = 80 + 80 = 160
+        const gear5 = new Gear(660, 510, 80, 24, '#bb8fce', false);
+        gear2.connect(gear5);
+        gears.push(gear5);
+
+        // Engranaje pequeño adicional a la derecha (radio 40, 12 dientes)
+        // Distancia entre centros ajustada para moverlo a la derecha
+        const gear6 = new Gear(860, 350, 40, 12, '#85c1e2', true);
+        gear3.connect(gear6);
+        gears.push(gear6);
+
+        // Variables para el arrastre
+        let selectedGear = null;
+        let isDragging = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let lastAngle = 0;
+
+        // Función para encontrar el engranaje bajo el mouse
+        function getGearAt(x, y) {
+            for (let i = gears.length - 1; i >= 0; i--) {
+                if (gears[i].containsPoint(x, y)) {
+                    return gears[i];
+                }
+            }
+            return null;
+        }
+
+        // Calcular el ángulo del mouse respecto al centro del engranaje
+        function getMouseAngle(gear, x, y) {
+            const dx = x - gear.x;
+            const dy = y - gear.y;
+            return Math.atan2(dy, dx);
+        }
+
+        // Dibujar todos los engranajes
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            gears.forEach(gear => gear.draw());
+        }
+
+        // Eventos del mouse
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            selectedGear = getGearAt(x, y);
+            if (selectedGear) {
+                isDragging = true;
+                lastMouseX = x;
+                lastMouseY = y;
+                lastAngle = getMouseAngle(selectedGear, x, y);
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging && selectedGear) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const currentAngle = getMouseAngle(selectedGear, x, y);
+                let deltaAngle = currentAngle - lastAngle;
+                
+                // Normalizar el deltaAngle para evitar saltos cuando cruza -π/π
+                if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
+                if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
+                
+                selectedGear.rotate(deltaAngle);
+                
+                lastAngle = currentAngle;
+                draw();
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            selectedGear = null;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+            selectedGear = null;
+        });
+
+        // Dibujar inicialmente
+        draw();
+    </script>
+</body>
+</html>
+

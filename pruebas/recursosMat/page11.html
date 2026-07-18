@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Mundial Político</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .map-container {
+            background: linear-gradient(135deg, #87CEEB 0%, #E0F6FF 100%);
+            border: 3px solid #2c3e50;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .map-container.low-poly {
+            background: #000000;
+            border-color: #8B4513;
+        }
+
+        .world-map {
+            width: 100%;
+            height: auto;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .world-map.hidden {
+            display: none;
+        }
+
+        .map-style-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 0 5px;
+        }
+
+        .map-style-button.active {
+            background: #27ae60;
+            color: white;
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .map-style-button:not(.active) {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .map-style-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Estilos para mapa low-poly */
+        .low-poly-continent {
+            fill: none;
+            stroke: #8B4513;
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .low-poly-continent:hover {
+            stroke: #D2691E;
+            stroke-width: 2;
+            fill: rgba(139, 69, 19, 0.1);
+        }
+
+        .country {
+            fill: #4a90e2;
+            stroke: #ffffff;
+            stroke-width: 0.5;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .country:hover {
+            fill: #e74c3c;
+            stroke-width: 1.5;
+            transform: scale(1.02);
+        }
+
+        .country.selected {
+            fill: #27ae60;
+            stroke: #2c3e50;
+            stroke-width: 2;
+        }
+
+        .info-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 100px;
+            border-left: 4px solid #3498db;
+        }
+
+        .info-panel h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .info-panel p {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: #34495e;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #3498db;
+            color: white;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .page-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .page-number:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .page-number.active {
+            background: white;
+            border-color: #3498db;
+            color: #3498db;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .map-container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Mapa Mundial Político</h1>
+        <p class="subtitle">Explora los países del mundo - Haz clic en cualquier país para más información</p>
+
+        <div class="controls">
+            <div style="width: 100%; text-align: center; margin-bottom: 15px;">
+                <button class="map-style-button active" onclick="switchMap('political')" id="btnPolitical">🗺️ Mapa Político</button>
+                <button class="map-style-button" onclick="switchMap('lowpoly')" id="btnLowPoly">🔷 Mapa Low-Poly</button>
+            </div>
+            <button class="btn btn-primary" onclick="resetSelection()">🔄 Limpiar Selección</button>
+            <button class="btn btn-secondary" onclick="zoomToContinent('america')">🌎 América</button>
+            <button class="btn btn-secondary" onclick="zoomToContinent('europe')">🇪🇺 Europa</button>
+            <button class="btn btn-secondary" onclick="zoomToContinent('asia')">🌏 Asia</button>
+            <button class="btn btn-secondary" onclick="zoomToContinent('africa')">🌍 África</button>
+            <button class="btn btn-secondary" onclick="zoomToContinent('oceania')">🌊 Oceanía</button>
+        </div>
+
+        <div class="info-panel" id="infoPanel">
+            <h3>Información del País</h3>
+            <p>Haz clic en cualquier país del mapa para ver información detallada.</p>
+        </div>
+
+        <div class="map-container" id="mapContainer">
+            <!-- Mapa Político Original -->
+            <svg class="world-map" id="worldMap" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
+                <!-- América del Norte -->
+                <g id="north-america">
+                    <!-- Canadá -->
+                    <path class="country" data-country="Canadá" data-continent="north-america" 
+                          d="M 100 50 L 150 60 L 200 55 L 280 65 L 350 70 L 420 75 L 480 80 L 520 85 L 550 90 L 580 95 L 600 100 L 590 110 L 570 120 L 540 130 L 500 140 L 450 135 L 400 130 L 350 125 L 300 120 L 250 115 L 200 110 L 150 105 L 120 100 L 110 90 L 105 80 L 100 70 Z"
+                          fill="#4a90e2" />
+                    
+                    <!-- Estados Unidos -->
+                    <path class="country" data-country="Estados Unidos" data-continent="north-america"
+                          d="M 200 110 L 300 120 L 400 130 L 500 140 L 550 150 L 580 160 L 600 170 L 590 180 L 570 190 L 540 200 L 500 210 L 450 205 L 400 200 L 350 195 L 300 190 L 250 180 L 220 170 L 200 160 L 190 150 L 195 140 L 200 130 Z"
+                          fill="#5ba3f5" />
+                    
+                    <!-- México -->
+                    <path class="country" data-country="México" data-continent="north-america"
+                          d="M 250 180 L 350 195 L 400 200 L 420 210 L 400 220 L 380 230 L 350 235 L 320 230 L 290 225 L 270 220 L 250 210 L 240 200 L 245 190 Z"
+                          fill="#6bb5ff" />
+                    
+                    <!-- Centroamérica -->
+                    <path class="country" data-country="Centroamérica" data-continent="north-america"
+                          d="M 320 230 L 350 235 L 360 245 L 370 255 L 365 265 L 355 270 L 340 265 L 325 260 L 315 250 L 310 240 Z"
+                          fill="#7bc5ff" />
+                </g>
+
+                <!-- América del Sur -->
+                <g id="south-america">
+                    <!-- Brasil -->
+                    <path class="country" data-country="Brasil" data-continent="south-america"
+                          d="M 380 250 L 450 255 L 520 260 L 580 270 L 630 285 L 680 300 L 720 315 L 750 330 L 760 350 L 755 370 L 745 390 L 730 405 L 710 410 L 680 400 L 650 390 L 620 380 L 590 370 L 560 360 L 530 350 L 500 340 L 470 330 L 440 320 L 410 310 L 385 295 L 375 275 L 378 260 Z"
+                          fill="#52c878" />
+                    
+                    <!-- Argentina -->
+                    <path class="country" data-country="Argentina" data-continent="south-america"
+                          d="M 480 340 L 530 350 L 560 360 L 580 370 L 590 380 L 585 400 L 575 420 L 560 435 L 540 440 L 520 435 L 500 425 L 485 410 L 475 390 L 470 370 L 475 355 Z"
+                          fill="#62d888" />
+                    
+                    <!-- Colombia/Venezuela -->
+                    <path class="country" data-country="Colombia" data-continent="south-america"
+                          d="M 355 270 L 380 275 L 400 280 L 415 290 L 410 300 L 400 310 L 385 315 L 370 310 L 360 295 L 355 285 Z"
+                          fill="#72e898" />
+                    
+                    <!-- Chile -->
+                    <path class="country" data-country="Chile" data-continent="south-america"
+                          d="M 480 340 L 490 345 L 495 365 L 490 385 L 485 405 L 480 425 L 475 440 L 465 435 L 460 415 L 465 395 L 470 375 L 475 355 Z"
+                          fill="#82f8a8" />
+                    
+                    <!-- Perú -->
+                    <path class="country" data-country="Perú" data-continent="south-america"
+                          d="M 410 310 L 450 320 L 480 330 L 500 340 L 495 355 L 485 365 L 470 360 L 450 350 L 430 340 L 415 330 L 405 320 Z"
+                          fill="#92f8b8" />
+                </g>
+
+                <!-- Europa -->
+                <g id="europe">
+                    <!-- España -->
+                    <path class="country" data-country="España" data-continent="europe"
+                          d="M 400 180 L 440 185 L 460 190 L 470 200 L 465 210 L 450 215 L 430 210 L 410 205 L 395 200 L 390 190 Z"
+                          fill="#e74c3c" />
+                    
+                    <!-- Francia -->
+                    <path class="country" data-country="Francia" data-continent="europe"
+                          d="M 450 150 L 490 155 L 520 160 L 540 165 L 545 175 L 540 185 L 525 190 L 505 185 L 485 180 L 470 175 L 455 170 L 445 160 Z"
+                          fill="#c0392b" />
+                    
+                    <!-- Alemania -->
+                    <path class="country" data-country="Alemania" data-continent="europe"
+                          d="M 520 140 L 560 145 L 590 150 L 610 155 L 615 165 L 610 175 L 590 180 L 570 175 L 550 170 L 530 165 L 515 160 L 510 150 Z"
+                          fill="#a93226" />
+                    
+                    <!-- Reino Unido -->
+                    <path class="country" data-country="Reino Unido" data-continent="europe"
+                          d="M 430 130 L 450 135 L 455 145 L 450 155 L 435 160 L 420 155 L 415 145 L 420 135 Z"
+                          fill="#922b21" />
+                    
+                    <!-- Italia -->
+                    <path class="country" data-country="Italia" data-continent="europe"
+                          d="M 540 180 L 560 185 L 575 200 L 570 230 L 565 250 L 555 255 L 545 250 L 535 230 L 530 210 L 535 195 Z"
+                          fill="#7b241c" />
+                    
+                    <!-- Rusia (parte europea) -->
+                    <path class="country" data-country="Rusia (Europa)" data-continent="europe"
+                          d="M 650 80 L 750 85 L 850 90 L 950 95 L 980 100 L 975 110 L 950 115 L 900 120 L 850 125 L 800 130 L 750 135 L 700 140 L 650 145 L 620 140 L 610 130 L 620 120 L 640 100 Z"
+                          fill="#6c1e15" />
+                    
+                    <!-- Países Nórdicos -->
+                    <path class="country" data-country="Países Nórdicos" data-continent="europe"
+                          d="M 520 100 L 580 105 L 620 110 L 640 120 L 630 135 L 610 140 L 585 135 L 560 130 L 540 125 L 525 115 L 515 105 Z"
+                          fill="#5d1910" />
+                </g>
+
+                <!-- África -->
+                <g id="africa">
+                    <!-- África del Norte -->
+                    <path class="country" data-country="África del Norte" data-continent="africa"
+                          d="M 480 200 L 580 205 L 680 210 L 750 215 L 780 220 L 775 235 L 760 245 L 730 250 L 700 245 L 670 240 L 640 235 L 610 230 L 580 225 L 550 220 L 520 215 L 495 210 Z"
+                          fill="#f39c12" />
+                    
+                    <!-- África Central/Occidental -->
+                    <path class="country" data-country="África Central" data-continent="africa"
+                          d="M 500 250 L 580 255 L 650 260 L 710 265 L 740 275 L 735 295 L 720 310 L 690 315 L 660 310 L 630 305 L 600 300 L 570 295 L 540 290 L 510 285 L 495 275 L 495 260 Z"
+                          fill="#e67e22" />
+                    
+                    <!-- África Oriental -->
+                    <path class="country" data-country="África Oriental" data-continent="africa"
+                          d="M 740 275 L 820 280 L 900 285 L 950 290 L 960 305 L 945 320 L 920 330 L 890 335 L 860 330 L 830 325 L 800 320 L 770 315 L 745 305 L 735 290 Z"
+                          fill="#d35400" />
+                    
+                    <!-- África del Sur -->
+                    <path class="country" data-country="África del Sur" data-continent="africa"
+                          d="M 660 315 L 730 320 L 790 325 L 840 330 L 860 345 L 850 365 L 830 380 L 800 385 L 770 380 L 740 375 L 710 370 L 680 365 L 655 355 L 645 340 L 650 330 Z"
+                          fill="#c0392b" />
+                </g>
+
+                <!-- Asia -->
+                <g id="asia">
+                    <!-- Rusia (parte asiática) -->
+                    <path class="country" data-country="Rusia (Asia)" data-continent="asia"
+                          d="M 750 85 L 950 90 L 1150 95 L 1350 100 L 1500 105 L 1520 115 L 1500 125 L 1400 130 L 1300 135 L 1200 140 L 1100 145 L 1000 150 L 900 155 L 800 160 L 750 155 L 720 145 L 730 125 L 740 105 Z"
+                          fill="#3498db" />
+                    
+                    <!-- China -->
+                    <path class="country" data-country="China" data-continent="asia"
+                          d="M 900 155 L 1100 160 L 1250 165 L 1350 170 L 1380 185 L 1365 205 L 1330 220 L 1280 225 L 1220 220 L 1160 215 L 1100 210 L 1040 205 L 980 200 L 920 195 L 885 185 L 890 170 Z"
+                          fill="#2980b9" />
+                    
+                    <!-- India -->
+                    <path class="country" data-country="India" data-continent="asia"
+                          d="M 1000 230 L 1080 235 L 1130 245 L 1150 260 L 1140 280 L 1110 295 L 1070 300 L 1030 295 L 1000 285 L 980 270 L 975 250 L 985 240 Z"
+                          fill="#1f6399" />
+                    
+                    <!-- Japón -->
+                    <path class="country" data-country="Japón" data-continent="asia"
+                          d="M 1420 180 L 1450 185 L 1470 195 L 1465 210 L 1445 215 L 1425 210 L 1410 200 L 1410 190 Z"
+                          fill="#156479" />
+                    
+                    <!-- Sudeste Asiático -->
+                    <path class="country" data-country="Sudeste Asiático" data-continent="asia"
+                          d="M 1150 260 L 1220 265 L 1280 275 L 1320 285 L 1330 300 L 1310 315 L 1280 320 L 1240 315 L 1200 310 L 1160 305 L 1130 295 L 1110 280 L 1120 270 Z"
+                          fill="#0b4559" />
+                    
+                    <!-- Oriente Medio -->
+                    <path class="country" data-country="Oriente Medio" data-continent="asia"
+                          d="M 750 215 L 850 220 L 920 225 L 970 230 L 975 245 L 955 255 L 920 260 L 880 255 L 850 250 L 820 245 L 795 240 L 775 235 L 760 230 Z"
+                          fill="#002639" />
+                </g>
+
+                <!-- Oceanía -->
+                <g id="oceania">
+                    <!-- Australia -->
+                    <path class="country" data-country="Australia" data-continent="oceania"
+                          d="M 1200 350 L 1350 355 L 1450 365 L 1500 375 L 1510 395 L 1490 415 L 1450 420 L 1400 415 L 1350 410 L 1300 405 L 1250 400 L 1200 395 L 1170 385 L 1160 370 L 1175 360 Z"
+                          fill="#9b59b6" />
+                    
+                    <!-- Nueva Zelanda -->
+                    <path class="country" data-country="Nueva Zelanda" data-continent="oceania"
+                          d="M 1480 420 L 1520 425 L 1535 440 L 1525 455 L 1500 460 L 1475 455 L 1465 440 L 1470 430 Z"
+                          fill="#8e44ad" />
+                    
+                    <!-- Indonesia -->
+                    <path class="country" data-country="Indonesia" data-continent="oceania"
+                          d="M 1280 315 L 1320 320 L 1340 335 L 1335 355 L 1315 365 L 1290 360 L 1275 350 L 1270 335 Z"
+                          fill="#7d3c98" />
+                </g>
+
+                <!-- Líneas de coordenadas -->
+                <g id="grid" opacity="0.2">
+                    <!-- Meridianos -->
+                    <line x1="200" y1="0" x2="200" y2="500" stroke="#2c3e50" stroke-width="0.5"/>
+                    <line x1="400" y1="0" x2="400" y2="500" stroke="#2c3e50" stroke-width="0.5"/>
+                    <line x1="600" y1="0" x2="600" y2="500" stroke="#2c3e50" stroke-width="0.5"/>
+                    <line x1="800" y1="0" x2="800" y2="500" stroke="#2c3e50" stroke-width="0.5"/>
+                    <line x1="1000" y1="0" x2="1000" y2="500" stroke="#2c3e50" stroke-width="0.5"/>
+                    <line x1="1200" y1="0" x2="1200" y2="500" stroke="#2c3e50" stroke-width="0.5"/>
+                    
+                    <!-- Paralelos -->
+                    <line x1="0" y1="100" x2="1600" y2="100" stroke="#2c3e50" stroke-width="0.5"/>
+                    <line x1="0" y1="200" x2="1600" y2="200" stroke="#2c3e50" stroke-width="0.5"/>
+                    <line x1="0" y1="300" x2="1600" y2="300" stroke="#2c3e50" stroke-width="0.5"/>
+                    <line x1="0" y1="400" x2="1600" y2="400" stroke="#2c3e50" stroke-width="0.5"/>
+                </g>
+            </svg>
+
+            <!-- Mapa Low-Poly (Estilo Geométrico) -->
+            <svg class="world-map hidden" id="lowPolyMap" viewBox="0 0 2000 1000" preserveAspectRatio="xMidYMid meet">
+                <!-- Greenland -->
+                <path class="low-poly-continent" data-country="Groenlandia" data-continent="north-america"
+                      d="M 450 50 L 550 60 L 650 70 L 700 80 L 720 100 L 710 130 L 680 150 L 630 160 L 580 155 L 530 145 L 480 130 L 440 110 L 430 85 L 435 65 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- North America -->
+                <path class="low-poly-continent" data-country="América del Norte" data-continent="north-america"
+                      d="M 200 150 L 300 160 L 500 170 L 700 175 L 850 180 L 950 185 L 1000 200 L 980 250 L 950 300 L 900 330 L 850 350 L 780 360 L 700 355 L 600 350 L 500 340 L 400 330 L 300 320 L 250 300 L 220 270 L 200 230 L 195 190 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Central America -->
+                <path class="low-poly-continent" data-country="Centroamérica" data-continent="north-america"
+                      d="M 400 360 L 500 370 L 580 380 L 620 390 L 640 410 L 630 430 L 600 440 L 570 435 L 540 425 L 510 415 L 480 405 L 450 390 L 425 375 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- South America -->
+                <path class="low-poly-continent" data-country="América del Sur" data-continent="south-america"
+                      d="M 500 420 L 600 430 L 750 450 L 900 480 L 1000 520 L 1050 580 L 1060 650 L 1040 720 L 1000 780 L 950 820 L 880 840 L 800 835 L 720 820 L 650 800 L 590 770 L 550 730 L 530 680 L 520 630 L 515 580 L 520 530 L 510 470 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Europe -->
+                <path class="low-poly-continent" data-country="Europa" data-continent="europe"
+                      d="M 800 200 L 950 210 L 1100 220 L 1200 230 L 1280 240 L 1320 260 L 1330 300 L 1300 330 L 1250 350 L 1180 360 L 1100 355 L 1020 345 L 950 330 L 880 315 L 820 300 L 780 280 L 770 250 L 785 225 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- British Isles -->
+                <path class="low-poly-continent" data-country="Islas Británicas" data-continent="europe"
+                      d="M 750 240 L 800 245 L 820 260 L 815 280 L 800 290 L 775 285 L 760 270 L 755 255 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Scandinavia -->
+                <path class="low-poly-continent" data-country="Escandinavia" data-continent="europe"
+                      d="M 950 180 L 1050 185 L 1120 195 L 1160 210 L 1170 240 L 1150 270 L 1110 280 L 1060 275 L 1020 265 L 980 250 L 960 230 L 955 205 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Africa -->
+                <path class="low-poly-continent" data-country="África" data-continent="africa"
+                      d="M 900 360 L 1100 370 L 1300 385 L 1480 400 L 1600 420 L 1650 480 L 1660 580 L 1640 680 L 1590 760 L 1520 810 L 1430 830 L 1330 825 L 1230 810 L 1140 790 L 1060 760 L 1000 720 L 960 670 L 940 610 L 930 550 L 920 490 L 915 430 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Asia -->
+                <path class="low-poly-continent" data-country="Asia" data-continent="asia"
+                      d="M 1320 200 L 1600 210 L 1850 230 L 1950 260 L 1980 320 L 1960 420 L 1900 520 L 1800 600 L 1680 650 L 1550 670 L 1420 660 L 1320 630 L 1250 580 L 1200 520 L 1170 460 L 1160 400 L 1170 340 L 1200 280 L 1250 240 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Middle East -->
+                <path class="low-poly-continent" data-country="Oriente Medio" data-continent="asia"
+                      d="M 1280 350 L 1380 360 L 1450 375 L 1500 390 L 1520 420 L 1500 460 L 1460 480 L 1400 475 L 1340 460 L 1300 435 L 1280 400 L 1275 370 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Indian Subcontinent -->
+                <path class="low-poly-continent" data-country="Subcontinente Indio" data-continent="asia"
+                      d="M 1250 480 L 1350 490 L 1420 510 L 1460 550 L 1470 600 L 1450 640 L 1400 660 L 1340 655 L 1290 630 L 1260 590 L 1245 540 L 1240 510 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Southeast Asia -->
+                <path class="low-poly-continent" data-country="Sudeste Asiático" data-continent="asia"
+                      d="M 1460 550 L 1580 570 L 1680 600 L 1750 630 L 1780 670 L 1760 710 L 1710 730 L 1640 725 L 1580 710 L 1530 680 L 1490 640 L 1470 600 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Japan -->
+                <path class="low-poly-continent" data-country="Japón" data-continent="asia"
+                      d="M 1850 380 L 1900 385 L 1920 410 L 1910 440 L 1880 450 L 1850 445 L 1835 425 L 1835 405 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Indonesia Archipelago -->
+                <path class="low-poly-continent" data-country="Indonesia" data-continent="asia"
+                      d="M 1550 630 L 1600 640 L 1650 660 L 1680 690 L 1670 720 L 1630 730 L 1580 725 L 1540 710 L 1520 680 L 1525 650 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <path class="low-poly-continent" data-country="Indonesia" data-continent="asia"
+                      d="M 1600 680 L 1640 690 L 1670 710 L 1665 740 L 1630 750 L 1590 745 L 1570 720 L 1575 695 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <path class="low-poly-continent" data-country="Indonesia" data-continent="asia"
+                      d="M 1650 720 L 1690 730 L 1710 755 L 1700 780 L 1670 785 L 1640 775 L 1625 750 L 1630 730 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Australia -->
+                <path class="low-poly-continent" data-country="Australia" data-continent="oceania"
+                      d="M 1650 750 L 1850 760 L 1950 780 L 1980 820 L 1960 880 L 1900 920 L 1820 940 L 1730 930 L 1670 900 L 1630 860 L 1610 810 L 1615 780 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- New Zealand -->
+                <path class="low-poly-continent" data-country="Nueva Zelanda" data-continent="oceania"
+                      d="M 1920 900 L 1970 910 L 1985 940 L 1975 970 L 1940 975 L 1910 965 L 1895 940 L 1900 920 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <path class="low-poly-continent" data-country="Nueva Zelanda" data-continent="oceania"
+                      d="M 1940 980 L 1970 990 L 1980 1015 L 1965 1035 L 1935 1040 L 1915 1025 L 1910 1005 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Caribbean Islands -->
+                <path class="low-poly-continent" data-country="Caribe" data-continent="north-america"
+                      d="M 550 380 L 570 385 L 580 400 L 575 415 L 560 420 L 545 415 L 535 400 L 540 390 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <path class="low-poly-continent" data-country="Caribe" data-continent="north-america"
+                      d="M 600 390 L 620 395 L 630 410 L 625 425 L 610 430 L 595 425 L 585 410 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Philippine Islands -->
+                <path class="low-poly-continent" data-country="Filipinas" data-continent="asia"
+                      d="M 1720 560 L 1750 565 L 1765 585 L 1755 605 L 1735 610 L 1715 600 L 1705 580 L 1715 570 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Madagascar -->
+                <path class="low-poly-continent" data-country="Madagascar" data-continent="africa"
+                      d="M 1750 620 L 1800 630 L 1820 670 L 1810 720 L 1780 750 L 1740 745 L 1720 710 L 1720 670 L 1735 640 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+
+                <!-- Arabian Peninsula -->
+                <path class="low-poly-continent" data-country="Península Arábiga" data-continent="asia"
+                      d="M 1400 420 L 1500 430 L 1560 460 L 1580 510 L 1560 560 L 1520 580 L 1470 575 L 1430 550 L 1410 510 L 1395 470 Z"
+                      fill="none" stroke="#8B4513" stroke-width="1.5" />
+            </svg>
+        </div>
+
+        <div class="page-navigation">
+            <a href="index.html" class="page-number">1</a>
+            <a href="page2.html" class="page-number">2</a>
+            <a href="page3.html" class="page-number">3</a>
+            <a href="page4.html" class="page-number">4</a>
+            <a href="page5.html" class="page-number">5</a>
+            <a href="page6.html" class="page-number">6</a>
+            <a href="page7.html" class="page-number">7</a>
+            <a href="page8.html" class="page-number">8</a>
+            <a href="page9.html" class="page-number">9</a>
+            <a href="page10.html" class="page-number">10</a>
+            <a href="page11.html" class="page-number active">11</a>
+        </div>
+    </div>
+
+    <script>
+        const countryInfo = {
+            'Canadá': {
+                capital: 'Ottawa',
+                población: '38 millones',
+                continente: 'América del Norte',
+                descripción: 'El segundo país más grande del mundo, conocido por sus vastos paisajes naturales y su diversidad cultural.'
+            },
+            'Estados Unidos': {
+                capital: 'Washington D.C.',
+                población: '331 millones',
+                continente: 'América del Norte',
+                descripción: 'Una superpotencia mundial con gran diversidad geográfica, cultural y económica.'
+            },
+            'México': {
+                capital: 'Ciudad de México',
+                población: '126 millones',
+                continente: 'América del Norte',
+                descripción: 'País rico en historia, cultura y biodiversidad, puente entre América del Norte y del Sur.'
+            },
+            'Brasil': {
+                capital: 'Brasilia',
+                población: '215 millones',
+                continente: 'América del Sur',
+                descripción: 'El país más grande de Sudamérica, hogar de la Amazonía y gran diversidad cultural.'
+            },
+            'Argentina': {
+                capital: 'Buenos Aires',
+                población: '45 millones',
+                continente: 'América del Sur',
+                descripción: 'Conocido por sus paisajes diversos, desde los Andes hasta las Pampas.'
+            },
+            'España': {
+                capital: 'Madrid',
+                población: '47 millones',
+                continente: 'Europa',
+                descripción: 'País ibérico con rica historia, arquitectura única y diversas regiones culturales.'
+            },
+            'Francia': {
+                capital: 'París',
+                población: '67 millones',
+                continente: 'Europa',
+                descripción: 'Cuna del arte, la moda y la gastronomía, con influencia global en cultura y política.'
+            },
+            'Alemania': {
+                capital: 'Berlín',
+                población: '83 millones',
+                continente: 'Europa',
+                descripción: 'Potencia económica europea conocida por su ingeniería, historia y cultura.'
+            },
+            'China': {
+                capital: 'Pekín',
+                población: '1.4 mil millones',
+                continente: 'Asia',
+                descripción: 'El país más poblado del mundo y una de las mayores economías globales.'
+            },
+            'India': {
+                capital: 'Nueva Delhi',
+                población: '1.4 mil millones',
+                continente: 'Asia',
+                descripción: 'País con gran diversidad cultural, lingüística y religiosa, segunda economía de Asia.'
+            },
+            'Japón': {
+                capital: 'Tokio',
+                población: '125 millones',
+                continente: 'Asia',
+                descripción: 'Isla nación conocida por su tecnología avanzada, tradiciones milenarias y cultura única.'
+            },
+            'Rusia (Europa)': {
+                capital: 'Moscú',
+                población: '146 millones',
+                continente: 'Europa/Asia',
+                descripción: 'El país más grande del mundo, que se extiende por dos continentes.'
+            },
+            'Rusia (Asia)': {
+                capital: 'Moscú',
+                población: '146 millones',
+                continente: 'Europa/Asia',
+                descripción: 'La parte asiática de Rusia, con vastos recursos naturales y territorios extensos.'
+            },
+            'África del Norte': {
+                capital: 'Varias',
+                población: '250 millones',
+                continente: 'África',
+                descripción: 'Región con rica historia antigua, desiertos extensos y cultura islámica predominante.'
+            },
+            'África Central': {
+                capital: 'Varias',
+                población: '180 millones',
+                continente: 'África',
+                descripción: 'Corazón de África con selvas tropicales, ríos importantes y gran biodiversidad.'
+            },
+            'África Oriental': {
+                capital: 'Varias',
+                población: '450 millones',
+                continente: 'África',
+                descripción: 'Cuna de la humanidad, con grandes lagos, montañas y diversidad étnica.'
+            },
+            'África del Sur': {
+                capital: 'Varias',
+                población: '68 millones',
+                continente: 'África',
+                descripción: 'Región rica en minerales, con paisajes variados desde desiertos hasta costas.'
+            },
+            'Australia': {
+                capital: 'Canberra',
+                población: '26 millones',
+                continente: 'Oceanía',
+                descripción: 'Isla continente única con fauna endémica, desiertos y ciudades costeras modernas.'
+            },
+            'Nueva Zelanda': {
+                capital: 'Wellington',
+                población: '5 millones',
+                continente: 'Oceanía',
+                descripción: 'Islas con paisajes espectaculares, conocidas por sus montañas y naturaleza pristina.'
+            },
+            'Centroamérica': {
+                capital: 'Varias',
+                población: '50 millones',
+                continente: 'América Central',
+                descripción: 'Puente entre América del Norte y del Sur, con volcanes y biodiversidad única.'
+            },
+            'Colombia': {
+                capital: 'Bogotá',
+                población: '51 millones',
+                continente: 'América del Sur',
+                descripción: 'País con gran biodiversidad, dos océanos y rica cultura latinoamericana.'
+            },
+            'Chile': {
+                capital: 'Santiago',
+                población: '19 millones',
+                continente: 'América del Sur',
+                descripción: 'País largo y estrecho con desierto, montañas y glaciares.'
+            },
+            'Perú': {
+                capital: 'Lima',
+                población: '33 millones',
+                continente: 'América del Sur',
+                descripción: 'Cuna del Imperio Inca, con historia rica y geografía diversa.'
+            },
+            'Italia': {
+                capital: 'Roma',
+                población: '60 millones',
+                continente: 'Europa',
+                descripción: 'Cuna del Imperio Romano y del Renacimiento, con arte y gastronomía mundialmente famosos.'
+            },
+            'Reino Unido': {
+                capital: 'Londres',
+                población: '67 millones',
+                continente: 'Europa',
+                descripción: 'Isla nación con gran influencia histórica en el mundo y cultura anglófona.'
+            },
+            'Países Nórdicos': {
+                capital: 'Varias',
+                población: '27 millones',
+                continente: 'Europa',
+                descripción: 'Región conocida por su calidad de vida, innovación y naturaleza.'
+            },
+            'Sudeste Asiático': {
+                capital: 'Varias',
+                población: '680 millones',
+                continente: 'Asia',
+                descripción: 'Región tropical con gran diversidad cultural y crecimiento económico rápido.'
+            },
+            'Oriente Medio': {
+                capital: 'Varias',
+                población: '450 millones',
+                continente: 'Asia',
+                descripción: 'Región históricamente importante, cuna de civilizaciones y rica en recursos energéticos.'
+            },
+            'Indonesia': {
+                capital: 'Yakarta',
+                población: '273 millones',
+                continente: 'Oceanía/Asia',
+                descripción: 'Archipiélago más grande del mundo con gran diversidad étnica y cultural.'
+            }
+        };
+
+        let selectedCountry = null;
+
+        // Agregar event listeners a todos los países del mapa político
+        document.querySelectorAll('#worldMap .country').forEach(country => {
+            country.addEventListener('click', function() {
+                const countryName = this.getAttribute('data-country');
+                selectCountry(countryName, this);
+            });
+
+            country.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.fill = '#e74c3c';
+                }
+            });
+
+            country.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.fill = '';
+                }
+            });
+        });
+
+        // Inicializar mapa low-poly
+        setupLowPolyMap();
+
+        function selectCountry(countryName, element) {
+            // Remover selección anterior solo del mapa político
+            document.querySelectorAll('#worldMap .country').forEach(c => {
+                c.classList.remove('selected');
+                if (!c.classList.contains('selected')) {
+                    c.style.fill = '';
+                }
+            });
+
+            // Seleccionar nuevo país
+            if (selectedCountry !== countryName) {
+                selectedCountry = countryName;
+                if (element) {
+                    element.classList.add('selected');
+                    element.style.fill = '#27ae60';
+                }
+
+                // Mostrar información
+                const info = countryInfo[countryName];
+                if (info) {
+                    document.getElementById('infoPanel').innerHTML = `
+                        <h3>${countryName}</h3>
+                        <p><strong>Capital:</strong> ${info.capital}</p>
+                        <p><strong>Población:</strong> ${info.población}</p>
+                        <p><strong>Continente:</strong> ${info.continente}</p>
+                        <p><strong>Descripción:</strong> ${info.descripción}</p>
+                    `;
+                } else {
+                    document.getElementById('infoPanel').innerHTML = `
+                        <h3>${countryName}</h3>
+                        <p>Información no disponible para esta región.</p>
+                    `;
+                }
+            } else {
+                // Deseleccionar si se hace clic en el mismo
+                selectedCountry = null;
+                document.getElementById('infoPanel').innerHTML = `
+                    <h3>Información del País</h3>
+                    <p>Haz clic en cualquier país del mapa para ver información detallada.</p>
+                `;
+            }
+        }
+
+        function resetSelection() {
+            selectedCountry = null;
+            document.querySelectorAll('#worldMap .country').forEach(c => {
+                c.classList.remove('selected');
+                c.style.fill = '';
+            });
+            document.getElementById('infoPanel').innerHTML = `
+                <h3>Información del País</h3>
+                <p>Haz clic en cualquier país del mapa para ver información detallada.</p>
+            `;
+        }
+
+        function switchMap(mapType) {
+            const politicalMap = document.getElementById('worldMap');
+            const lowPolyMap = document.getElementById('lowPolyMap');
+            const mapContainer = document.getElementById('mapContainer');
+            const btnPolitical = document.getElementById('btnPolitical');
+            const btnLowPoly = document.getElementById('btnLowPoly');
+
+            if (mapType === 'political') {
+                politicalMap.classList.remove('hidden');
+                lowPolyMap.classList.add('hidden');
+                mapContainer.classList.remove('low-poly');
+                btnPolitical.classList.add('active');
+                btnLowPoly.classList.remove('active');
+            } else if (mapType === 'lowpoly') {
+                politicalMap.classList.add('hidden');
+                lowPolyMap.classList.remove('hidden');
+                mapContainer.classList.add('low-poly');
+                btnPolitical.classList.remove('active');
+                btnLowPoly.classList.add('active');
+                
+                // Agregar event listeners al mapa low-poly si aún no los tiene
+                setupLowPolyMap();
+            }
+        }
+
+        let lowPolyMapSetup = false;
+
+        function setupLowPolyMap() {
+            if (lowPolyMapSetup) return; // Evitar configuración múltiple
+            
+            const lowPolyContinents = document.querySelectorAll('#lowPolyMap .low-poly-continent');
+            lowPolyContinents.forEach(continent => {
+                continent.addEventListener('click', function() {
+                    const countryName = this.getAttribute('data-country');
+                    const continentName = this.getAttribute('data-continent');
+                    
+                    // Mostrar información básica
+                    document.getElementById('infoPanel').innerHTML = `
+                        <h3>${countryName}</h3>
+                        <p><strong>Continente:</strong> ${continentName}</p>
+                        <p>Esta es una representación geométrica low-poly del mapa mundial.</p>
+                    `;
+                });
+            });
+            
+            lowPolyMapSetup = true;
+        }
+
+        function zoomToContinent(continent) {
+            const activeMap = document.querySelector('.world-map:not(.hidden)');
+            if (!activeMap) return;
+            
+            const isLowPoly = activeMap.id === 'lowPolyMap';
+            
+            const continents = {
+                'america': isLowPoly 
+                    ? { x: 400, y: 200, width: 800, height: 500 }
+                    : { x: 300, y: 200, width: 500, height: 250 },
+                'europe': isLowPoly
+                    ? { x: 700, y: 150, width: 700, height: 300 }
+                    : { x: 450, y: 100, width: 400, height: 150 },
+                'asia': isLowPoly
+                    ? { x: 1200, y: 150, width: 800, height: 600 }
+                    : { x: 800, y: 100, width: 700, height: 250 },
+                'africa': isLowPoly
+                    ? { x: 850, y: 300, width: 800, height: 550 }
+                    : { x: 500, y: 200, width: 450, height: 200 },
+                'oceania': isLowPoly
+                    ? { x: 1550, y: 650, width: 450, height: 350 }
+                    : { x: 1200, y: 330, width: 350, height: 130 }
+            };
+
+            const viewBox = continents[continent];
+            const defaultViewBox = isLowPoly ? '0 0 2000 1000' : '0 0 1600 500';
+            
+            if (viewBox) {
+                activeMap.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+                setTimeout(() => {
+                    activeMap.setAttribute('viewBox', defaultViewBox);
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
+

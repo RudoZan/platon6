@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetonor - Juego Matemático</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1em;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: #34495e;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .target-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .target-cell {
+            aspect-ratio: 1;
+            background: #ffffff;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #2c3e50;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .target-cell:hover {
+            border-color: #3498db;
+            background: #ecf0f1;
+        }
+
+        .target-cell.completed {
+            background: #d5f4e6;
+            border-color: #27ae60;
+            color: #27ae60;
+        }
+
+        .target-cell.hint {
+            animation: pulse 1s ease infinite;
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.6);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .target-cell .dropped-number {
+            position: absolute;
+            bottom: 8px;
+            width: 25px;
+            height: 25px;
+            background: #ecf0f1;
+            border: 1px solid #95a5a6;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.5em;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .target-cell .dropped-number:hover {
+            background: #e74c3c;
+            color: white;
+            border-color: #c0392b;
+        }
+
+        .target-cell .dropped-number.first {
+            left: 8px;
+        }
+
+        .target-cell .dropped-number.second {
+            right: 8px;
+        }
+
+        .target-cell .operation-badge {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.45em;
+            background: #27ae60;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .target-cell .operation-badge.multiply {
+            background: #3498db;
+        }
+
+        .basic-numbers {
+            background: #ffffff;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            padding: 20px;
+        }
+
+        .basic-numbers h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: 400;
+        }
+
+        .numbers-list {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            justify-items: center;
+        }
+
+        .number-basic {
+            width: 50px;
+            height: 50px;
+            background: #ecf0f1;
+            border: 2px solid #95a5a6;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: grab;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .number-basic:active {
+            cursor: grabbing;
+        }
+
+        .number-basic:hover {
+            border-color: #3498db;
+            background: #d6eaf8;
+        }
+
+        .number-basic.selected {
+            background: #3498db;
+            border-color: #2980b9;
+            color: white;
+        }
+
+        .number-basic.dragging {
+            opacity: 0.5;
+        }
+
+        .target-cell.drag-over {
+            background: #d6eaf8;
+            border-color: #3498db;
+            border-style: dashed;
+        }
+
+        .operation-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-operation {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .btn-sum {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-multiply {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-operation:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .status-message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-success {
+            background: #d5f4e6;
+            color: #27ae60;
+            border: 1px solid #27ae60;
+        }
+
+        .status-error {
+            background: #fadbd8;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #2c3e50;
+        }
+
+        .close {
+            font-size: 2em;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .instructions {
+            line-height: 1.8;
+        }
+
+        .instructions h3 {
+            color: #2c3e50;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .instructions .example {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .page-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .page-number:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .page-number.active {
+            background: white;
+            border-color: #3498db;
+            color: #3498db;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .game-board {
+                grid-template-columns: 1fr;
+            }
+
+            .target-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .numbers-list {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .number-basic {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Tetonor</h1>
+        <p class="subtitle">Juego Matemático del Sunday Times</p>
+
+        <div class="game-header">
+            <button class="btn btn-primary" onclick="showInstructions()">📖 Instrucciones</button>
+            <button class="btn btn-secondary" onclick="showHint()">💡 Pista</button>
+            <button class="btn btn-danger" onclick="resetGame()">🔄 Reiniciar</button>
+        </div>
+
+        <div id="statusMessage" class="status-message"></div>
+
+        <div class="game-board">
+            <div>
+                <h3 style="text-align: center; margin-bottom: 15px; color: #2c3e50; font-weight: 400;">Números Objetivo</h3>
+                <div class="target-grid" id="targetGrid"></div>
+            </div>
+
+            <div class="basic-numbers">
+                <h3>Números Básicos</h3>
+                <div class="numbers-list" id="numbersList"></div>
+                <div class="operation-buttons">
+                    <button class="btn btn-operation btn-sum" id="btnSum" onclick="applySum()" disabled>+</button>
+                    <button class="btn btn-operation btn-multiply" id="btnMultiply" onclick="applyMultiply()" disabled>×</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-navigation">
+            <a href="index.html" class="page-number">1</a>
+            <a href="page2.html" class="page-number">2</a>
+            <a href="page3.html" class="page-number">3</a>
+            <a href="page4.html" class="page-number">4</a>
+            <a href="page5.html" class="page-number">5</a>
+            <a href="page6.html" class="page-number">6</a>
+            <a href="page7.html" class="page-number">7</a>
+            <a href="page8.html" class="page-number">8</a>
+            <a href="page9.html" class="page-number">9</a>
+            <a href="page10.html" class="page-number active">10</a>
+            <a href="page11.html" class="page-number">11</a>
+        </div>
+    </div>
+
+    <!-- Modal de Instrucciones -->
+    <div id="instructionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📖 Instrucciones del Tetonor</h2>
+                <span class="close" onclick="closeInstructions()">&times;</span>
+            </div>
+            <div class="instructions">
+                <h3>Objetivo del Juego</h3>
+                <p>Completa todos los números objetivo usando los números básicos disponibles. Cada número objetivo debe completarse de <strong>dos maneras diferentes</strong> usando el <strong>mismo par</strong> de números básicos:</p>
+                
+                <div class="example">
+                    <strong>Ejemplo:</strong> Si seleccionas los números básicos 2 y 3:<br>
+                    • Puedes sumarlos: 2 + 3 = 5<br>
+                    • Puedes multiplicarlos: 2 × 3 = 6<br>
+                    • Ambos resultados (5 y 6) deben estar en la cuadrícula de números objetivo
+                </div>
+
+                <h3>Reglas Importantes</h3>
+                <ul>
+                    <li>Cada par de números básicos se usa <strong>exactamente dos veces</strong>: una para suma y otra para multiplicación.</li>
+                    <li>No puedes usar el mismo par más de dos veces.</li>
+                    <li>Cada número objetivo debe completarse con ambas operaciones (suma y multiplicación) del mismo par.</li>
+                    <li>Cuando completes un número objetivo, se marcará en verde.</li>
+                </ul>
+
+                <h3>Cómo Jugar</h3>
+                <ol>
+                    <li>Selecciona dos números básicos haciendo clic en ellos.</li>
+                    <li>Elige una operación (Sumar o Multiplicar).</li>
+                    <li>Si el resultado coincide con un número objetivo disponible, se marcará como completado.</li>
+                    <li>Repite el proceso hasta completar todos los números objetivo.</li>
+                </ol>
+
+                <h3>Consejos</h3>
+                <ul>
+                    <li>Usa el botón "Pista" para resaltar un número objetivo que aún no has resuelto.</li>
+                    <li>Piensa en pares de números que puedan generar resultados tanto por suma como por multiplicación.</li>
+                    <li>Los números más grandes en la cuadrícula suelen requerir multiplicaciones con números básicos mayores.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos del juego
+        let basicNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+        let targetNumbers = [7, 12, 15, 18, 20, 24, 28, 30, 35, 40, 42, 48, 56, 63, 72, 80];
+        let selectedNumbers = [];
+        let targetOperations = new Map(); // Guarda qué tiene cada target: {targetNum: {numbers: [num1, num2], operation: 'sum'|'multiply'|null}}
+
+        // Inicializar juego
+        function initGame() {
+            selectedNumbers = [];
+            targetOperations.clear();
+            draggedNumber = null;
+            renderTargetGrid();
+            renderBasicNumbers();
+            updateOperationButtons();
+            showMessage('Arrastra números básicos o selecciona dos y elige una operación', 'success');
+        }
+
+        function renderTargetGrid() {
+            const grid = document.getElementById('targetGrid');
+            grid.innerHTML = '';
+            
+            targetNumbers.forEach((num, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'target-cell';
+                cell.dataset.number = num;
+                cell.dataset.index = index;
+                
+                const numSpan = document.createElement('span');
+                numSpan.textContent = num;
+                cell.appendChild(numSpan);
+                
+                cell.onclick = () => selectTarget(num);
+                
+                // Event listeners para drag and drop
+                cell.ondragover = (e) => {
+                    e.preventDefault();
+                    if (draggedNumber !== null) {
+                        cell.classList.add('drag-over');
+                    }
+                };
+                
+                cell.ondragleave = () => {
+                    cell.classList.remove('drag-over');
+                };
+                
+                cell.ondrop = (e) => {
+                    e.preventDefault();
+                    cell.classList.remove('drag-over');
+                    if (draggedNumber !== null) {
+                        handleDropToTarget(num, draggedNumber);
+                        draggedNumber = null;
+                    }
+                };
+                
+                // Mostrar números y operación existentes
+                if (targetOperations.has(num)) {
+                    const data = targetOperations.get(num);
+                    const numbers = data.numbers || [];
+                    
+                    // Mostrar primer número (abajo izquierda)
+                    if (numbers.length > 0) {
+                        const firstNum = document.createElement('div');
+                        firstNum.className = 'dropped-number first';
+                        firstNum.textContent = numbers[0];
+                        firstNum.onclick = () => removeFromTarget(num, 0);
+                        cell.appendChild(firstNum);
+                    }
+                    
+                    // Mostrar segundo número (abajo derecha)
+                    if (numbers.length > 1) {
+                        const secondNum = document.createElement('div');
+                        secondNum.className = 'dropped-number second';
+                        secondNum.textContent = numbers[1];
+                        secondNum.onclick = () => removeFromTarget(num, 1);
+                        cell.appendChild(secondNum);
+                    }
+                    
+                    // Mostrar operación (abajo centro)
+                    if (data.operation) {
+                        const badge = document.createElement('span');
+                        badge.className = 'operation-badge';
+                        badge.textContent = data.operation === 'sum' ? '+' : '×';
+                        if (data.operation === 'multiply') {
+                            badge.classList.add('multiply');
+                        }
+                        cell.appendChild(badge);
+                    }
+                    
+                    // Si tiene ambos números y operación, marcar como completado
+                    if (numbers.length === 2 && data.operation) {
+                        cell.classList.add('completed');
+                    }
+                }
+                
+                grid.appendChild(cell);
+            });
+        }
+
+        function renderBasicNumbers() {
+            const list = document.getElementById('numbersList');
+            list.innerHTML = '';
+            
+            basicNumbers.forEach((num, index) => {
+                const numberEl = document.createElement('div');
+                numberEl.className = 'number-basic';
+                numberEl.textContent = num;
+                numberEl.dataset.number = num;
+                numberEl.dataset.index = index;
+                numberEl.draggable = true;
+                numberEl.onclick = () => selectBasicNumber(num);
+                
+                // Event listeners para drag and drop
+                numberEl.addEventListener('dragstart', (e) => {
+                    draggedNumber = num;
+                    numberEl.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'copy';
+                    e.dataTransfer.setData('text/plain', num);
+                });
+                
+                numberEl.addEventListener('dragend', () => {
+                    numberEl.classList.remove('dragging');
+                    // No resetear draggedNumber aquí, lo haremos en el drop
+                });
+                
+                if (selectedNumbers.includes(num)) {
+                    numberEl.classList.add('selected');
+                }
+                
+                list.appendChild(numberEl);
+            });
+        }
+
+        function selectBasicNumber(num) {
+            if (selectedNumbers.includes(num)) {
+                // Deseleccionar
+                selectedNumbers = selectedNumbers.filter(n => n !== num);
+            } else if (selectedNumbers.length < 2) {
+                // Seleccionar
+                selectedNumbers.push(num);
+            } else {
+                // Reemplazar el primero
+                selectedNumbers[0] = selectedNumbers[1];
+                selectedNumbers[1] = num;
+            }
+            
+            renderBasicNumbers();
+            updateOperationButtons();
+        }
+
+        function updateOperationButtons() {
+            const btnSum = document.getElementById('btnSum');
+            const btnMultiply = document.getElementById('btnMultiply');
+            
+            if (selectedNumbers.length === 2) {
+                btnSum.disabled = false;
+                btnMultiply.disabled = false;
+            } else {
+                btnSum.disabled = true;
+                btnMultiply.disabled = true;
+            }
+        }
+
+        function applySum() {
+            if (selectedNumbers.length !== 2) return;
+            
+            const [a, b] = selectedNumbers.sort((x, y) => x - y);
+            const result = a + b;
+            const operation = `${a}+${b}`;
+            
+            applyOperation(result, 'sum', operation, a, b);
+        }
+
+        function applyOperation(targetNum, type, operation, a, b) {
+            // Verificar si el target ya está completado
+            const existing = targetOperations.get(targetNum);
+            if (existing && existing.numbers && existing.numbers.length === 2 && existing.operation) {
+                showMessage('Este número objetivo ya está completado', 'error');
+                return;
+            }
+            
+            if (targetNumbers.includes(targetNum)) {
+                // Inicializar si no existe
+                if (!targetOperations.has(targetNum)) {
+                    targetOperations.set(targetNum, { numbers: [], operation: null });
+                }
+                
+                const targetData = targetOperations.get(targetNum);
+                
+                // Si no tiene números, usar los seleccionados
+                if (targetData.numbers.length === 0) {
+                    targetData.numbers = [a, b].sort((x, y) => x - y);
+                } else if (targetData.numbers.length === 1) {
+                    // Agregar el segundo número si falta
+                    const missing = targetData.numbers[0] === a ? b : a;
+                    targetData.numbers.push(missing);
+                    targetData.numbers.sort((x, y) => x - y);
+                }
+                
+                // Verificar que los números coincidan
+                const sortedNums = targetData.numbers.sort((x, y) => x - y);
+                const sortedSelected = [a, b].sort((x, y) => x - y);
+                
+                if (sortedNums[0] === sortedSelected[0] && sortedNums[1] === sortedSelected[1]) {
+                    // Verificar que el resultado sea correcto
+                    let result;
+                    if (type === 'sum') {
+                        result = a + b;
+                    } else {
+                        result = a * b;
+                    }
+                    
+                    if (result === targetNum) {
+                        targetData.operation = type;
+                        
+                        // Re-renderizar la cuadrícula
+                        renderTargetGrid();
+                        checkGameComplete();
+                        
+                        selectedNumbers = [];
+                        renderBasicNumbers();
+                        updateOperationButtons();
+                        
+                        const symbol = type === 'sum' ? '+' : '×';
+                        showMessage(`¡Correcto! ${a} ${symbol} ${b} = ${targetNum}`, 'success');
+                    } else {
+                        showMessage(`El resultado no coincide: ${a} ${type === 'sum' ? '+' : '×'} ${b} = ${result}, no ${targetNum}`, 'error');
+                    }
+                } else {
+                    showMessage('Los números seleccionados no coinciden con los del objetivo', 'error');
+                }
+            } else {
+                showMessage(`El resultado ${targetNum} no está en la cuadrícula`, 'error');
+            }
+        }
+
+        function handleDropToTarget(targetNum, number) {
+            // Verificar si el target ya está completado
+            const data = targetOperations.get(targetNum);
+            if (data && data.numbers && data.numbers.length === 2 && data.operation) {
+                showMessage('Este número objetivo ya está completado', 'error');
+                draggedNumber = null;
+                return;
+            }
+            
+            // Inicializar datos del target si no existen
+            if (!targetOperations.has(targetNum)) {
+                targetOperations.set(targetNum, { numbers: [], operation: null });
+            }
+            
+            const targetData = targetOperations.get(targetNum);
+            
+            // Agregar número si hay espacio (máximo 2)
+            if (targetData.numbers.length < 2) {
+                // Evitar duplicados en el mismo target
+                if (!targetData.numbers.includes(number)) {
+                    targetData.numbers.push(number);
+                    
+                    // Re-renderizar la cuadrícula
+                    renderTargetGrid();
+                    
+                    // Si ahora tiene 2 números, habilitar operaciones
+                    if (targetData.numbers.length === 2) {
+                        showMessage(`Tienes 2 números. Usa + o × para completar`, 'success');
+                    } else {
+                        showMessage(`Número ${number} agregado. Arrastra otro número o usa botones`, 'success');
+                    }
+                } else {
+                    showMessage('Este número ya está en este objetivo', 'error');
+                }
+            } else {
+                showMessage('Ya hay 2 números. Usa + o × o elimina uno', 'error');
+            }
+            
+            draggedNumber = null;
+        }
+
+        function removeFromTarget(targetNum, index) {
+            const data = targetOperations.get(targetNum);
+            if (data && data.numbers && data.numbers.length > index) {
+                data.numbers.splice(index, 1);
+                // Si se elimina un número, también eliminar la operación
+                if (data.numbers.length < 2) {
+                    data.operation = null;
+                }
+                renderTargetGrid();
+                showMessage('Número eliminado', 'success');
+            }
+        }
+
+        function applyMultiply() {
+            if (selectedNumbers.length !== 2) return;
+            
+            const [a, b] = selectedNumbers.sort((x, y) => x - y);
+            const result = a * b;
+            const operation = `${a}×${b}`;
+            
+            applyOperation(result, 'multiply', operation, a, b);
+        }
+
+        function checkGameComplete() {
+            let allCompleted = true;
+            targetNumbers.forEach(num => {
+                const data = targetOperations.get(num);
+                if (!data || !data.numbers || data.numbers.length !== 2 || !data.operation) {
+                    allCompleted = false;
+                }
+            });
+            
+            if (allCompleted) {
+                setTimeout(() => {
+                    showMessage('¡Felicitaciones! Has completado el Tetonor', 'success');
+                }, 500);
+            }
+        }
+
+        function selectTarget(num) {
+            const cell = document.querySelector(`.target-cell[data-number="${num}"]`);
+            if (cell) {
+                cell.classList.toggle('hint');
+                setTimeout(() => {
+                    cell.classList.remove('hint');
+                }, 2000);
+            }
+        }
+
+        function showHint() {
+            const incompleteTargets = targetNumbers.filter(num => {
+                const data = targetOperations.get(num);
+                return !data || !data.numbers || data.numbers.length !== 2 || !data.operation;
+            });
+            
+            if (incompleteTargets.length > 0) {
+                const randomTarget = incompleteTargets[Math.floor(Math.random() * incompleteTargets.length)];
+                selectTarget(randomTarget);
+                showMessage(`Pista: Resuelve el número ${randomTarget}`, 'success');
+            } else {
+                showMessage('¡Ya completaste todos los números objetivo!', 'success');
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('statusMessage');
+            messageEl.textContent = text;
+            messageEl.className = `status-message status-${type} show`;
+            
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, 3000);
+        }
+
+        function showInstructions() {
+            document.getElementById('instructionModal').classList.add('show');
+        }
+
+        function closeInstructions() {
+            document.getElementById('instructionModal').classList.remove('show');
+        }
+
+        function resetGame() {
+            if (confirm('¿Estás seguro de que quieres reiniciar el juego?')) {
+                initGame();
+            }
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('instructionModal');
+            if (event.target === modal) {
+                closeInstructions();
+            }
+        }
+
+        // Inicializar al cargar
+        initGame();
+    </script>
+</body>
+</html>
+

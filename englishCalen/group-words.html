@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Group Words</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #2d2d44; color: #eee; padding: 20px; }
+    h1 { font-size: 1.2rem; margin-bottom: 15px; color: #e94560; }
+    .groups { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .group { background: #1a1a2e; border: 2px dashed #555; border-radius: 10px; padding: 12px; min-height: 120px; }
+    .group.drag-over { border-color: #e94560; background: #252540; }
+    .group-title { font-size: 0.85rem; color: #e94560; font-weight: bold; margin-bottom: 8px; }
+    .word { display: inline-block; padding: 6px 14px; margin: 3px; background: #3a506b; color: white; border-radius: 6px; cursor: grab; font-size: 0.9rem; font-weight: 600; }
+    .word:active { cursor: grabbing; }
+    .word.dragging { opacity: 0.4; }
+    button { margin-top: 15px; padding: 10px 20px; background: #e94560; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+    button:hover { background: #c73650; }
+    pre { margin-top: 15px; background: #1a1a2e; padding: 15px; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap; display: none; }
+</style>
+</head>
+<body>
+<h1>Drag words into groups</h1>
+<div class="groups">
+    <div class="group" id="g0" ondrop="drop(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)">
+        <div class="group-title">Group 1</div>
+    </div>
+    <div class="group" id="g1" ondrop="drop(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)">
+        <div class="group-title">Group 2</div>
+    </div>
+    <div class="group" id="g2" ondrop="drop(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)">
+        <div class="group-title">Group 3</div>
+    </div>
+    <div class="group" id="g3" ondrop="drop(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)">
+        <div class="group-title">Group 4</div>
+    </div>
+    <div class="group" id="unassigned" ondrop="drop(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)" style="grid-column:1/-1; border-style:solid;">
+        <div class="group-title">Unassigned</div>
+    </div>
+</div>
+<button onclick="exportGroups()">Show Result</button>
+<pre id="result"></pre>
+
+<script>
+const words = [
+    "Camping","Poster","Sandwich","Selfie","YouTube","WhatsApp",
+    "Happy Birthday","Game Over","Halloween","Corner","Offside",
+    "Basketball","Influencer","Like","Gamer","Skateboard",
+    "Baby Shower","Flash","Sushi","Pizza","Jeans",
+    "I Love You","Thank You","Hello"
+];
+
+const unassigned = document.getElementById('unassigned');
+words.forEach(w => {
+    const el = document.createElement('span');
+    el.className = 'word';
+    el.textContent = w;
+    el.draggable = true;
+    el.ondragstart = (e) => { e.dataTransfer.setData('text', w); el.classList.add('dragging'); };
+    el.ondragend = () => el.classList.remove('dragging');
+    unassigned.appendChild(el);
+});
+
+function dragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function drop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    const w = e.dataTransfer.getData('text');
+    const existing = document.querySelector(`.word.dragging`);
+    if (existing) e.currentTarget.appendChild(existing);
+}
+
+function exportGroups() {
+    const res = document.getElementById('result');
+    let text = '';
+    for (let i = 0; i < 4; i++) {
+        const g = document.getElementById(`g${i}`);
+        const ws = [...g.querySelectorAll('.word')].map(el => el.textContent);
+        text += `Group ${i+1}: ${ws.join(', ') || '(empty)'}\n`;
+    }
+    const un = [...document.getElementById('unassigned').querySelectorAll('.word')].map(el => el.textContent);
+    if (un.length) text += `\nUnassigned: ${un.join(', ')}`;
+    res.textContent = text;
+    res.style.display = 'block';
+}
+</script>
+</body>
+</html>

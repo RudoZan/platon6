@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano Cartesiano — Círculo Unitario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            gap: 30px;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .plane-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .plane-layout #planeCanvas { flex-shrink: 0; }
+        .plane-layout .trig-panel { flex: 0 0 220px; }
+
+        #planeCanvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: block;
+            background: white;
+            cursor: pointer;
+        }
+
+        .trig-panel {
+            min-width: 220px;
+            padding-top: 10px;
+        }
+
+        .trig-panel label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        #angleSlider {
+            width: 100%;
+            margin-bottom: 18px;
+        }
+
+        .trig-valores {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 1.05em;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .dot-sin { background: #e74c3c; }
+        .dot-cos { background: #3498db; }
+        .dot-tan { background: #9b59b6; }
+
+        .trig-hint {
+            font-size: 0.82em;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        .page-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .page-number:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-number.active {
+            background: white;
+            border-color: #667eea;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Plano Cartesiano — Círculo Unitario</h1>
+        <div class="plane-layout">
+            <canvas id="planeCanvas"></canvas>
+            <div class="trig-panel">
+                <label for="angleSlider">Ángulo: <span id="angleValueLabel">45°</span></label>
+                <input type="range" id="angleSlider" min="0" max="360" value="45" step="1">
+                <div class="trig-valores">
+                    <div><span class="dot dot-cos"></span>cos θ (eje X) = <span id="valCos"></span></div>
+                    <div><span class="dot dot-sin"></span>sen θ (eje Y) = <span id="valSin"></span></div>
+                    <div><span class="dot dot-tan"></span>tan θ = <span id="valTan"></span></div>
+                </div>
+                <p class="trig-hint">Arrastra el punto sobre la circunferencia o usa el control deslizante.
+                El radio (hipotenusa) mide siempre 1 — por eso el punto sobre la
+                circunferencia cae exactamente en las coordenadas (cos θ, sen θ)
+                del plano.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-navigation">
+        <a href="index.html" class="page-number active">1</a>
+        <a href="page2.html" class="page-number">2</a>
+        <a href="page3.html" class="page-number">3</a>
+        <a href="page4.html" class="page-number">4</a>
+        <a href="page5.html" class="page-number">5</a>
+        <a href="page6.html" class="page-number">6</a>
+        <a href="page7.html" class="page-number">7</a>
+        <a href="page8.html" class="page-number">8</a>
+        <a href="page9.html" class="page-number">9</a>
+        <a href="page10.html" class="page-number">10</a>
+        <a href="page11.html" class="page-number">11</a>
+    </div>
+
+    <script>
+        // ══════════════════════════════════════════════════════════════
+        // Un solo plano cartesiano con el círculo unitario dibujado sobre él
+        // ══════════════════════════════════════════════════════════════
+        const planeCanvas = document.getElementById('planeCanvas');
+        const planeCtx = planeCanvas.getContext('2d');
+
+        const planeSize = 560;
+        planeCanvas.width = planeSize;
+        planeCanvas.height = planeSize;
+
+        const scale = 120; // píxeles por unidad
+        const units = 2;   // unidades visibles en cada dirección
+        const originX = planeSize / 2;
+        const originY = planeSize / 2;
+        const circleRadius = scale; // radio 1 = círculo unitario
+
+        let angleDeg = 45;
+        let arrastrandoAngulo = false;
+
+        function anguloAPunto(deg) {
+            const rad = deg * Math.PI / 180;
+            return {
+                rad,
+                x: originX + circleRadius * Math.cos(rad),
+                y: originY - circleRadius * Math.sin(rad) // y invertido (canvas crece hacia abajo)
+            };
+        }
+
+        function drawPlane() {
+            planeCtx.clearRect(0, 0, planeSize, planeSize);
+
+            // Cuadrícula
+            planeCtx.strokeStyle = '#e0e0e0';
+            planeCtx.lineWidth = 1;
+            for (let i = -units; i <= units; i++) {
+                const x = originX + i * scale;
+                planeCtx.beginPath();
+                planeCtx.moveTo(x, 0);
+                planeCtx.lineTo(x, planeSize);
+                planeCtx.stroke();
+
+                const y = originY + i * scale;
+                planeCtx.beginPath();
+                planeCtx.moveTo(0, y);
+                planeCtx.lineTo(planeSize, y);
+                planeCtx.stroke();
+            }
+
+            // Ejes
+            planeCtx.strokeStyle = '#000';
+            planeCtx.lineWidth = 2;
+            planeCtx.beginPath();
+            planeCtx.moveTo(0, originY); planeCtx.lineTo(planeSize, originY);
+            planeCtx.moveTo(originX, 0); planeCtx.lineTo(originX, planeSize);
+            planeCtx.stroke();
+
+            // Flechas de los ejes
+            planeCtx.fillStyle = '#000';
+            planeCtx.beginPath();
+            planeCtx.moveTo(planeSize - 15, originY - 5);
+            planeCtx.lineTo(planeSize, originY);
+            planeCtx.lineTo(planeSize - 15, originY + 5);
+            planeCtx.fill();
+            planeCtx.beginPath();
+            planeCtx.moveTo(originX - 5, 15);
+            planeCtx.lineTo(originX, 0);
+            planeCtx.lineTo(originX + 5, 15);
+            planeCtx.fill();
+
+            // Etiquetas y números de los ejes
+            planeCtx.fillStyle = '#000';
+            planeCtx.font = 'bold 16px Arial';
+            planeCtx.textAlign = 'center';
+            planeCtx.fillText('X', planeSize - 22, originY - 12);
+            planeCtx.fillText('Y', originX + 16, 20);
+
+            planeCtx.font = '12px Arial';
+            planeCtx.textBaseline = 'middle';
+            for (let i = -units; i <= units; i++) {
+                if (i === 0) continue;
+                planeCtx.textAlign = 'center';
+                planeCtx.fillText(i.toString(), originX + i * scale, originY + 16);
+                planeCtx.textAlign = 'right';
+                planeCtx.fillText(i.toString(), originX - 8, originY - i * scale);
+            }
+
+            // Circunferencia unitaria
+            planeCtx.strokeStyle = '#333';
+            planeCtx.lineWidth = 2;
+            planeCtx.beginPath();
+            planeCtx.arc(originX, originY, circleRadius, 0, Math.PI * 2);
+            planeCtx.stroke();
+
+            const p = anguloAPunto(angleDeg);
+
+            // Cateto adyacente (coseno) — azul
+            planeCtx.strokeStyle = '#3498db';
+            planeCtx.lineWidth = 3;
+            planeCtx.beginPath();
+            planeCtx.moveTo(originX, originY);
+            planeCtx.lineTo(p.x, originY);
+            planeCtx.stroke();
+
+            // Cateto opuesto (seno) — rojo
+            planeCtx.strokeStyle = '#e74c3c';
+            planeCtx.beginPath();
+            planeCtx.moveTo(p.x, originY);
+            planeCtx.lineTo(p.x, p.y);
+            planeCtx.stroke();
+
+            // Hipotenusa (radio = 1) — morado
+            planeCtx.strokeStyle = '#9b59b6';
+            planeCtx.lineWidth = 2.5;
+            planeCtx.beginPath();
+            planeCtx.moveTo(originX, originY);
+            planeCtx.lineTo(p.x, p.y);
+            planeCtx.stroke();
+
+            // Arco del ángulo
+            const anguloCanvas = -p.rad;
+            planeCtx.strokeStyle = '#f39c12';
+            planeCtx.lineWidth = 2;
+            planeCtx.beginPath();
+            planeCtx.arc(originX, originY, 26, 0, anguloCanvas, true);
+            planeCtx.stroke();
+
+            // Punto sobre la circunferencia
+            planeCtx.fillStyle = '#2c3e50';
+            planeCtx.beginPath();
+            planeCtx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+            planeCtx.fill();
+            planeCtx.strokeStyle = 'white';
+            planeCtx.lineWidth = 2;
+            planeCtx.stroke();
+
+            // Etiquetas cos/sen
+            planeCtx.fillStyle = '#3498db';
+            planeCtx.font = 'bold 13px Arial';
+            planeCtx.textAlign = 'center';
+            planeCtx.fillText('cos θ', (originX + p.x) / 2, originY + (p.y < originY ? 18 : -8));
+            planeCtx.fillStyle = '#e74c3c';
+            planeCtx.textAlign = p.x >= originX ? 'left' : 'right';
+            planeCtx.fillText('sen θ', p.x + (p.x >= originX ? 8 : -8), (originY + p.y) / 2);
+
+            actualizarValoresTrig(p.rad);
+        }
+
+        function actualizarValoresTrig(rad) {
+            const s = Math.sin(rad);
+            const c = Math.cos(rad);
+            document.getElementById('valSin').textContent = s.toFixed(3);
+            document.getElementById('valCos').textContent = c.toFixed(3);
+            document.getElementById('valTan').textContent =
+                Math.abs(c) < 0.001 ? 'indefinida (90°/270°)' : (s / c).toFixed(3);
+            document.getElementById('angleValueLabel').textContent = Math.round(angleDeg) + '°';
+        }
+
+        document.getElementById('angleSlider').addEventListener('input', (e) => {
+            angleDeg = parseInt(e.target.value, 10);
+            drawPlane();
+        });
+
+        planeCanvas.addEventListener('mousedown', (e) => {
+            const rect = planeCanvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            const p = anguloAPunto(angleDeg);
+            if (Math.hypot(mx - p.x, my - p.y) < 16) arrastrandoAngulo = true;
+        });
+
+        planeCanvas.addEventListener('mousemove', (e) => {
+            if (!arrastrandoAngulo) return;
+            const rect = planeCanvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            let ang = Math.atan2(-(my - originY), mx - originX) * 180 / Math.PI;
+            if (ang < 0) ang += 360;
+            angleDeg = ang;
+            document.getElementById('angleSlider').value = Math.round(ang);
+            drawPlane();
+        });
+
+        window.addEventListener('mouseup', () => { arrastrandoAngulo = false; });
+
+        drawPlane();
+    </script>
+</body>
+</html>

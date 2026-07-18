@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controlar el acceso a tu sitio — Taller de Recursos Digitales Interactivos</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body class="tiene-sidebar" data-module="04" data-page="05" data-root="../">
+
+  <div id="site-header"></div>
+  <div id="site-modulebar"></div>
+  <div id="site-sidebar"></div>
+
+  <main class="contenido">
+    <h1>Controlar el acceso a tu sitio</h1>
+    <p>Hasta ahora tus páginas eran recursos sueltos. En la página anterior
+    las juntaste dentro de un solo sitio, con un índice que las reúne a
+    todas. Ese cambio trae una pregunta nueva: ¿quién puede entrar a verlo?
+    No todo recurso necesita estar completamente abierto a cualquiera, y
+    conviene conocer las opciones antes de publicar.</p>
+
+    <p>A lo largo de este taller la idea es que no te quedes solo con
+    recursos sueltos, sino que vayas armando tu propia pequeña plataforma
+    donde reunir los recursos de tus distintos cursos. Mientras más juntes
+    ahí, más sentido toma pensar en quién puede acceder a qué.</p>
+
+    <ol class="pasos-numerados">
+      <li><strong>No enlazar el recurso a ningún lugar público.</strong> Es
+      el nivel más simple: si no compartes el enlace en redes sociales,
+      buscadores u otros sitios, es difícil que alguien llegue a él por
+      accidente. No es una protección real (cualquiera con el enlace puede
+      entrar, y reenviarlo), pero suele alcanzar para un uso interno con un
+      curso.</li>
+      <li><strong>Pedir un código de acceso.</strong> Un paso más: mostrar
+      el contenido solo si se ingresa una palabra o código simple, como se
+      hizo en la portada de este mismo taller. Es fácil de construir con
+      JavaScript, pero es una protección débil: si el código se comparte
+      entre mucha gente deja de servir, y alguien con conocimientos
+      técnicos puede saltárselo revisando el código de la página. Sirve
+      como filtro liviano, no como seguridad real.</li>
+      <li><strong>Un sistema de usuarios.</strong> El nivel más completo:
+      cada persona tiene su propia cuenta, y tú controlas quién tiene
+      acceso y a qué. Este taller no entra en el detalle de cómo
+      construirlo, pero vale la pena saber que existe y que es posible
+      implementarlo más adelante, apoyándote en Supabase (Módulo 8).</li>
+    </ol>
+
+    <div class="consejo">
+      <p>Si en algún momento quieres dar el salto a un sistema de usuarios,
+      evita construir tu propio sistema de contraseñas desde cero. Es más
+      simple y más seguro dejar que cada persona inicie sesión con una
+      cuenta que ya tiene, por ejemplo su correo de Google. Así no eres tú
+      quien tiene que guardar y proteger contraseñas ajenas.</p>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../js/nav-data.js"></script>
+  <script src="../js/nav.js"></script>
+</body>
+</html>

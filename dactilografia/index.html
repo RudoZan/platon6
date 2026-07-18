@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curso de Dactilografía — Platón 6</title>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Paleta Tema Claro (TypingClub style) */
+    --bg-main: #f3f4f6;
+    --bg-card: #ffffff;
+    --border-color: #e5e7eb;
+    
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --text-pending: #9ca3af;
+    
+    --primary: #2563eb; /* Royal Blue */
+    --primary-light: #eff6ff;
+    --primary-glow: rgba(37, 99, 235, 0.25);
+    
+    --accent: #f97316;
+    --correct-color: #16a34a; /* Green */
+    --correct-bg: rgba(22, 163, 74, 0.1);
+    --incorrect-color: #dc2626; /* Red */
+    --incorrect-bg: rgba(220, 38, 38, 0.1);
+    
+    /* Colores de Dedos (Pasteles Armoniosos) */
+    --color-pinky: #fca5a5;   /* Rosa */
+    --color-ring: #fed7aa;    /* Naranja */
+    --color-middle: #bbf7d0;  /* Verde */
+    --color-index: #bfdbfe;   /* Azul */
+    --color-thumb: #cbd5e1;   /* Gris */
+  }
+
+  body.dark-mode {
+    /* Paleta Tema Oscuro */
+    --bg-main: #0f172a;
+    --bg-card: #1e293b;
+    --border-color: #334155;
+    
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-pending: #475569;
+    
+    --primary: #38bdf8; /* Cyan */
+    --primary-light: #0c4a6e;
+    --primary-glow: rgba(56, 189, 248, 0.3);
+    
+    --correct-color: #4ade80;
+    --correct-bg: rgba(74, 222, 128, 0.15);
+    --incorrect-color: #f87171;
+    --incorrect-bg: rgba(248, 113, 113, 0.15);
+    
+    --color-pinky: #f43f5e;
+    --color-ring: #ea580c;
+    --color-middle: #16a34a;
+    --color-index: #0284c7;
+    --color-thumb: #475569;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+  }
+
+  header {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px 20px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .btn-volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .btn-volver:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 12px var(--primary-glow);
+    transform: translateX(-2px);
+  }
+  .btn-volver span { transition: transform 0.2s ease; }
+  .btn-volver:hover span { transform: translateX(-3px); }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* Modo Oscuro Toggle */
+  .theme-toggle-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .theme-toggle-btn:hover {
+    border-color: var(--primary);
+    transform: scale(1.05);
+  }
+
+  main {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Encabezado del Curso (Título y Selector de Nivel) */
+  .course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 20px 24px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  .course-title h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+  
+  .course-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  
+  .level-selector-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .level-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  
+  .select-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .level-dropdown {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px 36px 10px 16px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 300px;
+  }
+  
+  .level-dropdown:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 8px var(--primary-glow);
+  }
+  
+  .level-dropdown:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  
+  .select-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  /* Contenedor Principal del Juego */
+  .game-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    position: relative;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+
+  /* Foco de Entrada Oculto */
+  #typingInput {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .focus-warning {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 23px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary);
+    cursor: pointer;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  body.dark-mode .focus-warning {
+    background: rgba(15, 23, 42, 0.9);
+  }
+  .game-container:not(.focused) .focus-warning {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Caja de Texto estilo TypingClub */
+  .text-display-box {
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .text-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 2.2rem;
+    letter-spacing: 0.08em;
+    line-height: 3.4rem;
+    word-break: break-word;
+    user-select: none;
+    text-align: center;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .char {
+    position: relative;
+    color: var(--text-pending);
+    border-radius: 4px;
+    transition: all 0.08s ease;
+  }
+
+  .char.correct {
+    color: var(--correct-color);
+  }
+
+  .char.incorrect {
+    color: var(--incorrect-color);
+    background-color: var(--incorrect-bg);
+    border-bottom: 3px solid var(--incorrect-color);
+  }
+
+  .char.current {
+    color: var(--text-main);
+    background-color: rgba(37, 99, 235, 0.08);
+  }
+  .char.current::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 4px;
+    background-color: var(--primary);
+    box-shadow: 0 0 8px var(--primary);
+    animation: cursorBlink 1s infinite;
+  }
+
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Barra de Estadísticas */
+  .stats-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+    transition: border-color 0.3s ease;
+  }
+  .stat-item {
+    text-align: center;
+  }
+  .stat-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  .stat-lbl {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* Teclado Virtual con Colores */
+  .keyboard-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    user-select: none;
+    max-width: 820px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .key {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-main);
+    height: 46px;
+    min-width: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: all 0.08s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    position: relative;
+  }
+
+  /* Colores de Bordes del Teclado según los dedos */
+  .key.pinky-l { border-bottom: 3.5px solid var(--color-pinky); }
+  .key.ring-l { border-bottom: 3.5px solid var(--color-ring); }
+  .key.middle-l { border-bottom: 3.5px solid var(--color-middle); }
+  .key.index-l { border-bottom: 3.5px solid var(--color-index); }
+  .key.thumb { border-bottom: 3.5px solid var(--color-thumb); }
+  .key.index-r { border-bottom: 3.5px solid var(--color-index); }
+  .key.middle-r { border-bottom: 3.5px solid var(--color-middle); }
+  .key.ring-r { border-bottom: 3.5px solid var(--color-ring); }
+  .key.pinky-r { border-bottom: 3.5px solid var(--color-pinky); }
+
+  /* Tamaños especiales de teclas */
+  .key.backspace { width: 72px; }
+  .key.tab { width: 56px; }
+  .key.caps { width: 66px; }
+  .key.enter { width: 84px; }
+  .key.shift { width: 92px; }
+  .key.space { width: 280px; }
+
+  /* Efecto Tecla Activa Objetivo */
+  .key.target {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px var(--primary-glow) !important;
+    transform: translateY(-2px);
+  }
+
+  .key.pressed {
+    background: #cbd5e1;
+    transform: scale(0.95);
+  }
+  body.dark-mode .key.pressed {
+    background: #475569;
+  }
+
+  /* Sección de Manos Guía */
+  .hands-section {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 10px;
+  }
+
+  .hand-svg {
+    width: 140px;
+    height: 140px;
+  }
+
+  .palm-path {
+    fill: #e5e7eb;
+    stroke: var(--border-color);
+    stroke-width: 1.5;
+    transition: fill 0.3s ease, stroke 0.3s ease;
+  }
+  body.dark-mode .palm-path {
+    fill: #334155;
+  }
+
+  .finger-rect {
+    fill: #d1d5db;
+    stroke: var(--border-color);
+    stroke-width: 1;
+    transition: fill 0.2s ease, transform 0.2s ease;
+  }
+  body.dark-mode .finger-rect {
+    fill: #475569;
+  }
+
+  /* Iluminación de dedos */
+  .finger-rect.active.pinky-l { fill: var(--color-pinky); filter: drop-shadow(0 0 3px var(--color-pinky)); }
+  .finger-rect.active.ring-l { fill: var(--color-ring); filter: drop-shadow(0 0 3px var(--color-ring)); }
+  .finger-rect.active.middle-l { fill: var(--color-middle); filter: drop-shadow(0 0 3px var(--color-middle)); }
+  .finger-rect.active.index-l { fill: var(--color-index); filter: drop-shadow(0 0 3px var(--color-index)); }
+  .finger-rect.active.thumb { fill: var(--color-thumb); filter: drop-shadow(0 0 3px var(--color-thumb)); }
+  .finger-rect.active.index-r { fill: var(--color-index); filter: drop-shadow(0 0 3px var(--color-index)); }
+  .finger-rect.active.middle-r { fill: var(--color-middle); filter: drop-shadow(0 0 3px var(--color-middle)); }
+  .finger-rect.active.ring-r { fill: var(--color-ring); filter: drop-shadow(0 0 3px var(--color-ring)); }
+  .finger-rect.active.pinky-r { fill: var(--color-pinky); filter: drop-shadow(0 0 3px var(--color-pinky)); }
+
+  /* Modal de Resultados */
+  .results-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .results-modal.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .results-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .results-modal.show .results-card {
+    transform: scale(1);
+  }
+
+  .results-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 12px;
+  }
+  .results-quote {
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.4rem;
+  }
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+  .result-item {
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .result-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .result-value {
+    font-size: 2rem;
+    font-weight: bold;
+    font-family: 'Space Mono', monospace;
+  }
+  .result-value.accent { color: var(--accent); }
+  .result-value.correct { color: var(--correct-color); }
+
+  .btn-modal {
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px var(--primary-glow);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-modal:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--primary-glow);
+  }
+
+  /* Audio Controles */
+  .audio-indicator {
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+  }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: auto;
+  }
+
+  /* Responsive */
+  @media(max-width: 768px) {
+    main { padding: 0 10px 20px; }
+    .course-header { flex-direction: column; align-items: stretch; padding: 16px; }
+    .level-dropdown { min-width: 100%; }
+    .text-display { font-size: 1.5rem; line-height: 2.4rem; }
+    .key { height: 38px; min-width: 32px; font-size: 0.8rem; }
+    .key.backspace { width: 50px; }
+    .key.tab { width: 42px; }
+    .key.caps { width: 50px; }
+    .key.enter { width: 60px; }
+    .key.shift { width: 70px; }
+    .key.space { width: 160px; }
+    .hands-section { display: none; } /* Ocultar manos en pantallas móviles por espacio */
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a class="btn-volver" href="../listado.html">
+      <span>←</span> Volver a Platón 6
+    </a>
+    <div class="header-controls">
+      <div class="audio-indicator" id="audioToggle" title="Activar/Silenciar sonido de teclado">🔊</div>
+      <button class="theme-toggle-btn" id="themeToggle" title="Cambiar Tema">🌙</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Encabezado del Curso (Título y Selector de Nivel) -->
+    <div class="course-header">
+      <div class="course-title">
+        <h1>Curso de Dactilografía Interactiva</h1>
+        <p class="course-subtitle">Aprende a escribir al tacto de forma progresiva y visual</p>
+      </div>
+      <div class="level-selector-container">
+        <label for="levelSelect" class="level-label">Nivel:</label>
+        <div class="select-wrapper">
+          <select id="levelSelect" class="level-dropdown">
+            <option value="1">Nivel 1: Las Teclas Guía (F, J, Espacio)</option>
+            <option value="2">Nivel 2: Fila Central Básica (D, K, F, J)</option>
+            <option value="3">Nivel 3: Fila Central Completa (A, S, D, F, J, K, L, Ñ)</option>
+            <option value="4">Nivel 4: Fila Superior Básica (E, I, R, U + Central)</option>
+            <option value="5">Nivel 5: Palabras y Citas (Frases Completas)</option>
+          </select>
+          <span class="select-arrow">▼</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Caja del Juego principal -->
+    <div class="game-container" id="gameContainer">
+      <div class="focus-warning" id="focusWarning">
+        <span>⌨️ Haz clic aquí para enfocar y empezar a escribir</span>
+        <small style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">(Asegúrate de colocar tus dedos en la posición de reposo: ASDF y JKLÑ)</small>
+      </div>
+      <input type="text" id="typingInput" autocomplete="off" autofocus>
+      
+      <!-- Fila de Estadísticas -->
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-val" id="statWpm">0</div>
+          <div class="stat-lbl">PPM (WPM)</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" id="statAccuracy">100%</div>
+          <div class="stat-lbl">Precisión</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" id="statErrors">0</div>
+          <div class="stat-lbl">Errores</div>
+        </div>
+      </div>
+
+      <!-- Pantalla de Texto -->
+      <div class="text-display-box">
+        <div class="text-display" id="textDisplay"></div>
+      </div>
+
+      <!-- Teclado en Pantalla -->
+      <div class="keyboard-section" id="keyboardSection">
+        <!-- Fila de Números -->
+        <div class="keyboard-row">
+          <div class="key pinky-l" id="key-º">º</div>
+          <div class="key pinky-l" id="key-1">1</div>
+          <div class="key ring-l" id="key-2">2</div>
+          <div class="key middle-l" id="key-3">3</div>
+          <div class="key index-l" id="key-4">4</div>
+          <div class="key index-l" id="key-5">5</div>
+          <div class="key index-r" id="key-6">6</div>
+          <div class="key index-r" id="key-7">7</div>
+          <div class="key middle-r" id="key-8">8</div>
+          <div class="key ring-r" id="key-9">9</div>
+          <div class="key pinky-r" id="key-0">0</div>
+          <div class="key pinky-r" id="key--">-</div>
+          <div class="key pinky-r" id="key-+">+</div>
+          <div class="key backspace pinky-r" id="key-backspace">← Back</div>
+        </div>
+        <!-- Fila QWERTY -->
+        <div class="keyboard-row">
+          <div class="key tab pinky-l">Tab</div>
+          <div class="key pinky-l" id="key-q">Q</div>
+          <div class="key ring-l" id="key-w">W</div>
+          <div class="key middle-l" id="key-e">E</div>
+          <div class="key index-l" id="key-r">R</div>
+          <div class="key index-l" id="key-t">T</div>
+          <div class="key index-r" id="key-y">Y</div>
+          <div class="key index-r" id="key-u">U</div>
+          <div class="key middle-r" id="key-i">I</div>
+          <div class="key ring-r" id="key-o">O</div>
+          <div class="key pinky-r" id="key-p">P</div>
+          <div class="key pinky-r" id="key-`">`</div>
+          <div class="key pinky-r" id="key-´">´</div>
+          <div class="key enter pinky-r" id="key-enter">Enter</div>
+        </div>
+        <!-- Fila ASDF -->
+        <div class="keyboard-row">
+          <div class="key caps pinky-l">Caps</div>
+          <div class="key pinky-l" id="key-a">A</div>
+          <div class="key ring-l" id="key-s">S</div>
+          <div class="key middle-l" id="key-d">D</div>
+          <div class="key index-l" id="key-f">F</div>
+          <div class="key index-l" id="key-g">G</div>
+          <div class="key index-r" id="key-h">H</div>
+          <div class="key index-r" id="key-j">J</div>
+          <div class="key middle-r" id="key-k">K</div>
+          <div class="key ring-r" id="key-l">L</div>
+          <div class="key pinky-r" id="key-ñ">Ñ</div>
+          <div class="key pinky-r" id="key-ç">Ç</div>
+        </div>
+        <!-- Fila ZXCV -->
+        <div class="keyboard-row">
+          <div class="key shift pinky-l" id="key-shift">Shift</div>
+          <div class="key pinky-l" id="key-<">&lt;</div>
+          <div class="key pinky-l" id="key-z">Z</div>
+          <div class="key ring-l" id="key-x">X</div>
+          <div class="key middle-l" id="key-c">C</div>
+          <div class="key index-l" id="key-v">V</div>
+          <div class="key index-l" id="key-b">B</div>
+          <div class="key index-r" id="key-n">N</div>
+          <div class="key index-r" id="key-m">M</div>
+          <div class="key middle-r" id="key-,">,</div>
+          <div class="key ring-r" id="key-.">.</div>
+          <div class="key pinky-r" id="key-_">_</div>
+          <div class="key shift pinky-r" id="key-shift-r">Shift</div>
+        </div>
+        <!-- Fila Espacio -->
+        <div class="keyboard-row">
+          <div class="key space thumb" id="key-space"></div>
+        </div>
+      </div>
+
+      <!-- Manos Virtuales SVG -->
+      <div class="hands-section">
+        <!-- Mano Izquierda -->
+        <svg class="hand-svg" viewBox="0 0 120 120">
+          <g id="left-hand">
+            <path d="M20,100 C20,70 30,60 50,60 C70,60 80,70 80,100 Z" class="palm-path" />
+            <rect id="finger-L5" x="20" y="32" width="9" height="35" rx="4.5" class="finger-rect pinky-l" />
+            <rect id="finger-L4" x="32" y="15" width="9" height="48" rx="4.5" class="finger-rect ring-l" />
+            <rect id="finger-L3" x="44" y="6" width="9" height="56" rx="4.5" class="finger-rect middle-l" />
+            <rect id="finger-L2" x="56" y="15" width="9" height="48" rx="4.5" class="finger-rect index-l" />
+            <rect id="finger-L1" x="73" y="46" width="9" height="32" rx="4.5" transform="rotate(-38 73 46)" class="finger-rect thumb" />
+          </g>
+        </svg>
+
+        <!-- Mano Derecha -->
+        <svg class="hand-svg" viewBox="0 0 120 120">
+          <g id="right-hand">
+            <path d="M100,100 C100,70 90,60 70,60 C50,60 40,70 40,100 Z" class="palm-path" />
+            <rect id="finger-R1" x="38" y="46" width="9" height="32" rx="4.5" transform="rotate(38 47 46)" class="finger-rect thumb" />
+            <rect id="finger-R2" x="55" y="15" width="9" height="48" rx="4.5" class="finger-rect index-r" />
+            <rect id="finger-R3" x="67" y="6" width="9" height="56" rx="4.5" class="finger-rect middle-r" />
+            <rect id="finger-R4" x="79" y="15" width="9" height="48" rx="4.5" class="finger-rect ring-r" />
+            <rect id="finger-R5" x="91" y="32" width="9" height="35" rx="4.5" class="finger-rect pinky-r" />
+          </g>
+        </svg>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de Resultados -->
+  <div class="results-modal" id="resultsModal">
+    <div class="results-card">
+      <div class="results-title" id="resultsTitle">¡Muy Bien!</div>
+      <div class="results-quote" id="resultsQuote"></div>
+      
+      <div class="results-grid">
+        <div class="result-item">
+          <div class="result-label">Palabras por Minuto</div>
+          <div class="result-value accent" id="resultWpm">0</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Precisión</div>
+          <div class="result-value correct" id="resultAccuracy">0%</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Total Aciertos</div>
+          <div class="result-value" id="resultHits">0</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Total Errores</div>
+          <div class="result-value" id="resultErrors">0</div>
+        </div>
+      </div>
+      
+      <button class="btn-modal" id="btnNextLevel">
+        <span>🎮</span> Siguiente Nivel
+      </button>
+    </div>
+  </div>
+
+  <footer>
+    - Desarrollado por Astutosoft 2026 -
+  </footer>
+
+  <script>
+    // Configuración de Audio
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().then(() => {
+            console.log("AudioContext reanudado con éxito.");
+          }).catch(err => {
+            console.error("Error al reanudar AudioContext:", err);
+          });
+        }
+      } catch (e) {
+        console.error("Web Audio API no es compatible con este navegador:", e);
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'click') {
+        // --- SONIDO DE TECLA REALISTA (CLACK MECÁNICO) ---
+        // 1. Transitorio de impacto (ruido blanco filtrado de duración ultra corta)
+        const bufferSize = Math.floor(audioCtx.sampleRate * 0.015); // 15ms (forzado a entero)
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(2800, now); // Frecuencia de impacto plástico
+        filter.Q.setValueAtTime(4, now);
+        
+        const noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.18, now); // Volumen del golpe
+        noiseGain.gain.linearRampToValueAtTime(0.001, now + 0.008);
+        
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+        
+        // 2. Resonancia del cuerpo de la tecla (onda senoidal atenuada)
+        const osc = audioCtx.createOscillator();
+        const oscGain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(650, now);
+        osc.frequency.linearRampToValueAtTime(220, now + 0.015);
+        
+        oscGain.gain.setValueAtTime(0.06, now);
+        oscGain.gain.linearRampToValueAtTime(0.001, now + 0.015);
+        
+        osc.connect(oscGain);
+        oscGain.connect(audioCtx.destination);
+        
+        noise.start(now);
+        noise.stop(now + 0.015);
+        osc.start(now);
+        osc.stop(now + 0.015);
+        
+      } else if (type === 'space') {
+        // --- SONIDO DE BARRA ESPACIADORA REALISTA (GOLPE HUECO Y HÚMEDO) ---
+        // 1. Ruido blanco filtrado más grave
+        const bufferSize = Math.floor(audioCtx.sampleRate * 0.035); // 35ms (forzado a entero)
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1400, now); // Golpe más resonante y grave
+        filter.Q.setValueAtTime(2.5, now);
+        
+        const noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.24, now);
+        noiseGain.gain.linearRampToValueAtTime(0.001, now + 0.015);
+        
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+        
+        // 2. Resonancia grave de la barra espaciadora
+        const osc = audioCtx.createOscillator();
+        const oscGain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(130, now);
+        osc.frequency.linearRampToValueAtTime(75, now + 0.035);
+        
+        oscGain.gain.setValueAtTime(0.14, now);
+        oscGain.gain.linearRampToValueAtTime(0.001, now + 0.035);
+        
+        osc.connect(oscGain);
+        oscGain.connect(audioCtx.destination);
+        
+        noise.start(now);
+        noise.stop(now + 0.035);
+        osc.start(now);
+        osc.stop(now + 0.035);
+        
+      } else if (type === 'error') {
+        // --- SONIDO DE ERROR (GOLPE SECO / TRABA MECÁNICA) ---
+        // Onda de sierra filtrada con pasa-bajos que suena a "clunk" de máquina de escribir trabada
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(95, now);
+        
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(320, now); // Quita frecuencias altas molestas
+        
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.linearRampToValueAtTime(0.001, now + 0.12);
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.12);
+        
+      } else if (type === 'complete') {
+        // Acorde festivo al completar el nivel (Do mayor arpegiado suave)
+        const notes = [261.63, 329.63, 392.00, 523.25];
+        notes.forEach((freq, i) => {
+          const oscNode = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          oscNode.type = 'sine';
+          oscNode.frequency.setValueAtTime(freq, now + i * 0.08);
+          gainNode.gain.setValueAtTime(0.12, now + i * 0.08);
+          gainNode.gain.linearRampToValueAtTime(0.001, now + i * 0.08 + 0.25);
+          oscNode.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          oscNode.start(now + i * 0.08);
+          oscNode.stop(now + i * 0.08 + 0.25);
+        });
+      }
+    }
+
+    // Datos del Nivel al estilo TypingClub
+    const LEVELS = {
+      1: {
+        name: "Las Teclas Guía",
+        keys: ["f", "j", " "],
+        texts: [
+          "f f j j ff jj fj jf ff jj ff jf jf ff jj",
+          "f j f j ff jj f f j j fj jf f j f j ff jj",
+          "f f f j j j fj fj jf jf f f j j ff jj fj jf"
+        ]
+      },
+      2: {
+        name: "Fila Central Básica",
+        keys: ["d", "k", "f", "j", " "],
+        texts: [
+          "d d k k dk kd dd kk df jk fd kj dk fj jf dk",
+          "f j d k fd jk kd fj dk jd kf dj fk jd kf dk",
+          "f d k j fd kj dk fj jd kf df jk kd fj dd kk"
+        ]
+      },
+      3: {
+        name: "Fila Central Completa",
+        keys: ["a", "s", "d", "f", "j", "k", "l", "ñ", " "],
+        texts: [
+          "a s d f j k l ñ asdf jklñ salsa laña alaska falda salada",
+          "las faldas de alaska son de salsa alada y salada",
+          "la salsa alada es salada y la falda de lino de la niña"
+        ]
+      },
+      4: {
+        name: "Fila Superior Básica",
+        keys: ["e", "i", "r", "u", "a", "s", "d", "f", "j", "k", "l", "ñ", " "],
+        texts: [
+          "e i r u er iu re ur de ki fe ju se li se re el ir un",
+          "quiero poder ver perito equipo de rio y de ruiseñor",
+          "el ruiseñor quiere ver el equipo de lino en la orilla"
+        ]
+      },
+      5: {
+        name: "Palabras y Citas",
+        keys: ["a-z", "ñ", " "],
+        texts: [
+          "El conocimiento empieza en el asombro dijo el sabio Socrates",
+          "La medida de un hombre es lo que hace con el poder segun Platon",
+          "La felicidad depende de nosotros mismos afirmo Aristoteles",
+          "La educacion es el encendido de una llama en la mente de las personas"
+        ]
+      }
+    };
+
+    // Mapeo detallado de Teclas a Dedos (L5 a R5)
+    const KEY_TO_FINGER = {
+      // Mano Izquierda
+      'º': 'L5', '1': 'L5', 'q': 'L5', 'a': 'L5', 'z': 'L5', '<': 'L5', 'tab': 'L5', 'caps': 'L5', 'shift': 'L5',
+      '2': 'L4', 'w': 'L4', 's': 'L4', 'x': 'L4',
+      '3': 'L3', 'e': 'L3', 'd': 'L3', 'c': 'L3',
+      '4': 'L2', '5': 'L2', 'r': 'L2', 't': 'L2', 'f': 'L2', 'g': 'L2', 'v': 'L2', 'b': 'L2',
+      // Pulgares
+      ' ': 'thumb',
+      // Mano Derecha
+      '6': 'R2', '7': 'R2', 'y': 'R2', 'u': 'R2', 'h': 'R2', 'j': 'R2', 'n': 'R2', 'm': 'R2',
+      '8': 'R3', 'i': 'R3', 'k': 'R3', ',': 'R3',
+      '9': 'R4', 'o': 'R4', 'l': 'R4', '.': 'R4',
+      '0': 'R5', '-': 'R5', '_': 'R5', 'p': 'R5', 'ñ': 'R5', '´': 'R5', 'ç': 'R5', '+': 'R5', '`': 'R5', 'enter': 'R5', 'shift-r': 'R5', 'backspace': 'R5'
+    };
+
+    // Mapeo de Dedos a Clases de Estilo CSS
+    const FINGER_TO_CLASS = {
+      'L5': 'pinky-l',
+      'L4': 'ring-l',
+      'L3': 'middle-l',
+      'L2': 'index-l',
+      'thumb': 'thumb',
+      'R2': 'index-r',
+      'R3': 'middle-r',
+      'R4': 'ring-r',
+      'R5': 'pinky-r'
+    };
+
+    // Estado del juego
+    let currentLevelNum = 1;
+    let rawText = '';
+    let chars = [];
+    let currentIndex = 0;
+    
+    let isPlaying = false;
+    let startTime = null;
+    let totalKeystrokes = 0;
+    let hits = 0;
+    let errors = 0;
+    let isErrorState = false;
+
+    // Elementos DOM
+    const textDisplay = document.getElementById('textDisplay');
+    const typingInput = document.getElementById('typingInput');
+    const gameContainer = document.getElementById('gameContainer');
+    const focusWarning = document.getElementById('focusWarning');
+    const audioToggle = document.getElementById('audioToggle');
+    const themeToggle = document.getElementById('themeToggle');
+    const statWpm = document.getElementById('statWpm');
+    const statAccuracy = document.getElementById('statAccuracy');
+    const statErrors = document.getElementById('statErrors');
+    const levelSelect = document.getElementById('levelSelect');
+    const resultsModal = document.getElementById('resultsModal');
+    const resultsTitle = document.getElementById('resultsTitle');
+    const resultsQuote = document.getElementById('resultsQuote');
+    const resultWpm = document.getElementById('resultWpm');
+    const resultAccuracy = document.getElementById('resultAccuracy');
+    const resultHits = document.getElementById('resultHits');
+    const resultErrors = document.getElementById('resultErrors');
+    const btnNextLevel = document.getElementById('btnNextLevel');
+
+    function init() {
+      loadLevel(currentLevelNum);
+
+      // Eventos
+      gameContainer.addEventListener('click', focusInput);
+      typingInput.addEventListener('focus', () => gameContainer.classList.add('focused'));
+      typingInput.addEventListener('blur', () => gameContainer.classList.remove('focused'));
+      typingInput.addEventListener('input', handleInput);
+      typingInput.addEventListener('keydown', handleKeydown);
+      
+      // Control de Audio
+      audioToggle.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        audioToggle.textContent = soundEnabled ? '🔊' : '🔇';
+      });
+
+      // Tema
+      themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+      });
+
+      // Selector de niveles (Dropdown)
+      levelSelect.addEventListener('change', (e) => {
+        currentLevelNum = parseInt(e.target.value);
+        loadLevel(currentLevelNum);
+      });
+
+      btnNextLevel.addEventListener('click', () => {
+        resultsModal.classList.remove('show');
+        if (currentLevelNum < 5) {
+          currentLevelNum++;
+          levelSelect.value = currentLevelNum;
+        }
+        loadLevel(currentLevelNum);
+      });
+
+      focusInput();
+    }
+
+    function focusInput() {
+      typingInput.focus();
+      initAudio(); // Garantizar activación de audio mediante el evento click del usuario
+    }
+
+    function loadLevel(levelNum) {
+      const level = LEVELS[levelNum];
+      const texts = level.texts;
+      // Seleccionar texto aleatorio de los del nivel
+      rawText = texts[Math.floor(Math.random() * texts.length)];
+      
+      resetSession();
+      renderText();
+      highlightKeyboardAndHands();
+    }
+
+    function resetSession() {
+      isPlaying = false;
+      startTime = null;
+      currentIndex = 0;
+      totalKeystrokes = 0;
+      hits = 0;
+      errors = 0;
+      isErrorState = false;
+
+      statWpm.textContent = '0';
+      statAccuracy.textContent = '100%';
+      statErrors.textContent = '0';
+      typingInput.value = '';
+      
+      // Limpiar estados visuales
+      document.querySelectorAll('.key').forEach(k => k.classList.remove('pressed', 'target'));
+      document.querySelectorAll('.finger-rect').forEach(f => f.classList.remove('active'));
+    }
+
+    function renderText() {
+      textDisplay.innerHTML = '';
+      chars = rawText.split('').map((char, index) => {
+        const span = document.createElement('span');
+        span.classList.add('char');
+        span.textContent = char;
+        if (index === 0) span.classList.add('current');
+        textDisplay.appendChild(span);
+        return span;
+      });
+    }
+
+    // Lógica para resaltar teclas y dedos
+    function highlightKeyboardAndHands() {
+      // Limpiar activos
+      document.querySelectorAll('.key.target').forEach(k => k.classList.remove('target'));
+      document.querySelectorAll('.finger-rect.active').forEach(f => f.classList.remove('active'));
+
+      if (currentIndex >= rawText.length) return;
+
+      const charToType = rawText[currentIndex];
+      const lowerChar = charToType.toLowerCase();
+      const requiresShift = (charToType !== lowerChar && charToType.match(/[A-Z]/));
+
+      // Determinar dedo principal
+      let finger = KEY_TO_FINGER[lowerChar];
+      if (lowerChar === ' ') finger = 'thumb';
+
+      // Resaltar tecla del carácter base
+      let keyId = 'key-' + (lowerChar === ' ' ? 'space' : lowerChar);
+      
+      // Ajustar caracteres especiales para ID de teclas
+      if (lowerChar === ',') keyId = 'key-,';
+      if (lowerChar === '.') keyId = 'key-.';
+      if (lowerChar === '-') keyId = 'key--';
+      if (lowerChar === '+') keyId = 'key-+';
+      if (lowerChar === '´') keyId = 'key-´';
+      if (lowerChar === '`') keyId = 'key-`';
+      if (lowerChar === 'ñ') keyId = 'key-ñ';
+      if (lowerChar === 'ç') keyId = 'key-ç';
+
+      const keyEl = document.getElementById(keyId);
+      if (keyEl) {
+        keyEl.classList.add('target');
+      }
+
+      // Resaltar dedo correspondiente en el SVG
+      if (finger) {
+        let fingerElId = '';
+        if (finger === 'thumb') {
+          fingerElId = 'finger-R1';
+        } else {
+          fingerElId = 'finger-' + finger;
+        }
+        
+        const fingerEl = document.getElementById(fingerElId);
+        if (fingerEl) {
+          fingerEl.classList.add('active');
+        }
+      }
+
+      // Si requiere Mayúsculas (Shift)
+      if (requiresShift) {
+        const leftHandFingers = ['L5', 'L4', 'L3', 'L2'];
+        const isLeftHandKey = leftHandFingers.includes(finger);
+        
+        const shiftKeyId = isLeftHandKey ? 'key-shift-r' : 'key-shift';
+        const shiftFingerId = isLeftHandKey ? 'finger-R5' : 'finger-L5';
+
+        const shiftKeyEl = document.getElementById(shiftKeyId);
+        if (shiftKeyEl) shiftKeyEl.classList.add('target');
+
+        const shiftFingerEl = document.getElementById(shiftFingerId);
+        if (shiftFingerEl) shiftFingerEl.classList.add('active');
+      }
+    }
+
+    // Procesar Entrada
+    function handleInput(e) {
+      if (!isPlaying) {
+        isPlaying = true;
+        startTime = new Date();
+      }
+
+      const inputVal = typingInput.value;
+      const expectedChar = rawText[currentIndex];
+      const typedChar = inputVal.charAt(inputVal.length - 1);
+
+      if (currentIndex >= rawText.length) return;
+
+      totalKeystrokes++;
+
+      if (typedChar === expectedChar) {
+        // Acierto
+        chars[currentIndex].className = 'char correct';
+        hits++;
+        isErrorState = false;
+        
+        if (typedChar === ' ') {
+          playSound('space');
+        } else {
+          playSound('click');
+        }
+
+        // Avanzar
+        chars[currentIndex].classList.remove('current');
+        currentIndex++;
+
+        if (currentIndex < rawText.length) {
+          chars[currentIndex].classList.add('current');
+          chars[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          endSession();
+        }
+      } else {
+        // Error (no avanza hasta corregir)
+        chars[currentIndex].className = 'char incorrect current';
+        errors++;
+        isErrorState = true;
+        playSound('error');
+      }
+
+      // Limpiar input
+      typingInput.value = '';
+
+      updateStatsDisplay();
+      highlightKeyboardAndHands();
+    }
+
+    // Efecto visual al presionar teclas físicas
+    function handleKeydown(e) {
+      let keyElement = null;
+      let keyChar = e.key.toLowerCase();
+
+      if (e.code === 'Space') {
+        keyElement = document.getElementById('key-space');
+      } else if (e.code === 'Backspace') {
+        keyElement = document.getElementById('key-backspace');
+      } else if (e.code === 'Enter') {
+        keyElement = document.getElementById('key-enter');
+      } else if (keyChar === 'ñ') {
+        keyElement = document.getElementById('key-ñ');
+      } else if (keyChar === 'shift') {
+        keyElement = e.code === 'ShiftRight' ? document.getElementById('key-shift-r') : document.getElementById('key-shift');
+      } else if (keyChar === ',' || keyChar === '.' || keyChar === '-' || keyChar === '+' || keyChar === '`' || keyChar === '´' || keyChar === 'ç' || keyChar === 'º') {
+        keyElement = document.getElementById('key-' + keyChar);
+      } else if (keyChar === '<' || keyChar === '>') {
+        keyElement = document.getElementById('key-<');
+      } else if (keyChar.match(/[a-z0-9]/)) {
+        keyElement = document.getElementById('key-' + keyChar);
+      }
+
+      if (keyElement) {
+        keyElement.classList.add('pressed');
+        setTimeout(() => keyElement.classList.remove('pressed'), 80);
+      }
+    }
+
+    function updateStatsDisplay() {
+      // Precisión
+      const accuracy = totalKeystrokes > 0 ? Math.round((hits / totalKeystrokes) * 100) : 100;
+      statAccuracy.textContent = accuracy + '%';
+      statErrors.textContent = errors;
+
+      // Calcular WPM (basado en tiempo real)
+      if (startTime) {
+        const timeElapsedMins = (new Date() - startTime) / 60000;
+        if (timeElapsedMins > 0.005) {
+          const wpm = Math.round((hits / 5) / timeElapsedMins);
+          statWpm.textContent = wpm;
+        }
+      }
+    }
+
+    function endSession() {
+      isPlaying = false;
+      playSound('complete');
+      
+      const timeElapsedMins = (new Date() - startTime) / 60000;
+      const wpm = timeElapsedMins > 0 ? Math.round((hits / 5) / timeElapsedMins) : 0;
+      const accuracy = totalKeystrokes > 0 ? Math.round((hits / totalKeystrokes) * 100) : 100;
+
+      // Mostrar Resultados
+      resultWpm.textContent = wpm;
+      resultAccuracy.textContent = accuracy + '%';
+      resultHits.textContent = hits;
+      resultErrors.textContent = errors;
+
+      let title = "¡Buen Intento!";
+      let quote = "La práctica constante hace al maestro de las teclas.";
+
+      if (accuracy >= 95) {
+        title = "¡Excelente Precisión!";
+        quote = "¡Qué gran puntería! Mantén esa posición de los dedos.";
+      } else if (wpm >= 40) {
+        title = "¡Velocidad Impresionante!";
+        quote = "¡Vas volando! Tu memoria muscular está funcionando genial.";
+      }
+
+      resultsTitle.textContent = title;
+      resultsQuote.textContent = quote;
+
+      if (currentLevelNum === 5) {
+        btnNextLevel.innerHTML = '<span>🔄</span> Repetir Nivel';
+      } else {
+        btnNextLevel.innerHTML = '<span>🎮</span> Siguiente Nivel';
+      }
+
+      resultsModal.classList.add('show');
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

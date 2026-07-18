@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página 2 - Gráficas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            gap: 30px;
+            margin: 0;
+        }
+
+        .content-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .canvas-wrapper {
+            width: 100%;
+        }
+
+        .title-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin: 0;
+            flex: 1;
+            font-size: 1.5em;
+        }
+
+        #canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: block;
+            background: white;
+            cursor: move;
+            width: 100%;
+        }
+
+        .selection-panel {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .selection-panel h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .number-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            border: none;
+        }
+
+        .number-selector label {
+            display: inline;
+            font-size: 14px;
+            color: #333;
+            margin: 0;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+        .dropdown-select {
+            padding: 6px 12px;
+            font-size: 14px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+            min-width: 80px;
+        }
+
+        .dropdown-select:hover {
+            border-color: #667eea;
+        }
+
+        .dropdown-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        #squareSelectors {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            border: 1px solid #d0d0d0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .square-selector {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 3px 6px;
+            margin: 0;
+            background: white;
+            border-radius: 0;
+            border-bottom: 1px solid #d0d0d0;
+            border-left: none;
+            border-right: none;
+            border-top: none;
+            transition: all 0.2s ease;
+            gap: 4px;
+            min-height: 24px;
+        }
+
+        .divisores-lista {
+            font-size: 1.05em;
+            font-weight: bold;
+            color: #444;
+            text-align: center;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .factores-hint {
+            font-size: 0.78em;
+            color: #888;
+            margin: 0 auto 14px;
+            line-height: 1.4;
+            text-align: center;
+            max-width: 640px;
+        }
+
+        .pares-factores {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .par-factor-btn {
+            padding: 9px 20px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .par-factor-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-desordenar {
+            display: block;
+            margin: 0 auto;
+            padding: 9px 22px;
+            border: none;
+            border-radius: 6px;
+            background: #f39c12;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+
+        .btn-desordenar:hover {
+            background: #d6870a;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        .page-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .page-number:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-number.active {
+            background: white;
+            border-color: #667eea;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="container">
+            <div class="canvas-wrapper">
+                <div class="title-header">
+                    <h1>Cuadrados Arrastrables — Divisores</h1>
+                    <div class="number-selector">
+                        <label for="numberSelect">Número de elementos:</label>
+                        <select id="numberSelect" class="dropdown-select">
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="12" selected>12</option>
+                            <option value="15">15</option>
+                            <option value="18">18</option>
+                            <option value="21">21</option>
+                        </select>
+                    </div>
+                </div>
+                <canvas id="canvas"></canvas>
+            </div>
+            <div class="selection-panel">
+                <h2 id="panelTitulo">Divisores de 12</h2>
+                <p class="divisores-lista" id="divisoresLista"></p>
+                <p class="factores-hint">Elige un par de factores para organizar los cuadrados en una grilla
+                rectangular — esa es justamente la idea de un divisor: repartir el total en filas y columnas
+                exactas, sin que sobre ni falte ninguno.</p>
+                <div class="pares-factores" id="paresFactores"></div>
+                <button class="btn-desordenar" onclick="desordenarCuadrados()">🔀 Desordenar</button>
+            </div>
+        </div>
+    </div>
+    <div class="page-navigation">
+        <a href="index.html" class="page-number">1</a>
+        <a href="page2.html" class="page-number active">2</a>
+        <a href="page3.html" class="page-number">3</a>
+        <a href="page4.html" class="page-number">4</a>
+        <a href="page5.html" class="page-number">5</a>
+        <a href="page6.html" class="page-number">6</a>
+        <a href="page7.html" class="page-number">7</a>
+        <a href="page8.html" class="page-number">8</a>
+        <a href="page9.html" class="page-number">9</a>
+        <a href="page10.html" class="page-number">10</a>
+        <a href="page11.html" class="page-number">11</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Configurar el tamaño del canvas
+        canvas.width = 1140;
+        canvas.height = 600;
+
+        // Tamaño de la grilla
+        const gridSize = 20;
+
+        // Función para alinear a la grilla
+        function snapToGrid(value) {
+            return Math.round(value / gridSize) * gridSize;
+        }
+
+        // Colores para los cuadrados (suficientes para 21)
+        const colors = [
+            '#ff6b6b', '#4ecdc4', '#45b7d1', '#ffa07a',
+            '#98d8c8', '#f7dc6f', '#bb8fce', '#85c1e2',
+            '#f8b739', '#ea5550', '#6c5ce7', '#00b894',
+            '#fd79a8', '#fdcb6e', '#e17055', '#a29bfe',
+            '#55efc4', '#74b9ff', '#ff7675', '#00cec9',
+            '#d68910'
+        ];
+
+        // Variable para el número de cuadrados
+        let numSquares = 12;
+        const squares = [];
+        const squareSize = 80;
+
+        // Función para crear los cuadrados
+        function createSquares(count) {
+            squares.length = 0; // Limpiar array
+
+            // Se esparcen al azar: el objetivo es que el profe/estudiante los
+            // ordene eligiendo un par de factores en el panel de la derecha.
+            for (let i = 0; i < count; i++) {
+                squares.push({
+                    x: snapToGrid(Math.random() * (canvas.width - squareSize)),
+                    y: snapToGrid(Math.random() * (canvas.height - squareSize)),
+                    width: squareSize,
+                    height: squareSize,
+                    color: '#667eea', // Mismo color para todos
+                    isDragging: false,
+                    offsetX: 0,
+                    offsetY: 0
+                });
+            }
+        }
+
+        // ── Divisores de un número ──────────────────────────────────────
+        function divisoresDe(n) {
+            const divs = [];
+            for (let i = 1; i <= n; i++) if (n % i === 0) divs.push(i);
+            return divs;
+        }
+
+        function paresDeFactor(n) {
+            const vistos = new Set();
+            const pares = [];
+            for (const d of divisoresDe(n)) {
+                const otro = n / d;
+                const a = Math.min(d, otro), b = Math.max(d, otro);
+                const clave = `${a}x${b}`;
+                if (!vistos.has(clave)) {
+                    vistos.add(clave);
+                    pares.push([a, b]);
+                }
+            }
+            return pares;
+        }
+
+        function organizarEnGrilla(filas, columnas) {
+            const margen = 20;
+            const espacioDisponibleX = (canvas.width - margen * 2) / columnas;
+            const espacioDisponibleY = (canvas.height - margen * 2) / filas;
+            const espacio = Math.min(espacioDisponibleX, espacioDisponibleY, 100);
+            const tamano = Math.max(16, espacio - 10);
+
+            const startX = (canvas.width - espacio * columnas) / 2;
+            const startY = (canvas.height - espacio * filas) / 2;
+
+            squares.forEach((square, i) => {
+                const fila = Math.floor(i / columnas);
+                const col = i % columnas;
+                square.width = tamano;
+                square.height = tamano;
+                square.x = startX + col * espacio + (espacio - tamano) / 2;
+                square.y = startY + fila * espacio + (espacio - tamano) / 2;
+            });
+            drawSquares();
+        }
+
+        function desordenarCuadrados() {
+            squares.forEach(square => {
+                square.width = squareSize;
+                square.height = squareSize;
+                square.x = snapToGrid(Math.random() * (canvas.width - squareSize));
+                square.y = snapToGrid(Math.random() * (canvas.height - squareSize));
+            });
+            drawSquares();
+        }
+
+        function actualizarPanelDivisores(n) {
+            document.getElementById('panelTitulo').textContent = `Divisores de ${n}`;
+            document.getElementById('divisoresLista').textContent = divisoresDe(n).join(', ');
+
+            const cont = document.getElementById('paresFactores');
+            cont.innerHTML = '';
+            paresDeFactor(n).forEach(([a, b]) => {
+                const btn = document.createElement('button');
+                btn.className = 'par-factor-btn';
+                btn.textContent = `${a} × ${b}`;
+                btn.onclick = () => organizarEnGrilla(a, b);
+                cont.appendChild(btn);
+            });
+        }
+
+        // Dibujar la grilla
+        function drawGrid() {
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            
+            // Líneas verticales
+            for (let x = 0; x <= canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Líneas horizontales
+            for (let y = 0; y <= canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        // Dibujar todos los cuadrados
+        function drawSquares() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar la grilla primero
+            drawGrid();
+            
+            // Dibujar los cuadrados
+            squares.forEach(square => {
+                ctx.fillStyle = square.color;
+                ctx.fillRect(square.x, square.y, square.width, square.height);
+                ctx.strokeStyle = '#cbd5e0';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(square.x, square.y, square.width, square.height);
+            });
+        }
+
+        // Verificar si el punto está dentro de un cuadrado
+        function getSquareAt(x, y) {
+            for (let i = squares.length - 1; i >= 0; i--) {
+                const square = squares[i];
+                if (x >= square.x && x <= square.x + square.width &&
+                    y >= square.y && y <= square.y + square.height) {
+                    return { square, index: i };
+                }
+            }
+            return null;
+        }
+
+        // Eventos del mouse
+        let selectedSquare = null;
+
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const result = getSquareAt(x, y);
+            if (result) {
+                selectedSquare = result.square;
+                selectedSquare.isDragging = true;
+                selectedSquare.offsetX = x - selectedSquare.x;
+                selectedSquare.offsetY = y - selectedSquare.y;
+                canvas.style.cursor = 'grabbing';
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (selectedSquare && selectedSquare.isDragging) {
+                // Calcular nueva posición
+                let newX = x - selectedSquare.offsetX;
+                let newY = y - selectedSquare.offsetY;
+                
+                // Alinear a la grilla
+                newX = snapToGrid(newX);
+                newY = snapToGrid(newY);
+                
+                // Limitar el movimiento dentro del canvas
+                newX = Math.max(0, Math.min(newX, canvas.width - selectedSquare.width));
+                newY = Math.max(0, Math.min(newY, canvas.height - selectedSquare.height));
+                
+                selectedSquare.x = newX;
+                selectedSquare.y = newY;
+                
+                drawSquares();
+            } else {
+                // Cambiar cursor si está sobre un cuadrado
+                const result = getSquareAt(x, y);
+                canvas.style.cursor = result ? 'grab' : 'default';
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            if (selectedSquare) {
+                // Asegurar que está alineado a la grilla al soltar
+                selectedSquare.x = snapToGrid(selectedSquare.x);
+                selectedSquare.y = snapToGrid(selectedSquare.y);
+                selectedSquare.isDragging = false;
+                selectedSquare = null;
+                canvas.style.cursor = 'default';
+                drawSquares();
+            }
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            if (selectedSquare) {
+                // Asegurar que está alineado a la grilla
+                selectedSquare.x = snapToGrid(selectedSquare.x);
+                selectedSquare.y = snapToGrid(selectedSquare.y);
+                selectedSquare.isDragging = false;
+                selectedSquare = null;
+                drawSquares();
+            }
+            canvas.style.cursor = 'default';
+        });
+
+        // Función para reinicializar todo con un nuevo número
+        function reinitializeSquares(newCount) {
+            numSquares = newCount;
+            createSquares(numSquares);
+            drawSquares();
+            actualizarPanelDivisores(numSquares);
+        }
+
+        // Event listener para el menú desplegable
+        const numberSelect = document.getElementById('numberSelect');
+        numberSelect.addEventListener('change', (e) => {
+            const selectedNumber = parseInt(e.target.value);
+            reinitializeSquares(selectedNumber);
+        });
+
+        // Inicializar con el valor por defecto (12)
+        createSquares(numSquares);
+        drawSquares();
+        actualizarPanelDivisores(numSquares);
+    </script>
+</body>
+</html>
+

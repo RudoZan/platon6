@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Desenfoque de enfoque del lente</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@400;600;700;800&display=swap');
+
+    :root {
+      --bg:        #071324;
+      --bg2:       #0c1f38;
+      --panel:     #0d2040;
+      --border:    #1a3a5c;
+      --orange:    #f5a623;
+      --orange2:   #fbbf24;
+      --orange-glow: rgba(245,166,35,0.35);
+      --cyan:      #38bdf8;
+      --grid:      rgba(56,189,248,0.08);
+      --text:      #e2eaf4;
+      --muted:     #7a9bba;
+      --mono:      'Share Tech Mono', monospace;
+      --sans:      'Exo 2', Arial, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      /* blueprint grid */
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* ── outer frame ── */
+    .page {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(7,19,36,0.88);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      position: relative;
+      backdrop-filter: blur(2px);
+    }
+
+    /* corner brackets */
+    .page::before, .page::after,
+    .corner-bl, .corner-br {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-color: var(--orange);
+      border-style: solid;
+      z-index: 2;
+    }
+    .page::before  { top: -1px; left: -1px;  border-width: 3px 0 0 3px; }
+    .page::after   { top: -1px; right: -1px; border-width: 3px 3px 0 0; }
+    .corner-bl { bottom: -1px; left: -1px;  border-width: 0 0 3px 3px; }
+    .corner-br { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; }
+
+    /* ── header ── */
+    header {
+      padding: 28px 32px 22px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    header h1 {
+      font-family: var(--sans);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #ffffff;
+      text-shadow: 0 0 18px var(--orange-glow);
+      padding: 10px 18px;
+      border: 1px solid var(--orange);
+      display: inline-block;
+      border-radius: 3px;
+      background: rgba(249,115,22,0.07);
+      margin-bottom: 14px;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 740px;
+    }
+
+    header p strong { color: var(--orange2); }
+
+    /* label chips */
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+    }
+
+    /* ── layout ── */
+    .content {
+      display: grid;
+      grid-template-columns: 1.25fr 0.85fr;
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .panel {
+      background: var(--bg2);
+      padding: 26px 28px;
+    }
+
+    .panel h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 22px;
+      font-family: var(--mono);
+    }
+
+    .context-text {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .context-text strong { color: var(--orange2); }
+
+    .guiding-question {
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--cyan);
+      border-left: 3px solid var(--orange);
+      padding: 8px 14px;
+      margin-bottom: 20px;
+      background: rgba(56,189,248,0.05);
+      border-radius: 0 3px 3px 0;
+    }
+
+    /* ── slider ── */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .slider-row label {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    input[type='range'] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input[type='range']::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 12px var(--orange-glow);
+      cursor: pointer;
+      border: 2px solid #fff2;
+    }
+
+    .value-box {
+      min-width: 68px;
+      padding: 8px 12px;
+      border-radius: 3px;
+      background: rgba(249,115,22,0.12);
+      border: 1px solid var(--orange);
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--orange2);
+      text-shadow: 0 0 10px var(--orange-glow);
+    }
+
+    /* ── math display ── */
+    .math-block {
+      background: rgba(249,115,22,0.06);
+      border: 1px solid rgba(249,115,22,0.3);
+      border-radius: 3px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-family: var(--mono);
+      font-size: 15px;
+      color: var(--text);
+      line-height: 2;
+    }
+
+    .math-block .formula {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .math-block .result {
+      color: var(--orange2);
+      font-size: 14px;
+    }
+
+    .math-block .result strong {
+      color: var(--orange);
+      font-size: 18px;
+      text-shadow: 0 0 10px var(--orange-glow);
+    }
+
+    /* ── canvas ── */
+    .graph-container {
+      position: relative;
+      height: 300px;
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--panel);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ── right panel ── */
+    .image-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .image-card {
+      padding: 22px 24px;
+      background: var(--bg2);
+      text-align: center;
+      flex: 1;
+    }
+
+    .image-card h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 18px;
+      font-family: var(--mono);
+    }
+
+    .img-wrapper {
+      position: relative;
+      display: inline-block;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .img-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 3px;
+      box-shadow: inset 0 0 0 1px rgba(249,115,22,0.25);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .image-card img {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 3px;
+      transition: filter 0.3s ease, transform 0.3s ease;
+      display: block;
+    }
+
+    /* focus indicator */
+    .focus-bar-wrap {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .focus-bar {
+      flex: 1;
+      height: 5px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .focus-bar-fill {
+      height: 100%;
+      background: var(--orange);
+      box-shadow: 0 0 8px var(--orange-glow);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    .info-box {
+      padding: 20px 24px;
+      background: rgba(7,19,36,0.6);
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    .info-box strong { color: var(--orange2); }
+
+    /* status badge */
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 2px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      border: 1px solid;
+      margin-top: 10px;
+    }
+
+    .status-badge.focused {
+      color: #4ade80;
+      border-color: #4ade80;
+      background: rgba(74,222,128,0.08);
+      text-shadow: 0 0 8px rgba(74,222,128,0.5);
+    }
+
+    .status-badge.blurred {
+      color: var(--orange);
+      border-color: var(--orange);
+      background: rgba(249,115,22,0.08);
+      text-shadow: 0 0 8px var(--orange-glow);
+    }
+
+    /* ── footer bar ── */
+    footer {
+      padding: 14px 32px;
+      border-top: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      letter-spacing: 0.08em;
+    }
+
+    .micro-anim-wrap {
+      margin-top: 14px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 10px 6px 6px;
+      overflow: hidden;
+    }
+
+    #microscopeAnim {
+      width: 60%;
+      max-width: 114px;
+      display: block;
+      margin: -20px auto 0;
+    }
+
+    #microTube {
+      transition: transform 0.35s ease;
+    }
+
+    /* ── nav tabs ── */
+    .header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .nav-tabs { display: flex; gap: 6px; margin-top: 2px; }
+
+    .nav-tab {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 7px 18px;
+      border-radius: 3px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .nav-tab.active {
+      background: rgba(245,166,35,0.15);
+      border-color: var(--orange);
+      color: var(--orange2);
+    }
+    .nav-tab:hover:not(.active) { border-color: var(--cyan); color: var(--cyan); }
+
+    /* ── vistas ── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── explorador cuadrático ── */
+    .quad-content {
+      display: grid;
+      grid-template-columns: 0.75fr 1.4fr;
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .quad-panel {
+      background: var(--bg2);
+      padding: 26px 28px;
+    }
+
+    .coef-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .coef-row label {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--cyan);
+      min-width: 18px;
+    }
+    .coef-val {
+      min-width: 52px;
+      padding: 6px 10px;
+      border-radius: 3px;
+      background: rgba(245,166,35,0.10);
+      border: 1px solid var(--orange);
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--orange2);
+    }
+
+    .quad-formula {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(245,166,35,0.06);
+      border: 1px solid rgba(245,166,35,0.3);
+      border-radius: 3px;
+      padding: 12px 16px;
+      margin: 18px 0 16px;
+    }
+
+    .disc-box {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      padding: 10px 14px;
+      background: rgba(26,58,92,0.5);
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      line-height: 1.9;
+      margin-bottom: 14px;
+    }
+
+    .root-entry {
+      font-family: var(--mono);
+      font-size: 14px;
+      padding: 8px 14px;
+      border-radius: 3px;
+      margin-bottom: 8px;
+      border: 1px solid;
+    }
+    .root-entry.real {
+      color: #4ade80;
+      border-color: rgba(74,222,128,0.4);
+      background: rgba(74,222,128,0.06);
+    }
+    .root-entry.none {
+      color: var(--muted);
+      border-color: var(--border);
+      font-size: 12px;
+    }
+
+    .quad-graph-wrap {
+      background: var(--bg2);
+      padding: 0;
+      position: relative;
+      height: 480px;
+    }
+    .quad-graph-wrap canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    @media (max-width: 820px) {
+      .content, .quad-content { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="corner-bl"></div>
+    <div class="corner-br"></div>
+
+    <header>
+      <div class="header-row">
+        <h1>Desenfoque del lente del microscopio</h1>
+        <nav class="nav-tabs">
+          <button class="nav-tab active" id="tab1" onclick="showView(1)">Simulador de lente</button>
+          <button class="nav-tab"        id="tab2" onclick="showView(2)">Función cuadrática</button>
+        </nav>
+      </div>
+    </header>
+
+    <div id="view1" class="view active">
+    <div class="content">
+      <!-- LEFT: controls + graph -->
+      <section class="panel">
+        <p class="guiding-question">¿Para qué valor de x el lente no tiene desenfoque?</p>
+        <p class="context-text">La función <strong>f(x) = x² – 4x + 4</strong> representa el grado de desenfoque de un lente de microscopio. Cuando <strong>f(x) = 0</strong> el lente está correctamente enfocado.</p>
+
+        <div class="slider-row">
+          <label for="xRange">VALOR DE x</label>
+          <input id="xRange" type="range" min="0" max="5" step="0.1" value="0.5" />
+          <div class="value-box" id="xValue">0.5</div>
+        </div>
+
+        <div class="math-block">
+          <span class="formula">f(x) = x² – 4x + 4</span>
+          <span class="result">Resultado: f(<span id="xDisplay">0.5</span>) = <strong id="fxValue">2.25</strong></span>
+        </div>
+
+        <div class="graph-container">
+          <canvas id="functionGraph"></canvas>
+        </div>
+      </section>
+
+      <!-- RIGHT: image + info -->
+      <aside class="image-panel">
+        <div class="image-card">
+          <h2>Imagen del microscopio</h2>
+          <div class="img-wrapper">
+            <img id="microscopeImage"
+              src="Micro.png"
+              alt="Imagen del microscopio" />
+          </div>
+
+          <div class="focus-bar-wrap">
+            <span>FOCO</span>
+            <div class="focus-bar">
+              <div class="focus-bar-fill" id="focusBar" style="width:100%"></div>
+            </div>
+            <span id="focusLabel">100%</span>
+          </div>
+
+          <div id="statusBadge" class="status-badge focused">● ENFOCADO</div>
+
+          <!-- Microscopio animado -->
+          <div class="micro-anim-wrap">
+            <svg id="microscopeAnim" viewBox="0 0 180 256" xmlns="http://www.w3.org/2000/svg">
+              <g fill="none" stroke="#c5d8ef" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+
+                <!-- BASE -->
+                <path d="M 25 238 Q 90 250 158 238 L 160 252 Q 90 263 23 252 Z"/>
+                <path d="M 55 244 Q 90 241 128 244" stroke-width="1.2" opacity="0.4"/>
+
+                <!-- COLUMNA (barra vertical derecha) -->
+                <rect x="127" y="88" width="14" height="150" rx="3"/>
+
+                <!-- BRAZO HORIZONTAL (une columna con tubo, tapa fija) -->
+                <rect x="83" y="74" width="46" height="20" rx="4" fill="#0c1f38"/>
+                <rect x="83" y="74" width="46" height="20" rx="4"/>
+
+                <!-- PLATINA -->
+                <rect x="46" y="170" width="84" height="10" rx="2"/>
+
+                <!-- TORNILLOS DE ENFOQUE -->
+                <circle cx="141" cy="158" r="6.5"/>
+                <circle cx="141" cy="178" r="6.5"/>
+
+                <!-- TUBO VERTICAL (sube/baja con translate) -->
+                <g id="microTube">
+                  <!-- Tapa del ocular -->
+                  <rect x="83" y="28" width="16" height="8"  rx="3"/>
+                  <!-- Tubo del ocular -->
+                  <rect x="87" y="34" width="8"  height="22" rx="2"/>
+                  <!-- Cuerpo principal -->
+                  <rect x="84" y="54" width="14" height="62" rx="3"/>
+                  <!-- Revólver portaobjetivos -->
+                  <rect x="82" y="114" width="18" height="7" rx="2"/>
+                  <!-- Objetivo largo (central) -->
+                  <rect x="88" y="121" width="6"  height="22" rx="1"/>
+                  <!-- Objetivo corto (lateral) -->
+                  <rect x="82" y="121" width="5"  height="15" rx="1"/>
+                </g>
+
+              </g>
+            </svg>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <span>EOS_APP // SIMULADOR ÓPTICO</span>
+      <span id="footerStatus">f(0.5) = 2.25 — DESENFOQUE ACTIVA</span>
+    </footer>
+    </div><!-- /view1 -->
+
+    <div id="view2" class="view">
+      <div class="quad-content">
+
+        <!-- Panel izquierdo: controles -->
+        <div class="quad-panel">
+          <div class="coef-row">
+            <label>a</label>
+            <input type="range" id="aSlider" min="-3" max="3" step="0.1" value="1" style="flex:1"/>
+            <div class="coef-val" id="aVal">1</div>
+          </div>
+          <div class="coef-row">
+            <label>b</label>
+            <input type="range" id="bSlider" min="-6" max="6" step="0.1" value="-4" style="flex:1"/>
+            <div class="coef-val" id="bVal">-4</div>
+          </div>
+          <div class="coef-row">
+            <label>c</label>
+            <input type="range" id="cSlider" min="-6" max="6" step="0.1" value="4" style="flex:1"/>
+            <div class="coef-val" id="cVal">4</div>
+          </div>
+
+          <div class="quad-formula" id="quadFormula">f(x) = x² – 4x + 4</div>
+
+          <div class="disc-box" id="discBox">Δ = b² – 4ac = 0</div>
+          <div id="rootsDisplay"></div>
+        </div>
+
+        <!-- Panel derecho: gráfico -->
+        <div class="quad-graph-wrap">
+          <canvas id="quadGraph"></canvas>
+        </div>
+
+      </div>
+      <footer>
+        <span>EOS_APP // EXPLORADOR CUADRÁTICO</span>
+        <span id="quadFooter">f(x) = x² – 4x + 4</span>
+      </footer>
+    </div><!-- /view2 -->
+
+  </div><!-- /.page -->
+
+  <script>
+    const xRange  = document.getElementById('xRange');
+    const xValue  = document.getElementById('xValue');
+    const xDisplay= document.getElementById('xDisplay');
+    const fxValue = document.getElementById('fxValue');
+    const image   = document.getElementById('microscopeImage');
+    const canvas  = document.getElementById('functionGraph');
+    const ctx     = canvas.getContext('2d');
+    const focusBar= document.getElementById('focusBar');
+    const focusLabel = document.getElementById('focusLabel');
+    const statusBadge = document.getElementById('statusBadge');
+    const footerStatus= document.getElementById('footerStatus');
+    const microTube   = document.getElementById('microTube');
+
+    // colours
+    const C = {
+      bg:      '#0d2040',
+      grid:    'rgba(26,58,92,0.8)',
+      axis:    'rgba(56,189,248,0.5)',
+      curve:   '#f5a623',
+      curveGlow:'rgba(245,166,35,0.25)',
+      dot:     '#f5a623',
+      text:    '#7a9bba',
+      textBright:'#e2eaf4',
+      orange:  '#fbbf24',
+    };
+
+    function f(x) { return x * x - 4 * x + 4; }
+
+    function resizeCanvas() {
+      const r = canvas.getBoundingClientRect();
+      canvas.width  = r.width  * window.devicePixelRatio;
+      canvas.height = r.height * window.devicePixelRatio;
+      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+      drawGraph();
+    }
+
+    function drawGraph() {
+      const W = canvas.clientWidth;
+      const H = canvas.clientHeight;
+      const mg = { t:30, r:24, b:40, l:46 };
+
+      // ── escala igual en ambos ejes ──
+      const xmin = -0.5, xmax = 10.5;
+      const drawW = W - mg.l - mg.r;
+      const drawH = H - mg.t - mg.b;
+      const ppu   = drawW / (xmax - xmin);   // pixels por unidad
+      const ymin  = -0.5;
+      const ymax  = ymin + drawH / ppu;       // rango y derivado de la escala
+
+      const toX = x => mg.l + (x - xmin) * ppu;
+      const toY = y => mg.t + (ymax - y) * ppu;
+
+      // background
+      ctx.fillStyle = C.bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // ── grid (cuadrícula cuadrada) ──
+      ctx.setLineDash([]);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = C.grid;
+      for (let gx = Math.ceil(xmin); gx <= Math.floor(xmax); gx++) {
+        const px = toX(gx);
+        ctx.beginPath(); ctx.moveTo(px, mg.t); ctx.lineTo(px, H - mg.b); ctx.stroke();
+      }
+      for (let gy = Math.ceil(ymin); gy <= Math.floor(ymax); gy++) {
+        const py = toY(gy);
+        ctx.beginPath(); ctx.moveTo(mg.l, py); ctx.lineTo(W - mg.r, py); ctx.stroke();
+      }
+
+      // posición en pixels del origen matemático (0, 0)
+      const ox = toX(0);
+      const oy = toY(0);
+
+      // ── ejes en el origen matemático ──
+      ctx.strokeStyle = C.axis;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(ox, mg.t); ctx.lineTo(ox, H - mg.b); ctx.stroke(); // eje y
+      ctx.beginPath(); ctx.moveTo(mg.l, oy); ctx.lineTo(W - mg.r, oy); ctx.stroke(); // eje x
+
+      // ── etiquetas cada 1 unidad, sin el 0 ──
+      ctx.fillStyle = C.text;
+      ctx.font = '10px "Share Tech Mono", monospace';
+
+      // eje x: números debajo del eje y, empezando en 1
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      for (let gx = 1; gx <= Math.floor(xmax); gx++) {
+        ctx.fillText(gx, toX(gx), oy + 5);
+      }
+
+      // eje y: números a la izquierda del eje y, empezando en 1
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      for (let gy = 1; gy <= Math.floor(ymax); gy++) {
+        ctx.fillText(gy, ox - 5, toY(gy));
+      }
+
+      // nombres de ejes
+      ctx.fillStyle = C.axis;
+      ctx.font = '11px "Share Tech Mono", monospace';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('x', W - mg.r + 6, oy);
+      ctx.textAlign = 'center';
+      ctx.fillText('f(x)', ox, mg.t - 14);
+
+      // ── curva: clip al área de dibujo ──
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(mg.l, mg.t, drawW, drawH);
+      ctx.clip();
+
+      // glow
+      ctx.shadowColor = C.curveGlow;
+      ctx.shadowBlur = 14;
+      ctx.strokeStyle = C.curveGlow;
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      for (let i = 0; i <= 400; i++) {
+        const x = xmin + (i / 400) * (xmax - xmin);
+        const px = toX(x), py = toY(f(x));
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // curva principal
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = C.curve;
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      for (let i = 0; i <= 400; i++) {
+        const x = xmin + (i / 400) * (xmax - xmin);
+        const px = toX(x), py = toY(f(x));
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      ctx.restore();
+
+      // ── punto actual ──
+      const cx  = parseFloat(xRange.value);
+      const cy  = f(cx);
+      const cpx = toX(cx);
+      const cpy = toY(cy);
+      const ox2 = toX(0);
+      const oy2 = toY(0);
+      const inView = cy >= ymin && cy <= ymax && cx >= xmin && cx <= xmax;
+
+      if (inView) {
+        // línea vertical punteada desde el eje x hasta el punto
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = 'rgba(249,115,22,0.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cpx, oy2);
+        ctx.lineTo(cpx, cpy);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // anillos y punto
+        const isFocused = cx === 2;
+        const dotColor  = isFocused ? '#4ade80' : C.dot;
+        const ringRgba  = isFocused
+          ? (a => `rgba(74,222,128,${a})`)
+          : (a => `rgba(249,115,22,${a})`);
+        ctx.save();
+        ctx.shadowColor = dotColor;
+        ctx.shadowBlur = isFocused ? 28 : 20;
+        for (const r of [12, 7]) {
+          ctx.strokeStyle = ringRgba(r === 12 ? 0.2 : 0.5);
+          ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(cpx, cpy, r, 0, Math.PI * 2); ctx.stroke();
+        }
+        ctx.fillStyle = dotColor;
+        ctx.beginPath(); ctx.arc(cpx, cpy, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+      }
+    }
+
+    function updateUI() {
+      const x = parseFloat(xRange.value);
+      const y = f(x);
+
+      xValue.textContent  = x.toFixed(1);
+      xDisplay.textContent= x.toFixed(1);
+      fxValue.textContent = y.toFixed(2);
+
+      const blurPx = Math.min(18, Math.max(0, y * 1.8));
+      const scale = 1.15 - x * 0.06;
+      // tubo: +20px (abajo) en x=0 → -20px (arriba) en x=5
+      const tubeY = 20 - x * 8;
+      microTube.setAttribute('transform', `translate(0, ${tubeY.toFixed(1)})`);
+      image.style.filter = `blur(${blurPx}px)`;
+      image.style.transform = `scale(${scale.toFixed(4)})`;
+
+      const focusPct = Math.max(0, 100 - y * 4);
+      focusBar.style.width = focusPct.toFixed(0) + '%';
+      focusLabel.textContent = focusPct.toFixed(0) + '%';
+
+      if (x === 2) {
+        statusBadge.textContent = '● ENFOCADO';
+        statusBadge.className = 'status-badge focused';
+        footerStatus.textContent = `f(${x.toFixed(1)}) = ${y.toFixed(2)} — PUNTO DE TANGENCIA`;
+      } else {
+        statusBadge.textContent = '● DESENFOCADO';
+        statusBadge.className = 'status-badge blurred';
+        footerStatus.textContent = `f(${x.toFixed(1)}) = ${y.toFixed(2)} — DESENFOQUE ACTIVA`;
+      }
+
+      drawGraph();
+    }
+
+    xRange.addEventListener('input', updateUI);
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      if (document.getElementById('view2').classList.contains('active')) resizeQuadCanvas();
+    });
+
+    resizeCanvas();
+    updateUI();
+
+    // ── NAVEGACIÓN ──────────────────────────────────────────
+    const pageTitle = document.querySelector('header h1');
+    const titleView1 = pageTitle.textContent;
+    const titleView2 = '¿Dónde toca la parábola al eje x?';
+
+    function showView(n) {
+      document.getElementById('view1').classList.toggle('active', n === 1);
+      document.getElementById('view2').classList.toggle('active', n === 2);
+      document.getElementById('tab1').classList.toggle('active', n === 1);
+      document.getElementById('tab2').classList.toggle('active', n === 2);
+      pageTitle.textContent = n === 1 ? titleView1 : titleView2;
+      if (n === 2) { resizeQuadCanvas(); updateQuad(); }
+    }
+
+    // ── EXPLORADOR CUADRÁTICO ────────────────────────────────
+    const aSlider = document.getElementById('aSlider');
+    const bSlider = document.getElementById('bSlider');
+    const cSlider = document.getElementById('cSlider');
+    const aVal    = document.getElementById('aVal');
+    const bVal    = document.getElementById('bVal');
+    const cVal    = document.getElementById('cVal');
+    const qCanvas = document.getElementById('quadGraph');
+    const qCtx    = qCanvas.getContext('2d');
+    const discBox = document.getElementById('discBox');
+    const rootsDisplay = document.getElementById('rootsDisplay');
+    const quadFormula  = document.getElementById('quadFormula');
+    const quadFooter   = document.getElementById('quadFooter');
+
+    function fmtN(v) {
+      return Number.isInteger(v) ? String(v) : v.toFixed(2);
+    }
+
+    function buildFormula(a, b, c) {
+      const parts = [];
+      if (a !== 0) {
+        const k = Math.abs(a) === 1 ? '' : Math.abs(a);
+        parts.push({ s: a < 0 ? -1 : 1, t: `${k}x²` });
+      }
+      if (b !== 0) {
+        const k = Math.abs(b) === 1 ? '' : Math.abs(b);
+        parts.push({ s: b < 0 ? -1 : 1, t: `${k}x` });
+      }
+      if (c !== 0) parts.push({ s: c < 0 ? -1 : 1, t: `${Math.abs(c)}` });
+      if (!parts.length) return 'f(x) = 0';
+      return 'f(x) = ' + parts.map((p, i) =>
+        i === 0 ? (p.s < 0 ? '–' : '') + p.t : (p.s < 0 ? ' – ' : ' + ') + p.t
+      ).join('');
+    }
+
+    function solveQuad(a, b, c) {
+      if (a === 0) return b === 0 ? { type: 'const' } : { type: 'linear', x1: -c / b };
+      const d = b * b - 4 * a * c;
+      if (d < -1e-9) return { type: 'none', disc: d };
+      if (Math.abs(d) <= 1e-9) return { type: 'one', disc: 0, x1: -b / (2 * a) };
+      return { type: 'two', disc: d, x1: (-b + Math.sqrt(d)) / (2*a), x2: (-b - Math.sqrt(d)) / (2*a) };
+    }
+
+    function resizeQuadCanvas() {
+      const r = qCanvas.getBoundingClientRect();
+      if (!r.width) return;
+      qCanvas.width  = r.width  * window.devicePixelRatio;
+      qCanvas.height = r.height * window.devicePixelRatio;
+      qCtx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+      drawQuadGraph();
+    }
+
+    function drawQuadGraph() {
+      const a = parseFloat(aSlider.value);
+      const b = parseFloat(bSlider.value);
+      const c = parseFloat(cSlider.value);
+      const q = x => a*x*x + b*x + c;
+
+      const W = qCanvas.clientWidth;
+      const H = qCanvas.clientHeight;
+      if (!W || !H) return;
+      const mg = { t:34, r:24, b:40, l:46 };
+
+      const xmin = -7, xmax = 7;
+      const drawW = W - mg.l - mg.r;
+      const drawH = H - mg.t - mg.b;
+      const ppu   = drawW / (xmax - xmin);
+      const yrange = drawH / ppu;
+      const ymin = -yrange / 2, ymax = yrange / 2;
+
+      const toX = x => mg.l + (x - xmin) * ppu;
+      const toY = y => mg.t + (ymax - y) * ppu;
+      const ox = toX(0), oy = toY(0);
+
+      // Fondo
+      qCtx.fillStyle = '#0d2040';
+      qCtx.fillRect(0, 0, W, H);
+
+      // Cuadrícula
+      qCtx.setLineDash([]);
+      qCtx.lineWidth = 1;
+      qCtx.strokeStyle = 'rgba(26,58,92,0.8)';
+      for (let gx = Math.ceil(xmin); gx <= Math.floor(xmax); gx++) {
+        qCtx.beginPath(); qCtx.moveTo(toX(gx), mg.t); qCtx.lineTo(toX(gx), H-mg.b); qCtx.stroke();
+      }
+      for (let gy = Math.ceil(ymin); gy <= Math.floor(ymax); gy++) {
+        qCtx.beginPath(); qCtx.moveTo(mg.l, toY(gy)); qCtx.lineTo(W-mg.r, toY(gy)); qCtx.stroke();
+      }
+
+      // Ejes
+      qCtx.strokeStyle = 'rgba(56,189,248,0.5)';
+      qCtx.lineWidth = 1.5;
+      qCtx.beginPath(); qCtx.moveTo(ox, mg.t); qCtx.lineTo(ox, H-mg.b); qCtx.stroke();
+      qCtx.beginPath(); qCtx.moveTo(mg.l, oy); qCtx.lineTo(W-mg.r, oy); qCtx.stroke();
+
+      // Etiquetas
+      qCtx.fillStyle = '#7a9bba';
+      qCtx.font = '10px "Share Tech Mono", monospace';
+      qCtx.textAlign = 'center'; qCtx.textBaseline = 'top';
+      for (let gx = Math.ceil(xmin); gx <= Math.floor(xmax); gx++) {
+        if (gx !== 0) qCtx.fillText(gx, toX(gx), oy + 5);
+      }
+      qCtx.textAlign = 'right'; qCtx.textBaseline = 'middle';
+      for (let gy = Math.ceil(ymin); gy <= Math.floor(ymax); gy++) {
+        if (gy !== 0) qCtx.fillText(gy, ox - 5, toY(gy));
+      }
+      qCtx.fillStyle = 'rgba(56,189,248,0.5)';
+      qCtx.font = '11px "Share Tech Mono", monospace';
+      qCtx.textAlign = 'left'; qCtx.textBaseline = 'middle';
+      qCtx.fillText('x', W-mg.r+6, oy);
+      qCtx.textAlign = 'center';
+      qCtx.fillText('f(x)', ox, mg.t - 16);
+
+      // Curva con clip
+      qCtx.save();
+      qCtx.beginPath(); qCtx.rect(mg.l, mg.t, drawW, drawH); qCtx.clip();
+
+      qCtx.shadowColor = 'rgba(245,166,35,0.25)';
+      qCtx.shadowBlur = 14;
+      qCtx.strokeStyle = 'rgba(245,166,35,0.2)';
+      qCtx.lineWidth = 8;
+      qCtx.beginPath();
+      for (let i = 0; i <= 400; i++) {
+        const x = xmin + (i/400)*(xmax-xmin);
+        i===0 ? qCtx.moveTo(toX(x), toY(q(x))) : qCtx.lineTo(toX(x), toY(q(x)));
+      }
+      qCtx.stroke();
+
+      qCtx.shadowBlur = 0;
+      qCtx.strokeStyle = '#f5a623';
+      qCtx.lineWidth = 2.5;
+      qCtx.beginPath();
+      for (let i = 0; i <= 400; i++) {
+        const x = xmin + (i/400)*(xmax-xmin);
+        i===0 ? qCtx.moveTo(toX(x), toY(q(x))) : qCtx.lineTo(toX(x), toY(q(x)));
+      }
+      qCtx.stroke();
+      qCtx.restore();
+
+      // Raíces
+      const sol = solveQuad(a, b, c);
+      const roots = sol.type === 'two' ? [sol.x1, sol.x2]
+                  : sol.type === 'one' || sol.type === 'linear' ? [sol.x1] : [];
+
+      roots.forEach(rx => {
+        if (rx < xmin || rx > xmax) return;
+        const rpx = toX(rx);
+
+        // Línea punteada vertical hasta la curva
+        qCtx.setLineDash([4, 4]);
+        qCtx.strokeStyle = 'rgba(74,222,128,0.35)';
+        qCtx.lineWidth = 1;
+        qCtx.beginPath(); qCtx.moveTo(rpx, oy); qCtx.lineTo(rpx, toY(q(rx))); qCtx.stroke();
+        qCtx.setLineDash([]);
+
+        // Anillos y punto sobre eje x
+        qCtx.save();
+        qCtx.shadowColor = '#4ade80';
+        qCtx.shadowBlur = 22;
+        for (const r of [16, 9]) {
+          qCtx.strokeStyle = `rgba(74,222,128,${r===16 ? 0.2 : 0.55})`;
+          qCtx.lineWidth = 1.5;
+          qCtx.beginPath(); qCtx.arc(rpx, oy, r, 0, Math.PI*2); qCtx.stroke();
+        }
+        qCtx.fillStyle = '#4ade80';
+        qCtx.beginPath(); qCtx.arc(rpx, oy, 5, 0, Math.PI*2); qCtx.fill();
+        qCtx.restore();
+
+        // Etiqueta
+        qCtx.font = 'bold 11px "Share Tech Mono", monospace';
+        qCtx.fillStyle = '#4ade80';
+        qCtx.textAlign = 'center';
+        qCtx.textBaseline = 'bottom';
+        qCtx.fillText(`x = ${fmtN(rx)}`, rpx, oy - 22);
+      });
+    }
+
+    function updateQuad() {
+      const a = parseFloat(aSlider.value);
+      const b = parseFloat(bSlider.value);
+      const c = parseFloat(cSlider.value);
+
+      aVal.textContent = fmtN(a);
+      bVal.textContent = fmtN(b);
+      cVal.textContent = fmtN(c);
+
+      const formula = buildFormula(a, b, c);
+      quadFormula.textContent = formula;
+      quadFooter.textContent  = formula;
+
+      const sol = solveQuad(a, b, c);
+
+      if (a !== 0) {
+        const d = b*b - 4*a*c;
+        const dColor = d >= 0 ? '#4ade80' : '#f87171';
+        discBox.innerHTML = `Δ = b² – 4ac = (${fmtN(b)})² – 4·(${fmtN(a)})·(${fmtN(c)}) = <strong style="color:${dColor}">${fmtN(d)}</strong>`;
+      } else {
+        discBox.innerHTML = `Función lineal (a = 0)`;
+      }
+
+      let html = '';
+      if (sol.type === 'two') {
+        html = `<div style="display:flex;gap:8px;">
+                  <div class="root-entry real" style="flex:1">x₁ = ${fmtN(sol.x1)}</div>
+                  <div class="root-entry real" style="flex:1">x₂ = ${fmtN(sol.x2)}</div>
+                </div>`;
+      } else if (sol.type === 'one') {
+        html = `<div class="root-entry real">x = ${fmtN(sol.x1)} &nbsp;(raíz doble)</div>`;
+      } else if (sol.type === 'linear') {
+        html = `<div class="root-entry real">x = ${fmtN(sol.x1)}</div>`;
+      } else if (sol.type === 'none') {
+        html = `<div class="root-entry none">No hay raíces reales (Δ &lt; 0)</div>`;
+      } else {
+        html = `<div class="root-entry none">Función constante</div>`;
+      }
+      rootsDisplay.innerHTML = html;
+
+      drawQuadGraph();
+    }
+
+    [aSlider, bSlider, cSlider].forEach(s => s.addEventListener('input', updateQuad));
+  </script>
+</body>
+</html>

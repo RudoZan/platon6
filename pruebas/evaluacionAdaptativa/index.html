@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evaluación Adaptativa de Álgebra — Platón 6</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Importar KaTeX para fórmulas matemáticas hermosas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Botón Volver al Listado General -->
+    <a class="btn-volver" href="../../listado.html">← Volver a Platón 6</a>
+
+    <header class="app-header">
+      <h1>Mide tu nivel en Álgebra</h1>
+    </header>
+
+    <div style="display: flex; justify-content: center; margin: 15px 0 25px 0;">
+      <img src="../../imagenes/platon_inteligente.png" alt="Platón Profesor" style="width: 115px; height: 115px; border-radius: 50%; object-fit: cover; border: 3px solid var(--color-borde); box-shadow: 0 5px 15px var(--color-sombras); background: var(--color-tarjeta);">
+    </div>
+
+    <!-- PANTALLA 1: MENÚ DE PRUEBAS -->
+    <div id="screen-menu" class="screen active">
+
+      <div class="tests-grid" id="tests-grid">
+        <!-- Tarjetas de pruebas cargadas dinámicamente -->
+      </div>
+
+      <div class="menu-footer">
+        <button id="btn-go-admin" class="btn-admin-access">⚙️ Panel de Administración (Profesor)</button>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>- Desarrollado por Astutosoft 2026 -</footer>
+
+  <script src="db.js"></script>
+  <script src="menu.js"></script>
+</body>
+</html>

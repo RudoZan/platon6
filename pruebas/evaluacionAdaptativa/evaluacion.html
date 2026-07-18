@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evaluación Adaptativa — Platón 6</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Importar KaTeX para fórmulas matemáticas hermosas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Botón Volver al Menú -->
+    <a class="btn-volver" href="index.html">← Volver al Menú</a>
+
+    <header class="app-header">
+      <h1 id="test-title-header">Evaluación</h1>
+      <p class="subtitle">Motor Adaptativo en Ejecución</p>
+    </header>
+
+    <!-- PANTALLA 4: PRUEBA ACTIVA -->
+    <div id="screen-test" class="screen active">
+      <div class="test-progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 20%;"></div>
+      </div>
+
+      <div class="test-header-info">
+        <span class="badge-pregunta" id="current-question-num">Pregunta 1 de 5</span>
+        <span id="current-question-code" style="background: rgba(35, 94, 130, 0.08); border: 1.5px solid var(--color-borde); padding: 3px 10px; border-radius: 99px; font-size: 0.8rem; font-weight: bold; color: var(--color-primario);">CÓDIGO</span>
+      </div>
+
+      <div class="card question-card">
+        <div class="question-body" id="question-text">
+          <!-- Enunciado de la pregunta -->
+        </div>
+
+        <div class="answer-section">
+          <label id="answer-input-label">Escribe tu respuesta:</label>
+          <div id="dynamic-inputs-container" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; margin-top: 8px;">
+            <!-- Se generarán uno o más inputs aquí dinámicamente -->
+          </div>
+          <div style="margin-top: 15px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <p class="input-subnote" style="margin: 0; font-size: 0.85rem;">El sistema admite formatos libres si usas el teclado.</p>
+            <button id="btn-submit-answer" class="btn-primary">Enviar Respuesta</button>
+          </div>
+        </div>
+
+        <div class="hints-section">
+          <div class="hints-header" style="display: flex; justify-content: flex-end; width: 100%;">
+            <button id="btn-use-hint" class="btn-hint-trigger" style="display: none; align-items: center; gap: 6px;">💡 Solicitar Pista</button>
+          </div>
+          <div id="hints-container" class="hints-container">
+            <!-- Pistas reveladas -->
+          </div>
+        </div>
+
+        <div class="abandon-section">
+          <button id="btn-give-up" class="btn-danger">🏳️ Rendirse / Ver solución</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANTALLA 5: DIÁLOGO DE CONFIANZA (POPUP SOBRE LA PREGUNTA) -->
+    <div id="screen-confidence" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; display: flex; justify-content: center; align-items: center;">
+      <div class="card confidence-card" style="max-width: 500px; width: 90%; background: var(--color-tarjeta); border: 1.5px solid var(--color-borde); padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);">
+        <div class="confidence-header">
+          <p id="confidence-question-num" style="font-weight: bold; color: var(--color-primario); text-transform: uppercase; font-size: 0.85rem; margin-bottom: 5px; letter-spacing: 0.5px; text-align: center;">Pregunta 1 de 5</p>
+          <h3 style="margin-top: 0; text-align: center;">🎯 Autoevaluación de Confianza</h3>
+          <p style="text-align: center;">¿Qué tan seguro estás de la respuesta que acabas de ingresar?</p>
+        </div>
+        <div class="confidence-buttons">
+          <button class="btn-conf" data-conf="0">
+            <img src="../../imagenes/platon_duda.png" alt="Platón Duda" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--color-borde);">
+            <div class="conf-info">
+              <span class="conf-title">Nada seguro</span>
+              <span class="conf-desc">Es una moneda al aire</span>
+            </div>
+          </button>
+          <button class="btn-conf" data-conf="1">
+            <img src="../../imagenes/platon_preocupado.png" alt="Platón Preocupado" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--color-borde);">
+            <div class="conf-info">
+              <span class="conf-title">Poco seguro</span>
+              <span class="conf-desc">Lo que vale es la intención</span>
+            </div>
+          </button>
+          <button class="btn-conf" data-conf="2">
+            <img src="../../imagenes/platon_inteligente.png" alt="Platón Inteligente" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--color-borde);">
+            <div class="conf-info">
+              <span class="conf-title">Bastante seguro</span>
+              <span class="conf-desc">Me tengo fe</span>
+            </div>
+          </button>
+          <button class="btn-conf" data-conf="3">
+            <img src="../../imagenes/platon_victoria.png" alt="Platón Seguro" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--color-borde);">
+            <div class="conf-info">
+              <span class="conf-title">Muy seguro</span>
+              <span class="conf-desc">Pongo las manos al fuego</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANTALLA 5.5: OFERTA DE PREGUNTA RETO (MODAL INTERNO) -->
+    <div id="modal-q6-offer" class="screen flex-center hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000;">
+      <div class="card confidence-card" style="max-width: 450px; width: 90%; background: var(--color-tarjeta); border: 1.5px solid var(--color-borde); padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); text-align: center;">
+        <div class="confidence-header" style="margin-bottom: 20px;">
+          <h3 style="margin-top: 0; color: var(--color-primario); font-size: 1.4rem;">🔥 ¿Deseas tomar la Pregunta Reto?</h3>
+          <p style="font-size: 0.95rem; line-height: 1.4; color: var(--color-texto-secundario); margin-top: 8px;">
+            Has completado las 5 preguntas reglamentarias. Puedes responder una **Pregunta 6 (Reto Extra)** para medir tu límite.
+          </p>
+        </div>
+        <p style="font-weight: bold; margin-bottom: 12px; color: var(--color-texto); font-size: 0.95rem;">¿Cómo quieres que sea la pregunta reto?</p>
+        <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 12px;">
+          <button id="btn-accept-q6-easier" class="btn-secondary" style="flex: 1; padding: 12px 6px; border-radius: 8px; border: 1.5px solid var(--color-borde); cursor: pointer; font-weight: bold; color: var(--color-texto); font-size: 0.85rem; background: var(--color-tarjeta); text-align: center;">
+            Más fácil
+          </button>
+          <button id="btn-accept-q6-similar" class="btn-primary" style="flex: 1; padding: 12px 6px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; font-size: 0.85rem; background: var(--color-primario-claro); text-align: center;">
+            Dificultad similar
+          </button>
+          <button id="btn-accept-q6-harder" class="btn-accent" style="flex: 1; padding: 12px 6px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; font-size: 0.85rem; text-align: center;">
+            Más difícil
+          </button>
+        </div>
+        <hr style="border: 0; border-top: 1px solid var(--color-borde); margin: 6px 0;">
+        <button id="btn-decline-q6" class="btn-secondary" style="padding: 12px; width: 100%; border-radius: 8px; border: 1.5px solid var(--color-borde); cursor: pointer; font-weight: bold; color: var(--color-texto); font-size: 0.95rem; background: transparent;">
+          No deseo el reto, ver mis resultados
+        </button>
+      </div>
+    </div>
+
+    <!-- PANTALLA 6: EXPLICACIÓN FEEDBACK -->
+    <div id="screen-explanation" class="screen">
+      <div class="card feedback-card" id="feedback-card-type">
+        <p id="explanation-question-num" style="font-weight: bold; color: #7f8c8d; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 5px; letter-spacing: 0.5px;">Pregunta 1 de 5</p>
+        <h2 id="feedback-status-title" style="margin-top: 0;">¡Respuesta Correcta!</h2>
+        
+        <div class="feedback-comparison">
+          <div class="comp-box">
+            <strong>Tu respuesta:</strong>
+            <span id="feedback-user-ans" class="ans-value">3, 2</span>
+          </div>
+          <div class="comp-box">
+            <strong>Seguridad declarada:</strong>
+            <span id="feedback-confidence-label" class="ans-value" style="color: var(--color-primario);">Bastante seguro</span>
+          </div>
+          <div class="comp-box">
+            <strong>Respuesta aceptada:</strong>
+            <span id="feedback-correct-ans" class="ans-value">3, 2</span>
+          </div>
+        </div>
+
+        <div class="explanation-box">
+          <h3>Resolución Paso a Paso:</h3>
+          <div id="explanation-text" class="explanation-content">
+            <!-- Explicación de la solución -->
+          </div>
+        </div>
+
+        <div class="feedback-actions">
+          <button id="btn-next-question" class="btn-primary">Siguiente Pregunta →</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>- Desarrollado por Astutosoft 2026 -</footer>
+
+  <script src="db.js"></script>
+  <script src="utils.js"></script>
+  <script src="evaluacion.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administración — Platón 6</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Importar KaTeX para fórmulas matemáticas hermosas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Botón Volver al Listado General -->
+    <a class="btn-volver" href="index.html">← Volver al Portal de Alumnos</a>
+
+    <header class="app-header">
+      <h1>Panel Docente</h1>
+      <p class="subtitle">Gestión y especificaciones técnicas</p>
+    </header>
+
+    <!-- PANTALLA 2: ACCESO ADMIN (CLAVE MOCKUP) -->
+    <div id="screen-admin-auth" class="screen active">
+      <div class="card auth-card" style="max-width: 450px; margin: 30px auto; padding: 25px;">
+        <h3>Acceso de Administración</h3>
+        <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--color-texto-secundario);">Ingresa la contraseña de profesor para ver y validar los bancos de preguntas.</p>
+        <div class="form-group" style="margin-bottom: 15px;">
+          <input type="password" id="admin-pass" placeholder="Cualquier contraseña sirve (Maqueta)" style="width: 100%; padding: 12px; border: 1.5px solid var(--color-borde); border-radius: 8px;">
+        </div>
+        <div class="btn-group-row" style="display: flex; gap: 10px;">
+          <button id="btn-auth-submit" class="btn-primary" style="flex: 1; padding: 12px;">Entrar</button>
+          <button id="btn-auth-cancel" class="btn-secondary" style="flex: 1; padding: 12px;">Cancelar</button>
+        </div>
+        <p id="auth-error" class="error-text" style="color: var(--color-error); margin-top: 10px; font-weight: 500; font-size: 0.85rem; text-align: center;"></p>
+      </div>
+    </div>
+
+    <!-- PANTALLA 3: PANEL ADMIN -->
+    <div id="screen-admin-panel" class="screen">
+      <!-- MENÚ DE NAVEGACIÓN PERMANENTE DOCENTE -->
+      <nav class="admin-nav" style="display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 2px solid var(--color-borde); padding-bottom: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; width: 100%;">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <span style="font-weight: bold; color: var(--color-primario); font-family: Georgia, serif; font-size: 1.25rem; margin-right: 15px;">Panel Docente</span>
+          <a class="nav-item active" href="admin.html" style="text-decoration: none; color: white; background: var(--color-primario); font-weight: 600; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; display: inline-block;">Inicio</a>
+          <a class="nav-item" href="bancos.html" style="text-decoration: none; color: var(--color-texto); font-weight: 500; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; border: 1.5px solid transparent; transition: all 0.2s; display: inline-block;">Bancos de Preguntas</a>
+          <a class="nav-item" href="criterios.html" style="text-decoration: none; color: var(--color-texto); font-weight: 500; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; border: 1.5px solid transparent; transition: all 0.2s; display: inline-block;">Criterios de Puntaje</a>
+        </div>
+        <div>
+          <button id="btn-admin-close" class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem; font-weight: 600;">Salir a Alumnos</button>
+        </div>
+      </nav>
+
+      <!-- Explicación pedagógica para el docente -->
+      <div class="card info-card" style="background: rgba(35, 94, 130, 0.05); border: 1.5px solid var(--color-borde); padding: 15px; margin-bottom: 25px; border-radius: 8px;">
+        <h4 style="margin-top: 0; color: var(--color-primario); display: flex; align-items: center; gap: 8px; font-weight: 600;">Especificaciones Pedagógicas del Motor Adaptativo</h4>
+        <p style="font-size: 0.9rem; margin-bottom: 8px; line-height: 1.4; color: var(--color-texto);">Este recurso evalúa el rendimiento del estudiante de forma adaptativa y formativa. A continuación se detallan las reglas lógicas del motor:</p>
+        <ul style="font-size: 0.85rem; padding-left: 20px; margin-bottom: 0; line-height: 1.5; color: var(--color-texto-secundario);">
+          <li><strong>Estructura del Test:</strong> Cada evaluación selecciona de manera dinámica e inteligente un conjunto de <strong>5 preguntas</strong> de un banco de 20 preguntas distribuidas en 4 niveles de dificultad.</li>
+          <li><strong>Algoritmo de Adaptabilidad:</strong> El test inicia con una pregunta de <strong>Nivel 2</strong> (Comprensión). Si el estudiante acierta 0/2 disminuye el nivel en 1, si acierta 2/2 aumenta el nivel en 1, y si acierta 1/2 mantiene el nivel actual para el siguiente bloque.</li>
+          <li><strong>Análisis Metacognitivo:</strong> Tras responder, se califica la seguridad del alumno. Al terminar, el sistema proyecta un gráfico cartesiano cuadrante (Precisión vs. Confianza) para detectar sesgos como subestimación o sobreestimación del aprendizaje.</li>
+          <li><strong>Ayudas Didácticas:</strong> Se permiten hasta 2 pistas graduadas por pregunta y la opción de rendirse. Las pistas y rendiciones restan puntuación en el balance final.</li>
+          <li><strong>Pregunta de Reto (Nivel 5):</strong> Se ofrece un desafío adicional opcional cuya dificultad se puede graduar según el interés del estudiante.</li>
+        </ul>
+      </div>
+
+      <!-- SECCIÓN DEL PORTAL DE INICIO DEL PROFESOR (Opciones principales) -->
+      <div id="admin-portal-view">
+        <h3 style="margin-bottom: 15px; color: var(--color-primario); font-family: Georgia, serif; border-bottom: 1.5px solid var(--color-borde); padding-bottom: 8px;">⚙️ Opciones de Administración</h3>
+        
+        <div>
+          <h4 style="margin-bottom: 12px; color: var(--color-texto); font-weight: 600;">Herramientas de Gestión Adicionales (Próximamente)</h4>
+          <p style="font-size: 0.9rem; color: var(--color-texto-secundario); margin-bottom: 15px;">Módulos avanzados en desarrollo para expandir las capacidades del panel del profesor:</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; opacity: 0.6;">
+            
+            <div class="card" style="padding: 20px; border: 1.5px dashed var(--color-borde); cursor: not-allowed; background: var(--color-tarjeta);">
+              <h5 style="margin: 0 0 8px 0; font-size: 1rem; color: var(--color-texto);">📊 Estadísticas de Grupo / Curso</h5>
+              <p style="margin: 0; font-size: 0.8rem; color: var(--color-texto-secundario); line-height: 1.4;">Permite visualizar la distribución de niveles de logro alcanzados por los estudiantes en gráficos consolidados e históricos.</p>
+            </div>
+
+            <div class="card" style="padding: 20px; border: 1.5px dashed var(--color-borde); cursor: not-allowed; background: var(--color-tarjeta);">
+              <h5 style="margin: 0 0 8px 0; font-size: 1rem; color: var(--color-texto);">✏️ Creador / Editor de Preguntas</h5>
+              <p style="margin: 0; font-size: 0.8rem; color: var(--color-texto-secundario); line-height: 1.4;">Interfaz visual para redactar nuevos enunciados en LaTeX, configurar pistas, respuestas correctas y explicaciones paso a paso.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>- Desarrollado por Astutosoft 2026 -</footer>
+
+  <script src="db.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

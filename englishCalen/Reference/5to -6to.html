@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Reference – Unit 3: Languages · 5° Básico</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap');
+  :root {
+    --teal: #1D9E75; --teal-light: #E1F5EE; --teal-dark: #085041;
+    --purple: #7F77DD; --purple-light: #EEEDFE; --purple-dark: #3C3489;
+    --coral: #D85A30; --coral-light: #FAECE7; --coral-dark: #712B13;
+    --amber: #BA7517; --amber-light: #FAEEDA; --amber-dark: #412402;
+    --text: #2C2C2A; --text-muted: #5F5E5A; --bg: #fafaf8; --border: #D3D1C7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; }
+
+  .header { background: var(--teal-dark); color: white; padding: 24px 36px 20px; }
+  .header h1 { font-size: 20px; font-weight: 800; }
+  .header .sub { font-size: 12px; opacity: .7; margin-top: 3px; }
+  .header .meta { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .badge { font-size: 10px; font-weight: 700; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); border-radius: 20px; padding: 2px 9px; text-transform: uppercase; }
+
+  .nav-tabs { background: white; border-bottom: 1.5px solid var(--border); display: flex; padding: 0 36px; overflow-x: auto; }
+  .nav-tab { padding: 11px 16px; font-size: 12px; font-weight: 700; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1.5px; white-space: nowrap; transition: color .15s; }
+  .nav-tab:hover { color: var(--teal); }
+  .nav-tab.active { color: var(--teal-dark); border-bottom-color: var(--teal); }
+
+  .main { padding: 24px 36px 60px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .full { grid-column: 1 / -1; }
+
+  .card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .card-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 12px; }
+
+  .pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { font-size: 12px; font-weight: 600; border-radius: 6px; padding: 3px 9px; border: 1px solid; }
+  .pill-teal   { background: var(--teal-light);   color: var(--teal-dark);   border-color: #5DCAA5; }
+  .pill-purple { background: var(--purple-light); color: var(--purple-dark); border-color: #AFA9EC; }
+  .pill-coral  { background: var(--coral-light);  color: var(--coral-dark);  border-color: #F0997B; }
+  .pill-amber  { background: var(--amber-light);  color: var(--amber-dark);  border-color: #EF9F27; }
+  .pill-gray   { background: #f0efe8; color: #666; border-color: #ccc; }
+
+  .phrase-block { margin-bottom: 8px; }
+  .phrase { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 13px; padding: 5px 10px; background: var(--bg); border-left: 3px solid var(--teal); border-radius: 0 5px 5px 0; margin-bottom: 4px; }
+  .phrase-label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; letter-spacing: .4px; }
+  .phrase-es { font-size: 11px; color: var(--text-muted); font-style: italic; margin-left: 10px; }
+
+  .struct { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 13px; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 10px 14px; margin-bottom: 7px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; padding: 7px 10px; background: var(--bg); border-bottom: 1.5px solid var(--border); text-align: left; }
+  td { padding: 7px 10px; border-bottom: 1px solid #f0efe8; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+
+  .tip { border-radius: 7px; padding: 10px 14px; font-size: 12px; border-left: 4px solid; margin-top: 14px; }
+  .tip strong { font-weight: 800; }
+  .tip-teal   { background: var(--teal-light);   border-color: var(--teal);   color: var(--teal-dark); }
+  .tip-purple { background: var(--purple-light); border-color: var(--purple); color: var(--purple-dark); }
+  .tip-coral  { background: var(--coral-light);  border-color: var(--coral);  color: var(--coral-dark); }
+  .tip-amber  { background: var(--amber-light);  border-color: var(--amber);  color: var(--amber-dark); }
+
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Teacher Reference · Unit 3: Languages</h1>
+  <div class="sub">Vocabulario clave · Estructuras · Frases frecuentes · 5° Básico Chile</div>
+  <div class="meta">
+    <span class="badge">5° Básico</span>
+    <span class="badge">CLT · Scaffolding · TBL · Lexical</span>
+    <span class="badge">Lesson 1 + Lesson 2 + Project</span>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="showTab(0)">🌍 Vocabulario clave</div>
+  <div class="nav-tab" onclick="showTab(1)">📐 Estructuras gramaticales</div>
+  <div class="nav-tab" onclick="showTab(2)">💬 Frases frecuentes</div>
+  <div class="nav-tab" onclick="showTab(3)">🔊 /iː/ · Pronunciación</div>
+  <div class="nav-tab" onclick="showTab(4)">🧩 Chunks útiles</div>
+</div>
+
+<div class="main">
+
+<!-- ═══════════════════════════════
+     TAB 0 — VOCABULARIO CLAVE
+     ═══════════════════════════════ -->
+<div class="section active">
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-title" style="color:var(--teal-dark);"><span class="dot" style="background:var(--teal);"></span>Idiomas — Languages</div>
+      <div class="pill-list">
+        <span class="pill pill-teal">English</span>
+        <span class="pill pill-teal">Spanish</span>
+        <span class="pill pill-teal">French</span>
+        <span class="pill pill-teal">Italian</span>
+        <span class="pill pill-teal">German</span>
+        <span class="pill pill-teal">Portuguese</span>
+        <span class="pill pill-teal">Japanese</span>
+        <span class="pill pill-teal">Chinese</span>
+        <span class="pill pill-teal">Russian</span>
+        <span class="pill pill-teal">Arabic</span>
+      </div>
+      <div class="tip tip-teal" style="margin-top:12px;">
+        <strong>Nota:</strong> Siempre con mayúscula en inglés. Enseñar emparejado con su país: <em>Brazil → Portuguese</em>.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--purple-dark);"><span class="dot" style="background:var(--purple);"></span>Países — Countries</div>
+      <div class="pill-list">
+        <span class="pill pill-purple">Mexico</span>
+        <span class="pill pill-purple">Brazil</span>
+        <span class="pill pill-purple">The United Kingdom</span>
+        <span class="pill pill-purple">China</span>
+        <span class="pill pill-purple">Russia</span>
+        <span class="pill pill-purple">Spain</span>
+        <span class="pill pill-purple">France</span>
+        <span class="pill pill-purple">Japan</span>
+        <span class="pill pill-purple">Germany</span>
+        <span class="pill pill-purple">Italy</span>
+        <span class="pill pill-purple">Canada</span>
+        <span class="pill pill-purple">Australia</span>
+        <span class="pill pill-purple">South Africa</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--amber-dark);"><span class="dot" style="background:var(--amber);"></span>Habilidades lingüísticas — Language Skills</div>
+      <div class="pill-list">
+        <span class="pill pill-amber">speak</span>
+        <span class="pill pill-amber">read</span>
+        <span class="pill pill-amber">write</span>
+        <span class="pill pill-amber">sing</span>
+        <span class="pill pill-amber">listen</span>
+        <span class="pill pill-amber">learn</span>
+        <span class="pill pill-amber">teach</span>
+        <span class="pill pill-amber">say</span>
+        <span class="pill pill-amber">talk</span>
+      </div>
+      <hr class="divider">
+      <p style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px;">Siempre con can/can't:</p>
+      <div class="pill-list">
+        <span class="pill pill-amber">speak Spanish</span>
+        <span class="pill pill-amber">read in Russian</span>
+        <span class="pill pill-amber">write in Arabic</span>
+        <span class="pill pill-amber">sing French songs</span>
+        <span class="pill pill-amber">write short stories</span>
+        <span class="pill pill-amber">play language games</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--coral-dark);"><span class="dot" style="background:var(--coral);"></span>Estrategias de aprendizaje — Do's &amp; Don'ts</div>
+      <p style="font-size:11px; font-weight:800; color:var(--teal-dark); margin-bottom:5px;">✅ Do's</p>
+      <div class="pill-list" style="margin-bottom:10px;">
+        <span class="pill pill-teal">Study every day.</span>
+        <span class="pill pill-teal">Watch movies.</span>
+        <span class="pill pill-teal">Listen to songs.</span>
+        <span class="pill pill-teal">Read comic books.</span>
+        <span class="pill pill-teal">Play language games.</span>
+        <span class="pill pill-teal">Be curious.</span>
+        <span class="pill pill-teal">Be patient.</span>
+        <span class="pill pill-teal">Have fun!</span>
+      </div>
+      <p style="font-size:11px; font-weight:800; color:var(--coral-dark); margin-bottom:5px;">❌ Don'ts</p>
+      <div class="pill-list">
+        <span class="pill pill-coral">Don't be shy.</span>
+        <span class="pill pill-coral">Don't give up.</span>
+        <span class="pill pill-coral">Don't be lazy.</span>
+        <span class="pill pill-coral">Don't get distracted.</span>
+      </div>
+    </div>
+
+    <div class="card full">
+      <div class="card-title" style="color:var(--teal-dark);"><span class="dot" style="background:var(--teal);"></span>Saludos del mundo — Greetings (se repiten en toda la unidad)</div>
+      <div class="pill-list">
+        <span class="pill pill-teal">Hello (English)</span>
+        <span class="pill pill-teal">Hola (Spanish)</span>
+        <span class="pill pill-teal">Bonjour (French)</span>
+        <span class="pill pill-teal">Ciao (Italian)</span>
+        <span class="pill pill-teal">Hallo (German)</span>
+        <span class="pill pill-teal">Olá (Portuguese)</span>
+        <span class="pill pill-teal">Konnichiwa (Japanese)</span>
+        <span class="pill pill-teal">Nǐ hǎo (Chinese)</span>
+        <span class="pill pill-teal">Mari Mari (Mapudungun)</span>
+        <span class="pill pill-teal">Oui (French · "yes")</span>
+        <span class="pill pill-teal">Buongiorno (Italian)</span>
+      </div>
+    </div>
+
+    <div class="card full">
+      <div class="card-title" style="color:var(--amber-dark);"><span class="dot" style="background:var(--amber);"></span>Variedades del inglés — Dialect Words (p.64)</div>
+      <table>
+        <thead><tr><th>American English</th><th>British English</th><th>Australian English</th></tr></thead>
+        <tbody>
+          <tr><td>candy</td><td>sweets</td><td>lollies</td></tr>
+          <tr><td>sneakers</td><td>trainers</td><td>runners</td></tr>
+          <tr><td>French fries</td><td>chips</td><td>hot chips</td></tr>
+          <tr><td>elevator</td><td>lift</td><td>lift</td></tr>
+          <tr><td>traffic lights</td><td>traffic lights</td><td>robots (South Africa)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     TAB 1 — ESTRUCTURAS
+     ═══════════════════════════════ -->
+<div class="section">
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-title" style="color:var(--teal-dark);"><span class="dot" style="background:var(--teal);"></span>Simple Present — do / does</div>
+      <div class="struct">Do you speak [language]?</div>
+      <div class="struct">Yes, I do. / No, I don't.</div>
+      <div class="struct">Does she / he speak [language]?</div>
+      <div class="struct">Yes, she does. / No, he doesn't.</div>
+      <div class="struct">I speak [language] and a little [language].</div>
+      <div class="struct">She speaks French and German.</div>
+      <div class="tip tip-teal">
+        <strong>Clave:</strong> <em>-s</em> en tercera persona: she speak<strong>s</strong>. <em>Do</em> → I/You/We/They. <em>Does</em> → She/He/It.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--purple-dark);"><span class="dot" style="background:var(--purple);"></span>Modal Can — habilidad</div>
+      <div class="struct">Can you speak / read / write in [language]?</div>
+      <div class="struct">Yes, I can. / No, I can't.</div>
+      <div class="struct">I can only speak English.</div>
+      <div class="struct">She can sing French songs.</div>
+      <div class="struct">He can't read in Russian.</div>
+      <div class="tip tip-purple">
+        <strong>Clave:</strong> <em>can</em> nunca lleva <em>-s</em> con she/he/it. Siempre va seguido de verbo base.
+      </div>
+    </div>
+
+    <div class="card full">
+      <div class="card-title" style="color:var(--coral-dark);"><span class="dot" style="background:var(--coral);"></span>do vs. can — contraste esencial</div>
+      <table>
+        <thead><tr><th>Simple Present (hábito / identidad)</th><th>Modal Can (habilidad / capacidad)</th></tr></thead>
+        <tbody>
+          <tr><td><em>Do you speak Spanish?</em> → ¿Hablas español?</td><td><em>Can you speak Spanish?</em> → ¿Puedes hablar español?</td></tr>
+          <tr><td><em>She speaks French at home.</em></td><td><em>She can sing French songs.</em></td></tr>
+          <tr><td><em>I don't speak Chinese.</em></td><td><em>I can't read in Russian.</em></td></tr>
+          <tr><td><em>Does she speak other languages?</em></td><td><em>Can she write in Spanish?</em></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--amber-dark);"><span class="dot" style="background:var(--amber);"></span>Imperativo + Let's</div>
+      <div class="struct">Study every day. / Have fun! / Be patient.</div>
+      <div class="struct">Don't be shy. / Don't give up.</div>
+      <div class="struct">Let's learn together.</div>
+      <div class="struct">Let's start today! / Let's try!</div>
+      <div class="tip tip-amber">
+        <strong>Let's</strong> = propuesta colaborativa. Muy útil en CLT. El imperativo negativo aparece en el brochure de estrategias (p.72).
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--teal-dark);"><span class="dot" style="background:var(--teal);"></span>Want to — deseos</div>
+      <div class="struct">I want to learn [language].</div>
+      <div class="struct">What language do you want to learn?</div>
+      <div class="struct">She wants to learn Portuguese.</div>
+      <div class="tip tip-teal">
+        <strong>Oral:</strong> <em>want to</em> → /ˈwɒnə/ (wanna) en inglés hablado. Presentar ambas formas.
+      </div>
+    </div>
+
+    <div class="card full">
+      <div class="card-title" style="color:var(--purple-dark);"><span class="dot" style="background:var(--purple);"></span>Patrones de alta frecuencia — se repiten en toda la unidad</div>
+      <table>
+        <thead><tr><th>Patrón</th><th>Ejemplo</th></tr></thead>
+        <tbody>
+          <tr><td><strong>In [country], people speak [language].</strong></td><td>In Brazil, people speak Portuguese.</td></tr>
+          <tr><td><strong>In [country], people say "[word]" for [meaning].</strong></td><td>In the UK, people say "lift" for elevator.</td></tr>
+          <tr><td><strong>How do you say "[word]" in [language]?</strong></td><td>How do you say "hello" in Italian? — Ciao!</td></tr>
+          <tr><td><strong>She / He is from [country]. She / He speaks [language].</strong></td><td>She is from the USA. She speaks English.</td></tr>
+          <tr><td><strong>My [relative] is from [country]. She / He can [skill].</strong></td><td>My grandma is from France. She can sing French songs.</td></tr>
+          <tr><td><strong>I usually [activity] to learn English.</strong></td><td>I usually watch movies / listen to songs.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     TAB 2 — FRASES FRECUENTES
+     ═══════════════════════════════ -->
+<div class="section">
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-title" style="color:var(--teal-dark);"><span class="dot" style="background:var(--teal);"></span>Preguntas recurrentes — los alumnos las usan en toda la unidad</div>
+      <div class="phrase-block">
+        <div class="phrase">What languages do you speak?</div>
+        <div class="phrase-es">¿Qué idiomas hablas?</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">What languages do you want to learn?</div>
+        <div class="phrase-es">¿Qué idiomas quieres aprender?</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">How do you say "…" in [language]?</div>
+        <div class="phrase-es">¿Cómo se dice "…" en [idioma]?</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">Does she / he speak other languages?</div>
+        <div class="phrase-es">¿Habla ella / él otros idiomas?</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">Can you speak / write / read in [language]?</div>
+        <div class="phrase-es">¿Puedes hablar / escribir / leer en [idioma]?</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">What do you usually do to learn English?</div>
+        <div class="phrase-es">¿Qué haces generalmente para aprender inglés?</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">What do you call [thing] in [country]?</div>
+        <div class="phrase-es">¿Cómo llaman a [cosa] en [país]?</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--purple-dark);"><span class="dot" style="background:var(--purple);"></span>Respuestas recurrentes — producción esperada del alumno</div>
+      <div class="phrase-block">
+        <div class="phrase">I speak [language] and a little [language].</div>
+        <div class="phrase-es">Hablo [idioma] y un poco de [idioma].</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">I speak [language] at home.</div>
+        <div class="phrase-es">Hablo [idioma] en casa.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">I can only speak English.</div>
+        <div class="phrase-es">Solo puedo hablar inglés.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">Yes, I can. / No, I can't.</div>
+        <div class="phrase-es">Sí, puedo. / No, no puedo.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">I usually listen to songs / watch movies.</div>
+        <div class="phrase-es">Generalmente escucho canciones / veo películas.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">In [country], people speak [language].</div>
+        <div class="phrase-es">En [país], la gente habla [idioma].</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase">I want to learn [language].</div>
+        <div class="phrase-es">Quiero aprender [idioma].</div>
+      </div>
+    </div>
+
+    <div class="card full">
+      <div class="card-title" style="color:var(--coral-dark);"><span class="dot" style="background:var(--coral);"></span>Expresiones de los diálogos — discurso social (alta frecuencia)</div>
+      <div class="pill-list">
+        <span class="pill pill-coral">Of course!</span>
+        <span class="pill pill-coral">Really?</span>
+        <span class="pill pill-coral">Me too!</span>
+        <span class="pill pill-coral">Great idea!</span>
+        <span class="pill pill-coral">Nice!</span>
+        <span class="pill pill-coral">Wow!</span>
+        <span class="pill pill-coral">That's amazing!</span>
+        <span class="pill pill-coral">That's unusual!</span>
+        <span class="pill pill-coral">That sounds cool!</span>
+        <span class="pill pill-coral">Same thing, different word!</span>
+        <span class="pill pill-coral">Don't worry!</span>
+        <span class="pill pill-coral">Let's try!</span>
+        <span class="pill pill-coral">It's not difficult!</span>
+        <span class="pill pill-coral">Languages are fun!</span>
+        <span class="pill pill-coral">Around the world</span>
+        <span class="pill pill-coral">Let's learn together!</span>
+        <span class="pill pill-coral">What about you?</span>
+      </div>
+      <div class="tip tip-coral">
+        <strong>Sugerencia:</strong> Pegar estas expresiones en tarjetas en la pizarra. Desafiar a los alumnos a usarlas durante cada conversación de la semana — son el "pegamento" del discurso oral.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     TAB 3 — PRONUNCIACIÓN /iː/
+     ═══════════════════════════════ -->
+<div class="section">
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-title" style="color:var(--teal-dark);"><span class="dot" style="background:var(--teal);"></span>Palabras con sonido /iː/ — de la unidad</div>
+      <div class="pill-list">
+        <span class="pill pill-teal">Japanese</span>
+        <span class="pill pill-teal">cheese</span>
+        <span class="pill pill-teal">speak</span>
+        <span class="pill pill-teal">three</span>
+        <span class="pill pill-teal">beach</span>
+        <span class="pill pill-teal">sea</span>
+        <span class="pill pill-teal">Portuguese</span>
+        <span class="pill pill-teal">tea</span>
+        <span class="pill pill-teal">easy</span>
+        <span class="pill pill-teal">see</span>
+        <span class="pill pill-teal">eagle</span>
+        <span class="pill pill-teal">green</span>
+        <span class="pill pill-teal">tree</span>
+        <span class="pill pill-teal">cream</span>
+        <span class="pill pill-teal">please</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--coral-dark);"><span class="dot" style="background:var(--coral);"></span>Palabras trampa — NO tienen sonido /iː/</div>
+      <div class="pill-list">
+        <span class="pill pill-gray">hello</span>
+        <span class="pill pill-gray">car</span>
+        <span class="pill pill-gray">ball</span>
+        <span class="pill pill-gray">match</span>
+        <span class="pill pill-gray">French</span>
+      </div>
+      <div class="tip tip-coral" style="margin-top:14px;">
+        <strong>Actividad speed game (p.67):</strong> equipos compiten repitiendo las palabras /iː/ lo más rápido posible sin errores.
+      </div>
+    </div>
+
+    <div class="card full">
+      <div class="card-title" style="color:var(--purple-dark);"><span class="dot" style="background:var(--purple);"></span>Tongue twisters — p.67</div>
+      <div class="struct">"Tea with cream for me, please."</div>
+      <div class="struct">"It's easy to see the eagle on the green tree."</div>
+      <div class="tip tip-purple">
+        Subrayar en rojo las letras con sonido /iː/ antes de leer. Pedir que las digan lento → normal → rápido.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     TAB 4 — CHUNKS ÚTILES
+     ═══════════════════════════════ -->
+<div class="section">
+  <div class="grid">
+
+    <!-- IDENTIDAD -->
+    <div class="card">
+      <div class="card-title" style="color:var(--teal-dark);"><span class="dot" style="background:var(--teal);"></span>Identidad lingüística — ¿Qué idiomas hablas?</div>
+      <div class="phrase-block">
+        <div class="phrase-label">Básico</div>
+        <div class="phrase">I speak Spanish.</div>
+        <div class="phrase-es">Hablo español.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Con matiz</div>
+        <div class="phrase">I speak a little Italian.</div>
+        <div class="phrase-es">Hablo un poco de italiano.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Contexto</div>
+        <div class="phrase">I speak Spanish at home.</div>
+        <div class="phrase-es">Hablo español en casa.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Dos idiomas</div>
+        <div class="phrase">I speak English and a little French.</div>
+        <div class="phrase-es">Hablo inglés y un poco de francés.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Tercera persona</div>
+        <div class="phrase">She speaks French and German.</div>
+        <div class="phrase-es">Ella habla francés y alemán.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">País + idioma</div>
+        <div class="phrase">In Brazil, people speak Portuguese.</div>
+        <div class="phrase-es">En Brasil, la gente habla portugués.</div>
+      </div>
+    </div>
+
+    <!-- HABILIDAD -->
+    <div class="card">
+      <div class="card-title" style="color:var(--purple-dark);"><span class="dot" style="background:var(--purple);"></span>Habilidad — ¿Qué puedes hacer?</div>
+      <div class="phrase-block">
+        <div class="phrase-label">Pregunta</div>
+        <div class="phrase">Can you speak / read / write in Spanish?</div>
+        <div class="phrase-es">¿Puedes hablar / leer / escribir en español?</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Respuesta positiva</div>
+        <div class="phrase">Yes, I can. I can write short stories.</div>
+        <div class="phrase-es">Sí, puedo. Puedo escribir cuentos cortos.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Respuesta negativa</div>
+        <div class="phrase">No, I can't. I can't read in Russian.</div>
+        <div class="phrase-es">No, no puedo. No puedo leer en ruso.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Solo / limitado</div>
+        <div class="phrase">I can only speak English.</div>
+        <div class="phrase-es">Solo puedo hablar inglés.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Tercera persona</div>
+        <div class="phrase">She can sing French songs.</div>
+        <div class="phrase-es">Ella puede cantar canciones en francés.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Global</div>
+        <div class="phrase">We can talk to people around the world!</div>
+        <div class="phrase-es">¡Podemos hablar con personas de todo el mundo!</div>
+      </div>
+    </div>
+
+    <!-- CURIOSIDAD INTERLINGÜÍSTICA -->
+    <div class="card">
+      <div class="card-title" style="color:var(--amber-dark);"><span class="dot" style="background:var(--amber);"></span>Curiosidad — preguntar sobre idiomas</div>
+      <div class="phrase-block">
+        <div class="phrase-label">Pregunta clave</div>
+        <div class="phrase">How do you say "hello" in Italian?</div>
+        <div class="phrase-es">¿Cómo se dice "hello" en italiano?</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Nombrar objeto</div>
+        <div class="phrase">What do you call "traffic lights" in South Africa?</div>
+        <div class="phrase-es">¿Cómo llaman a "traffic lights" en Sudáfrica?</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Variedad</div>
+        <div class="phrase">In the UK, people say "lift" for elevator.</div>
+        <div class="phrase-es">En el Reino Unido, dicen "lift" para ascensor.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Conclusión</div>
+        <div class="phrase">Same thing, different word!</div>
+        <div class="phrase-es">¡La misma cosa, palabra diferente!</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Reacción</div>
+        <div class="phrase">That's amazing! / That's unusual!</div>
+        <div class="phrase-es">¡Es increíble! / ¡Eso es inusual!</div>
+      </div>
+    </div>
+
+    <!-- APRENDIZAJE -->
+    <div class="card">
+      <div class="card-title" style="color:var(--coral-dark);"><span class="dot" style="background:var(--coral);"></span>Aprendizaje — hablar de metas y hábitos</div>
+      <div class="phrase-block">
+        <div class="phrase-label">Meta</div>
+        <div class="phrase">I want to learn Japanese.</div>
+        <div class="phrase-es">Quiero aprender japonés.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Propuesta</div>
+        <div class="phrase">Let's learn together! / Let's start today!</div>
+        <div class="phrase-es">¡Aprendamos juntos! / ¡Comencemos hoy!</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Hábito</div>
+        <div class="phrase">I usually listen to songs to learn English.</div>
+        <div class="phrase-es">Generalmente escucho canciones para aprender inglés.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Consejo positivo</div>
+        <div class="phrase">Be patient. Study every day. Have fun!</div>
+        <div class="phrase-es">Sé paciente. Estudia cada día. ¡Diviértete!</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Consejo negativo</div>
+        <div class="phrase">Don't be shy. Don't give up!</div>
+        <div class="phrase-es">No seas tímido. ¡No te rindas!</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Ánimo</div>
+        <div class="phrase">It's not difficult. Languages are fun!</div>
+        <div class="phrase-es">No es difícil. ¡Los idiomas son divertidos!</div>
+      </div>
+    </div>
+
+    <!-- DESCRIBIR PERSONAS -->
+    <div class="card">
+      <div class="card-title" style="color:var(--teal-dark);"><span class="dot" style="background:var(--teal);"></span>Describir personas — estructura fija</div>
+      <div class="phrase-block">
+        <div class="phrase-label">Nombre</div>
+        <div class="phrase">My favorite person is Taylor Swift.</div>
+        <div class="phrase-es">Mi persona favorita es Taylor Swift.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Origen</div>
+        <div class="phrase">She is from the USA.</div>
+        <div class="phrase-es">Ella es de EE.UU.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Idioma</div>
+        <div class="phrase">She speaks English.</div>
+        <div class="phrase-es">Ella habla inglés.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Talento</div>
+        <div class="phrase">She sings pop. / He plays football.</div>
+        <div class="phrase-es">Ella canta pop. / Él juega fútbol.</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Familia</div>
+        <div class="phrase">My grandma is from France. She can sing French songs.</div>
+        <div class="phrase-es">Mi abuela es de Francia. Ella puede cantar en francés.</div>
+      </div>
+    </div>
+
+    <!-- DISCURSO SOCIAL -->
+    <div class="card">
+      <div class="card-title" style="color:var(--purple-dark);"><span class="dot" style="background:var(--purple);"></span>Discurso social — reaccionar y conectar</div>
+      <div class="phrase-block">
+        <div class="phrase-label">Sorpresa / admiración</div>
+        <div class="phrase">Really? That's amazing! / Wow!</div>
+        <div class="phrase-es">¿En serio? ¡Es increíble! / ¡Guau!</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Acuerdo</div>
+        <div class="phrase">Me too! / Great idea! / Of course!</div>
+        <div class="phrase-es">¡Yo también! / ¡Buena idea! / ¡Por supuesto!</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Confirmar</div>
+        <div class="phrase">Yes, I do. / Yes, I can. / Of course!</div>
+        <div class="phrase-es">Sí, hablo. / Sí, puedo. / ¡Claro!</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Tranquilizar</div>
+        <div class="phrase">Don't worry! It's not difficult!</div>
+        <div class="phrase-es">¡No te preocupes! ¡No es difícil!</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Turno / seguir</div>
+        <div class="phrase">What about you? / And you, Enzo?</div>
+        <div class="phrase-es">¿Y tú? / ¿Y tú, Enzo?</div>
+      </div>
+      <div class="phrase-block">
+        <div class="phrase-label">Cierre positivo</div>
+        <div class="phrase">Languages are fun! Let's learn together!</div>
+        <div class="phrase-es">¡Los idiomas son divertidos! ¡Aprendamos juntos!</div>
+      </div>
+    </div>
+
+    <!-- TABLA PRIORIDAD -->
+    <div class="card full">
+      <div class="card-title" style="color:var(--coral-dark);"><span class="dot" style="background:var(--coral);"></span>Prioridad — ¿Qué chunks enseñar primero?</div>
+      <table>
+        <thead>
+          <tr><th>Prioridad</th><th>Chunk</th><th>Función</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>⭐⭐⭐</td><td><em>I speak [language].</em></td><td>Identidad — se usa en toda la unidad y el proyecto</td></tr>
+          <tr><td>⭐⭐⭐</td><td><em>In [country], people speak [language].</em></td><td>Patrón más repetido: diálogos, canción, story time, writing</td></tr>
+          <tr><td>⭐⭐⭐</td><td><em>Can you speak / write / read in…?</em></td><td>Pregunta generativa del proyecto Survey</td></tr>
+          <tr><td>⭐⭐</td><td><em>How do you say "…" in [language]?</em></td><td>Pregunta auténtica de clase — uso real inmediato</td></tr>
+          <tr><td>⭐⭐</td><td><em>I want to learn [language].</em></td><td>Expresar metas — conecta con la identidad del alumno</td></tr>
+          <tr><td>⭐⭐</td><td><em>Let's learn / try / start together.</em></td><td>Colaboración — CLT y trabajo en grupos</td></tr>
+          <tr><td>⭐⭐</td><td><em>I usually [activity] to learn English.</em></td><td>Hábitos — puente hacia el proyecto Survey</td></tr>
+          <tr><td>⭐</td><td><em>Don't be shy. / Don't give up!</em></td><td>Actitud positiva — imperativo negativo</td></tr>
+          <tr><td>⭐</td><td><em>Same thing, different word!</em></td><td>Conciencia metalingüística — dialectos</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+function showTab(n) {
+  document.querySelectorAll('.section').forEach((s,i) => s.classList.toggle('active', i===n));
+  document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>

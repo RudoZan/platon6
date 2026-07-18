@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Interactivo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            gap: 30px;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .piano-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            background: #2d3436;
+            border-radius: 10px;
+        }
+
+        .piano {
+            display: flex;
+            position: relative;
+            padding: 10px;
+            background: linear-gradient(to bottom, #636e72, #2d3436);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .white-key {
+            width: 60px;
+            height: 250px;
+            background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+            user-select: none;
+        }
+
+        .white-key:hover {
+            background: linear-gradient(to bottom, #f5f5f5, #e0e0e0);
+        }
+
+        .white-key.pressed {
+            background: linear-gradient(to bottom, #e0e0e0, #d0d0d0);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+            transform: translateY(2px);
+        }
+
+        .black-key {
+            width: 35px;
+            height: 160px;
+            background: linear-gradient(to bottom, #2d3436, #000000);
+            border: 1px solid #000;
+            border-radius: 0 0 3px 3px;
+            cursor: pointer;
+            position: absolute;
+            z-index: 1;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.7);
+            transition: all 0.1s;
+            user-select: none;
+        }
+
+        .black-key:hover {
+            background: linear-gradient(to bottom, #3d4346, #1a1a1a);
+        }
+
+        .black-key.pressed {
+            background: linear-gradient(to bottom, #1a1a1a, #0a0a0a);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+            transform: translateY(1px);
+        }
+
+        .key-label {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .black-key .key-label {
+            color: #ccc;
+            bottom: 8px;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        .page-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .page-number:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-number.active {
+            background: white;
+            border-color: #667eea;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Piano Interactivo</h1>
+        <div class="piano-container">
+            <div class="piano" id="piano"></div>
+        </div>
+    </div>
+    <div class="page-navigation">
+        <a href="index.html" class="page-number">1</a>
+        <a href="page2.html" class="page-number">2</a>
+        <a href="page3.html" class="page-number active">3</a>
+        <a href="page4.html" class="page-number">4</a>
+        <a href="page5.html" class="page-number">5</a>
+        <a href="page6.html" class="page-number">6</a>
+        <a href="page7.html" class="page-number">7</a>
+        <a href="page8.html" class="page-number">8</a>
+        <a href="page9.html" class="page-number">9</a>
+        <a href="page10.html" class="page-number">10</a>
+        <a href="page11.html" class="page-number">11</a>
+    </div>
+
+    <script>
+        // Frecuencias de las notas (una octava completa)
+        const notes = {
+            'C': 261.63,
+            'C#': 277.18,
+            'D': 293.66,
+            'D#': 311.13,
+            'E': 329.63,
+            'F': 349.23,
+            'F#': 369.99,
+            'G': 392.00,
+            'G#': 415.30,
+            'A': 440.00,
+            'A#': 466.16,
+            'B': 493.88
+        };
+
+        // Orden de las teclas del piano
+        const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const blackKeys = ['C#', 'D#', 'F#', 'G#', 'A#'];
+        
+        // Posiciones de las teclas negras (índices relativos a las blancas)
+        const blackKeyPositions = [0, 1, 3, 4, 5]; // C#, D#, F#, G#, A#
+
+        // Audio Context para generar sonidos
+        let audioContext;
+        
+        // Inicializar Audio Context
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.error('AudioContext no disponible');
+            }
+        }
+
+        // Reproducir una nota
+        function playNote(frequency) {
+            if (!audioContext) {
+                initAudio();
+            }
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+
+            // Envelope para un sonido más natural
+            const now = audioContext.currentTime;
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(0.3, now + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+            oscillator.start(now);
+            oscillator.stop(now + 0.5);
+        }
+
+        // Crear el piano
+        function createPiano() {
+            const piano = document.getElementById('piano');
+            piano.innerHTML = '';
+
+            // Crear teclas blancas
+            whiteKeys.forEach((note, index) => {
+                const whiteKey = document.createElement('div');
+                whiteKey.className = 'white-key';
+                whiteKey.dataset.note = note;
+                whiteKey.dataset.frequency = notes[note];
+                
+                const label = document.createElement('div');
+                label.className = 'key-label';
+                label.textContent = note;
+                whiteKey.appendChild(label);
+
+                // Eventos de mouse
+                whiteKey.addEventListener('mousedown', () => playKey(whiteKey));
+                whiteKey.addEventListener('mouseup', () => releaseKey(whiteKey));
+                whiteKey.addEventListener('mouseleave', () => releaseKey(whiteKey));
+
+                // Eventos de teclado
+                document.addEventListener('keydown', (e) => {
+                    const keyMap = {
+                        'a': 'C', 's': 'D', 'd': 'E', 'f': 'F',
+                        'g': 'G', 'h': 'A', 'j': 'B'
+                    };
+                    if (e.key.toLowerCase() === Object.keys(keyMap).find(k => keyMap[k] === note)) {
+                        playKey(whiteKey);
+                    }
+                });
+
+                piano.appendChild(whiteKey);
+            });
+
+            // Crear teclas negras
+            blackKeys.forEach((note, index) => {
+                const blackKey = document.createElement('div');
+                blackKey.className = 'black-key';
+                blackKey.dataset.note = note;
+                blackKey.dataset.frequency = notes[note];
+                
+                const label = document.createElement('div');
+                label.className = 'key-label';
+                label.textContent = note.replace('#', '♯');
+                blackKey.appendChild(label);
+
+                // Posicionar la tecla negra
+                const whiteKeyIndex = blackKeyPositions[index];
+                const leftPosition = whiteKeyIndex * 60 + 45; // 60px es el ancho de tecla blanca, 45px es el offset
+                blackKey.style.left = leftPosition + 'px';
+
+                // Eventos de mouse
+                blackKey.addEventListener('mousedown', () => playKey(blackKey));
+                blackKey.addEventListener('mouseup', () => releaseKey(blackKey));
+                blackKey.addEventListener('mouseleave', () => releaseKey(blackKey));
+
+                // Eventos de teclado
+                document.addEventListener('keydown', (e) => {
+                    const keyMap = {
+                        'w': 'C#', 'e': 'D#', 't': 'F#',
+                        'y': 'G#', 'u': 'A#'
+                    };
+                    if (e.key.toLowerCase() === Object.keys(keyMap).find(k => keyMap[k] === note)) {
+                        playKey(blackKey);
+                    }
+                });
+
+                piano.appendChild(blackKey);
+            });
+        }
+
+        // Reproducir una tecla
+        function playKey(key) {
+            if (key.classList.contains('pressed')) return;
+            
+            key.classList.add('pressed');
+            const frequency = parseFloat(key.dataset.frequency);
+            playNote(frequency);
+        }
+
+        // Liberar una tecla
+        function releaseKey(key) {
+            key.classList.remove('pressed');
+        }
+
+        // Inicializar
+        initAudio();
+        createPiano();
+
+        // Inicializar Audio Context al hacer clic (requerido por algunos navegadores)
+        document.addEventListener('click', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
+

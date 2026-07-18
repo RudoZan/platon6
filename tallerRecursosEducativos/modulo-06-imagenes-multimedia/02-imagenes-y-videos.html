@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imágenes y videos — Taller de Recursos Digitales Interactivos</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body class="tiene-sidebar" data-module="06" data-page="02" data-root="../">
+
+  <div id="site-header"></div>
+  <div id="site-modulebar"></div>
+  <div id="site-sidebar"></div>
+
+  <main class="contenido">
+    <h1>Imágenes y videos en los Recursos Digitales</h1>
+    <p class="introduccion">Los recursos visuales son el corazón de la interactividad en la educación. Sin embargo, en el desarrollo web y de software educativo, debemos aprender a seleccionar, formatear e insertar correctamente cada elemento multimedia para garantizar que nuestra aplicación sea rápida, accesible y atractiva.</p>
+
+    <h2>1. La importancia de la optimización y el formato adecuado</h2>
+    <p>Antes de insertar cualquier gráfico o video en tu código HTML o JavaScript, debes asegurarte de haber elegido el formato correcto y el tamaño adecuado en píxeles. Si deseas profundizar en la comparación detallada de formatos (WebP, JPG, PNG y GIF) y cómo evitar que tu sitio consuma todo el ancho de banda escolar, visita nuestra lección completa de <a href="04-optimizacion-y-derechos.html">Peso de archivos y derechos de uso</a>.</p>
+
+    <h2>2. Insertar imágenes en HTML y JavaScript</h2>
+    <p>Para añadir una imagen en tus recursos, utiliza la etiqueta HTML <code>&lt;img&gt;</code> o asígnala en arreglos de JavaScript cuando construyas juegos interactivos (como memorices, quizzes o mapas interactivos):</p>
+    
+    <div class="bloque-contenido-destacado" style="margin-top: 15px; margin-bottom: 20px;">
+      <p><strong>En código HTML:</strong></p>
+      <pre style="background: var(--color-bg-oscuro); color: #fff; padding: 12px; border-radius: 6px; overflow-x: auto;"><code>&lt;img src="img/mapa_espana.webp" alt="Mapa interactivo de España" width="800" height="600" loading="lazy"&gt;</code></pre>
+      <p style="font-size: 0.85rem; margin-top: 6px; color: var(--color-texto-suave);">* Nota: El atributo <code>loading="lazy"</code> permite que la imagen se descargue solo cuando el estudiante hace scroll hacia ella, ahorrando datos.</p>
+    </div>
+
+    <h2>3. Integración de videos educativos</h2>
+    <p>Para los videos, es altamente aconsejable alojarlos en plataformas externas (como YouTube, Vimeo o servidores escolares especializados) e incrustarlos mediante un <code>&lt;iframe&gt;</code> en lugar de guardar archivos MP4 pesados dentro de tu repositorio de GitHub.</p>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../js/nav-data.js"></script>
+  <script src="../js/nav.js"></script>
+</body>
+</html>

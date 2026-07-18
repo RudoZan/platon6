@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auditoría de Banco de Preguntas — Platón 6</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Importar KaTeX para fórmulas matemáticas hermosas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- MENÚ DE NAVEGACIÓN PERMANENTE DOCENTE -->
+    <nav class="admin-nav" style="display: flex; gap: 15px; margin-top: 15px; margin-bottom: 25px; border-bottom: 2px solid var(--color-borde); padding-bottom: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; width: 100%;">
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <span style="font-weight: bold; color: var(--color-primario); font-family: Georgia, serif; font-size: 1.25rem; margin-right: 15px;">Panel Docente</span>
+        <a class="nav-item" href="admin.html" style="text-decoration: none; color: var(--color-texto); font-weight: 500; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; border: 1.5px solid transparent; transition: all 0.2s; display: inline-block;">Inicio</a>
+        <a class="nav-item" href="bancos.html" style="text-decoration: none; color: var(--color-texto); font-weight: 500; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; border: 1.5px solid transparent; transition: all 0.2s; display: inline-block;">Bancos de Preguntas</a>
+        <a class="nav-item" href="criterios.html" style="text-decoration: none; color: var(--color-texto); font-weight: 500; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; border: 1.5px solid transparent; transition: all 0.2s; display: inline-block;">Criterios de Puntaje</a>
+        <span class="nav-item active" style="color: white; background: var(--color-primario); font-weight: 600; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; display: inline-block;">Auditoría</span>
+      </div>
+      <div>
+        <button id="btn-admin-close" class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem; font-weight: 600;">Salir a Alumnos</button>
+      </div>
+    </nav>
+
+    <header class="app-header">
+      <h1 id="admin-selected-title">Auditoría de Banco</h1>
+      <p class="subtitle">Inspección pedagógica y validación en vivo</p>
+    </header>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; width: 100%;">
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <label for="select-audit-test" style="font-weight: bold; color: var(--color-texto); font-size: 0.95rem;">Seleccionar Banco:</label>
+        <select id="select-audit-test" style="padding: 8px 12px; border: 1.5px solid var(--color-borde); border-radius: 8px; font-size: 0.9rem; background: var(--color-tarjeta); color: var(--color-texto); font-weight: 600; cursor: pointer; min-width: 250px; outline: none; transition: border-color 0.2s;">
+          <!-- Opciones cargadas dinámicamente -->
+        </select>
+        <a class="btn-primary" href="bancos.html" style="padding: 8px 16px; text-decoration: none; font-size: 0.9rem; font-weight: bold; border-radius: 8px; display: inline-block;">Volver a Listado de Pruebas</a>
+      </div>
+      <button id="btn-validate-bank" class="btn-accent" style="padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 8px;">Validar Banco de Preguntas</button>
+    </div>
+
+    <!-- Reporte de validación en vivo -->
+    <div id="validation-report" class="validation-report hidden" style="margin-bottom: 25px; padding: 15px; border-radius: 8px; border: 1.5px solid transparent; font-size: 0.95rem; line-height: 1.5;"></div>
+
+    <div class="card admin-content-card" style="padding: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px var(--color-sombras); margin-bottom: 30px;">
+      <div class="table-responsive">
+        <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+          <thead>
+            <tr style="background: rgba(35, 94, 130, 0.08);">
+              <th style="width: 100px; padding: 12px 15px; border-bottom: 2px solid var(--color-borde);">Código</th>
+              <th style="width: 80px; padding: 12px 15px; border-bottom: 2px solid var(--color-borde);">Nivel</th>
+              <th style="padding: 12px 15px; border-bottom: 2px solid var(--color-borde);">Pregunta / Enunciado</th>
+              <th style="width: 180px; padding: 12px 15px; border-bottom: 2px solid var(--color-borde);">Respuestas Aceptadas</th>
+              <th style="width: 250px; padding: 12px 15px; border-bottom: 2px solid var(--color-borde);">Pistas</th>
+              <th style="padding: 12px 15px; border-bottom: 2px solid var(--color-borde);">Descripción Pedagógica (Objetivo)</th>
+            </tr>
+          </thead>
+          <tbody id="admin-questions-body">
+            <!-- Preguntas cargadas dinámicamente desde auditar.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 30px; text-align: right;">
+      <a class="btn-primary" href="bancos.html" style="padding: 12px 24px; text-decoration: none; display: inline-block; font-weight: bold; border-radius: 8px;">Finalizar / Volver al Listado</a>
+    </div>
+
+  </div>
+
+  <footer>- Desarrollado por Astutosoft 2026 -</footer>
+
+  <script src="db.js"></script>
+  <script src="utils.js"></script>
+  <script src="auditar.js"></script>
+</body>
+</html>

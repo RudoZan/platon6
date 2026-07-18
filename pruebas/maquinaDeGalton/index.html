@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Máquina de Galton — Platón 6</title>
+    <style>
+        :root {
+            --oro: #cdae5c;
+            --oro-claro: #e6cb8a;
+            --panel: rgba(255,255,255,0.045);
+            --borde: rgba(205,174,92,0.3);
+            --texto: #e8e6df;
+            --texto-tenue: #9aa3b8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at top, #182035 0%, #05070d 75%);
+            padding: 16px 16px 24px;
+            gap: 10px;
+        }
+
+        .volver {
+            align-self: flex-start; display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px 8px 12px; border-radius: 999px;
+            background: rgba(255,255,255,0.05); border: 1.5px solid var(--oro);
+            color: var(--oro-claro); text-decoration: none; font-size: 0.82rem; font-weight: bold;
+            transition: background .15s, gap .15s;
+        }
+        .volver:hover { background: rgba(205,174,92,0.15); gap: 10px; }
+
+        h1 {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 1.5rem; text-align: center; letter-spacing: 0.03em;
+            color: var(--oro-claro); text-shadow: 0 2px 14px rgba(0,0,0,.5);
+        }
+        .subtitulo {
+            text-align: center; color: var(--texto-tenue); font-size: 0.78rem; margin-top: -4px;
+            max-width: 480px;
+        }
+
+        .container {
+            background: var(--panel); border: 1px solid var(--borde);
+            border-radius: 14px; padding: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+            width: 100%; max-width: 900px;
+            backdrop-filter: blur(6px);
+        }
+
+        .controls { text-align: center; margin-bottom: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+        .btn {
+            padding: 7px 16px; font-size: 0.78rem; font-weight: bold;
+            border: 1.5px solid var(--oro); border-radius: 999px; cursor: pointer;
+            background: linear-gradient(180deg, rgba(205,174,92,0.18), rgba(205,174,92,0.05));
+            color: var(--oro-claro); transition: background .15s, transform .1s;
+            font-family: inherit;
+        }
+        .btn:hover { background: rgba(205,174,92,0.3); transform: translateY(-1px); }
+        .btn-secundario {
+            background: rgba(154,163,184,0.1); border-color: rgba(154,163,184,0.5); color: var(--texto-tenue);
+        }
+        .btn-secundario:hover { background: rgba(154,163,184,0.2); }
+
+        canvas {
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .aviso {
+            max-width: 560px; text-align: center; font-size: 0.72rem; color: var(--texto-tenue);
+            line-height: 1.5;
+        }
+
+        /* Modal de información */
+        .modal-fondo {
+            display: none; position: fixed; inset: 0; background: rgba(5,7,13,0.75);
+            align-items: center; justify-content: center; z-index: 100; padding: 20px;
+        }
+        .modal-fondo.visible { display: flex; }
+        .modal {
+            background: #141a2e; border: 1px solid var(--borde); border-radius: 14px;
+            max-width: 520px; width: 100%; padding: 26px; position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            max-height: 85vh; overflow-y: auto;
+        }
+        .modal h2 {
+            font-family: Georgia, 'Times New Roman', serif; color: var(--oro-claro);
+            font-size: 1.3rem; margin-bottom: 12px;
+        }
+        .modal h3 {
+            color: var(--oro); font-size: 0.9rem; margin: 16px 0 6px;
+        }
+        .modal p {
+            color: var(--texto); font-size: 0.85rem; line-height: 1.6; margin-bottom: 8px;
+        }
+        .modal-cerrar {
+            position: absolute; top: 14px; right: 14px; background: none; border: none;
+            color: var(--texto-tenue); font-size: 1.3rem; cursor: pointer; line-height: 1;
+        }
+        .modal-cerrar:hover { color: var(--oro-claro); }
+
+        @media (max-width: 620px) {
+            canvas { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <a class="volver" href="../../listado.html"><span>←</span> Volver al listado</a>
+
+    <h1>Máquina de Galton</h1>
+    <p class="subtitulo">Cada bola rebota al azar en cada clavo — miles de decisiones aleatorias, siempre terminan formando la misma curva.</p>
+
+    <div class="container">
+        <div class="controls">
+            <button class="btn" onclick="dropBall()">Soltar 1 bola</button>
+            <button class="btn" onclick="dropMultipleBalls(10)">Soltar 10 bolas</button>
+            <button class="btn" onclick="dropMultipleBalls(50)">Soltar 50 bolas</button>
+            <button class="btn btn-secundario" onclick="reiniciarTodo()">↺ Reiniciar</button>
+            <button class="btn btn-secundario" onclick="mostrarInfo()">ℹ️ Información</button>
+        </div>
+        <canvas id="galtonCanvas"></canvas>
+    </div>
+
+    <p class="aviso">Basado en el tablero de Galton (bean machine): un dispositivo clásico para visualizar cómo procesos
+    puramente aleatorios convergen, en conjunto, hacia una distribución normal.</p>
+
+    <div class="modal-fondo" id="modalFondo" onclick="if(event.target===this) ocultarInfo()">
+        <div class="modal">
+            <button class="modal-cerrar" onclick="ocultarInfo()">✕</button>
+            <h2>La Máquina de Galton</h2>
+
+            <h3>¿Quién fue Francis Galton?</h3>
+            <p>Francis Galton (1822–1911) fue un polímata inglés, primo de Charles Darwin: incursionó en
+            meteorología, geografía, psicología y, sobre todo, estadística — se le considera el padre de
+            conceptos como la <strong>correlación</strong> y la <strong>regresión</strong>. Es una figura
+            reconocida por sus aportes estadísticos, aunque también controvertida: fue quien acuñó el
+            término "eugenesia", una idea hoy ampliamente rechazada.</p>
+
+            <h3>¿Qué es esta máquina?</h3>
+            <p>También llamada <em>bean machine</em>, Galton la construyó en 1894 para mostrar algo
+            sorprendente de forma física y visual: si dejas caer muchas bolas sobre una fila de clavos,
+            cada una rebota a la izquierda o derecha completamente al azar — no hay ningún patrón en el
+            camino de una sola bola.</p>
+
+            <h3>¿Por qué importa?</h3>
+            <p>Pero al soltar muchas bolas, el resultado conjunto <strong>no es aleatorio</strong>: se
+            acumulan formando una curva con forma de campana, la famosa <strong>distribución normal</strong>.
+            Es una manera intuitiva de ver cómo el azar individual puede producir un orden estadístico
+            predecible a gran escala — la base de gran parte de la estadística moderna.</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('galtonCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = 600;
+        canvas.height = 675;
+
+        // Configuración de la máquina
+        const numRows = 12;
+        const numBins = numRows + 1;
+        const pegRadius = 5;
+        const ballRadius = 6;
+        const binWidth = (canvas.width - 75) / numBins;
+        const startX = canvas.width / 2;
+        const startY = 38;
+        const rowSpacing = 30;
+        const pegSpacing = binWidth / 2;
+
+        // Clavos (pegs)
+        const pegs = [];
+        for (let row = 0; row < numRows; row++) {
+            pegs[row] = [];
+            const numPegs = row + 1;
+            const startXRow = startX - (row * pegSpacing);
+            for (let peg = 0; peg < numPegs; peg++) {
+                pegs[row].push({
+                    x: startXRow + peg * pegSpacing * 2,
+                    y: startY + row * rowSpacing
+                });
+            }
+        }
+
+        // Bins (compartimentos)
+        const bins = [];
+        const binStartY = startY + numRows * rowSpacing + 23;
+        const binHeight = 188;
+
+        const leftEndX = pegs[numRows - 1][0].x - pegRadius * 10;
+        const rightEndX = pegs[numRows - 1][pegs[numRows - 1].length - 1].x + pegRadius * 10;
+        const topLeftX = startX - 5;
+        const topRightX = startX + 5;
+
+        for (let i = 0; i < numBins; i++) {
+            bins[i] = {
+                x: 38 + i * binWidth,
+                width: binWidth - 10,
+                count: 0,
+                balls: []
+            };
+        }
+
+        const balls = [];
+
+        // Sistema de sonido para colisiones
+        let audioContext;
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {}
+
+        function playCollisionSound(frequency = 440, duration = 0.1) {
+            if (!audioContext) return;
+            try {
+                if (audioContext.state === 'suspended') audioContext.resume();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (e) {}
+        }
+
+        // ── Gradientes elegantes (marfil/dorado, look de mármol) ──────────
+        function gradienteBola(x, y, r) {
+            const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+            g.addColorStop(0, '#fff8e8');
+            g.addColorStop(0.55, '#e6cb8a');
+            g.addColorStop(1, '#9c7a33');
+            return g;
+        }
+        function gradientePeg(x, y, r) {
+            const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+            g.addColorStop(0, '#e6cb8a');
+            g.addColorStop(1, '#7a5f28');
+            return g;
+        }
+
+        class Ball {
+            constructor() {
+                this.x = startX;
+                this.y = startY - 23;
+                this.vx = 0;
+                this.vy = 2;
+                this.radius = ballRadius;
+                this.active = true;
+                this.lastPegHit = null;
+                this.lastBarHit = null;
+            }
+
+            update() {
+                if (!this.active) return;
+
+                this.y += this.vy;
+                this.x += this.vx;
+                this.vy += 0.3;
+
+                for (let row = 0; row < pegs.length; row++) {
+                    for (let pegIndex = 0; pegIndex < pegs[row].length; pegIndex++) {
+                        const peg = pegs[row][pegIndex];
+                        const dx = this.x - peg.x;
+                        const dy = this.y - peg.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const pegId = `${row}-${pegIndex}`;
+
+                        if (distance < this.radius + pegRadius && this.lastPegHit !== pegId && this.y >= peg.y - 10) {
+                            const frequency = 300 + (row * 50);
+                            playCollisionSound(frequency, 0.08);
+
+                            const direction = Math.random() > 0.5 ? 1 : -1;
+                            this.vx = direction * (Math.random() * 3 + 2);
+                            this.vy = Math.random() * 2 + 1;
+
+                            const angle = Math.atan2(dy, dx);
+                            this.x = peg.x + Math.cos(angle) * (this.radius + pegRadius + 2);
+                            this.y = peg.y + Math.sin(angle) * (this.radius + pegRadius + 2);
+
+                            this.lastPegHit = pegId;
+                            break;
+                        }
+                    }
+                }
+
+                if (this.lastPegHit) {
+                    const [row, peg] = this.lastPegHit.split('-').map(Number);
+                    if (this.y > pegs[row][peg].y + rowSpacing * 0.8) {
+                        this.lastPegHit = null;
+                    }
+                }
+
+                let barHitThisFrame = false;
+                if (this.y >= startY - 23 && this.y <= binStartY) {
+                    const progress = (this.y - (startY - 23)) / (binStartY - (startY - 23));
+                    const leftBound = topLeftX + (leftEndX - topLeftX) * progress;
+                    const rightBound = topRightX + (rightEndX - topRightX) * progress;
+
+                    if (this.x < leftBound + this.radius) {
+                        if (this.lastBarHit !== 'left') {
+                            playCollisionSound(200, 0.1);
+                            this.lastBarHit = 'left';
+                        }
+                        this.x = leftBound + this.radius;
+                        this.vx = Math.abs(this.vx) * 0.8;
+                        barHitThisFrame = true;
+                    }
+
+                    if (this.x > rightBound - this.radius) {
+                        if (this.lastBarHit !== 'right') {
+                            playCollisionSound(200, 0.1);
+                            this.lastBarHit = 'right';
+                        }
+                        this.x = rightBound - this.radius;
+                        this.vx = -Math.abs(this.vx) * 0.8;
+                        barHitThisFrame = true;
+                    }
+                }
+
+                if (!barHitThisFrame) this.lastBarHit = null;
+
+                const stopY = binStartY - 23;
+                if (this.y >= stopY && this.active) {
+                    let binIndex = Math.floor((this.x - 50) / binWidth);
+                    binIndex = Math.max(0, Math.min(binIndex, numBins - 1));
+
+                    const bin = bins[binIndex];
+                    if (this.x >= bin.x && this.x <= bin.x + bin.width) {
+                        playCollisionSound(150, 0.15);
+
+                        this.active = false;
+                        this.vx = 0;
+                        this.vy = 0;
+
+                        const ballHeight = ballRadius * 2 + 2;
+                        const baseY = binStartY + binHeight - ballRadius;
+                        const stackIndex = bin.balls.length;
+                        const finalY = baseY - (stackIndex * ballHeight);
+
+                        this.x = bin.x + bin.width / 2;
+                        this.y = finalY;
+
+                        bin.count++;
+                        bin.balls.push({ x: this.x, y: this.y });
+                    }
+                }
+
+                if (Math.abs(this.vx) > 5) this.vx = this.vx > 0 ? 5 : -5;
+            }
+
+            draw() {
+                if (!this.active) return;
+                ctx.fillStyle = gradienteBola(this.x, this.y, this.radius);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawMachine() {
+            // Fondo del canvas (marco oscuro elegante)
+            const fondo = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            fondo.addColorStop(0, '#141a2e');
+            fondo.addColorStop(1, '#0a0d18');
+            ctx.fillStyle = fondo;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Barras diagonales (embudo), en dorado
+            const oroLinea = ctx.createLinearGradient(0, startY, 0, binStartY);
+            oroLinea.addColorStop(0, '#e6cb8a');
+            oroLinea.addColorStop(1, '#8a6b2f');
+            ctx.strokeStyle = oroLinea;
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+
+            ctx.beginPath();
+            ctx.moveTo(topLeftX, startY - 23);
+            ctx.lineTo(leftEndX, binStartY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(topRightX, startY - 23);
+            ctx.lineTo(rightEndX, binStartY);
+            ctx.stroke();
+
+            // Clavos
+            for (let row of pegs) {
+                for (let peg of row) {
+                    ctx.fillStyle = gradientePeg(peg.x, peg.y, pegRadius);
+                    ctx.beginPath();
+                    ctx.arc(peg.x, peg.y, pegRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Separadores de bins (líneas doradas finas y sutiles)
+            ctx.strokeStyle = 'rgba(205,174,92,0.35)';
+            ctx.lineWidth = 1.5;
+            for (let bin of bins) {
+                ctx.beginPath();
+                ctx.moveTo(bin.x, binStartY);
+                ctx.lineTo(bin.x + bin.width, binStartY);
+                ctx.moveTo(bin.x, binStartY);
+                ctx.lineTo(bin.x, binStartY + binHeight);
+                ctx.moveTo(bin.x + bin.width, binStartY);
+                ctx.lineTo(bin.x + bin.width, binStartY + binHeight);
+                ctx.stroke();
+            }
+
+            // Bolas acumuladas en los bins
+            for (let bin of bins) {
+                for (let ball of bin.balls) {
+                    ctx.fillStyle = gradienteBola(ball.x, ball.y, ballRadius);
+                    ctx.beginPath();
+                    ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Línea límite de acumulación
+            ctx.strokeStyle = 'rgba(154,163,184,0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(38, binStartY + binHeight);
+            ctx.lineTo(canvas.width - 38, binStartY + binHeight);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Conteo por bin
+            ctx.font = 'bold 18px Georgia, serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            for (let i = 0; i < bins.length; i++) {
+                const bin = bins[i];
+                const centerX = bin.x + bin.width / 2;
+                ctx.fillStyle = '#e6cb8a';
+                ctx.fillText(bin.count.toString(), centerX, binStartY + binHeight + 35);
+            }
+
+            // Letras identificadoras
+            ctx.font = '15px Georgia, serif';
+            for (let i = 0; i < bins.length; i++) {
+                const bin = bins[i];
+                const centerX = bin.x + bin.width / 2;
+                ctx.fillStyle = 'rgba(154,163,184,0.9)';
+                ctx.fillText(String.fromCharCode(65 + i), centerX, binStartY + binHeight + 60);
+            }
+
+            for (let ball of balls) ball.draw();
+        }
+
+        function dropBall() { balls.push(new Ball()); }
+
+        function dropMultipleBalls(count) {
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => dropBall(), i * 200);
+            }
+        }
+
+        function reiniciarTodo() {
+            balls.length = 0;
+            bins.forEach(bin => { bin.count = 0; bin.balls = []; });
+        }
+
+        function mostrarInfo() {
+            document.getElementById('modalFondo').classList.add('visible');
+        }
+
+        function ocultarInfo() {
+            document.getElementById('modalFondo').classList.remove('visible');
+        }
+
+        function animate() {
+            for (let ball of balls) ball.update();
+            drawMachine();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

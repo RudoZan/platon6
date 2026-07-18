@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listado de sitios — Platón 6</title>
+<style>
+  :root {
+    --color-bg-top: #cdf0f8;
+    --color-bg-bottom: #c2ebf5;
+    --color-primario: #235e82;
+    --color-primario-claro: #4a90c2;
+    --color-acento: #ef9d4f;
+    --color-texto: #1f3a4d;
+    --color-tarjeta: #fdfbf6;
+    --color-borde: #a9d0e2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(180deg, var(--color-bg-top), var(--color-bg-bottom));
+    color: var(--color-texto);
+    min-height: 100vh; padding: 32px 20px 0;
+    display: flex; flex-direction: column;
+  }
+
+  footer {
+    text-align: center; margin-top: 40px; padding: 20px 0;
+    color: var(--color-primario-claro); font-size: 0.78rem; letter-spacing: 0.03em;
+  }
+
+  .volver {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px 8px 12px; border-radius: 999px;
+    background: var(--color-tarjeta); border: 2px solid var(--color-borde);
+    color: var(--color-primario); text-decoration: none;
+    font-size: 0.82rem; font-weight: bold; margin-bottom: 18px;
+    transition: border-color .15s, box-shadow .15s, gap .15s;
+  }
+  .volver:hover {
+    border-color: var(--color-acento); gap: 10px;
+    box-shadow: 0 4px 14px rgba(35, 94, 130, 0.18);
+  }
+  .volver .flecha { display: inline-block; transition: transform .15s; }
+  .volver:hover .flecha { transform: translateX(-3px); }
+
+  header { text-align: center; margin-bottom: 36px; }
+  .avatar {
+    width: 84px; height: 84px; border-radius: 50%; object-fit: cover;
+    border: 3px solid var(--color-tarjeta); box-shadow: 0 4px 16px rgba(35, 94, 130, 0.25);
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 2rem; color: var(--color-primario); letter-spacing: 0.03em;
+  }
+  .subtitulo { color: var(--color-primario-claro); font-size: 0.85rem; margin-top: 4px; }
+
+  .contenedor { max-width: 1000px; margin: 0 auto; flex: 1; width: 100%; }
+
+  .seccion-titulo {
+    color: var(--color-primario); font-size: 1rem; font-weight: bold;
+    margin: 28px 0 12px; padding-bottom: 4px; border-bottom: 2px solid var(--color-borde);
+  }
+  .seccion-titulo:first-child { margin-top: 0; }
+
+  .proyectos {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;
+  }
+  .proyecto {
+    display: block; background: var(--color-tarjeta); border: 2px solid var(--color-borde);
+    border-radius: 10px; padding: 16px 18px; text-decoration: none; color: var(--color-texto);
+    transition: border-color .15s, transform .15s;
+  }
+  .proyecto:hover { border-color: var(--color-acento); transform: translateY(-2px); }
+  .proyecto .titulo { font-weight: bold; font-size: 0.95rem; color: var(--color-primario); margin-bottom: 4px; }
+  .proyecto .desc { font-size: 0.78rem; color: #5c7d8f; }
+</style>
+</head>
+<body>
+
+  <div class="contenedor">
+    <a class="volver" href="index.html"><span class="flecha">←</span> Volver a Platón 6</a>
+
+    <header>
+      <img class="avatar" src="imagenes/platonCara1.png" alt="Platón">
+      <h1>Listado de sitios</h1>
+      <p class="subtitulo">Todos los subsitios disponibles en este portal</p>
+    </header>
+
+    <div class="seccion-titulo">Cursos y talleres</div>
+    <div class="proyectos">
+      <a class="proyecto" href="dactilografia/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Aprende Dactilografía</div>
+        <div class="desc">Método por niveles (estilo TypingClub) con manos virtuales y teclado por colores.</div>
+      </a>
+      <a class="proyecto" href="tallerRecursosEducativos/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Taller de Recursos Digitales Interactivos</div>
+        <div class="desc">Curso para crear recursos digitales interactivos con IA.</div>
+      </a>
+      <a class="proyecto" href="englishCalen/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Calen English Class</div>
+        <div class="desc">Panel de control para clases de inglés en vivo, para la Escuela de Calen (Chiloé).</div>
+      </a>
+      <a class="proyecto" href="ajedrez/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Ajedrez</div>
+        <div class="desc">Tablero libre — mueve las piezas donde quieras o sácalas fuera del tablero.</div>
+      </a>
+      <a class="proyecto" href="practicaConmigo/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Práctica conmigo</div>
+        <div class="desc">Videos para practicar batería siguiendo videos de YouTube.</div>
+      </a>
+    </div>
+
+    <div class="seccion-titulo">Trabajos USACH</div>
+    <div class="proyectos">
+      <a class="proyecto" href="trabajosUsach/porcentajes/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Porcentaje</div>
+        <div class="desc">Introducción al concepto de porcentaje.</div>
+      </a>
+      <a class="proyecto" href="trabajosUsach/multiplicacionFracciones/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Multiplicación de Fracciones</div>
+        <div class="desc">Recurso interactivo de fracciones.</div>
+      </a>
+      <a class="proyecto" href="trabajosUsach/dispersionDeDatos/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Dispersión de datos</div>
+        <div class="desc">Explorando la dispersión de datos.</div>
+      </a>
+      <a class="proyecto" href="trabajosUsach/microscopio/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Microscopio</div>
+        <div class="desc">Desenfoque de enfoque del lente.</div>
+      </a>
+      <a class="proyecto" href="trabajosUsach/diferencial/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Diferencial de una Función</div>
+        <div class="desc">Simulador dy vs Δy y pantalla dividida de Seno y Coseno.</div>
+      </a>
+    </div>
+
+    <div class="seccion-titulo">Ideas sueltas</div>
+    <div class="proyectos">
+      <a class="proyecto" href="pruebas/evaluacionAdaptativa/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Evaluación Adaptativa de Álgebra</div>
+        <div class="desc">Test de álgebra (sistemas de ecuaciones, matrices, etc.) sin alternativas que adapta su nivel en tiempo real. Incluye panel de profesor.</div>
+      </a>
+      <a class="proyecto" href="pruebas/recursosMat/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Recurso de prueba</div>
+        <div class="desc">Recurso de matemática — varias pruebas y ejercicios interactivos.</div>
+      </a>
+      <a class="proyecto" href="pruebas/tablaDeMultiplicar/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Tabla de multiplicar colaborativa</div>
+        <div class="desc">Teducas — tabla de multiplicar en vivo.</div>
+      </a>
+      <a class="proyecto" href="pruebas/maquinaDeGalton/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Máquina de Galton</div>
+        <div class="desc">Simulación interactiva de un tablero de Galton y la distribución normal.</div>
+      </a>
+      <a class="proyecto" href="pruebas/mapaMundial/index.html" target="_blank" rel="noopener">
+        <div class="titulo">Mapa Mundial</div>
+        <div class="desc">Mapa político interactivo del mundo, con vista low-poly y datos por país.</div>
+      </a>
+    </div>
+  </div>
+
+  <footer>- Desarrollado por Astutosoft 2026 -</footer>
+
+</body>
+</html>
