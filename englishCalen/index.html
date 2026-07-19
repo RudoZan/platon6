@@ -255,7 +255,7 @@
     <div class="items-container" id="itemsContainer"></div>
 
     <div class="clear-bar" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-        <button class="btn btn-red" onclick="send('clear-all',''); renderActivity();">Clear Screen</button>
+        <button class="btn btn-red" onclick="clearScreenAndReset()">Clear Screen</button>
         <div style="display:flex; align-items:center; gap:5px;">
             <label class="switch"><input type="checkbox" id="debugGridSwitch" onchange="onDebugGridSwitchChange()"><span class="slider"></span></label>
             <span class="switch-label" style="color:#e74c3c; font-weight:bold; font-size:0.85rem;">Debug Bars</span>
@@ -269,6 +269,55 @@
 <script src="game1/game-data.js?v=2"></script>
 <script>
 const channel = new BroadcastChannel('english-with-video');
+let suggestionBodyVisible = true;
+
+channel.onmessage = (e) => {
+    const d = e.data;
+    console.log("Teacher window received BroadcastChannel message:", d);
+    if (d.type === 'request-state') {
+        const course = COURSES[courseSelect.value];
+        if (course) {
+            const all = getAllActivities(course);
+            const act = all[activitySelect.value];
+            if (act) {
+                channel.postMessage({
+                    type: 'activity-init',
+                    activityName: act.name,
+                    activityType: act.type
+                });
+                if (act.type === 'story-sorter') {
+                    channel.postMessage({
+                        type: 'story-sorter-init',
+                        connectors: act.connectors,
+                        items: act.items,
+                        assignments: act.state ? act.state.currentAssignments : [2, 5, 0, 4, 1, 6, 3],
+                        storyShown: act.state ? act.state.storyShown : false
+                    });
+                } else if (act.type === 'which-correct') {
+                    channel.postMessage({ type: 'which-correct-init' });
+                    if (act.state) {
+                        if (act.state.selectedLeft) {
+                            channel.postMessage({ type: 'which-correct-left', text: act.state.selectedLeft.text });
+                        }
+                        if (act.state.selectedRight) {
+                            channel.postMessage({ type: 'which-correct-right', text: act.state.selectedRight.text });
+                        }
+                        if (act.state.revealed) {
+                            channel.postMessage({
+                                type: 'which-correct-reveal',
+                                leftCorrect: act.state.selectedLeft ? act.state.selectedLeft.isCorrect : null,
+                                rightCorrect: act.state.selectedRight ? act.state.selectedRight.isCorrect : null
+                            });
+                        }
+                    }
+                } else if (shownQuestion || shownWord || shownFlag || shownTrans) {
+                    if (shownQuestion) send('middle', shownQuestion, shownFlag || shownTrans, true);
+                    if (shownWord) send('bottom', shownWord, null, true);
+                }
+            }
+        }
+    }
+};
 function send(type, text, image, big) {
     if (type === 'side-image') {
         channel.postMessage({ type, image: image || null });
@@ -505,9 +554,9 @@ function soloKid(i) {
 function toggleSuggestion() {
     const body = document.getElementById('suggestionBody');
     const btn = document.getElementById('suggestionToggleBtn');
-    const hidden = body.style.display === 'none';
-    body.style.display = hidden ? '' : 'none';
-    btn.textContent = hidden ? 'Hide' : 'Show';
+    suggestionBodyVisible = body.style.display === 'none';
+    body.style.display = suggestionBodyVisible ? '' : 'none';
+    btn.textContent = suggestionBodyVisible ? 'Hide' : 'Show';
 }
 
 function toggleKidsPanel() {
@@ -516,6 +565,25 @@ function toggleKidsPanel() {
     const hidden = grid.style.display === 'none';
     grid.style.display = hidden ? '' : 'none';
     btn.textContent = hidden ? 'Hide' : 'Show';
+}
+
+function clearScreenAndReset() {
+    send('clear-all', '');
+    channel.postMessage({ type: 'story-sorter-disable' });
+    const course = COURSES[courseSelect.value];
+    const all = getAllActivities(course);
+    const act = all[activitySelect.value];
+    if (act) {
+        if (act.state) {
+            act.state.selectedLeft = null;
+            act.state.selectedRight = null;
+            act.state.revealed = false;
+            if (act.type === 'story-sorter') {
+                act.state.currentAssignments = [2, 5, 0, 4, 1, 6, 3];
+            }
+        }
+    }
+    renderActivity();
 }
 
 function onKidNameChange() {
@@ -717,6 +785,18 @@ const PLAY_GO_DO_WHICH_CORRECT_SUGGESTION = `
     <li><strong>Reveal:</strong> Click the <strong>"Reveal Answers"</strong> button. A large checkmark (✓) or cross (✗) will appear under each sentence on the projection screen.</li>
     <li><strong>Reset:</strong> Clicking any new sentence after revealing will automatically clear the screen and start a new comparison.</li>
 </ul>
+`;
+
+const LITTLE_PRINCE_SUGGESTION = `
+<p>This activity aims to teach chronological narration and sequence connectors (<em>First, Next, Then, After that, As soon as, Finally, In the end</em>) through the famous story of <em>The Little Prince</em>.</p>
+<ol>
+    <li><strong>Contextualization (Warm-up):</strong> Ask the class: <em>"Have you read 'The Little Prince'? What happens when he visits Earth?"</em>. Discuss in Spanish/English to activate prior knowledge.</li>
+    <li><strong>Scaffolding (Ordered Events):</strong> The events are presented in chronological order on your panel, but will appear on the presentation screen as students organize them. Ask the class to look at the list of raw events on the board.</li>
+    <li><strong>Prompting (Connectors):</strong> Ask: <em>"Which event happened first?"</em>. Once students identify it, click the <strong>"Event"</strong> button to reveal the raw action, then ask: <em>"How do we start a story? What connector do we use?"</em>.</li>
+    <li><strong>Reveal Connectors:</strong> Click <strong>"Ordered"</strong> to show the final sentence on screen starting with the connector (e.g., <em>"First,..."</em>). Read it together.</li>
+    <li><strong>Grammar Note (As soon as):</strong> Point out how <strong>"As soon as"</strong> shows immediate action-reaction (simultaneity). Ask students: <em>"What happened as soon as it was time to say goodbye?"</em>.</li>
+    <li><strong>Wrap-up:</strong> In the end, ask students to retell the whole sequence using only their memory and the connectors on the board.</li>
+</ol>
 `;
 
 const COURSES = {
@@ -1042,6 +1122,21 @@ const COURSES = {
             { q: "Argentina won the World Cup! 🏆", a: "In the end, Argentina won the World Cup!", icon: "🏆" },
         ]
     },
+    {
+        name: "🔢 Story Sequence - The Little Prince",
+        type: "story-sorter",
+        suggestion: LITTLE_PRINCE_SUGGESTION,
+        connectors: ["First,", "Next,", "Eventually,", "Soon after,", "As soon as", "Finally,", "In the end,"],
+        items: [
+            { id: 1, correctOrder: 1, text: "the Little Prince lived on a small planet with three volcanoes and a beautiful Rose.", label: "The Prince on B-612" },
+            { id: 2, correctOrder: 2, text: "he left his planet to visit other asteroids and met strange adults.", label: "Leaving and traveling" },
+            { id: 3, correctOrder: 3, text: "he arrived on Earth and met a wild fox under an apple tree.", label: "Arrival and meeting the fox" },
+            { id: 4, correctOrder: 4, text: "he tamed the fox, and they became best friends.", label: "Taming and friendship" },
+            { id: 5, correctOrder: 5, text: "it was time to say goodbye, the fox shared a secret: 'What is essential is invisible to the eye.'", label: "The fox's secret" },
+            { id: 6, correctOrder: 6, text: "the Prince decided to return home because he was responsible for his Rose.", label: "Decision to return" },
+            { id: 7, correctOrder: 7, text: "the snake bit him, and his spirit returned to his star.", label: "The snake's bite and departure" }
+        ]
+    },
         ]
     },
     {
@@ -1131,6 +1226,7 @@ function onCourseChange() {
 }
 
 function onActivitySelect() {
+    suggestionBodyVisible = true;
     if (activitySelect.value === '') {
         renderActivityMenu();
     } else {
@@ -1185,6 +1281,11 @@ function renderActivityMenu() {
 
 function renderActivity() {
     clearContainer();
+    const scArea = document.getElementById('storySorterControlArea');
+    if (scArea) scArea.remove();
+    const wcArea = document.getElementById('whichCorrectControlArea');
+    if (wcArea) wcArea.remove();
+
     shownQuestion = null;
     shownWord = null;
     shownFlag = null;
@@ -1208,6 +1309,12 @@ function renderActivity() {
     const course = COURSES[courseSelect.value];
     const all = getAllActivities(course);
     const act = all[activitySelect.value];
+
+    channel.postMessage({
+        type: 'activity-init',
+        activityName: act.name,
+        activityType: act.type
+    });
 
     const title = document.createElement('div');
     title.className = 'activity-title-row';
@@ -1233,8 +1340,8 @@ function renderActivity() {
 
     if (act.suggestion) {
         suggestionBody.innerHTML = act.suggestion;
-        suggestionBody.style.display = '';
-        suggestionToggleBtn.textContent = 'Hide';
+        suggestionBody.style.display = suggestionBodyVisible ? '' : 'none';
+        suggestionToggleBtn.textContent = suggestionBodyVisible ? 'Hide' : 'Show';
     } else {
         suggestionBody.innerHTML = '';
         suggestionBody.style.display = 'none';
@@ -1245,6 +1352,8 @@ function renderActivity() {
         renderAlreadyKnow(act, 'Show Question', 'Show Word', 'Hide Question', 'Hide Word');
     } else if (act.type === 'which-correct') {
         renderWhichCorrect(act);
+    } else if (act.type === 'story-sorter') {
+        renderStorySorter(act);
     } else if (act.type === 'question-answer') {
         renderAlreadyKnow(act, act.qLabel || 'Question', act.aLabel || 'Answer', 'Hide ' + (act.qLabel || 'Question'), 'Hide ' + (act.aLabel || 'Answer'));
     } else if (act.type === 'multi-mode') {
@@ -1669,6 +1778,212 @@ function renderWhichCorrect(act) {
     });
 
     area.appendChild(columnsContainer);
+}
+
+function renderStorySorter(act) {
+    if (!act.state) {
+        act.state = {
+            currentAssignments: [2, 5, 0, 4, 1, 6, 3],
+            storyShown: false
+        };
+    }
+
+    console.log("renderStorySorter sending story-sorter-init. storyShown =", act.state.storyShown, "assignments =", act.state.currentAssignments);
+    channel.postMessage({
+        type: 'story-sorter-init',
+        connectors: act.connectors,
+        items: act.items,
+        assignments: act.state.currentAssignments,
+        storyShown: act.state.storyShown
+    });
+
+    let area = document.getElementById('storySorterControlArea');
+    if (!area) {
+        area = document.createElement('div');
+        area.id = 'storySorterControlArea';
+        container.appendChild(area);
+    } else {
+        area.innerHTML = '';
+    }
+
+    // Ocultar otras áreas de control interactivo por si acaso
+    const wcArea = document.getElementById('whichCorrectControlArea');
+    if (wcArea) wcArea.innerHTML = '';
+
+    const actionBar = document.createElement('div');
+    actionBar.style.display = 'flex';
+    actionBar.style.gap = '15px';
+    actionBar.style.marginBottom = '20px';
+    actionBar.style.justifyContent = 'center';
+
+    const btnShow = document.createElement('button');
+    btnShow.className = 'btn btn-mid';
+    if (act.state.storyShown) {
+        btnShow.style.border = '2px solid #e74c3c';
+        btnShow.style.color = '#e74c3c';
+        btnShow.textContent = 'Hide Story';
+    } else {
+        btnShow.style.border = '2px solid #f0a830';
+        btnShow.style.color = '#f0a830';
+        btnShow.textContent = 'Show Story';
+    }
+    btnShow.onclick = () => {
+        act.state.storyShown = !act.state.storyShown;
+        channel.postMessage({
+            type: 'story-sorter-update',
+            connectors: act.connectors,
+            items: act.items,
+            assignments: act.state.currentAssignments,
+            storyShown: act.state.storyShown
+        });
+        renderStorySorter(act);
+    };
+
+    const btnReset = document.createElement('button');
+    btnReset.className = 'btn btn-gray';
+    btnReset.textContent = 'Reset Sorter';
+    btnReset.onclick = () => {
+        act.state.currentAssignments = [2, 5, 0, 4, 1, 6, 3];
+        act.state.storyShown = false;
+        channel.postMessage({
+            type: 'story-sorter-update',
+            connectors: act.connectors,
+            items: act.items,
+            assignments: act.state.currentAssignments,
+            storyShown: act.state.storyShown
+        });
+        renderStorySorter(act);
+    };
+
+    actionBar.appendChild(btnShow);
+    actionBar.appendChild(btnReset);
+    area.appendChild(actionBar);
+
+    let draggedIdx = null;
+
+    const listContainer = document.createElement('div');
+    listContainer.style.display = 'flex';
+    listContainer.style.flexDirection = 'column';
+    listContainer.style.gap = '10px';
+    listContainer.style.width = '100%';
+
+    act.connectors.forEach((conn, connIdx) => {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.background = 'transparent';
+        row.style.padding = '4px 0';
+        row.style.gap = '15px';
+
+        // Conector FIJO en su propia caja
+        const connLabel = document.createElement('div');
+        connLabel.style.width = '100px';
+        connLabel.style.fontWeight = 'bold';
+        connLabel.style.color = '#f0a830';
+        connLabel.style.fontSize = '0.9rem';
+        connLabel.style.padding = '8px 12px';
+        connLabel.style.background = 'rgba(240, 168, 48, 0.08)';
+        connLabel.style.borderRadius = '6px';
+        connLabel.style.border = '1px solid rgba(240, 168, 48, 0.2)';
+        connLabel.style.textAlign = 'center';
+        connLabel.textContent = conn;
+        row.appendChild(connLabel);
+
+        // Bloque de la frase ARRASTRABLE (a la derecha)
+        const textBlock = document.createElement('div');
+        textBlock.style.flex = '1';
+        textBlock.style.display = 'flex';
+        textBlock.style.alignItems = 'center';
+        textBlock.style.background = 'rgba(255, 255, 255, 0.05)';
+        textBlock.style.border = '2px solid transparent';
+        textBlock.style.borderRadius = '8px';
+        textBlock.style.padding = '8px 15px';
+        textBlock.style.gap = '12px';
+        textBlock.style.cursor = 'grab';
+        textBlock.style.transition = 'all 0.2s ease';
+        textBlock.draggable = true;
+
+        const assignedItemIdx = act.state.currentAssignments[connIdx];
+        const item = act.items[assignedItemIdx];
+
+        const textLabel = document.createElement('div');
+        textLabel.style.flex = '1';
+        textLabel.style.fontSize = '0.85rem';
+        textLabel.style.color = '#e8e4d9';
+        textLabel.style.userSelect = 'none';
+        textLabel.textContent = item ? `(${item.correctOrder}) ${item.text}` : '...';
+        textBlock.appendChild(textLabel);
+
+        const dragHandle = document.createElement('div');
+        dragHandle.style.color = '#555';
+        dragHandle.style.fontSize = '1.1rem';
+        dragHandle.innerHTML = '☰';
+        textBlock.appendChild(dragHandle);
+
+        row.appendChild(textBlock);
+
+        textBlock.ondragstart = (e) => {
+            draggedIdx = connIdx;
+            e.dataTransfer.effectAllowed = 'move';
+            textBlock.style.opacity = '0.5';
+            textBlock.style.borderColor = '#f0a830';
+            textBlock.style.borderStyle = 'dashed';
+        };
+
+        textBlock.ondragend = () => {
+            textBlock.style.opacity = '';
+            textBlock.style.borderColor = 'transparent';
+            textBlock.style.borderStyle = 'solid';
+            draggedIdx = null;
+            document.querySelectorAll('#storySorterControlArea div[draggable="true"]').forEach(tb => {
+                tb.style.background = 'rgba(255, 255, 255, 0.05)';
+                tb.style.borderColor = 'transparent';
+            });
+        };
+
+        textBlock.ondragover = (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            if (draggedIdx !== null && draggedIdx !== connIdx) {
+                textBlock.style.background = 'rgba(240, 168, 48, 0.12)';
+                textBlock.style.borderColor = 'rgba(240, 168, 48, 0.4)';
+            }
+        };
+
+        textBlock.ondragenter = (e) => {
+            e.preventDefault();
+        };
+
+        textBlock.ondragleave = () => {
+            textBlock.style.background = 'rgba(255, 255, 255, 0.05)';
+            textBlock.style.borderColor = 'transparent';
+        };
+
+        textBlock.ondrop = (e) => {
+            e.preventDefault();
+            textBlock.style.background = 'rgba(255, 255, 255, 0.05)';
+            textBlock.style.borderColor = 'transparent';
+
+            if (draggedIdx !== null && draggedIdx !== connIdx) {
+                const temp = act.state.currentAssignments[draggedIdx];
+                act.state.currentAssignments[draggedIdx] = act.state.currentAssignments[connIdx];
+                act.state.currentAssignments[connIdx] = temp;
+
+                channel.postMessage({
+                    type: 'story-sorter-update',
+                    connectors: act.connectors,
+                    items: act.items,
+                    assignments: act.state.currentAssignments,
+                    storyShown: act.state.storyShown
+                });
+                renderStorySorter(act);
+            }
+        };
+
+        listContainer.appendChild(row);
+    });
+
+    area.appendChild(listContainer);
 }
 
 // ══════════════════════════════════════

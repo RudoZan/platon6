@@ -11,60 +11,54 @@ El objetivo prioritario de los primeros módulos es **no matar el entusiasmo** d
 * Si se introduce una alta densidad teórica y conceptual desde el primer día, se genera frustración y barreras de entrada innecesarias.
 * Por lo tanto, en los primeros módulos los conceptos teóricos (tipos de recursos, normativa, fundamentos de IA) se tratarán **muy por encima, con mayor brevedad y directo al grano**, priorizando pasar rápidamente al uso práctico de las herramientas y la creación.
 
-### 2. División de "IAs para programar" en 2 Módulos Específicos (Módulo 2 y Módulo 3)
-Para evitar que el aprendizaje de herramientas se mezcle de golpe con la creación de recursos y para que cada paso sea claro, motivador y asimilable, el anterior Módulo 2 se **divide en dos módulos diferenciados**:
-* **Módulo 02: IAs para programar (Elección e Instalación):** Dedicado exclusivamente al panorama actual de asistentes de IA, cómo elegir la herramienta adecuada según el perfil, y las instrucciones de instalación paso a paso (Antigravity IDE, Cursor o VS Code + Copilot).
-* **Módulo 03: Creando tu primer recurso con IA:** Dedicado a dar el salto a la acción. 
-  * *Justificación de Tecnologías Web:* Al inicio de este módulo se explica con claridad que, aunque con IA es posible programar en múltiples lenguajes (Python, C++, Java) y desarrollar diversos tipos de aplicaciones (escritorio nativo, apps móviles, etc.), en este taller **elegiremos tecnologías web (HTML y JavaScript)** por sus incomparables ventajas para el aula: **portabilidad absoluta** (funciona en Mac, Windows, Linux, tablets y celulares sin modificar nada), **simplicidad y universalidad** (el estudiante no requiere instalar programas ni dependencias, basta con abrir un link en su navegador), **ligero peso de archivos** y facilidad para inspeccionar, modificar y compartir.
-  * *Creación Práctica:* Tras entender por qué elegimos la web, el profesor aprende a interactuar en la práctica con su asistente de IA (modos de trabajo, cómo escribir buenos prompts, guiar paso a paso) y construye inmediatamente su **primer recurso web interactivo funcional**, experimentando la gratificación instantánea de ver la magia de la programación asistida.
+### 2. Creación Libre e Impulso del Logro (Módulo 3)
+El Módulo 3 se enfoca exclusivamente en dar el salto a la acción:
+* Tras instalar la IA en el Módulo 2, el estudiante creará libremente **dos recursos cualesquiera** a partir de una instrucción simple (pudiendo utilizar prompts sugeridos o formular los suyos).
+* El objetivo fundamental es que consiga resultados inmediatos para **aprovechar el impulso psicológico de la sensación de logro**, validando el poder de la IA antes de adentrarse en la estructura del código.
 
-### 3. Inserción del Módulo Denso y Conceptual (Módulo 11 - Ex Módulo 10)
-Toda la carga teórica profunda, compleja y "densa" sobre **lo que realmente implica desarrollar software educativo** (ingeniería de software pedagógico, arquitectura robusta, buenas prácticas de mantenibilidad, ciclos de prueba con estudiantes, accesibilidad y diseño instruccional avanzado) se ubica específicamente en la recta final del curso (ahora **Módulo 11** tras el corrimiento por la división del módulo 2).
-* Cuando los estudiantes lleguen a este módulo, ya habrán acumulado experiencia práctica real construyendo sitios, interactuando con IA, manejando GitHub y conectando bases de datos (Supabase) en los Módulos 1 al 10. 
-* Al tener esa madurez y experiencia empírica, **entenderán e interiorizarán con mucha mayor claridad** la necesidad del rigor, la arquitectura y los desafíos profundos del desarrollo de software educativo.
+### 3. Estructura Web y Portal de Recursos como Producto Tangible (Módulo 4)
+El Módulo 4 tiene dos objetivos principales:
+* **Explicar los archivos web:** Comprender el rol de HTML (estructura), CSS (estilos) y JavaScript (lógica) y cómo se relacionan entre sí.
+* **Portal de Recursos:** En lugar de seguir creando archivos sueltos e inconexos, los estudiantes aprenderán a planificar una estructura organizada. Le pedirán a la IA que cree una portada (`index.html`) que actúe como un **Portal de Recursos** unificado, desde el cual se acceda a las páginas de recursos listadas por curso o tema. Este portal constituye el **producto tangible final** del taller, y cada actividad vivirá en su propio archivo independiente dentro de este.
 
-### 4. Reubicación de Hosting y Dominio (Módulo 12)
-El módulo de cierre sobre *Hosting y dominio propio* se desplaza a la posición final (**Módulo 12**), sirviendo como el broche de oro profesional del taller, donde el docente publica su sitio web y adquiere su dominio `.cl` en NIC Chile de forma definitiva.
+### 4. Publicación Temprana en GitHub (Módulo 5)
+Para afianzar el portal de recursos y darle visibilidad al trabajo desde el inicio, el módulo de **GitHub** se ubica inmediatamente después de estructurar el sitio web (Módulo 5). Así, los profesores aprenden a subir su código y publicarlo online a través de GitHub Pages, construyendo sobre una base real que actualizarán paso a paso en los siguientes módulos.
+
+### 5. División de Recursos Simples y Animaciones (Módulos 6, 7 y 10)
+* **División de Recursos Simples (Módulos 6 y 7):** Para un aprendizaje asimilable, se separa la materia en un módulo dedicado únicamente a *Recursos interactivos simples* (interacciones básicas de botones y DOM) y otro a *Cuestionarios y ejercitación* (enfocado en lógica de puntajes, preguntas de opción múltiple y diseño de retroalimentación automática).
+* **Módulo de Animaciones (Módulo 10):** Se inserta un módulo de animaciones y dinamismo web inmediatamente después de Presentaciones Interactivas para enseñar a dotar a los recursos de mayor fluidez visual y micro-interacciones atractivas.
+
+### 6. Bases de Datos, Realtime y Cierre (Módulos 11 al 14)
+* **Bases de Datos y Realtime (Módulos 11 y 12):** Conectividad con Supabase para almacenamiento y sincronización en vivo.
+* **Desarrollo a Fondo (Módulo 13):** Módulo denso y conceptual sobre ingeniería de software educativo, arquitectura didáctica y UX pedagógica, introducido cuando los estudiantes ya tienen la madurez práctica.
+* **Hosting y Dominio Propio (Módulo 14):** Cierre profesional publicando el portal en servidores comerciales y registrando un dominio `.cl`.
 
 ---
 
-## 📚 Estructura Oficial de los 12 Módulos
+## 📚 Estructura Oficial de los 14 Módulos
 
 | Módulo | Título | Enfoque y Contenido Principal |
 | :---: | :--- | :--- |
-| **Módulo 01** | **Recursos digitales interactivos** | **Corto y práctico.** Visión general, tipos de recursos, utilidad inmediata y normativa básica sin abrumar. |
-| **Módulo 02** | **IAs para programar (Elección e Instalación)** | **[DIVIDIDO - Parte 1]** Panorama actual de IAs, cómo elegir según tu perfil e instrucciones exactas de instalación (Antigravity IDE, Cursor, Copilot). |
-| **Módulo 03** | **Creando tu primer recurso con IA** | **[DIVIDIDO - Parte 2 / NUEVO]** Por qué programaremos en Web (HTML/JS) vs otros lenguajes (portabilidad, simplicidad, sin instalación para el alumno). Uso práctico del IDE, cómo redactar prompts efectivos, guiar paso a paso y creación guiada de tu primer recurso web funcional. |
-| **Módulo 04** | **Creación de sitio (HTML y JavaScript)** | *(Ex Módulo 3)* Estructura base de páginas web, estilos CSS y lógica en JS para ordenar tus recursos en un sitio. |
-| **Módulo 05** | **Recursos simples (interactivos y cuestionarios)** | *(Ex Módulo 4)* Creación de cuestionarios, quizes y retroalimentación automática. |
-| **Módulo 06** | **Recursos con imágenes y multimedia** | *(Ex Módulo 5)* Integración de iconos, sonidos, imágenes, videos y optimización de pesos. |
-| **Módulo 07** | **Presentaciones interactivas** | *(Ex Módulo 6)* Transición de diapositivas estáticas (PPT) a presentaciones dinámicas web con IA. |
-| **Módulo 08** | **Subir el sitio a GitHub** | *(Ex Módulo 7)* Creación de repositorio, control de versiones básico y publicación gratuita en GitHub Pages. |
-| **Módulo 09** | **Conectar con base de datos (Supabase)** | *(Ex Módulo 8)* Introducción a bases de datos en la nube, tablas y conexión desde HTML/JS para guardar puntajes o respuestas. |
-| **Módulo 10** | **Comunicación en tiempo real (Supabase Realtime)** | *(Ex Módulo 9)* Sincronización en vivo entre estudiantes y profesor (pizarras colaborativas, quizes en vivo). |
-| **Módulo 11** | **Desarrollo de Software Educativo a Fondo** | *(Ex Módulo 10)* **[Módulo Denso y Conceptual]** Lo que implica en profundidad desarrollar software para educación: arquitectura didáctica, buenas prácticas de desarrollo, escalabilidad, evaluación de UX pedagógica y rigor profesional. |
-| **Módulo 12** | **Hosting y dominio propio** | *(Ex Módulo 11)* Opciones de hosting web profesional, compra de dominio en NIC Chile (`.cl`) y configuración de DNS para tu portal docente. |
+| **Módulo 01** | **Recursos digitales interactivos** | Visión general, tipos de recursos, utilidad didáctica inmediata y normativa celular en Chile. |
+| **Módulo 02** | **IAs para programar (Elección e Instalación)** | Asistentes de IA (Antigravity, Cursor, Copilot). Elección e instalación paso a paso. |
+| **Módulo 03** | **Creando tus primeros recursos con IA** | Creación libre de **dos recursos interactivos** usando prompts propios o sugeridos para afianzar la sensación de logro. |
+| **Módulo 04** | **Estructura web y Portal de Recursos** | Explicación del rol de HTML, CSS y JS. Creación del archivo `index.html` asumiendo el rol de portada y portal estructurado de recursos. |
+| **Módulo 05** | **Subir el sitio a GitHub** | Creación de repositorio y publicación gratuita en GitHub Pages para tener el portal online. |
+| **Módulo 06** | **Recursos interactivos simples** | Manipulación del DOM y lógica de botones para interacciones de aprendizaje sencillas. |
+| **Módulo 07** | **Cuestionarios y ejercitación** | Estructuras de quizes, opción múltiple, cálculo de puntajes y diseño de retroalimentación didáctica. |
+| **Módulo 08** | **Recursos con imágenes y multimedia** | Integración de iconos, sonidos, optimización de imágenes/videos y derechos de uso. |
+| **Módulo 09** | **Presentaciones interactivas** | Transición de diapositivas estáticas (PPT) a entornos dinámicos y navegables en la web. |
+| **Módulo 10** | **Animaciones y dinamismo** | Creación de animaciones web fluidas y transiciones visuales interactivas con CSS/JS. |
+| **Módulo 11** | **Conectar con base de datos (Supabase)** | Almacenamiento en la nube de puntajes, nombres y respuestas de los alumnos. |
+| **Módulo 12** | **Comunicación en tiempo real (Supabase Realtime)** | Sincronización en vivo entre pantallas del docente y los estudiantes para dinámicas de aula. |
+| **Módulo 13** | **Desarrollo de Software Educativo a Fondo** | Módulo conceptual sobre arquitectura pedagógica, UX educativa, ciclo de pruebas y accesibilidad. |
+| **Módulo 14** | **Hosting y dominio propio** | Publicación final en hosting profesional y configuración de dominio propio `.cl` (NIC Chile). |
 
 ---
 
-## 🛠️ Plan de Transición Técnica (Ejecución de la División)
+## 🛠️ Plan de Transición Técnica (Ejecutado)
 
-1. **Desplazamiento en cascada de carpetas (de arriba hacia abajo para evitar colisiones):**
-   * Renombrar `modulo-11-hosting-dominio` → `modulo-12-hosting-dominio`
-   * Renombrar `modulo-10-desarrollo-software-educativo` → `modulo-11-desarrollo-software-educativo`
-   * Renombrar `modulo-09-tiempo-real` → `modulo-10-tiempo-real`
-   * Renombrar `modulo-08-supabase-basico` → `modulo-09-supabase-basico`
-   * Renombrar `modulo-07-subir-a-github` → `modulo-08-subir-a-github`
-   * Renombrar `modulo-06-presentaciones-interactivas` → `modulo-07-presentaciones-interactivas`
-   * Renombrar `modulo-05-imagenes-multimedia` → `modulo-06-imagenes-multimedia`
-   * Renombrar `modulo-04-recursos-simples` → `modulo-05-recursos-simples`
-   * Renombrar `modulo-03-sitio-html-js` → `modulo-04-sitio-html-js`
-2. **Creación y reorganización del nuevo Módulo 3 (`modulo-03-creando-primer-recurso/`):**
-   * Crear la carpeta `modulo-03-creando-primer-recurso/` con su `index.html`.
-   * Crear la subpágina `01-por-que-aplicaciones-web.html` justificando la elección de HTML/JS por portabilidad, universalidad y ligereza.
-   * Trasladar desde `modulo-02-ias-y-antigravity/` las páginas prácticas de interacción (`primer-uso-antigravity`, `modos-de-trabajo`, `como-escribir-prompts`, `guiar-paso-a-paso`, `problemas-comunes`) y sumar la página práctica de creación rápida del primer recurso.
-3. **Ajustar `modulo-02-ias-y-antigravity/`:**
-   * Dejar en el Módulo 2 exclusivamente las páginas de panorama, elección de herramienta e instalación.
-4. **Actualizar navegación (`js/nav-data.js`):**
-   * Reflejar los **12 módulos** con sus nuevos IDs, slugs y páginas correspondientes.
-5. **Actualizar atributos (`data-module`) y títulos en las páginas internas de los módulos corridos.**
+1. **Reordenación de carpetas físicas:** Realizada en cascada para evitar colisiones, renombrando las carpetas de los Módulos 05 a 12 de forma ordenada e incrementando el total de 12 a 14 módulos.
+2. **Creación de nuevos módulos:** Creadas las carpetas para el Módulo 07 (Cuestionarios) y el Módulo 10 (Animaciones).
+3. **Actualización de navegación:** Actualizado el archivo `js/nav-data.js` para mapear los 14 módulos y sus rutas.
+4. **Refactorización de contenidos:** Ajustadas las páginas internas y cabeceras para reflejar las nuevas numeraciones y objetivos didácticos del taller.

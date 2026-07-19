@@ -35,7 +35,7 @@ const TALLER_NAV = {
     },
     {
       id: "03", slug: "modulo-03-creando-primer-recurso",
-      title: "Creando tu primer recurso con IA",
+      title: "Creando tus primeros recursos con IA",
       pages: [
         { id: "00", file: "index.html", title: "Objetivo del módulo" },
         { id: "01", file: "01-por-que-aplicaciones-web.html", title: "¿Por qué aplicaciones web? (HTML y JS)" },
@@ -45,54 +45,24 @@ const TALLER_NAV = {
         { id: "05", file: "05-como-escribir-prompts.html", title: "Cómo escribir mejores prompts" },
         { id: "06", file: "06-memoria-de-la-ia.html", title: "El contexto de Antigravity" },
         { id: "07", file: "07-guiar-paso-a-paso.html", title: "Guiar a la IA paso a paso" },
-        { id: "08", file: "08-creacion-practica-primer-recurso.html", title: "¡Manos a la obra! Creando tu primer recurso" },
+        { id: "08", file: "08-creacion-practica-primer-recurso.html", title: "¡Manos a la obra! Creando tus primeros dos recursos libres" },
         { id: "09", file: "09-problemas-comunes.html", title: "Problemas comunes (y qué hacer)" }
       ]
     },
     {
       id: "04", slug: "modulo-04-sitio-html-js",
-      title: "Creación de sitio (HTML y JavaScript)",
+      title: "Estructura web y Portal de Recursos",
       pages: [
         { id: "00", file: "index.html", title: "Objetivo del módulo" },
         { id: "01", file: "01-estructura-html-basica.html", title: "Estructura HTML básica" },
         { id: "02", file: "02-estilos-css-basicos.html", title: "Estilos CSS básicos" },
         { id: "03", file: "03-javascript-basico.html", title: "JavaScript básico" },
-        { id: "04", file: "04-creando-pagina-indice.html", title: "Creando tu página de índice" },
+        { id: "04", file: "04-creando-pagina-indice.html", title: "Creando tu Portal de Recursos" },
         { id: "05", file: "05-controlar-el-acceso.html", title: "Controlar el acceso a tu sitio" }
       ]
     },
     {
-      id: "05", slug: "modulo-05-recursos-simples",
-      title: "Recursos simples (interactivos y cuestionarios)",
-      pages: [
-        { id: "00", file: "index.html", title: "Objetivo del módulo" },
-        { id: "01", file: "01-recursos-interactivos.html", title: "Recursos interactivos" },
-        { id: "02", file: "02-cuestionarios.html", title: "Cuestionarios" },
-        { id: "03", file: "03-retroalimentacion-automatica.html", title: "Retroalimentación automática" }
-      ]
-    },
-    {
-      id: "06", slug: "modulo-06-imagenes-multimedia",
-      title: "Recursos con imágenes y multimedia",
-      pages: [
-        { id: "00", file: "index.html", title: "Objetivo del módulo" },
-        { id: "01", file: "01-iconos-y-sonidos.html", title: "Iconos y sonidos" },
-        { id: "02", file: "02-imagenes-y-videos.html", title: "Imágenes y videos" },
-        { id: "03", file: "03-organizacion-de-carpetas.html", title: "Organización de carpetas" },
-        { id: "04", file: "04-optimizacion-y-derechos.html", title: "Peso de archivos y derechos de uso" }
-      ]
-    },
-    {
-      id: "07", slug: "modulo-07-presentaciones-interactivas",
-      title: "Presentaciones interactivas",
-      pages: [
-        { id: "00", file: "index.html", title: "Objetivo del módulo" },
-        { id: "01", file: "01-de-ppt-a-web.html", title: "De PPT a presentación web" },
-        { id: "02", file: "02-construyendo-tu-presentacion.html", title: "Construyendo tu presentación" }
-      ]
-    },
-    {
-      id: "08", slug: "modulo-08-subir-a-github",
+      id: "05", slug: "modulo-05-subir-a-github",
       title: "Subir el sitio a GitHub",
       pages: [
         { id: "00", file: "index.html", title: "Objetivo del módulo" },
@@ -104,7 +74,53 @@ const TALLER_NAV = {
       ]
     },
     {
-      id: "09", slug: "modulo-09-supabase-basico",
+      id: "06", slug: "modulo-06-recursos-interactivos",
+      title: "Recursos interactivos simples",
+      pages: [
+        { id: "00", file: "index.html", title: "Objetivo del módulo" },
+        { id: "01", file: "01-recursos-interactivos.html", title: "Recursos interactivos simples" }
+      ]
+    },
+    {
+      id: "07", slug: "modulo-07-cuestionarios-ejercitacion",
+      title: "Cuestionarios y ejercitación",
+      pages: [
+        { id: "00", file: "index.html", title: "Objetivo del módulo" },
+        { id: "02", file: "02-cuestionarios.html", title: "Cuestionarios" },
+        { id: "03", file: "03-retroalimentacion-automatica.html", title: "Retroalimentación automática" }
+      ]
+    },
+    {
+      id: "08", slug: "modulo-08-imagenes-multimedia",
+      title: "Recursos con imágenes y multimedia",
+      pages: [
+        { id: "00", file: "index.html", title: "Objetivo del módulo" },
+        { id: "01", file: "01-iconos-y-sonidos.html", title: "Iconos y sonidos" },
+        { id: "02", file: "02-imagenes-y-videos.html", title: "Imágenes y videos" },
+        { id: "03", file: "03-organizacion-de-carpetas.html", title: "Organización de carpetas" },
+        { id: "04", file: "04-optimizacion-y-derechos.html", title: "Peso de archivos y derechos de uso" }
+      ]
+    },
+    {
+      id: "09", slug: "modulo-09-presentaciones-interactivas",
+      title: "Presentaciones interactivas",
+      pages: [
+        { id: "00", file: "index.html", title: "Objetivo del módulo" },
+        { id: "01", file: "01-de-ppt-a-web.html", title: "De PPT a presentación web" },
+        { id: "02", file: "02-construyendo-tu-presentacion.html", title: "Construyendo tu presentación" }
+      ]
+    },
+    {
+      id: "10", slug: "modulo-10-animaciones",
+      title: "Animaciones y dinamismo",
+      pages: [
+        { id: "00", file: "index.html", title: "Objetivo del módulo" },
+        { id: "01", file: "01-animaciones-basicas.html", title: "Animaciones básicas" },
+        { id: "02", file: "02-transiciones-efectos.html", title: "Transiciones y efectos visuales" }
+      ]
+    },
+    {
+      id: "11", slug: "modulo-11-supabase-basico",
       title: "Conectar con base de datos (Supabase)",
       pages: [
         { id: "00", file: "index.html", title: "Objetivo del módulo" },
@@ -114,7 +130,7 @@ const TALLER_NAV = {
       ]
     },
     {
-      id: "10", slug: "modulo-10-tiempo-real",
+      id: "12", slug: "modulo-12-tiempo-real",
       title: "Comunicación en tiempo real (Supabase Realtime)",
       pages: [
         { id: "00", file: "index.html", title: "Objetivo del módulo" },
@@ -123,7 +139,7 @@ const TALLER_NAV = {
       ]
     },
     {
-      id: "11", slug: "modulo-11-desarrollo-software-educativo",
+      id: "13", slug: "modulo-13-desarrollo-software-educativo",
       title: "Desarrollo de software educativo a fondo",
       pages: [
         { id: "00", file: "index.html", title: "Objetivo del módulo" },
@@ -133,7 +149,7 @@ const TALLER_NAV = {
       ]
     },
     {
-      id: "12", slug: "modulo-12-hosting-dominio",
+      id: "14", slug: "modulo-14-hosting-dominio",
       title: "Hosting y dominio propio",
       pages: [
         { id: "00", file: "index.html", title: "Objetivo del módulo" },

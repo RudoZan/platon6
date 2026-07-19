@@ -5,21 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calen English Class</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Satisfy&display=swap');
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #1b3a2d;
+            background: radial-gradient(circle at 50% 30%, #1c3d2e 0%, #0d1e16 100%);
             color: #e8e4d9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Outfit', sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            letter-spacing: -0.2px;
         }
         .top-section {
             display: flex;
-            background: #234a3a;
-            padding: 10px;
-            gap: 10px;
+            background: transparent;
+            padding: 20px 30px 10px 30px;
+            gap: 20px;
         }
         .photo-panel {
             display: none;
@@ -167,6 +170,11 @@
             min-height: 100px;
             position: relative;
             gap: 8px;
+            background: rgba(27, 58, 45, 0.4);
+            border: 1px solid rgba(240, 168, 48, 0.12);
+            box-shadow: inset 0 0 12px rgba(255,255,255,0.02), 0 4px 15px rgba(0,0,0,0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
         .side-image-caption {
             font-size: 1.5rem;
@@ -248,7 +256,8 @@
         .video-container {
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: inset 0 0 12px rgba(255,255,255,0.02), 0 8px 32px rgba(0,0,0,0.45);
+            border: 1px solid rgba(240, 168, 48, 0.15);
             width: 340px;
             flex-shrink: 0;
         }
@@ -271,17 +280,43 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 15px 30px;
+            padding: 10px 30px 20px 30px;
         }
         .content-box {
             flex: 1;
-            background: #234a3a;
-            border-radius: 12px;
+            background: rgba(35, 74, 58, 0.45);
+            border-radius: 14px;
             display: grid;
             grid-template-rows: repeat(10, 10%);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: inset 0 0 24px rgba(0,0,0,0.25), 0 8px 32px rgba(0,0,0,0.45);
+            border: 1px solid rgba(240, 168, 48, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             position: relative;
             padding: 0;
+            overflow: hidden;
+        }
+
+        /* Animación suave de entrada de contenido en el PI */
+        @keyframes contentEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+                filter: blur(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                filter: blur(0);
+            }
+        }
+
+        #names:not(:empty), 
+        #middle > *, 
+        #bottom:not(:empty),
+        #storySorterContainer > *,
+        #whichCorrectContainer > * {
+            animation: contentEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         #names {
             grid-row: 2;
@@ -429,9 +464,100 @@
             justify-content: center;
             flex-wrap: wrap;
         }
+
+        /* Cartel de Escuela Rural Calen */
+        .school-sign-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+        }
+        .school-sign-chains {
+            display: flex;
+            justify-content: space-between;
+            width: 180px;
+            height: 25px;
+        }
+        .school-sign-chains svg {
+            width: 10px;
+            height: 25px;
+            filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.5));
+        }
+        .school-sign-board {
+            width: 290px;
+            height: 52px;
+            background: linear-gradient(135deg, #e3cbb3 0%, #d4b89c 40%, #cfae8f 70%, #c4a07e 100%);
+            border: 2px solid #825a38;
+            border-radius: 4px 8px 5px 10px / 8px 5px 10px 4px;
+            box-shadow: 
+                inset 0 1px 3px rgba(255,255,255,0.5), 
+                inset 0 -2px 4px rgba(0,0,0,0.35), 
+                0 6px 15px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transform: rotate(-0.5deg);
+        }
+        .school-sign-board::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                rgba(107, 72, 42, 0.05) 0px,
+                rgba(107, 72, 42, 0.05) 4px,
+                transparent 4px,
+                transparent 16px
+            ), repeating-linear-gradient(
+                0deg,
+                rgba(107, 72, 42, 0.03) 0px,
+                rgba(107, 72, 42, 0.03) 2px,
+                transparent 2px,
+                transparent 8px
+            );
+            border-radius: inherit;
+            pointer-events: none;
+        }
+        .school-sign-text {
+            font-family: 'Satisfy', cursive;
+            font-size: 1.85rem;
+            font-weight: bold;
+            color: #2b3e4a;
+            text-align: center;
+            letter-spacing: 0.5px;
+            text-shadow: 
+                -1px -1px 1px rgba(0,0,0,0.65), 
+                1px 1px 1px rgba(255,255,255,0.4);
+            user-select: none;
+        }
     </style>
 </head>
 <body>
+    <!-- Cartel de Escuela Rural Calen (Colgante) -->
+    <div class="school-sign-container">
+        <div class="school-sign-chains">
+            <svg viewBox="0 0 10 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="0" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
+                <rect x="3" y="8" width="4" height="12" rx="2" stroke="#555" stroke-width="2.5" />
+                <rect x="3" y="16" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
+            </svg>
+            <svg viewBox="0 0 10 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="0" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
+                <rect x="3" y="8" width="4" height="12" rx="2" stroke="#555" stroke-width="2.5" />
+                <rect x="3" y="16" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
+            </svg>
+        </div>
+        <div class="school-sign-board">
+            <span class="school-sign-text">Escuela Rural Calen</span>
+        </div>
+    </div>
+
     <div class="photo-panel" id="photoPanel">
         <div class="photo-panel-photo">
             <img id="photoPanelImg" src="" alt="">
@@ -453,6 +579,7 @@
     </div>
     <div class="top-section">
         <div class="side-image" id="sideImage">
+            <div id="activityTitleBanner" style="display: none; font-size: 1.8rem; font-weight: bold; color: #f0a830; text-align: center; flex-direction: column; justify-content: center; align-items: center; width: 100%; box-sizing: border-box; text-shadow: 0 2px 5px rgba(0,0,0,0.5); padding: 10px;"></div>
             <div class="game-info-box" id="gameInfoBox">
                 <div class="game-info-nav" id="gameInfoNav">
                     <button onclick="showStoryMenu()">← Stories</button>
@@ -485,6 +612,7 @@
                 <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 9</div>
                 <div style="flex: 1; border-bottom: 1px dashed rgba(255, 0, 0, 0.4); color: rgba(255, 0, 0, 0.7); font-size: 12px; font-family: monospace; padding-left: 10px; box-sizing: border-box; display: flex; align-items: flex-end;">Bar 10</div>
             </div>
+
             <div id="names"></div>
             <div id="middle"></div>
             <div id="bottom"></div>
@@ -607,6 +735,167 @@
             bot.style.display = '';
         }
 
+        function disableStorySorter() {
+            const ssContainer = document.getElementById('storySorterContainer');
+            if (ssContainer) {
+                ssContainer.style.display = 'none';
+            }
+            nam.style.display = '';
+            mid.style.display = '';
+            bot.style.display = '';
+        }
+
+        function formatActivityTitle(rawTitle) {
+            // Quitar emojis al inicio (ej. 🔢, 🧠, 📖, 🌍, etc.)
+            let cleanTitle = rawTitle.replace(/^[\p{Emoji}\s\u200d\uFE0F]+/u, '');
+            
+            // Si contiene "Story Sequence — The Little Prince" o similar
+            if (cleanTitle.includes('—')) {
+                const parts = cleanTitle.split('—');
+                return `<div style="font-size: 1.5rem; font-weight: normal; color: rgba(240, 168, 48, 0.75); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">${parts[0].trim()}</div>
+                        <div style="font-size: 2.6rem; font-weight: bold; color: #f0a830; text-shadow: 0 2px 8px rgba(0,0,0,0.6); line-height: 1.2;">${parts[1].trim()}</div>`;
+            }
+            
+            if (cleanTitle.includes('-')) {
+                const parts = cleanTitle.split('-');
+                return `<div style="font-size: 1.5rem; font-weight: normal; color: rgba(240, 168, 48, 0.75); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">${parts[0].trim()}</div>
+                        <div style="font-size: 2.6rem; font-weight: bold; color: #f0a830; text-shadow: 0 2px 8px rgba(0,0,0,0.6); line-height: 1.2;">${parts[1].trim()}</div>`;
+            }
+
+            return `<div style="font-size: 2.4rem; font-weight: bold; color: #f0a830; text-shadow: 0 2px 8px rgba(0,0,0,0.6); line-height: 1.2;">${cleanTitle}</div>`;
+        }
+        function enableStorySorter() {
+            nam.style.display = 'none';
+            mid.style.display = 'none';
+            bot.style.display = 'none';
+            disableWhichCorrect();
+
+            let ssContainer = document.getElementById('storySorterContainer');
+            if (!ssContainer) {
+                const contentBox = document.querySelector('.content-box');
+                ssContainer = document.createElement('div');
+                ssContainer.id = 'storySorterContainer';
+                ssContainer.style.gridRow = '1 / span 10';
+                ssContainer.style.gridColumn = '1';
+                ssContainer.style.zIndex = '10';
+                ssContainer.style.display = 'flex';
+                ssContainer.style.flexDirection = 'column';
+                ssContainer.style.height = '100%';
+                ssContainer.style.width = '100%';
+                ssContainer.style.background = '#1a1c23';
+                ssContainer.style.borderRadius = '12px';
+                ssContainer.style.padding = '25px';
+                ssContainer.style.boxSizing = 'border-box';
+                ssContainer.style.border = '2px solid rgba(240, 168, 48, 0.2)';
+                ssContainer.innerHTML = `
+                    <div id="ssSuccessBanner" style="display: none; background: rgba(46, 204, 113, 0.2); border: 2px solid #2ecc71; border-radius: 8px; padding: 8px; font-size: 1.5rem; font-weight: bold; color: #2ecc71; text-align: center; margin-bottom: 12px; animation: ssBounce 0.6s infinite alternate; width: 100%; box-sizing: border-box;">
+                        🎉 Correct Order! Well Done!
+                    </div>
+                    <div id="ssList" style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center;">
+                    </div>
+                `;
+                contentBox.appendChild(ssContainer);
+
+                if (!document.getElementById('ssStyles')) {
+                    const style = document.createElement('style');
+                    style.id = 'ssStyles';
+                    style.innerHTML = `
+                        @keyframes ssBounce {
+                            from { transform: translateY(0); }
+                            to { transform: translateY(-5px); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            } else {
+                ssContainer.style.display = 'flex';
+            }
+            document.getElementById('ssSuccessBanner').style.display = 'none';
+        }
+
+        function updateStorySorterGrid(connectors, items, assignments, storyShown) {
+            console.log("updateStorySorterGrid inside presentation: assignments =", assignments, "storyShown =", storyShown);
+            const banner = document.getElementById('activityTitleBanner');
+            
+            if (storyShown) {
+                if (banner) banner.style.display = 'none';
+                enableStorySorter();
+
+                const list = document.getElementById('ssList');
+                const successBanner = document.getElementById('ssSuccessBanner');
+                if (!list) return;
+                list.innerHTML = '';
+ 
+                let isCorrectOrder = true;
+ 
+                connectors.forEach((conn, idx) => {
+                    const itemIdx = assignments[idx];
+                    const item = items[itemIdx];
+ 
+                    if (!item || item.correctOrder !== (idx + 1)) {
+                        isCorrectOrder = false;
+                    }
+ 
+                    const row = document.createElement('div');
+                    row.style.display = 'flex';
+                    row.style.alignItems = 'center';
+                    row.style.background = 'rgba(255, 255, 255, 0.04)';
+                    row.style.border = '1px solid rgba(255, 255, 255, 0.08)';
+                    row.style.borderRadius = '8px';
+                    row.style.padding = '6px 12px';
+                    row.style.gap = '15px';
+                    row.style.transition = 'all 0.3s ease';
+ 
+                    const connLabel = document.createElement('div');
+                    connLabel.style.width = '130px';
+                    connLabel.style.fontSize = '1.35rem';
+                    connLabel.style.fontWeight = 'bold';
+                    connLabel.style.color = '#f0a830';
+                    connLabel.style.textShadow = '0 2px 4px rgba(0,0,0,0.3)';
+                    connLabel.textContent = conn;
+ 
+                    const textLabel = document.createElement('div');
+                    textLabel.style.flex = '1';
+                    textLabel.style.fontSize = '1.15rem';
+                    textLabel.style.color = '#e8e4d9';
+                    textLabel.style.lineHeight = '1.2';
+                    textLabel.textContent = item ? item.text : '...';
+ 
+                    if (item && item.correctOrder === (idx + 1)) {
+                        row.style.borderColor = 'rgba(46, 204, 113, 0.3)';
+                        row.style.background = 'rgba(46, 204, 113, 0.02)';
+                    }
+ 
+                    row.appendChild(connLabel);
+                    row.appendChild(textLabel);
+                    list.appendChild(row);
+                });
+ 
+                if (isCorrectOrder) {
+                    if (successBanner) successBanner.style.display = 'block';
+                    const ssContainer = document.getElementById('storySorterContainer');
+                    if (ssContainer) {
+                        ssContainer.style.borderColor = '#2ecc71';
+                        ssContainer.style.boxShadow = '0 0 20px rgba(46, 204, 113, 0.2)';
+                    }
+                } else {
+                    if (successBanner) successBanner.style.display = 'none';
+                    const ssContainer = document.getElementById('storySorterContainer');
+                    if (ssContainer) {
+                        ssContainer.style.borderColor = 'rgba(240, 168, 48, 0.2)';
+                        ssContainer.style.boxShadow = 'none';
+                    }
+                }
+            } else {
+                disableStorySorter();
+                if (banner) {
+                    banner.innerHTML = formatActivityTitle("Story Sequence — The Little Prince");
+                    banner.style.display = 'flex';
+                    banner.style.flexDirection = 'column';
+                }
+            }
+        }
+
         function enableWhichCorrect() {
             nam.style.display = 'none';
             mid.style.display = 'none';
@@ -620,7 +909,7 @@
                 wcContainer.style.gridRow = '1 / span 10';
                 wcContainer.style.gridColumn = '1';
                 wcContainer.style.zIndex = '10';
-                wcContainer.style.display = 'flex';
+                wcContainer.style.display = 'none';
                 wcContainer.style.flexDirection = 'column';
                 wcContainer.style.height = '100%';
                 wcContainer.style.width = '100%';
@@ -629,7 +918,6 @@
                 wcContainer.style.padding = '20px 25px';
                 wcContainer.style.boxSizing = 'border-box';
                 wcContainer.innerHTML = `
-                    <div class="which-correct-title" style="font-size: 2.8rem; font-weight: bold; color: #f0a830; text-align: center; margin-top: 10px; margin-bottom: 20px; flex-shrink: 0;">Which sentence is correct?</div>
                     <div class="which-correct-columns" style="display: flex; flex: 1; justify-content: space-around; align-items: center; width: 100%; gap: 40px;">
                         <!-- Columna Izquierda -->
                         <div id="wcLeftCol" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;">
@@ -644,8 +932,6 @@
                     </div>
                 `;
                 contentBox.appendChild(wcContainer);
-            } else {
-                wcContainer.style.display = 'flex';
             }
             
             document.getElementById('wcLeftText').textContent = '';
@@ -660,6 +946,8 @@
             gameContainer.classList.add('active');
             sideImg.style.display = 'none';
             sideEmoji.style.display = 'none';
+            const banner = document.getElementById('activityTitleBanner');
+            if (banner) banner.style.display = 'none';
             gameInfoBox.classList.add('active');
         }
 
@@ -858,14 +1146,41 @@
         const channel = new BroadcastChannel('english-with-video');
         channel.onmessage = (e) => {
             const d = e.data;
+            console.log("Presentation window received BroadcastChannel message:", d);
 
-            if (d.type === 'game-mode') {
+            if (d.type === 'activity-init') {
+                disableStorySorter();
+                disableWhichCorrect();
+                nam.textContent = '';
+                mid.innerHTML = '';
+                bot.textContent = '';
+                const banner = document.getElementById('activityTitleBanner');
+                if (banner) {
+                    banner.innerHTML = formatActivityTitle(d.activityName);
+                    banner.style.display = 'flex';
+                    banner.style.flexDirection = 'column';
+                }
+            } else if (d.type === 'game-mode') {
                 showStoryMenu();
             } else if (d.type === 'names') {
                 nam.textContent = d.text;
-            } else if (d.type === 'which-correct-init') {
-                enableWhichCorrect();
+                if (d.text && d.text.trim() !== '') {
+                    const banner = document.getElementById('activityTitleBanner');
+                    if (banner) banner.style.display = 'none';
+                }
+            } else if (d.type === 'story-sorter-init') {
+                updateStorySorterGrid(d.connectors, d.items, d.assignments, d.storyShown);
+            } else if (d.type === 'story-sorter-update') {
+                updateStorySorterGrid(d.connectors, d.items, d.assignments, d.storyShown);
+            } else if (d.type === 'story-sorter-disable') {
+                disableStorySorter();
             } else if (d.type === 'which-correct-left') {
+                enableWhichCorrect();
+                const banner = document.getElementById('activityTitleBanner');
+                if (banner) banner.style.display = 'none';
+                const wcContainer = document.getElementById('whichCorrectContainer');
+                if (wcContainer) wcContainer.style.display = 'flex';
+
                 const txt = document.getElementById('wcLeftText');
                 const stat = document.getElementById('wcLeftStatus');
                 if (txt) txt.textContent = d.text || '';
@@ -881,6 +1196,12 @@
                     rStat.style.background = 'none';
                 }
             } else if (d.type === 'which-correct-right') {
+                enableWhichCorrect();
+                const banner = document.getElementById('activityTitleBanner');
+                if (banner) banner.style.display = 'none';
+                const wcContainer = document.getElementById('whichCorrectContainer');
+                if (wcContainer) wcContainer.style.display = 'flex';
+
                 const txt = document.getElementById('wcRightText');
                 const stat = document.getElementById('wcRightStatus');
                 if (txt) txt.textContent = d.text || '';
@@ -923,25 +1244,11 @@
                     rStat.style.boxSizing = 'border-box';
                 }
             } else if (d.type === 'which-correct-clear') {
-                const lTxt = document.getElementById('wcLeftText');
-                const lStat = document.getElementById('wcLeftStatus');
-                const rTxt = document.getElementById('wcRightText');
-                const rStat = document.getElementById('wcRightStatus');
-                if (lTxt) lTxt.textContent = '';
-                if (lStat) {
-                    lStat.textContent = '';
-                    lStat.style.border = 'none';
-                    lStat.style.background = 'none';
-                    lStat.style.width = '';
-                    lStat.style.height = '';
-                }
-                if (rTxt) rTxt.textContent = '';
-                if (rStat) {
-                    rStat.textContent = '';
-                    rStat.style.border = 'none';
-                    rStat.style.background = 'none';
-                    rStat.style.width = '';
-                    rStat.style.height = '';
+                disableWhichCorrect();
+                const banner = document.getElementById('activityTitleBanner');
+                if (banner) {
+                    banner.textContent = "Which sentence is correct?";
+                    banner.style.display = 'flex';
                 }
             } else if (d.type === 'debug-grid') {
                 const debugGrid = document.getElementById('debugGrid');
@@ -1044,6 +1351,7 @@
             } else if (d.type === 'clear-all') {
                 showNormalMode();
                 disableWhichCorrect();
+                disableStorySorter();
                 nam.textContent = '';
                 mid.innerHTML = '';
                 bot.textContent = '';
@@ -1052,8 +1360,13 @@
                 cornerPhotoImg.src = '';
                 cornerPhotoPanel.classList.remove('active');
                 contentBox.classList.remove('has-photo');
+                const banner = document.getElementById('activityTitleBanner');
+                if (banner) banner.style.display = 'none';
             }
         };
+
+        // Solicitar el estado actual al cargarse la pantalla de presentación
+        channel.postMessage({ type: 'request-state' });
     </script>
 
     <script type="module">
