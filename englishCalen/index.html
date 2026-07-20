@@ -183,6 +183,8 @@
         <ul class="stages-list" id="stagesList"></ul>
     </div>
 
+    <hr class="sidebar-divider">
+
     <div class="sidebar-block">
         <div class="sidebar-block-title">Resources</div>
         <div class="sidebar-resources">
@@ -202,6 +204,7 @@
             <label><input type="radio" name="camMode" value="normal" checked onchange="onCamOptionChange()"> Normal</label>
             <label><input type="radio" name="camMode" value="blur" onchange="onCamOptionChange()"> Blur background</label>
             <label><input type="radio" name="camMode" value="image" onchange="onCamOptionChange()"> Background image</label>
+            <label><input type="checkbox" id="cartelShowToggle" checked onchange="onCamOptionChange()"> Show wooden sign</label>
         </div>
     </div>
 </aside>
@@ -217,7 +220,7 @@
     </div>
 </div>
 
-<div id="appContent" style="display:none;">
+<div id="appContent" style="display:none; flex-direction:column; flex:1; min-height:0;">
     <div class="main-header" id="mainHeader">
         <span class="window-tag">Control Window</span>
         <span class="course-name" id="mainHeaderCourse"></span>
@@ -269,12 +272,19 @@
 <script src="game1/game-data.js?v=2"></script>
 <script>
 const channel = new BroadcastChannel('english-with-video');
+let courseSelect, activitySelect, container;
+document.addEventListener('DOMContentLoaded', () => {
+    courseSelect = document.getElementById('courseSelect');
+    activitySelect = document.getElementById('activitySelect');
+    container = document.getElementById('itemsContainer');
+});
 let suggestionBodyVisible = true;
 
 channel.onmessage = (e) => {
     const d = e.data;
     console.log("Teacher window received BroadcastChannel message:", d);
     if (d.type === 'request-state') {
+        onCamOptionChange();
         const course = COURSES[courseSelect.value];
         if (course) {
             const all = getAllActivities(course);
@@ -418,6 +428,7 @@ function formatStageTime(totalSeconds) {
 
 function renderStages() {
     const list = document.getElementById('stagesList');
+    if (!list) return;
     list.innerHTML = '';
     STAGES.forEach((stage, i) => {
         const li = document.createElement('li');
@@ -497,16 +508,31 @@ function tickStage() {
     renderStages();
 }
 
-renderStages();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderStages);
+} else {
+    renderStages();
+}
 
 // ══════════════════════════════════════
 // CAMERA CONFIG — sent to the presentation window
 // ══════════════════════════════════════
 function onCamOptionChange() {
-    const show = document.getElementById('camShowToggle').checked;
-    const mode = document.querySelector('input[name="camMode"]:checked').value;
-    channel.postMessage({ type: 'camera-show', value: show });
-    channel.postMessage({ type: 'camera-mode', mode });
+    try {
+        const showEl = document.getElementById('camShowToggle');
+        const modeEl = document.querySelector('input[name="camMode"]:checked');
+        const cartelEl = document.getElementById('cartelShowToggle');
+        
+        const show = showEl ? showEl.checked : true;
+        const mode = modeEl ? modeEl.value : 'normal';
+        const showCartel = cartelEl ? cartelEl.checked : true;
+
+        channel.postMessage({ type: 'camera-show', value: show });
+        channel.postMessage({ type: 'camera-mode', mode });
+        channel.postMessage({ type: 'cartel-show', value: showCartel });
+    } catch (err) {
+        console.error("Error in onCamOptionChange:", err);
+    }
 }
 
 // ══════════════════════════════════════
@@ -788,18 +814,19 @@ const PLAY_GO_DO_WHICH_CORRECT_SUGGESTION = `
 `;
 
 const LITTLE_PRINCE_SUGGESTION = `
-<p>This activity aims to teach chronological narration and sequence connectors (<em>First, Next, Then, After that, As soon as, Finally, In the end</em>) through the famous story of <em>The Little Prince</em>.</p>
+<p>This activity aims to teach chronological narration and sequence connectors (<em>First, Next, Eventually, As soon as, Soon after, Finally, In the end</em>) through the famous story of <em>The Little Prince</em>.</p>
 <ol>
     <li><strong>Contextualization (Warm-up):</strong> Ask the class: <em>"Have you read 'The Little Prince'? What happens when he visits Earth?"</em>. Discuss in Spanish/English to activate prior knowledge.</li>
-    <li><strong>Scaffolding (Ordered Events):</strong> The events are presented in chronological order on your panel, but will appear on the presentation screen as students organize them. Ask the class to look at the list of raw events on the board.</li>
-    <li><strong>Prompting (Connectors):</strong> Ask: <em>"Which event happened first?"</em>. Once students identify it, click the <strong>"Event"</strong> button to reveal the raw action, then ask: <em>"How do we start a story? What connector do we use?"</em>.</li>
-    <li><strong>Reveal Connectors:</strong> Click <strong>"Ordered"</strong> to show the final sentence on screen starting with the connector (e.g., <em>"First,..."</em>). Read it together.</li>
-    <li><strong>Grammar Note (As soon as):</strong> Point out how <strong>"As soon as"</strong> shows immediate action-reaction (simultaneity). Ask students: <em>"What happened as soon as it was time to say goodbye?"</em>.</li>
-    <li><strong>Wrap-up:</strong> In the end, ask students to retell the whole sequence using only their memory and the connectors on the board.</li>
+    <li><strong>Sequence Display:</strong> The sequence appears initially scrambled, but the teacher can modify it further as needed. When ready for students to see it on the presentation window, click <strong>"Show story"</strong>.</li>
+    <li><strong>Reading & Finding Order:</strong> Read each line of the sequence together with the class to determine the correct order. Suggest asking students one by one to read a full line and say where they think it belongs in the sequence.</li>
+    <li><strong>Teacher Guide Numbers:</strong> The numbers appearing at the beginning of each text in the Control Panel indicate the correct chronological order to the teacher.</li>
+    <li><strong>Sequence Verification:</strong> Once the sequence is organized, read it all together or ask students one by one to read a line to verify if the order is correct.</li>
+    <li><strong>Optional Focus on Connectors:</strong> Optionally, review the text by reading and translating to Spanish, placing special emphasis on the meaning of each sequence connector.</li>
 </ol>
+<p style="margin-top: 12px; color: #cdded4; font-style: italic;">Remember that the primary goal of this activity is not merely assembling the sequence, but becoming familiar with sequence connectors, practicing their usage, and reading aloud.</p>
 `;
 
-const COURSES = {
+var COURSES = {
 "5to-6to": {
     label: "5th & 6th Grade — Languages",
     sections: [
@@ -1126,17 +1153,17 @@ const COURSES = {
         name: "🔢 Story Sequence - The Little Prince",
         type: "story-sorter",
         suggestion: LITTLE_PRINCE_SUGGESTION,
-        connectors: ["First,", "Next,", "Eventually,", "Soon after,", "As soon as", "Finally,", "In the end,"],
+        connectors: ["First,", "Next,", "Eventually,", "As soon as", "Soon after,", "Finally,", "In the end,"],
         items: [
             { id: 1, correctOrder: 1, text: "the Little Prince lived on a small planet with three volcanoes and a beautiful Rose.", label: "The Prince on B-612" },
-            { id: 2, correctOrder: 2, text: "he left his planet to visit other asteroids and met strange adults.", label: "Leaving and traveling" },
-            { id: 3, correctOrder: 3, text: "he arrived on Earth and met a wild fox under an apple tree.", label: "Arrival and meeting the fox" },
-            { id: 4, correctOrder: 4, text: "he tamed the fox, and they became best friends.", label: "Taming and friendship" },
-            { id: 5, correctOrder: 5, text: "it was time to say goodbye, the fox shared a secret: 'What is essential is invisible to the eye.'", label: "The fox's secret" },
-            { id: 6, correctOrder: 6, text: "the Prince decided to return home because he was responsible for his Rose.", label: "Decision to return" },
+            { id: 2, correctOrder: 2, text: "he left his planet and visited other asteroids, where he met some strange adults.", label: "Leaving and traveling" },
+            { id: 3, correctOrder: 3, text: "after a long journey, he arrived on Earth and met a wild fox under an apple tree.", label: "Arrival and meeting the fox" },
+            { id: 4, correctOrder: 4, text: "he tamed the fox, they became best friends.", label: "Taming and friendship" },
+            { id: 5, correctOrder: 5, text: "it was time to say goodbye, the fox shared a secret: \"What is essential is invisible to the eye.\"", label: "The fox's secret" },
+            { id: 6, correctOrder: 6, text: "the Prince decided to return home, because he felt responsible for his Rose.", label: "Decision to return" },
             { id: 7, correctOrder: 7, text: "the snake bit him, and his spirit returned to his star.", label: "The snake's bite and departure" }
         ]
-    },
+    }
         ]
     },
     {
@@ -1154,9 +1181,11 @@ const COURSES = {
 // ══════════════════════════════════════
 // RENDERING
 // ══════════════════════════════════════
-const courseSelect = document.getElementById('courseSelect');
-const activitySelect = document.getElementById('activitySelect');
-const container = document.getElementById('itemsContainer');
+if (!courseSelect) {
+    courseSelect = document.getElementById('courseSelect');
+    activitySelect = document.getElementById('activitySelect');
+    container = document.getElementById('itemsContainer');
+}
 
 function clearContainer() {
     const sug = document.getElementById('suggestionPanel');
@@ -1189,15 +1218,16 @@ Object.keys(COURSES).forEach(k => {
 
 function selectCourse(courseKey) {
     document.getElementById('welcomeScreen').style.display = 'none';
-    document.getElementById('appContent').style.display = 'block';
+    document.getElementById('appContent').style.display = 'flex';
     courseSelect.value = courseKey;
     onCourseChange();
 }
 
 function onCourseChange() {
     document.getElementById('welcomeScreen').style.display = 'none';
-    document.getElementById('appContent').style.display = 'block';
+    document.getElementById('appContent').style.display = 'flex';
     const course = COURSES[courseSelect.value];
+    if (!course) return;
     document.getElementById('mainHeaderCourse').textContent = course.label;
     document.getElementById('btnBackActivities').style.display = 'inline-block';
     activitySelect.innerHTML = '<option value="">— Select activity —</option>';
@@ -1307,8 +1337,13 @@ function renderActivity() {
     }
 
     const course = COURSES[courseSelect.value];
+    if (!course) return;
     const all = getAllActivities(course);
     const act = all[activitySelect.value];
+    if (!act) {
+        renderActivityMenu();
+        return;
+    }
 
     channel.postMessage({
         type: 'activity-init',

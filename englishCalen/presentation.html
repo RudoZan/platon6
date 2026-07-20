@@ -9,6 +9,7 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
+            position: relative;
             background: radial-gradient(circle at 50% 30%, #1c3d2e 0%, #0d1e16 100%);
             color: #e8e4d9;
             font-family: 'Outfit', sans-serif;
@@ -261,6 +262,28 @@
             width: 340px;
             flex-shrink: 0;
         }
+        .video-wooden-cartel {
+            position: absolute;
+            top: 0;
+            right: 30px;
+            width: 340px;
+            height: 65px;
+            z-index: 100;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .video-wooden-cartel.hidden {
+            display: none !important;
+        }
+        .video-wooden-cartel img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.7));
+        }
+
         .video-container.cam-hidden { display: none; }
         .country-panel .video-container {
             position: absolute;
@@ -465,97 +488,12 @@
             flex-wrap: wrap;
         }
 
-        /* Cartel de Escuela Rural Calen */
-        .school-sign-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            pointer-events: none;
-        }
-        .school-sign-chains {
-            display: flex;
-            justify-content: space-between;
-            width: 180px;
-            height: 25px;
-        }
-        .school-sign-chains svg {
-            width: 10px;
-            height: 25px;
-            filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.5));
-        }
-        .school-sign-board {
-            width: 290px;
-            height: 52px;
-            background: linear-gradient(135deg, #e3cbb3 0%, #d4b89c 40%, #cfae8f 70%, #c4a07e 100%);
-            border: 2px solid #825a38;
-            border-radius: 4px 8px 5px 10px / 8px 5px 10px 4px;
-            box-shadow: 
-                inset 0 1px 3px rgba(255,255,255,0.5), 
-                inset 0 -2px 4px rgba(0,0,0,0.35), 
-                0 6px 15px rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            transform: rotate(-0.5deg);
-        }
-        .school-sign-board::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(
-                90deg,
-                rgba(107, 72, 42, 0.05) 0px,
-                rgba(107, 72, 42, 0.05) 4px,
-                transparent 4px,
-                transparent 16px
-            ), repeating-linear-gradient(
-                0deg,
-                rgba(107, 72, 42, 0.03) 0px,
-                rgba(107, 72, 42, 0.03) 2px,
-                transparent 2px,
-                transparent 8px
-            );
-            border-radius: inherit;
-            pointer-events: none;
-        }
-        .school-sign-text {
-            font-family: 'Satisfy', cursive;
-            font-size: 1.85rem;
-            font-weight: bold;
-            color: #2b3e4a;
-            text-align: center;
-            letter-spacing: 0.5px;
-            text-shadow: 
-                -1px -1px 1px rgba(0,0,0,0.65), 
-                1px 1px 1px rgba(255,255,255,0.4);
-            user-select: none;
-        }
     </style>
 </head>
 <body>
-    <!-- Cartel de Escuela Rural Calen (Colgante) -->
-    <div class="school-sign-container">
-        <div class="school-sign-chains">
-            <svg viewBox="0 0 10 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="3" y="0" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
-                <rect x="3" y="8" width="4" height="12" rx="2" stroke="#555" stroke-width="2.5" />
-                <rect x="3" y="16" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
-            </svg>
-            <svg viewBox="0 0 10 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="3" y="0" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
-                <rect x="3" y="8" width="4" height="12" rx="2" stroke="#555" stroke-width="2.5" />
-                <rect x="3" y="16" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
-            </svg>
-        </div>
-        <div class="school-sign-board">
-            <span class="school-sign-text">Escuela Rural Calen</span>
-        </div>
+    <!-- Cartel de madera pegado al borde superior de la ventana sobre el video -->
+    <div class="video-wooden-cartel">
+        <img src="Images/CartelMadera.png" alt="Cartel de Madera">
     </div>
 
     <div class="photo-panel" id="photoPanel">
@@ -752,17 +690,17 @@
             // Si contiene "Story Sequence — The Little Prince" o similar
             if (cleanTitle.includes('—')) {
                 const parts = cleanTitle.split('—');
-                return `<div style="font-size: 1.5rem; font-weight: normal; color: rgba(240, 168, 48, 0.75); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">${parts[0].trim()}</div>
-                        <div style="font-size: 2.6rem; font-weight: bold; color: #f0a830; text-shadow: 0 2px 8px rgba(0,0,0,0.6); line-height: 1.2;">${parts[1].trim()}</div>`;
+                return `<div style="font-size: 1.2rem; font-weight: normal; color: rgba(240, 168, 48, 0.85); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px;">${parts[0].trim()}</div>
+                        <div style="font-size: 2.0rem; font-weight: bold; color: #f0a830; text-shadow: 0 2px 8px rgba(0,0,0,0.6); line-height: 1.2;">${parts[1].trim()}</div>`;
             }
             
             if (cleanTitle.includes('-')) {
                 const parts = cleanTitle.split('-');
-                return `<div style="font-size: 1.5rem; font-weight: normal; color: rgba(240, 168, 48, 0.75); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">${parts[0].trim()}</div>
-                        <div style="font-size: 2.6rem; font-weight: bold; color: #f0a830; text-shadow: 0 2px 8px rgba(0,0,0,0.6); line-height: 1.2;">${parts[1].trim()}</div>`;
+                return `<div style="font-size: 1.2rem; font-weight: normal; color: rgba(240, 168, 48, 0.85); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px;">${parts[0].trim()}</div>
+                        <div style="font-size: 2.0rem; font-weight: bold; color: #f0a830; text-shadow: 0 2px 8px rgba(0,0,0,0.6); line-height: 1.2;">${parts[1].trim()}</div>`;
             }
 
-            return `<div style="font-size: 2.4rem; font-weight: bold; color: #f0a830; text-shadow: 0 2px 8px rgba(0,0,0,0.6); line-height: 1.2;">${cleanTitle}</div>`;
+            return `<div style="font-size: 2.0rem; font-weight: bold; color: #f0a830; text-shadow: 0 2px 8px rgba(0,0,0,0.6); line-height: 1.2;">${cleanTitle}</div>`;
         }
         function enableStorySorter() {
             nam.style.display = 'none';
@@ -818,7 +756,12 @@
             const banner = document.getElementById('activityTitleBanner');
             
             if (storyShown) {
-                if (banner) banner.style.display = 'none';
+                if (banner) {
+                    if (!banner.innerHTML || banner.innerHTML.trim() === '') {
+                        banner.innerHTML = formatActivityTitle("Story Sequence — The Little Prince");
+                    }
+                    banner.style.display = 'flex';
+                }
                 enableStorySorter();
 
                 const list = document.getElementById('ssList');
@@ -842,13 +785,13 @@
                     row.style.background = 'rgba(255, 255, 255, 0.04)';
                     row.style.border = '1px solid rgba(255, 255, 255, 0.08)';
                     row.style.borderRadius = '8px';
-                    row.style.padding = '6px 12px';
-                    row.style.gap = '15px';
+                    row.style.padding = '3px 8px';
+                    row.style.gap = '10px';
                     row.style.transition = 'all 0.3s ease';
  
                     const connLabel = document.createElement('div');
-                    connLabel.style.width = '130px';
-                    connLabel.style.fontSize = '1.35rem';
+                    connLabel.style.width = '95px';
+                    connLabel.style.fontSize = '0.75rem';
                     connLabel.style.fontWeight = 'bold';
                     connLabel.style.color = '#f0a830';
                     connLabel.style.textShadow = '0 2px 4px rgba(0,0,0,0.3)';
@@ -856,7 +799,7 @@
  
                     const textLabel = document.createElement('div');
                     textLabel.style.flex = '1';
-                    textLabel.style.fontSize = '1.15rem';
+                    textLabel.style.fontSize = '0.75rem';
                     textLabel.style.color = '#e8e4d9';
                     textLabel.style.lineHeight = '1.2';
                     textLabel.textContent = item ? item.text : '...';
@@ -1247,7 +1190,7 @@
                 disableWhichCorrect();
                 const banner = document.getElementById('activityTitleBanner');
                 if (banner) {
-                    banner.textContent = "Which sentence is correct?";
+                    banner.innerHTML = formatActivityTitle("Which sentence is correct?");
                     banner.style.display = 'flex';
                 }
             } else if (d.type === 'debug-grid') {
@@ -1327,6 +1270,8 @@
                 }
             } else if (d.type === 'middle') {
                 showNormalMode();
+                const banner = document.getElementById('activityTitleBanner');
+                if (banner) banner.style.display = 'none';
                 mid.innerHTML = '';
                 mid.classList.toggle('big-text', !!d.big);
                 if (d.image) {
@@ -1362,6 +1307,16 @@
                 contentBox.classList.remove('has-photo');
                 const banner = document.getElementById('activityTitleBanner');
                 if (banner) banner.style.display = 'none';
+            } else if (d.type === 'cartel-show') {
+                if (typeof window.setCartelShow === 'function') {
+                    window.setCartelShow(d.value);
+                } else {
+                    const woodenCartel = document.querySelector('.video-wooden-cartel');
+                    if (woodenCartel) {
+                        woodenCartel.classList.toggle('hidden', !d.value);
+                        woodenCartel.style.display = d.value ? 'flex' : 'none';
+                    }
+                }
             }
         };
 
@@ -1445,16 +1400,29 @@
             }
         }
 
-        function applyVisibility() {
-            videoContainer.classList.toggle('cam-hidden', !camShow);
-            if (camMode === 'normal') {
-                webcamVideo.style.display = 'block';
-                webcamCanvas.style.display = 'none';
-            } else {
-                webcamVideo.style.display = 'none';
-                webcamCanvas.style.display = 'block';
+        let cartelShow = true;
+
+        window.applyVisibility = function applyVisibility() {
+            if (videoContainer) videoContainer.classList.toggle('cam-hidden', !camShow);
+            const woodenCartel = document.querySelector('.video-wooden-cartel');
+            if (woodenCartel) {
+                const isVisible = Boolean(camShow && cartelShow);
+                woodenCartel.classList.toggle('hidden', !isVisible);
+                woodenCartel.style.display = isVisible ? 'flex' : 'none';
             }
-        }
+            if (camMode === 'normal') {
+                if (webcamVideo) webcamVideo.style.display = 'block';
+                if (webcamCanvas) webcamCanvas.style.display = 'none';
+            } else {
+                if (webcamVideo) webcamVideo.style.display = 'none';
+                if (webcamCanvas) webcamCanvas.style.display = 'block';
+            }
+        };
+
+        window.setCartelShow = function setCartelShow(value) {
+            cartelShow = Boolean(value);
+            window.applyVisibility();
+        };
 
         function renderLoop() {
             if (!camShow || camMode === 'normal' || !imageSegmenter) {
@@ -1558,6 +1526,8 @@
             } else if (d.type === 'camera-mode') {
                 camMode = d.mode || 'normal';
                 applyCamMode();
+            } else if (d.type === 'cartel-show') {
+                window.setCartelShow(d.value);
             }
         };
 
