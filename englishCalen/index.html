@@ -63,8 +63,8 @@
         .welcome-btn { padding: 20px 40px; border: 2px solid #2a5a42; border-radius: 12px; background: #122a1f; color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.2s; min-width: 250px; text-align: center; }
         .welcome-btn:hover { border-color: #5ec4b6; background: #1e4035; }
         .welcome-btns { display: flex; gap: 20px; }
-        .act-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
-        .act-card { padding: 18px 16px; background: #122a1f; border: 2px solid #2a5a42; border-radius: 10px; cursor: pointer; transition: all 0.2s; text-align: center; font-size: 0.95rem; font-weight: bold; }
+        .act-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px; }
+        .act-card { padding: 10px 12px; background: #122a1f; border: 2px solid #2a5a42; border-radius: 10px; cursor: pointer; transition: all 0.2s; text-align: center; font-size: 0.95rem; font-weight: bold; }
         .act-card:hover { border-color: #5ec4b6; background: #1e4035; }
         .photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; }
         .photo-grid-compact { grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 14px; }
@@ -94,7 +94,6 @@
         .game-opt.disabled { opacity: 0.3; cursor: not-allowed; }
         .game-nav { display: flex; gap: 8px; margin-top: 12px; }
         .game-flag { font-size: 0.75rem; color: #f0a830; margin-top: 6px; }
-        .act-card small { display: block; color: #888; font-weight: normal; font-size: 0.75rem; margin-top: 4px; }
 
         body { display: flex; align-items: stretch; }
         .sidebar {
@@ -135,8 +134,8 @@
         .sidebar-block-title { color: #9cb8a8; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
         .sidebar-divider { border: none; border-top: 1px solid #2a5a42; margin: 0; }
         .stages-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .stages-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-        .stage-item { padding: 7px 9px; border-radius: 6px; background: #163028; font-size: 0.78rem; color: #ccc; cursor: pointer; display: flex; justify-content: space-between; gap: 6px; }
+        .stages-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+        .stage-item { padding: 3px 9px; border-radius: 6px; background: #163028; font-size: 0.78rem; color: #ccc; cursor: pointer; display: flex; justify-content: space-between; gap: 6px; }
         .stage-item:hover { background: #1e4035; }
         .stage-item.active { background: #e8732a; color: white; font-weight: bold; }
         .stage-time { color: #888; white-space: nowrap; }
@@ -1294,8 +1293,7 @@ function renderActivityMenu() {
         section.activities.forEach(act => {
             const card = document.createElement('div');
             card.className = 'act-card';
-            const count = act.items ? act.items.length : (act.modes ? act.modes[0].items.length : 0);
-            card.innerHTML = `${act.name}<small>${count} items</small>`;
+            card.textContent = act.name;
             const idx = globalIdx;
             card.onclick = () => {
                 activitySelect.value = idx;
