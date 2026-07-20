@@ -730,7 +730,7 @@
                     <div id="ssSuccessBanner" style="display: none; background: rgba(46, 204, 113, 0.2); border: 2px solid #2ecc71; border-radius: 8px; padding: 8px; font-size: 1.5rem; font-weight: bold; color: #2ecc71; text-align: center; margin-bottom: 12px; animation: ssBounce 0.6s infinite alternate; width: 100%; box-sizing: border-box;">
                         🎉 Correct Order! Well Done!
                     </div>
-                    <div id="ssList" style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center;">
+                    <div id="ssList" style="display: flex; flex-direction: column; gap: 16px; width: 100%; justify-content: center;">
                     </div>
                 `;
                 contentBox.appendChild(ssContainer);
@@ -752,8 +752,7 @@
             document.getElementById('ssSuccessBanner').style.display = 'none';
         }
 
-        function updateStorySorterGrid(connectors, items, assignments, storyShown) {
-            console.log("updateStorySorterGrid inside presentation: assignments =", assignments, "storyShown =", storyShown);
+        function updateStorySorterGrid(connectors, items, assignments, storyShown, highlightedIdx) {
             const banner = document.getElementById('activityTitleBanner');
             
             if (storyShown) {
@@ -786,30 +785,37 @@
                     row.style.background = 'rgba(255, 255, 255, 0.04)';
                     row.style.border = '1px solid rgba(255, 255, 255, 0.08)';
                     row.style.borderRadius = '8px';
-                    row.style.padding = '3px 8px';
-                    row.style.gap = '10px';
+                    row.style.padding = '20px 16px';
+                    row.style.gap = '16px';
                     row.style.transition = 'all 0.3s ease';
- 
+
                     const connLabel = document.createElement('div');
-                    connLabel.style.width = '95px';
-                    connLabel.style.fontSize = '0.75rem';
+                    connLabel.style.width = '10.4rem';
+                    connLabel.style.fontSize = '1.6rem';
                     connLabel.style.fontWeight = 'bold';
                     connLabel.style.color = '#f0a830';
                     connLabel.style.textShadow = '0 2px 4px rgba(0,0,0,0.3)';
                     connLabel.textContent = conn;
- 
+
                     const textLabel = document.createElement('div');
                     textLabel.style.flex = '1';
-                    textLabel.style.fontSize = '0.75rem';
+                    textLabel.style.fontSize = '1.6rem';
                     textLabel.style.color = '#e8e4d9';
                     textLabel.style.lineHeight = '1.2';
                     textLabel.textContent = item ? item.text : '...';
- 
+
                     if (item && item.correctOrder === (idx + 1)) {
                         row.style.borderColor = 'rgba(46, 204, 113, 0.3)';
                         row.style.background = 'rgba(46, 204, 113, 0.02)';
                     }
- 
+
+                    if (idx === highlightedIdx) {
+                        row.style.borderColor = '#f0a830';
+                        row.style.borderWidth = '2px';
+                        row.style.background = 'rgba(240, 168, 48, 0.10)';
+                        row.style.boxShadow = '0 0 16px rgba(240, 168, 48, 0.35)';
+                    }
+
                     row.appendChild(connLabel);
                     row.appendChild(textLabel);
                     list.appendChild(row);
@@ -1090,7 +1096,6 @@
         const channel = new BroadcastChannel('english-with-video');
         channel.onmessage = (e) => {
             const d = e.data;
-            console.log("Presentation window received BroadcastChannel message:", d);
 
             if (d.type === 'activity-init') {
                 disableStorySorter();
@@ -1113,9 +1118,9 @@
                     if (banner) banner.style.display = 'none';
                 }
             } else if (d.type === 'story-sorter-init') {
-                updateStorySorterGrid(d.connectors, d.items, d.assignments, d.storyShown);
+                updateStorySorterGrid(d.connectors, d.items, d.assignments, d.storyShown, d.highlightedIdx);
             } else if (d.type === 'story-sorter-update') {
-                updateStorySorterGrid(d.connectors, d.items, d.assignments, d.storyShown);
+                updateStorySorterGrid(d.connectors, d.items, d.assignments, d.storyShown, d.highlightedIdx);
             } else if (d.type === 'story-sorter-disable') {
                 disableStorySorter();
             } else if (d.type === 'which-correct-left') {
@@ -1389,7 +1394,6 @@
                     outputCategoryMask: true,
                     outputConfidenceMasks: false
                 });
-                console.log('Segmentador de cámara listo (delegate=' + delegate + ')');
                 return imageSegmenter;
             } catch (e) {
                 console.error('No se pudo iniciar el segmentador (' + delegate + '):', e);
@@ -1470,8 +1474,6 @@
             const maskData = mask.getAsUint8Array();
             if (bgMaskValue === null) {
                 bgMaskValue = detectBgMaskValue(maskData, w, h);
-                const distinctValues = new Set(maskData);
-                console.log('Diagnóstico segmentación — valores distintos en la máscara:', [...distinctValues], '— elegido como fondo:', bgMaskValue);
             }
             const out = ctx.createImageData(w, h);
             for (let i = 0; i < maskData.length; i++) {

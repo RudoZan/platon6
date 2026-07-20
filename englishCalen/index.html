@@ -282,7 +282,6 @@ let suggestionBodyVisible = true;
 
 channel.onmessage = (e) => {
     const d = e.data;
-    console.log("Teacher window received BroadcastChannel message:", d);
     if (d.type === 'request-state') {
         onCamOptionChange();
         const course = COURSES[courseSelect.value];
@@ -301,7 +300,8 @@ channel.onmessage = (e) => {
                         connectors: act.connectors,
                         items: act.items,
                         assignments: act.state ? act.state.currentAssignments : [2, 5, 0, 4, 1, 6, 3],
-                        storyShown: act.state ? act.state.storyShown : false
+                        storyShown: act.state ? act.state.storyShown : false,
+                        highlightedIdx: act.state ? act.state.highlightedIdx : null
                     });
                 } else if (act.type === 'which-correct') {
                     channel.postMessage({ type: 'which-correct-init' });
@@ -1819,17 +1819,18 @@ function renderStorySorter(act) {
     if (!act.state) {
         act.state = {
             currentAssignments: [2, 5, 0, 4, 1, 6, 3],
-            storyShown: false
+            storyShown: false,
+            highlightedIdx: null
         };
     }
 
-    console.log("renderStorySorter sending story-sorter-init. storyShown =", act.state.storyShown, "assignments =", act.state.currentAssignments);
     channel.postMessage({
         type: 'story-sorter-init',
         connectors: act.connectors,
         items: act.items,
         assignments: act.state.currentAssignments,
-        storyShown: act.state.storyShown
+        storyShown: act.state.storyShown,
+        highlightedIdx: act.state.highlightedIdx
     });
 
     let area = document.getElementById('storySorterControlArea');
@@ -1869,7 +1870,8 @@ function renderStorySorter(act) {
             connectors: act.connectors,
             items: act.items,
             assignments: act.state.currentAssignments,
-            storyShown: act.state.storyShown
+            storyShown: act.state.storyShown,
+            highlightedIdx: act.state.highlightedIdx
         });
         renderStorySorter(act);
     };
@@ -1880,12 +1882,14 @@ function renderStorySorter(act) {
     btnReset.onclick = () => {
         act.state.currentAssignments = [2, 5, 0, 4, 1, 6, 3];
         act.state.storyShown = false;
+        act.state.highlightedIdx = null;
         channel.postMessage({
             type: 'story-sorter-update',
             connectors: act.connectors,
             items: act.items,
             assignments: act.state.currentAssignments,
-            storyShown: act.state.storyShown
+            storyShown: act.state.storyShown,
+            highlightedIdx: act.state.highlightedIdx
         });
         renderStorySorter(act);
     };
@@ -1903,12 +1907,16 @@ function renderStorySorter(act) {
     listContainer.style.width = '100%';
 
     act.connectors.forEach((conn, connIdx) => {
+        const isHighlighted = act.state.highlightedIdx === connIdx;
+
         const row = document.createElement('div');
         row.style.display = 'flex';
         row.style.alignItems = 'center';
-        row.style.background = 'transparent';
+        row.style.background = isHighlighted ? 'rgba(240, 168, 48, 0.14)' : 'transparent';
+        row.style.borderRadius = '8px';
         row.style.padding = '4px 0';
         row.style.gap = '15px';
+        row.style.transition = 'background 0.2s ease';
 
         // Conector FIJO en su propia caja
         const connLabel = document.createElement('div');
@@ -1930,12 +1938,13 @@ function renderStorySorter(act) {
         textBlock.style.display = 'flex';
         textBlock.style.alignItems = 'center';
         textBlock.style.background = 'rgba(255, 255, 255, 0.05)';
-        textBlock.style.border = '2px solid transparent';
+        textBlock.style.border = isHighlighted ? '2px solid #f0a830' : '2px solid transparent';
         textBlock.style.borderRadius = '8px';
         textBlock.style.padding = '8px 15px';
         textBlock.style.gap = '12px';
         textBlock.style.cursor = 'grab';
         textBlock.style.transition = 'all 0.2s ease';
+        textBlock.title = 'Click para destacar esta frase en la pantalla de presentación';
         textBlock.draggable = true;
 
         const assignedItemIdx = act.state.currentAssignments[connIdx];
@@ -1956,6 +1965,19 @@ function renderStorySorter(act) {
         textBlock.appendChild(dragHandle);
 
         row.appendChild(textBlock);
+
+        textBlock.onclick = () => {
+            act.state.highlightedIdx = isHighlighted ? null : connIdx;
+            channel.postMessage({
+                type: 'story-sorter-update',
+                connectors: act.connectors,
+                items: act.items,
+                assignments: act.state.currentAssignments,
+                storyShown: act.state.storyShown,
+                highlightedIdx: act.state.highlightedIdx
+            });
+            renderStorySorter(act);
+        };
 
         textBlock.ondragstart = (e) => {
             draggedIdx = connIdx;
@@ -2009,7 +2031,8 @@ function renderStorySorter(act) {
                     connectors: act.connectors,
                     items: act.items,
                     assignments: act.state.currentAssignments,
-                    storyShown: act.state.storyShown
+                    storyShown: act.state.storyShown,
+                    highlightedIdx: act.state.highlightedIdx
                 });
                 renderStorySorter(act);
             }
