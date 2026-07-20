@@ -255,6 +255,7 @@
         .game-info-nav button.red { background: rgba(232,115,42,0.6); }
         .game-info-nav button.red:hover { background: rgba(232,115,42,0.85); }
         .video-container {
+            position: relative;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: inset 0 0 12px rgba(255,255,255,0.02), 0 8px 32px rgba(0,0,0,0.45);
@@ -264,24 +265,50 @@
         }
         .video-wooden-cartel {
             position: absolute;
-            top: 0;
-            right: 30px;
-            width: 340px;
-            height: 65px;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 100;
             pointer-events: none;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
         .video-wooden-cartel.hidden {
             display: none !important;
         }
-        .video-wooden-cartel img {
-            width: 100%;
-            height: 100%;
-            object-fit: fill;
-            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.7));
+        .school-sign-chains {
+            display: flex;
+            justify-content: space-between;
+            width: 140px;
+            height: 12px;
+        }
+        .school-sign-chains svg {
+            width: 8px;
+            height: 12px;
+            filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.6));
+        }
+        .school-sign-board {
+            padding: 4px 18px;
+            background: linear-gradient(135deg, #a66a38 0%, #8c5326 50%, #6e3e19 100%);
+            border: 2px solid #4a280d;
+            border-radius: 6px;
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), inset 0 -2px 3px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(-0.5deg);
+        }
+        .school-sign-text {
+            font-family: 'Satisfy', cursive, sans-serif;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #f7e6d0;
+            text-align: center;
+            text-shadow: -1px -1px 1px rgba(0,0,0,0.8), 1px 1px 1px rgba(255,255,255,0.2);
+            user-select: none;
+            white-space: nowrap;
         }
 
         .video-container.cam-hidden { display: none; }
@@ -491,10 +518,7 @@
     </style>
 </head>
 <body>
-    <!-- Cartel de madera pegado al borde superior de la ventana sobre el video -->
-    <div class="video-wooden-cartel">
-        <img src="Images/CartelMadera.png" alt="Cartel de Madera">
-    </div>
+
 
     <div class="photo-panel" id="photoPanel">
         <div class="photo-panel-photo">
@@ -531,6 +555,23 @@
             <div class="side-image-caption" id="sideImageCaption"></div>
         </div>
         <div class="video-container" id="videoContainer">
+            <div class="video-wooden-cartel" id="videoWoodenCartel">
+                <div class="school-sign-chains">
+                    <svg viewBox="0 0 10 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="0" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
+                        <rect x="3" y="8" width="4" height="12" rx="2" stroke="#555" stroke-width="2.5" />
+                        <rect x="3" y="16" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
+                    </svg>
+                    <svg viewBox="0 0 10 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="0" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
+                        <rect x="3" y="8" width="4" height="12" rx="2" stroke="#555" stroke-width="2.5" />
+                        <rect x="3" y="16" width="4" height="12" rx="2" stroke="#777" stroke-width="2.5" />
+                    </svg>
+                </div>
+                <div class="school-sign-board">
+                    <span class="school-sign-text">Escuela Rural Calen</span>
+                </div>
+            </div>
             <video id="webcam" autoplay playsinline muted></video>
             <canvas id="webcamCanvas"></canvas>
         </div>
