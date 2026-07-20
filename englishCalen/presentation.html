@@ -723,14 +723,14 @@
                 ssContainer.style.width = '100%';
                 ssContainer.style.background = '#1a1c23';
                 ssContainer.style.borderRadius = '12px';
-                ssContainer.style.padding = '25px';
+                ssContainer.style.padding = '25px 10px';
                 ssContainer.style.boxSizing = 'border-box';
                 ssContainer.style.border = '2px solid rgba(240, 168, 48, 0.2)';
                 ssContainer.innerHTML = `
                     <div id="ssSuccessBanner" style="display: none; background: rgba(46, 204, 113, 0.2); border: 2px solid #2ecc71; border-radius: 8px; padding: 8px; font-size: 1.5rem; font-weight: bold; color: #2ecc71; text-align: center; margin-bottom: 12px; animation: ssBounce 0.6s infinite alternate; width: 100%; box-sizing: border-box;">
                         🎉 Correct Order! Well Done!
                     </div>
-                    <div id="ssList" style="display: flex; flex-direction: column; gap: 16px; width: 100%; justify-content: center;">
+                    <div id="ssList" style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center;">
                     </div>
                 `;
                 contentBox.appendChild(ssContainer);
@@ -785,21 +785,20 @@
                     row.style.background = 'rgba(255, 255, 255, 0.04)';
                     row.style.border = '1px solid rgba(255, 255, 255, 0.08)';
                     row.style.borderRadius = '8px';
-                    row.style.padding = '20px 16px';
-                    row.style.gap = '16px';
+                    row.style.padding = '3px 8px';
+                    row.style.gap = '10px';
                     row.style.transition = 'all 0.3s ease';
 
                     const connLabel = document.createElement('div');
-                    connLabel.style.width = '10.4rem';
-                    connLabel.style.fontSize = '1.6rem';
-                    connLabel.style.fontWeight = 'bold';
+                    connLabel.style.width = '95px';
+                    connLabel.style.fontSize = '1.2rem';
                     connLabel.style.color = '#f0a830';
                     connLabel.style.textShadow = '0 2px 4px rgba(0,0,0,0.3)';
                     connLabel.textContent = conn;
 
                     const textLabel = document.createElement('div');
                     textLabel.style.flex = '1';
-                    textLabel.style.fontSize = '1.6rem';
+                    textLabel.style.fontSize = '1.2rem';
                     textLabel.style.color = '#e8e4d9';
                     textLabel.style.lineHeight = '1.2';
                     textLabel.textContent = item ? item.text : '...';

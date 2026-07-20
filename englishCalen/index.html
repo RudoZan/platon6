@@ -337,7 +337,7 @@ function send(type, text, image, big) {
         channel.postMessage({ type, text, image, big: !!big });
     }
 }
-function openPresentation() { window.open('presentation.html', 'presentation', 'width=960,height=720'); }
+function openPresentation() { window.open('presentation.html', 'presentation', 'width=980,height=720'); }
 function goHome() {
     document.getElementById('appContent').style.display = 'none';
     document.getElementById('welcomeScreen').style.display = 'flex';
@@ -1921,7 +1921,6 @@ function renderStorySorter(act) {
         // Conector FIJO en su propia caja
         const connLabel = document.createElement('div');
         connLabel.style.width = '100px';
-        connLabel.style.fontWeight = 'bold';
         connLabel.style.color = '#f0a830';
         connLabel.style.fontSize = '0.9rem';
         connLabel.style.padding = '8px 12px';
@@ -1988,14 +1987,8 @@ function renderStorySorter(act) {
         };
 
         textBlock.ondragend = () => {
-            textBlock.style.opacity = '';
-            textBlock.style.borderColor = 'transparent';
-            textBlock.style.borderStyle = 'solid';
             draggedIdx = null;
-            document.querySelectorAll('#storySorterControlArea div[draggable="true"]').forEach(tb => {
-                tb.style.background = 'rgba(255, 255, 255, 0.05)';
-                tb.style.borderColor = 'transparent';
-            });
+            renderStorySorter(act);
         };
 
         textBlock.ondragover = (e) => {
@@ -2025,6 +2018,7 @@ function renderStorySorter(act) {
                 const temp = act.state.currentAssignments[draggedIdx];
                 act.state.currentAssignments[draggedIdx] = act.state.currentAssignments[connIdx];
                 act.state.currentAssignments[connIdx] = temp;
+                act.state.highlightedIdx = connIdx;
 
                 channel.postMessage({
                     type: 'story-sorter-update',
