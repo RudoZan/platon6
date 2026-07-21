@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calen English Class — Control Panel</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #1b3a2d; color: #e8e4d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #1b3a2d; color: #e8e4d9; font-family: 'Outfit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .open-btn { padding: 8px 16px; background: #e8732a; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
         .open-btn:hover { background: #c75f1e; }
         .selectors { display: none; }
@@ -49,6 +51,10 @@
         .btn-red:hover { background: #c75f1e; }
         .btn-gray { background: #3a5a48; }
         .btn-gray:hover { background: #2a4a38; }
+        .btn-home-dark-red { background: #6b1f1f; }
+        .btn-home-dark-red:hover { background: #521717; }
+        .btn-activities-dark-blue { background: #2e4f8f; }
+        .btn-activities-dark-blue:hover { background: #243d70; }
         .btn-img { background: #5ec4b6; color: #122a1f; }
         .btn-img:hover { background: #4ab0a2; }
         .btn-hide { background: #c75f1e; }
@@ -97,16 +103,17 @@
 
         body { display: flex; align-items: stretch; }
         .sidebar {
-            width: 280px; flex-shrink: 0; background: #122a1f; border-right: 2px solid #2a5a42;
+            width: 255px; flex-shrink: 0; background: #122a1f; border-right: 2px solid #2a5a42;
             padding: 16px; display: flex; flex-direction: column; gap: 18px;
             height: 100vh; position: sticky; top: 0; overflow-y: auto;
             transition: width 0.15s ease;
         }
         .sidebar-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .sidebar-title { font-size: 1.1rem; }
-        .main-header { text-align: center; padding: 18px 20px 10px; }
-        .main-header .window-tag { font-size: 1.6rem; font-weight: bold; color: #9cb8a8; margin-right: 8px; }
-        .main-header .course-name { font-size: 1.6rem; font-weight: bold; color: #f0a830; }
+        .main-header { position: relative; display: flex; align-items: center; padding: 18px 20px 10px; }
+        .main-header-nav { display: flex; gap: 8px; }
+        .clear-bar .window-tag { font-size: 1rem; font-weight: bold; color: #9cb8a8; }
+        .main-header .course-name { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 1.4rem; font-weight: bold; color: #f0a830; white-space: nowrap; }
         .review-stamp {
             display: inline-block;
             border: 2px solid #e8732a;
@@ -123,13 +130,12 @@
         }
         .suggestion-panel { max-width: 900px; margin: 0 auto 14px; background: #163028; border-radius: 8px; padding: 12px 16px; }
         .suggestion-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #f0a830; font-weight: bold; font-size: 0.9rem; }
-        .suggestion-body { margin-top: 10px; color: #cdded4; font-size: 0.85rem; line-height: 1.55; }
+        .suggestion-body { margin-top: 10px; color: #cdded4; font-size: 0.78rem; line-height: 1.55; }
         .suggestion-body p { margin: 0 0 8px; }
         .suggestion-body ol { margin: 0 0 8px; padding-left: 20px; }
         .suggestion-body li { margin-bottom: 6px; }
         .suggestion-body strong { color: #5ec4b6; }
-        .sidebar-nav { display: flex; flex-direction: column; gap: 6px; }
-        .sidebar-nav .btn, .sidebar > .open-btn { width: 100%; text-align: center; }
+        .sidebar > .open-btn { width: 100%; text-align: center; }
         .sidebar-clock { font-size: 2rem; font-weight: bold; text-align: center; letter-spacing: 1px; color: #5ec4b6; }
         .sidebar-block-title { color: #9cb8a8; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
         .sidebar-divider { border: none; border-top: 1px solid #2a5a42; margin: 0; }
@@ -163,11 +169,6 @@
         <button class="sidebar-hide-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Hide sidebar">«</button>
     </div>
 
-    <div class="sidebar-nav">
-        <button class="btn btn-gray" onclick="goHome()">← Home</button>
-        <button class="btn btn-gray" onclick="goActivities()" style="display:none;" id="btnBackActivities">← Activities</button>
-    </div>
-
     <button class="open-btn" onclick="openPresentation()">Open Presentation Window</button>
 
     <div class="sidebar-clock" id="sidebarClock">00:00:00</div>
@@ -187,8 +188,8 @@
     <div class="sidebar-block">
         <div class="sidebar-block-title">Resources</div>
         <div class="sidebar-resources">
-            <button class="btn btn-gray" onclick="openReference('5to-6to')">Ref 5°-6°</button>
-            <button class="btn btn-gray" onclick="openReference('7mo-8vo')">Ref 7°-8°</button>
+            <button class="btn btn-gray" onclick="openReference('5to-6to')">Teacher Reference 5° &amp; 6°</button>
+            <button class="btn btn-gray" onclick="openReference('7mo-8vo')">Teacher Reference 7° &amp; 8°</button>
             <button class="btn btn-gray" onclick="openBases()">Bases Curriculares</button>
             <button class="btn btn-gray" onclick="openPronunciacion()">Pronunciación</button>
         </div>
@@ -221,7 +222,10 @@
 
 <div id="appContent" style="display:none; flex-direction:column; flex:1; min-height:0;">
     <div class="main-header" id="mainHeader">
-        <span class="window-tag">Control Window</span>
+        <div class="main-header-nav">
+            <button class="btn btn-home-dark-red" onclick="goHome()">🏠 Home</button>
+            <button class="btn btn-activities-dark-blue" onclick="goActivities()" style="display:none;" id="btnBackActivities">← Activities</button>
+        </div>
         <span class="course-name" id="mainHeaderCourse"></span>
     </div>
 
@@ -241,9 +245,9 @@
                 <label class="switch"><input type="checkbox" id="namesSwitch" onchange="onNamesSwitchChange()" checked><span class="slider"></span></label>
                 <span class="switch-label">Show on screen</span>
             </div>
-            <button class="btn btn-gray" id="kidsToggleBtn" onclick="toggleKidsPanel()" style="padding:3px 10px; font-size:0.75rem;">Hide</button>
+            <button class="btn btn-gray" id="kidsToggleBtn" onclick="toggleKidsPanel()" style="padding:3px 10px; font-size:0.75rem;">Show</button>
         </div>
-        <div class="kids-grid" id="kidsGrid"></div>
+        <div class="kids-grid" id="kidsGrid" style="display:none;"></div>
     </div>
 
     <div class="suggestion-panel" id="suggestionPanel" style="display:none;">
@@ -258,6 +262,7 @@
 
     <div class="clear-bar" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
         <button class="btn btn-red" onclick="clearScreenAndReset()">Clear Screen</button>
+        <span class="window-tag" style="flex:1; text-align:center;">Control Window</span>
         <div style="display:flex; align-items:center; gap:5px;">
             <label class="switch"><input type="checkbox" id="debugGridSwitch" onchange="onDebugGridSwitchChange()"><span class="slider"></span></label>
             <span class="switch-label" style="color:#e74c3c; font-weight:bold; font-size:0.85rem;">Debug Bars</span>
@@ -280,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
     activitySelect = document.getElementById('activitySelect');
     container = document.getElementById('itemsContainer');
 });
-let suggestionBodyVisible = true;
+let suggestionBodyVisible = false;
 
 channel.onmessage = (e) => {
     const d = e.data;
@@ -301,7 +306,8 @@ channel.onmessage = (e) => {
                         type: 'story-sorter-init',
                         connectors: act.connectors,
                         items: act.items,
-                        assignments: act.state ? act.state.currentAssignments : [2, 5, 0, 4, 1, 6, 3],
+                        activityName: act.name,
+                        assignments: act.state ? act.state.currentAssignments : [4, 7, 1, 6, 0, 3, 5, 2],
                         storyShown: act.state ? act.state.storyShown : false,
                         highlightedIdx: act.state ? act.state.highlightedIdx : null
                     });
@@ -332,15 +338,16 @@ channel.onmessage = (e) => {
 };
 function send(type, text, image, big) {
     if (type === 'side-image') {
-        channel.postMessage({ type, image: image || null });
+        channel.postMessage({ type, image: image || null, small: !!big });
     } else if (type === 'side-emoji') {
         channel.postMessage({ type, text: text || '' });
     } else {
-        channel.postMessage({ type, text, image, big: !!big });
+        channel.postMessage({ type, text, image, big: big === 'xl' ? 'xl' : !!big });
     }
 }
 function openPresentation() { window.open('presentation.html', 'presentation', 'width=980,height=720'); }
 function goHome() {
+    stopSoundGamePlay();
     document.getElementById('appContent').style.display = 'none';
     document.getElementById('welcomeScreen').style.display = 'flex';
     clearContainer();
@@ -607,7 +614,7 @@ function clearScreenAndReset() {
             act.state.selectedRight = null;
             act.state.revealed = false;
             if (act.type === 'story-sorter') {
-                act.state.currentAssignments = [2, 5, 0, 4, 1, 6, 3];
+                act.state.currentAssignments = [4, 7, 1, 6, 0, 3, 5, 2];
             }
         }
     }
@@ -668,6 +675,37 @@ let shownWord = null;
 let shownFlag = null;
 let shownTrans = null;
 
+// Sound Game: auto-play state (intervalo activo, bolsa de palabras sin repetir)
+let soundGameInterval = null;
+let soundGameRemaining = [];
+let soundGameLastWord = null;
+let soundGameShowLetters = false;
+let soundGameCurrentItem = null;
+
+function stopSoundGamePlay() {
+    if (soundGameInterval) {
+        clearInterval(soundGameInterval);
+        soundGameInterval = null;
+        channel.postMessage({ type: 'sound-game-timer', duration: 0 });
+    }
+}
+
+// Colorea solo las letras que producen el sonido marcado: compara `word` con
+// `pron` (la misma palabra, con las letras del sonido en mayúscula) y pinta
+// únicamente las posiciones donde pron está en mayúscula pero word no lo está
+// (así se ignoran mayúsculas naturales, ej. la "J" de "Japanese").
+function buildHighlightedWord(word, pron, color) {
+    color = color || '#e74c3c';
+    let html = '';
+    for (let i = 0; i < word.length; i++) {
+        const wc = word[i];
+        const pc = pron[i] || '';
+        const isEmphasis = pc !== pc.toLowerCase() && wc === wc.toLowerCase();
+        html += isEmphasis ? `<span style="color:${color}; font-weight:bold;">${wc}</span>` : wc;
+    }
+    return html;
+}
+
 // Guess the Country: qué fotos ya se mostraron esta sesión (se resetea solo al recargar la página)
 const seenCountryPhotos = new Set();
 let currentCountryPhoto = null;
@@ -724,7 +762,7 @@ function onCourseChange() {
 }
 
 function onActivitySelect() {
-    suggestionBodyVisible = true;
+    suggestionBodyVisible = false;
     if (activitySelect.value === '') {
         renderActivityMenu();
     } else {
@@ -733,6 +771,7 @@ function onActivitySelect() {
 }
 
 function renderActivityMenu() {
+    stopSoundGamePlay();
     clearContainer();
     document.getElementById('suggestionPanel').style.display = 'none';
     send('clear-middle', '');
@@ -762,7 +801,8 @@ function renderActivityMenu() {
         section.activities.forEach(act => {
             const card = document.createElement('div');
             card.className = 'act-card';
-            card.textContent = act.name;
+            const modeCount = act.modes ? act.modes.length : (act.modeCount || 0);
+            card.textContent = modeCount > 1 ? `${act.name} (${modeCount})` : act.name;
             const idx = globalIdx;
             card.onclick = () => {
                 activitySelect.value = idx;
@@ -777,6 +817,8 @@ function renderActivityMenu() {
 }
 
 function renderActivity() {
+    stopSoundGamePlay();
+    suggestionBodyVisible = false;
     clearContainer();
     const scArea = document.getElementById('storySorterControlArea');
     if (scArea) scArea.remove();
@@ -872,6 +914,8 @@ function renderActivity() {
         renderCountryPhotos(act);
     } else if (act.type === 'hello-world') {
         renderHelloWorld(act);
+    } else if (act.type === 'sound-game') {
+        renderSoundGame(act);
     } else {
         renderDefault(act);
     }
@@ -904,6 +948,7 @@ function renderAlreadyKnow(act, showQLabel, showALabel, hideQLabel, hideALabel) 
 
         const flagMode = !!act.flagButton;
         const bigText = !!act.bigText;
+        const middleBig = act.bigTextXl ? 'xl' : bigText;
 
         const btnQ = document.createElement('button');
         btnQ.className = 'btn btn-mid';
@@ -924,6 +969,7 @@ function renderAlreadyKnow(act, showQLabel, showALabel, hideQLabel, hideALabel) 
                     resetAllBtns('t', '¿Cómo diría...?');
                     shownTrans = null;
                 }
+                resetAllBtns('hi', 'Highlight /iː/');
                 if (flagMode) {
                     if (shownFlag !== null && shownFlag !== i) {
                         send('side-image', '', null);
@@ -934,7 +980,7 @@ function renderAlreadyKnow(act, showQLabel, showALabel, hideQLabel, hideALabel) 
                     if (item.sideImg) { send('side-image', '', item.sideImg); }
                     else { send('side-emoji', item.icon || ''); }
                 }
-                send('middle', item.q, null, bigText);
+                send('middle', item.q, null, middleBig);
                 resetAllBtns('q', showQLabel);
                 shownQuestion = i;
                 btnQ.textContent = hideQLabel;
@@ -1046,6 +1092,46 @@ function renderAlreadyKnow(act, showQLabel, showALabel, hideQLabel, hideALabel) 
             row.appendChild(btnTrans);
         }
 
+        if (item.highlight) {
+            const btnHi = document.createElement('button');
+            btnHi.className = 'btn btn-mid';
+            btnHi.style.background = '#c0392b';
+            btnHi.style.color = 'white';
+            btnHi.textContent = 'Highlight /iː/';
+            btnHi.dataset.idx = i;
+            btnHi.dataset.state = 'show';
+            btnHi.dataset.type = 'hi';
+
+            btnHi.onclick = () => {
+                if (btnHi.dataset.state === 'show') {
+                    if (shownQuestion !== null && shownQuestion !== i) {
+                        resetAllBtns('q', showQLabel);
+                        resetAllBtns('hi', 'Highlight /iː/');
+                    } else if (shownQuestion === i) {
+                        resetAllBtns('q', showQLabel);
+                    }
+                    let html = item.q.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+                    item.highlight.forEach(([word, pron]) => {
+                        html = html.replace(new RegExp('\\b' + word + '\\b'), buildHighlightedWord(word, pron));
+                    });
+                    channel.postMessage({ type: 'middle', html, big: middleBig });
+                    shownQuestion = i;
+                    btnHi.textContent = 'Hide';
+                    btnHi.className = 'btn btn-hide';
+                    btnHi.dataset.state = 'hide';
+                } else {
+                    send('clear-middle', '');
+                    shownQuestion = null;
+                    btnHi.textContent = 'Highlight /iː/';
+                    btnHi.className = 'btn btn-mid';
+                    btnHi.style.background = '#c0392b';
+                    btnHi.style.color = 'white';
+                    btnHi.dataset.state = 'show';
+                }
+            };
+            row.appendChild(btnHi);
+        }
+
         row.appendChild(btnW);
 
         if (flagMode) {
@@ -1098,6 +1184,10 @@ function resetAllBtns(type, showLabel) {
                 } else if (type === 't') {
                     btn.className = 'btn btn-mid';
                     btn.style.background = '#e67e22';
+                    btn.style.color = 'white';
+                } else if (type === 'hi') {
+                    btn.className = 'btn btn-mid';
+                    btn.style.background = '#c0392b';
                     btn.style.color = 'white';
                 }
                 btn.dataset.state = 'show';
@@ -1163,19 +1253,7 @@ function renderWhichCorrect(act) {
         }
     };
 
-    const btnClear = document.createElement('button');
-    btnClear.className = 'btn btn-gray';
-    btnClear.textContent = 'Clear selections';
-    btnClear.onclick = () => {
-        act.state.selectedLeft = null;
-        act.state.selectedRight = null;
-        act.state.revealed = false;
-        channel.postMessage({ type: 'which-correct-clear' });
-        renderWhichCorrect(act);
-    };
-
     actionBar.appendChild(btnReveal);
-    actionBar.appendChild(btnClear);
     area.appendChild(actionBar);
 
     const columnsContainer = document.createElement('div');
@@ -1259,7 +1337,13 @@ function renderWhichCorrect(act) {
                     channel.postMessage({ type: 'which-correct-clear' });
                 }
 
-                if (!act.state.selectedLeft) {
+                if (act.state.selectedLeft && act.state.selectedLeft.key === phraseKey) {
+                    act.state.selectedLeft = null;
+                    channel.postMessage({ type: 'which-correct-left', text: '' });
+                } else if (act.state.selectedRight && act.state.selectedRight.key === phraseKey) {
+                    act.state.selectedRight = null;
+                    channel.postMessage({ type: 'which-correct-right', text: '' });
+                } else if (!act.state.selectedLeft) {
                     act.state.selectedLeft = { text: phraseText, isCorrect, key: phraseKey };
                     act.state.usedCounts[phraseKey] = (act.state.usedCounts[phraseKey] || 0) + 1;
                     channel.postMessage({ type: 'which-correct-left', text: phraseText });
@@ -1268,7 +1352,7 @@ function renderWhichCorrect(act) {
                     act.state.usedCounts[phraseKey] = (act.state.usedCounts[phraseKey] || 0) + 1;
                     channel.postMessage({ type: 'which-correct-right', text: phraseText });
                 }
-                
+
                 renderWhichCorrect(act);
             };
 
@@ -1285,7 +1369,7 @@ function renderWhichCorrect(act) {
 function renderStorySorter(act) {
     if (!act.state) {
         act.state = {
-            currentAssignments: [2, 5, 0, 4, 1, 6, 3],
+            currentAssignments: [4, 7, 1, 6, 0, 3, 5, 2],
             storyShown: false,
             highlightedIdx: null
         };
@@ -1295,6 +1379,7 @@ function renderStorySorter(act) {
         type: 'story-sorter-init',
         connectors: act.connectors,
         items: act.items,
+        activityName: act.name,
         assignments: act.state.currentAssignments,
         storyShown: act.state.storyShown,
         highlightedIdx: act.state.highlightedIdx
@@ -1336,6 +1421,7 @@ function renderStorySorter(act) {
             type: 'story-sorter-update',
             connectors: act.connectors,
             items: act.items,
+            activityName: act.name,
             assignments: act.state.currentAssignments,
             storyShown: act.state.storyShown,
             highlightedIdx: act.state.highlightedIdx
@@ -1347,13 +1433,14 @@ function renderStorySorter(act) {
     btnReset.className = 'btn btn-gray';
     btnReset.textContent = 'Reset Sorter';
     btnReset.onclick = () => {
-        act.state.currentAssignments = [2, 5, 0, 4, 1, 6, 3];
+        act.state.currentAssignments = [4, 7, 1, 6, 0, 3, 5, 2];
         act.state.storyShown = false;
         act.state.highlightedIdx = null;
         channel.postMessage({
             type: 'story-sorter-update',
             connectors: act.connectors,
             items: act.items,
+            activityName: act.name,
             assignments: act.state.currentAssignments,
             storyShown: act.state.storyShown,
             highlightedIdx: act.state.highlightedIdx
@@ -1370,7 +1457,7 @@ function renderStorySorter(act) {
     const listContainer = document.createElement('div');
     listContainer.style.display = 'flex';
     listContainer.style.flexDirection = 'column';
-    listContainer.style.gap = '10px';
+    listContainer.style.gap = '3px';
     listContainer.style.width = '100%';
 
     act.connectors.forEach((conn, connIdx) => {
@@ -1406,7 +1493,7 @@ function renderStorySorter(act) {
         textBlock.style.background = 'rgba(255, 255, 255, 0.05)';
         textBlock.style.border = isHighlighted ? '2px solid #f0a830' : '2px solid transparent';
         textBlock.style.borderRadius = '8px';
-        textBlock.style.padding = '8px 15px';
+        textBlock.style.padding = '3px 15px';
         textBlock.style.gap = '12px';
         textBlock.style.cursor = 'grab';
         textBlock.style.transition = 'all 0.2s ease';
@@ -1438,6 +1525,7 @@ function renderStorySorter(act) {
                 type: 'story-sorter-update',
                 connectors: act.connectors,
                 items: act.items,
+                activityName: act.name,
                 assignments: act.state.currentAssignments,
                 storyShown: act.state.storyShown,
                 highlightedIdx: act.state.highlightedIdx
@@ -1491,6 +1579,7 @@ function renderStorySorter(act) {
                     type: 'story-sorter-update',
                     connectors: act.connectors,
                     items: act.items,
+                    activityName: act.name,
                     assignments: act.state.currentAssignments,
                     storyShown: act.state.storyShown,
                     highlightedIdx: act.state.highlightedIdx
@@ -1613,6 +1702,50 @@ function stripFlagEmoji(text) {
 }
 
 function renderHelloWorld(act) {
+    const modeBar = document.createElement('div');
+    modeBar.className = 'mode-bar';
+
+    const btnMode1 = document.createElement('button');
+    btnMode1.className = 'mode-btn active';
+    btnMode1.textContent = 'Mode 1: Hello Around the World';
+
+    const btnMode2 = document.createElement('button');
+    btnMode2.className = 'mode-btn';
+    btnMode2.textContent = 'Mode 2: How do you say "hello"...?';
+
+    function clearHelloWorldScreen() {
+        container.querySelectorAll('.item-row, .group-header').forEach(el => el.remove());
+        send('clear-middle', '');
+        send('clear-bottom', '');
+        send('side-emoji', '');
+        send('side-image', '', null);
+        send('country-name', '');
+        send('corner-photo', '', null);
+    }
+
+    btnMode1.onclick = () => {
+        modeBar.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btnMode1.classList.add('active');
+        clearHelloWorldScreen();
+        renderHelloWorldMode1(act);
+    };
+
+    btnMode2.onclick = () => {
+        modeBar.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btnMode2.classList.add('active');
+        clearHelloWorldScreen();
+        const qaItems = act.items.map(item => ({ q: `How do you say "hello" in ${item.country}?`, a: item.q, sideImg: item.picture }));
+        renderAlreadyKnow({ items: qaItems }, 'Question', 'Answer', 'Hide Question', 'Hide Answer');
+    };
+
+    modeBar.appendChild(btnMode1);
+    modeBar.appendChild(btnMode2);
+    container.appendChild(modeBar);
+
+    renderHelloWorldMode1(act);
+}
+
+function renderHelloWorldMode1(act) {
     // por tipo de botón: índice de la fila actualmente mostrada (o null)
     const shown = { flag: null, picture: null, country: null, language: null, greeting: null };
     // por tipo de botón: referencia al <button> de cada fila (para poder resetearlo)
@@ -1690,7 +1823,7 @@ function renderHelloWorld(act) {
         row.appendChild(label);
 
         row.appendChild(makeToggle('flag', 'Flag', 'btn-flag', i,
-            () => send('side-image', '', item.sideImg),
+            () => send('side-image', '', item.sideImg, true),
             () => send('side-image', '', null)
         ));
 
@@ -1722,6 +1855,164 @@ function renderHelloWorld(act) {
 
         container.appendChild(row);
     });
+}
+
+// ══════════════════════════════════════
+// SOUND GAME — un botón por palabra + reproducción automática al azar
+// ══════════════════════════════════════
+function pickNextSoundGameWord(items) {
+    if (soundGameRemaining.length === 0) {
+        soundGameRemaining = items.map((_, idx) => idx);
+        for (let i = soundGameRemaining.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [soundGameRemaining[i], soundGameRemaining[j]] = [soundGameRemaining[j], soundGameRemaining[i]];
+        }
+        if (soundGameRemaining.length > 1 && items[soundGameRemaining[0]] === soundGameLastWord) {
+            [soundGameRemaining[0], soundGameRemaining[1]] = [soundGameRemaining[1], soundGameRemaining[0]];
+        }
+    }
+    const idx = soundGameRemaining.shift();
+    soundGameLastWord = items[idx];
+    return items[idx];
+}
+
+function sendSoundGameTimer(ms) {
+    channel.postMessage({ type: 'sound-game-timer', duration: ms || 0 });
+}
+
+function showSoundGameWord(item, timerMs) {
+    soundGameCurrentItem = item;
+    send('clear-middle', '');
+    send('side-emoji', '');
+    if (timerMs) sendSoundGameTimer(0);
+    setTimeout(() => {
+        if (soundGameShowLetters) {
+            const html = buildHighlightedWord(item.word, item.pron);
+            channel.postMessage({ type: 'middle', html, big: 'xl' });
+        } else {
+            send('middle', item.word, null, 'xl');
+        }
+        send('side-emoji', item.icon || '🔊');
+        if (timerMs) sendSoundGameTimer(timerMs);
+    }, 180);
+}
+
+function renderSoundGame(act) {
+    stopSoundGamePlay();
+    soundGameRemaining = [];
+    soundGameLastWord = null;
+    soundGameCurrentItem = null;
+
+    const topBar = document.createElement('div');
+    topBar.style.display = 'flex';
+    topBar.style.alignItems = 'center';
+    topBar.style.justifyContent = 'center';
+    topBar.style.gap = '8px';
+    topBar.style.marginBottom = '15px';
+
+    const switchLabel = document.createElement('label');
+    switchLabel.className = 'switch';
+    const switchInput = document.createElement('input');
+    switchInput.type = 'checkbox';
+    switchInput.checked = soundGameShowLetters;
+    const slider = document.createElement('span');
+    slider.className = 'slider';
+    switchLabel.appendChild(switchInput);
+    switchLabel.appendChild(slider);
+    topBar.appendChild(switchLabel);
+
+    const switchText = document.createElement('span');
+    switchText.className = 'switch-label';
+    switchText.textContent = 'Show /iː/ letters in another color';
+    topBar.appendChild(switchText);
+
+    switchInput.onchange = () => {
+        soundGameShowLetters = switchInput.checked;
+        if (soundGameCurrentItem) {
+            if (soundGameShowLetters) {
+                const html = buildHighlightedWord(soundGameCurrentItem.word, soundGameCurrentItem.pron);
+                channel.postMessage({ type: 'middle', html, big: 'xl' });
+            } else {
+                send('middle', soundGameCurrentItem.word, null, 'xl');
+            }
+        }
+    };
+
+    container.appendChild(topBar);
+
+    const playBtns = [];
+    function resetPlayButtons() {
+        playBtns.forEach(b => {
+            b.className = 'btn btn-gray';
+            b.dataset.active = 'false';
+        });
+    }
+
+    const playBar = document.createElement('div');
+    playBar.style.display = 'flex';
+    playBar.style.gap = '15px';
+    playBar.style.justifyContent = 'center';
+    playBar.style.marginBottom = '20px';
+
+    const speeds = [
+        { label: '▶️ Play Slow', ms: 5000 },
+        { label: '⏩ Play Fast', ms: 3000 },
+        { label: '⏭️ Play Very Fast', ms: 1500 },
+    ];
+
+    speeds.forEach(speed => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-gray';
+        btn.textContent = speed.label;
+        btn.dataset.active = 'false';
+        btn.onclick = () => {
+            const wasActive = btn.dataset.active === 'true';
+            stopSoundGamePlay();
+            resetPlayButtons();
+            sendSoundGameTimer(0);
+            if (wasActive) return;
+            btn.className = 'btn btn-hide';
+            btn.dataset.active = 'true';
+            const tick = () => showSoundGameWord(pickNextSoundGameWord(act.items), speed.ms);
+            tick();
+            soundGameInterval = setInterval(tick, speed.ms);
+        };
+        playBtns.push(btn);
+        playBar.appendChild(btn);
+    });
+
+    container.appendChild(playBar);
+
+    const wordBar = document.createElement('div');
+    wordBar.style.display = 'grid';
+    wordBar.style.gridTemplateColumns = 'repeat(5, 110px)';
+    wordBar.style.gap = '10px';
+    wordBar.style.justifyContent = 'center';
+
+    act.items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-mid';
+        btn.style.width = '110px';
+        btn.style.height = '90px';
+        btn.style.display = 'flex';
+        btn.style.flexDirection = 'column';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.style.gap = '4px';
+        btn.style.padding = '8px';
+        btn.style.whiteSpace = 'normal';
+        btn.style.textAlign = 'center';
+        btn.innerHTML = `<span style="font-weight:bold; font-size:0.95rem;">${item.word}</span><span style="font-size:0.75rem; opacity:0.85;">(${item.pron})</span>`;
+        btn.onclick = () => {
+            stopSoundGamePlay();
+            resetPlayButtons();
+            sendSoundGameTimer(0);
+            showSoundGameWord(item);
+        };
+        wordBar.appendChild(btn);
+    });
+
+    container.appendChild(wordBar);
 }
 
 // ══════════════════════════════════════

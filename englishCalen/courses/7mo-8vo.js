@@ -173,34 +173,35 @@ COURSES['7mo-8vo'] = {
         ]
     },
     {
-        name: "🔢 Story Sequence",
-        type: "question-answer",
+        name: "🔢 Sequence Connectors - FIFA World Cup 2026",
+        type: "story-sorter",
         suggestion: PENDING_SUGGESTION,
-        qLabel: "Event",
-        aLabel: "Ordered",
+        connectors: ["First,", "Next,", "Then,", "While,", "After that,", "As soon as", "Finally,", "In the end,"],
         items: [
-            { q: "The World Cup Final began in Qatar.", a: "First, the World Cup Final began in Qatar.", icon: "1️⃣" },
-            { q: "Argentina scored in the first half.", a: "Next, Argentina scored in the first half.", icon: "2️⃣" },
-            { q: "Mbappé scored two quick goals for France!", a: "Then, Mbappé scored two quick goals for France!", icon: "3️⃣" },
-            { q: "The match went to extra time.", a: "After that, the match went to extra time.", icon: "4️⃣" },
-            { q: "Argentina scored in the 109th minute.", a: "As soon as Argentina scored, France scored again!", icon: "5️⃣" },
-            { q: "France missed two penalties in the shootout.", a: "Finally, France missed two penalties.", icon: "6️⃣" },
-            { q: "Argentina won the World Cup! 🏆", a: "In the end, Argentina won the World Cup!", icon: "🏆" },
+            { id: 1, correctOrder: 1, text: "Argentina and Spain went to the field in the World Cup Final 2026.", label: "Kickoff" },
+            { id: 2, correctOrder: 2, text: "the national anthems were played.", label: "National anthems" },
+            { id: 3, correctOrder: 3, text: "the game started and the first half ended with no goals.", label: "First half" },
+            { id: 4, correctOrder: 4, text: "at halftime there was a show with Shakira, BTS and other artists.", label: "Halftime show" },
+            { id: 5, correctOrder: 5, text: "the second half began and also ended with no goals, so they went to extra time.", label: "Second half" },
+            { id: 6, correctOrder: 6, text: "extra time began, Ferran Torres scored a goal for Spain.", label: "Extra time goal" },
+            { id: 7, correctOrder: 7, text: "Spain kept the lead until the game ended.", label: "Holding the lead" },
+            { id: 8, correctOrder: 8, text: "Spain became World Champion for the second time in history.", label: "Champions" }
         ]
     },
     {
-        name: "🔢 Story Sequence - The Little Prince",
+        name: "🔢 Sequence Connectors - The Little Prince",
         type: "story-sorter",
         suggestion: LITTLE_PRINCE_SUGGESTION,
-        connectors: ["First,", "Next,", "Eventually,", "As soon as", "Soon after,", "Finally,", "In the end,"],
+        connectors: ["First,", "Next,", "Then,", "After that,", "While", "As soon as", "Finally,", "In the end,"],
         items: [
             { id: 1, correctOrder: 1, text: "the Little Prince lived on a small planet with three volcanoes and a beautiful Rose.", label: "The Prince on B-612" },
             { id: 2, correctOrder: 2, text: "he left his planet and visited other asteroids, where he met some strange adults.", label: "Leaving and traveling" },
             { id: 3, correctOrder: 3, text: "after a long journey, he arrived on Earth and met a wild fox under an apple tree.", label: "Arrival and meeting the fox" },
-            { id: 4, correctOrder: 4, text: "he tamed the fox, they became best friends.", label: "Taming and friendship" },
-            { id: 5, correctOrder: 5, text: "it was time to say goodbye, the fox shared a secret: \"What is essential is invisible to the eye.\"", label: "The fox's secret" },
-            { id: 6, correctOrder: 6, text: "the Prince decided to return home, because he felt responsible for his Rose.", label: "Decision to return" },
-            { id: 7, correctOrder: 7, text: "the snake bit him, and his spirit returned to his star.", label: "The snake's bite and departure" }
+            { id: 4, correctOrder: 4, text: "the fox asked to be tamed, so they met at the same time every day and became best friends.", label: "Taming the fox" },
+            { id: 5, correctOrder: 5, text: "they were saying goodbye, the fox shared a secret: \"What is essential is invisible to the eye.\"", label: "The fox's secret" },
+            { id: 6, correctOrder: 6, text: "he remembered his Rose, he felt responsible for her and decided to return home.", label: "Decision to return" },
+            { id: 7, correctOrder: 7, text: "the snake bit him, and he fell down gently onto the sand, without a sound.", label: "The snake's bite" },
+            { id: 8, correctOrder: 8, text: "his spirit returned to his star, back to his beloved Rose.", label: "Return to the stars" }
         ]
     }
         ]
