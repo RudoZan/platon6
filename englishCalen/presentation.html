@@ -185,6 +185,26 @@
             display: none;
         }
         .side-image-caption.active { display: block; }
+        .sw-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .sw-flag { font-size: 8rem; line-height: 1; position: relative; z-index: 1; }
+        .sw-word {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #f0a830;
+            text-align: center;
+            margin-bottom: 12px;
+            opacity: 0;
+            transform: translateY(110px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            position: relative;
+            z-index: 0;
+        }
+        .sw-word.revealed { opacity: 1; transform: translateY(0); z-index: 2; }
         .corner-photo-panel {
             display: none;
             position: absolute;
@@ -679,6 +699,45 @@
             bot.style.display = '';
         }
 
+        function disableSameWord() {
+            const swContainer = document.getElementById('sameWordContainer');
+            if (swContainer) {
+                swContainer.style.display = 'none';
+            }
+            nam.style.display = '';
+            mid.style.display = '';
+            bot.style.display = '';
+        }
+
+        function enableSameWord() {
+            nam.style.display = 'none';
+            mid.style.display = 'none';
+            bot.style.display = 'none';
+            disableWhichCorrect();
+            disableStorySorter();
+
+            let swContainer = document.getElementById('sameWordContainer');
+            if (!swContainer) {
+                const contentBox = document.querySelector('.content-box');
+                swContainer = document.createElement('div');
+                swContainer.id = 'sameWordContainer';
+                swContainer.style.position = 'absolute';
+                swContainer.style.inset = '0';
+                swContainer.style.zIndex = '10';
+                swContainer.style.boxSizing = 'border-box';
+                swContainer.innerHTML = `
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%; gap: 100px; box-sizing: border-box;">
+                        <div class="sw-col"><div class="sw-word" id="swWordus"></div><div class="sw-flag">🇺🇸</div></div>
+                        <div class="sw-col"><div class="sw-word" id="swWorduk"></div><div class="sw-flag">🇬🇧</div></div>
+                        <div class="sw-col"><div class="sw-word" id="swWordau"></div><div class="sw-flag">🇦🇺</div></div>
+                    </div>
+                `;
+                contentBox.appendChild(swContainer);
+            } else {
+                swContainer.style.display = 'block';
+            }
+        }
+
         function disableStorySorter() {
             const ssContainer = document.getElementById('storySorterContainer');
             if (ssContainer) {
@@ -1068,6 +1127,7 @@
             if (d.type === 'activity-init') {
                 disableStorySorter();
                 disableWhichCorrect();
+                disableSameWord();
                 nam.textContent = '';
                 mid.innerHTML = '';
                 bot.textContent = '';
@@ -1190,6 +1250,20 @@
                     sideImageCaption.textContent = '';
                     sideImageCaption.classList.remove('active');
                 }
+            } else if (d.type === 'same-word-init') {
+                enableSameWord();
+                ['us', 'uk', 'au'].forEach(lang => {
+                    const el = document.getElementById('swWord' + lang);
+                    if (el) {
+                        el.classList.remove('revealed');
+                        const text = d[lang] || '';
+                        const escaped = text.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+                        el.innerHTML = escaped.replace(' (', '<br>(');
+                    }
+                });
+            } else if (d.type === 'same-word-reveal') {
+                const el = document.getElementById('swWord' + d.lang);
+                if (el) el.classList.add('revealed');
             } else if (d.type === 'corner-photo') {
                 if (d.image) {
                     cornerPhotoImg.src = d.image;
@@ -1272,6 +1346,7 @@
                 showNormalMode();
                 disableWhichCorrect();
                 disableStorySorter();
+                disableSameWord();
                 nam.textContent = '';
                 mid.innerHTML = '';
                 bot.textContent = '';

@@ -201,11 +201,11 @@ COURSES['5to-6to'] = {
         type: "same-word",
         suggestion: PENDING_SUGGESTION,
         items: [
-            { es: "Dulces", us: "candy", uk: "sweets", au: "lollies", icon: "🍬" },
-            { es: "Zapatillas", us: "sneakers", uk: "trainers", au: "runners", icon: "👟" },
-            { es: "Papas fritas", us: "French fries", uk: "chips", au: "hot chips", icon: "🍟" },
-            { es: "Ascensor", us: "elevator", uk: "lift", au: "lift", icon: "🛗" },
-            { es: "Semáforo", us: "traffic lights", uk: "traffic lights", au: "robots (South Africa)", icon: "🚦" },
+            { es: "Dulces", us: "candy", uk: "sweets", au: "lollies", icon: "🍬", img: "Images/vocabulario/dulces.png" },
+            { es: "Zapatillas", us: "sneakers", uk: "trainers", au: "runners", icon: "👟", img: "Images/vocabulario/zapatillas.png" },
+            { es: "Papas fritas", us: "French fries", uk: "chips", au: "hot chips", icon: "🍟", img: "Images/vocabulario/papas_fritas.png" },
+            { es: "Ascensor", us: "elevator", uk: "lift", au: "lift", icon: "🛗", img: "Images/vocabulario/ascensor.png" },
+            { es: "Semáforo", us: "traffic lights", uk: "traffic lights", au: "robots (South Africa)", icon: "🚦", img: "Images/vocabulario/semaforo.png" },
         ]
     },
     {

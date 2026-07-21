@@ -1603,7 +1603,7 @@ function capFirst(s) {
 
 function renderSameWord(act) {
     let activeItem = null;
-    let shownParts = { middle: '', bottom: '' };
+    const disableLangFns = [];
 
     act.items.forEach((item, i) => {
         const row = document.createElement('div');
@@ -1620,66 +1620,46 @@ function renderSameWord(act) {
 
         const btnEs = document.createElement('button');
         btnEs.className = 'btn btn-mid';
-        btnEs.textContent = '🇪🇸 Español';
-        btnEs.onclick = () => {
-            if (activeItem !== null && activeItem !== i) {
-                send('clear-bottom', '');
-                shownParts.bottom = '';
-            }
-            send('middle', item.es);
-            if (item.icon) send('side-emoji', item.icon);
-            shownParts.middle = item.es;
-            activeItem = i;
-        };
+        btnEs.textContent = '🇪🇸 Show';
 
         const btnUs = document.createElement('button');
         btnUs.className = 'btn btn-bot';
         btnUs.textContent = '🇺🇸 USA';
-        btnUs.onclick = () => {
-            if (activeItem !== null && activeItem !== i) {
-                send('middle', item.es);
-                if (item.icon) send('side-emoji', item.icon);
-                shownParts.middle = item.es;
-            }
-            send('bottom', '🇺🇸 ' + capFirst(item.us));
-            activeItem = i;
-        };
 
         const btnUk = document.createElement('button');
         btnUk.className = 'btn btn-bot';
         btnUk.textContent = '🇬🇧 UK';
-        btnUk.onclick = () => {
-            if (activeItem !== null && activeItem !== i) {
-                send('middle', item.es);
-                if (item.icon) send('side-emoji', item.icon);
-                shownParts.middle = item.es;
-            }
-            send('bottom', '🇬🇧 ' + capFirst(item.uk));
-            activeItem = i;
-        };
 
         const btnAu = document.createElement('button');
         btnAu.className = 'btn btn-bot';
         btnAu.textContent = '🇦🇺 Other';
-        btnAu.onclick = () => {
-            if (activeItem !== null && activeItem !== i) {
-                send('middle', item.es);
-                if (item.icon) send('side-emoji', item.icon);
-                shownParts.middle = item.es;
-            }
-            send('bottom', '🇦🇺 ' + capFirst(item.au));
+
+        function setLangButtonsEnabled(enabled) {
+            [btnUs, btnUk, btnAu].forEach(b => {
+                b.disabled = !enabled;
+                b.style.opacity = enabled ? '' : '0.4';
+            });
+        }
+        setLangButtonsEnabled(false);
+        disableLangFns.push(() => setLangButtonsEnabled(false));
+
+        btnEs.onclick = () => {
+            disableLangFns.forEach((fn, idx) => { if (idx !== i) fn(); });
+            channel.postMessage({
+                type: 'same-word-init',
+                us: capFirst(item.us),
+                uk: capFirst(item.uk),
+                au: capFirst(item.au)
+            });
+            channel.postMessage({ type: 'country-name', text: item.es });
+            if (item.img) send('side-image', '', item.img);
+            setLangButtonsEnabled(true);
             activeItem = i;
         };
 
-        const btnAll = document.createElement('button');
-        btnAll.className = 'btn btn-red';
-        btnAll.textContent = 'All';
-        btnAll.onclick = () => {
-            send('middle', item.es);
-            send('bottom', '🇺🇸 ' + capFirst(item.us) + '   |   🇬🇧 ' + capFirst(item.uk) + '   |   🇦🇺 ' + capFirst(item.au));
-            if (item.icon) send('side-emoji', item.icon);
-            activeItem = i;
-        };
+        btnUs.onclick = () => channel.postMessage({ type: 'same-word-reveal', lang: 'us' });
+        btnUk.onclick = () => channel.postMessage({ type: 'same-word-reveal', lang: 'uk' });
+        btnAu.onclick = () => channel.postMessage({ type: 'same-word-reveal', lang: 'au' });
 
         row.appendChild(num);
         row.appendChild(label);
@@ -1687,7 +1667,6 @@ function renderSameWord(act) {
         row.appendChild(btnUs);
         row.appendChild(btnUk);
         row.appendChild(btnAu);
-        row.appendChild(btnAll);
         container.appendChild(row);
     });
 }
