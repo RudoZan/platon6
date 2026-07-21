@@ -234,7 +234,7 @@ COURSES['5to-6to'] = {
         name: "👅 Tongue Twister Race",
         type: "question-answer",
         suggestion: PENDING_SUGGESTION,
-        bigTextXl: true,
+        bigText: true,
         qLabel: "Show",
         aLabel: "Faster!",
         items: [
