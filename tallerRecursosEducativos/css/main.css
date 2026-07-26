@@ -165,25 +165,25 @@ body.sidebar-oculto .sidebar { transform: translateX(100%); }
 
 /* Grilla de módulos (curso.html) */
 .modulos-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 16px; margin-top: 22px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px; margin-top: 18px;
 }
 .modulo-tarjeta {
-  display: flex; flex-direction: column; gap: 8px; background: var(--color-tarjeta);
-  border: 1px solid var(--color-borde); border-radius: var(--radio); padding: 18px 20px 18px 22px;
+  display: flex; flex-direction: column; gap: 4px; background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde); border-radius: var(--radio-chico); padding: 12px 14px 12px 16px;
   text-decoration: none; color: var(--color-texto); box-shadow: var(--sombra-suave);
   transition: transform .18s, box-shadow .18s, border-color .18s; position: relative; overflow: hidden;
 }
 .modulo-tarjeta::before {
-  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3.5px;
   background: linear-gradient(180deg, var(--color-acento), var(--color-primario));
 }
-.modulo-tarjeta:hover { border-color: var(--color-acento); transform: translateY(-4px); box-shadow: var(--sombra-media); }
+.modulo-tarjeta:hover { border-color: var(--color-acento); transform: translateY(-3px); box-shadow: var(--sombra-media); }
 .modulo-tarjeta__numero {
-  font-size: 0.7rem; font-weight: 800; color: var(--color-acento-oscuro);
+  font-size: 0.65rem; font-weight: 800; color: var(--color-acento-oscuro);
   text-transform: uppercase; letter-spacing: .06em;
 }
-.modulo-tarjeta__titulo { font-size: 0.95rem; font-weight: 700; color: var(--color-primario-oscuro); line-height: 1.35; }
+.modulo-tarjeta__titulo { font-size: 0.85rem; font-weight: 700; color: var(--color-primario-oscuro); line-height: 1.3; }
 
 /* Caja de ejemplo (contenido específico de disciplina) */
 .caja-ejemplo {
@@ -205,7 +205,21 @@ body.sidebar-oculto .sidebar { transform: translateX(100%); }
 }
 
 .caja-ejemplo--destacada .caja-ejemplo__contenido > p:first-of-type strong {
-  color: #d97627;
+  color: var(--color-primario);
+}
+
+/* Botón de enlace a ejemplo interactivo en vivo */
+.btn-ejemplo {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 10px; padding: 6px 14px; border-radius: 999px;
+  background: #f0f8fd; border: 1.5px solid var(--color-borde);
+  color: var(--color-primario); font-weight: 700; font-size: 0.82rem;
+  text-decoration: none; transition: all .15s ease;
+}
+.btn-ejemplo:hover {
+  background: #ffffff; border-color: var(--color-acento);
+  color: var(--color-primario-oscuro); transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(35,94,130,.12);
 }
 
 
@@ -326,6 +340,11 @@ body.sidebar-oculto .sidebar { transform: translateX(100%); }
 @media (max-width: 700px) {
   .tipos-recurso-grid { grid-template-columns: 1fr; }
 }
+.tipo-recurso--pendiente {
+  border-style: dashed;
+  opacity: 0.7;
+}
+.tipo-recurso--pendiente .tipo-recurso__texto { justify-content: center; min-height: 160px; }
 
 /* ── Componentes para páginas de guía práctica (ej. Módulo 2) ─────────── */
 
@@ -401,12 +420,14 @@ body.sidebar-oculto .sidebar { transform: translateX(100%); }
   box-shadow: 0 -4px 18px rgba(18,54,80,.08); transition: right .18s ease;
 }
 body.sidebar-oculto .pie { right: 0; }
-.nav-prev-next { display: flex; justify-content: space-between; gap: 10px; width: 100%; }
+.nav-prev-next { display: flex; justify-content: space-between; gap: 10px; width: 100%; align-items: center; }
 .btn-nav {
   text-decoration: none; padding: 10px 18px; border-radius: 999px;
   background: var(--color-bg-bottom); border: 1.5px solid var(--color-borde);
   color: var(--color-primario); font-weight: 700; font-size: 0.82rem;
   transition: transform .15s, box-shadow .15s, border-color .15s;
+  max-width: 48%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: inline-flex; align-items: center; justify-content: center;
 }
 .btn-nav:hover { border-color: var(--color-primario-claro); transform: translateY(-1px); }
 .btn-nav--siguiente {

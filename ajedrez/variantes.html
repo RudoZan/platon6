@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variantes del Ajedrez — Platón 6</title>
+<style>
+  :root {
+    --bg-1: #241a10;
+    --bg-2: #140e08;
+    --oro: #c9a24b;
+    --oro-claro: #e0c37a;
+    --texto: #f0e6d6;
+    --claro: #f0d9b5;
+    --oscuro: #8b5a2b;
+    --marco: #3a2a18;
+    --acento: #d97706;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: radial-gradient(ellipse at top, rgba(36,26,16,0.55), rgba(20,14,8,0.72)), url('ajedrezFondo.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    color: var(--texto);
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 20px 16px 50px;
+  }
+
+  .nav-modos {
+    display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;
+  }
+  .nav-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--oro);
+    background: rgba(0,0,0,0.4); color: var(--texto); text-decoration: none;
+    font-size: 0.85rem; font-weight: bold; transition: all .2s;
+  }
+  .nav-link:hover { background: rgba(201,162,75,0.25); color: var(--oro-claro); transform: translateY(-1px); }
+  .nav-link.activo { background: var(--oro); color: #1a1005; border-color: var(--oro-claro); box-shadow: 0 0 12px rgba(201,162,75,0.4); }
+
+  h1 {
+    font-size: 2.2rem; letter-spacing: 0.08em; color: var(--oro-claro);
+    text-shadow: 0 2px 12px rgba(0,0,0,.6); margin-bottom: 4px; text-align: center;
+  }
+  .subtitulo { color: #b8a888; font-size: 0.9rem; margin-bottom: 22px; text-align: center; max-width: 650px; line-height: 1.4; }
+
+  .zona-juego {
+    display: flex; gap: 20px; align-items: flex-start; justify-content: center; flex-wrap: wrap;
+    width: 100%; max-width: 1140px;
+  }
+
+  .panel-variantes, .panel-info {
+    width: 250px; background: rgba(0,0,0,0.35); border: 1.5px solid rgba(201,162,75,0.4);
+    border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 14px;
+    backdrop-filter: blur(4px);
+  }
+  .panel-variantes h2, .panel-info h2 {
+    font-size: 0.95rem; color: var(--oro-claro); letter-spacing: .04em;
+    border-bottom: 1px solid rgba(201,162,75,0.3); padding-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .lista-variantes { display: flex; flex-direction: column; gap: 8px; }
+  .btn-variante {
+    text-align: left; padding: 10px 12px; border-radius: 8px; border: 1.5px solid rgba(201,162,75,0.3);
+    background: rgba(255,255,255,0.03); color: var(--texto); font-family: inherit; font-size: 0.82rem;
+    cursor: pointer; transition: all .15s; display: flex; flex-direction: column; gap: 4px;
+  }
+  .btn-variante:hover { background: rgba(201,162,75,0.15); border-color: var(--oro); }
+  .btn-variante.activo { background: rgba(201,162,75,0.25); border-color: var(--oro-claro); color: var(--oro-claro); }
+  .btn-variante .nombre-v { font-weight: bold; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; }
+  .btn-variante .sub-v { font-size: 0.72rem; color: #b8a888; line-height: 1.2; }
+
+  .acciones-panel { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+  .acciones-panel button {
+    padding: 9px 12px; border-radius: 6px; border: 1.5px solid var(--oro);
+    background: rgba(255,255,255,0.05); color: var(--oro-claro); font-weight: bold;
+    font-size: 0.8rem; cursor: pointer; font-family: inherit; transition: background .15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .acciones-panel button:hover { background: rgba(201,162,75,0.2); }
+
+  .reglas-caja {
+    background: rgba(0,0,0,0.25); border: 1px solid rgba(201,162,75,0.25);
+    border-radius: 8px; padding: 12px; font-size: 0.8rem; line-height: 1.5; color: #d6cbb5;
+  }
+  .reglas-caja h3 { color: var(--oro-claro); font-size: 0.85rem; margin-bottom: 6px; font-weight: bold; }
+  .reglas-caja ul { padding-left: 16px; margin-top: 4px; }
+  .reglas-caja li { margin-bottom: 4px; }
+
+  .marcador-variante {
+    background: rgba(201,162,75,0.12); border: 1px solid var(--oro);
+    border-radius: 8px; padding: 10px; text-align: center;
+  }
+  .marcador-titulo { font-size: 0.75rem; text-transform: uppercase; color: #b8a888; letter-spacing: 0.05em; }
+  .marcador-valor { font-size: 1.2rem; font-weight: bold; color: var(--oro-claro); margin-top: 2px; }
+
+  /* Tablero */
+  .tablero-contenedor-principal {
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  .tablero-envoltorio {
+    display: flex; margin: 10px 0; padding: 14px; background: var(--marco); position: relative;
+    border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,.6), inset 0 0 0 1px rgba(201,162,75,0.3);
+  }
+
+  .filas-numeros {
+    display: flex; flex-direction: column; justify-content: space-around; align-items: center;
+    width: 20px; margin-right: 4px;
+  }
+  .filas-numeros span { font-size: 0.75rem; color: var(--oro); height: 62px; display: flex; align-items: center; }
+
+  .tablero-centro { display: flex; flex-direction: column; }
+  .tablero {
+    display: grid; grid-template-columns: repeat(8, 62px); grid-template-rows: repeat(8, 62px);
+    border: 2px solid var(--oro);
+  }
+  .casilla {
+    display: flex; align-items: center; justify-content: center; position: relative;
+    cursor: pointer; user-select: none;
+  }
+  .casilla.clara { background: var(--claro); }
+  .casilla.oscura { background: var(--oscuro); }
+  .casilla.centro-colina {
+    box-shadow: inset 0 0 12px rgba(217, 119, 6, 0.7);
+  }
+  .casilla.centro-colina::before {
+    content: '👑'; position: absolute; font-size: 0.75rem; opacity: 0.35; pointer-events: none;
+  }
+
+  .casilla.destino-valido::after {
+    content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(201,162,75,0.6); pointer-events: none;
+  }
+  .casilla.destino-valido.con-pieza::after {
+    width: 100%; height: 100%; border-radius: 6px; background: transparent;
+    box-shadow: inset 0 0 0 4px rgba(201,162,75,0.75);
+  }
+
+  .columnas-letras { display: flex; justify-content: space-around; margin-top: 4px; }
+  .columnas-letras span { font-size: 0.75rem; color: var(--oro); width: 62px; text-align: center; }
+
+  .pieza {
+    font-size: 3.1rem; line-height: 1; cursor: grab; transition: transform .1s; position: relative;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); will-change: transform; z-index: 2;
+  }
+  .pieza:hover { transform: scale(1.08); }
+  .pieza:active { cursor: grabbing; }
+  .pieza.blanca { color: #ffffff; -webkit-text-stroke: 1.5px #8a8a8a; }
+  .pieza.negra { color: #111111; -webkit-text-stroke: 1.5px #8a8a8a; }
+  .pieza.seleccionada { transform: scale(1.12); filter: drop-shadow(0 0 8px var(--oro-claro)); }
+
+  .panel-estado {
+    font-size: 0.85rem; color: var(--oro-claro); text-align: center; margin-top: 8px;
+    min-height: 1.4em; font-weight: bold; background: rgba(0,0,0,0.3);
+    padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(201,162,75,0.3);
+  }
+
+  .mensaje-final {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.72); border-radius: 10px; z-index: 10;
+  }
+  .mensaje-final.oculto { display: none; }
+  .mensaje-final-caja {
+    background: var(--marco); border: 2px solid var(--oro); border-radius: 10px;
+    padding: 22px 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.7); max-width: 85%;
+  }
+  .mensaje-final-caja p {
+    font-size: 1.15rem; color: var(--oro-claro); margin-bottom: 14px; font-weight: bold; line-height: 1.4;
+  }
+  .mensaje-final-caja button {
+    padding: 8px 20px; border-radius: 6px; border: 1.5px solid var(--oro);
+    background: rgba(255,255,255,0.06); color: var(--oro-claro); font-weight: bold;
+    font-size: 0.85rem; cursor: pointer; font-family: inherit; transition: background .15s;
+  }
+  .mensaje-final-caja button:hover { background: rgba(201,162,75,0.25); }
+
+  .historial-movimientos {
+    border-top: 1px solid rgba(201,162,75,0.3); padding-top: 10px; font-size: 0.76rem;
+    max-height: 140px; overflow-y: auto; margin-top: 10px;
+  }
+  .historial-movimientos h3 { font-size: 0.78rem; color: var(--oro-claro); margin-bottom: 4px; }
+  .historial-movimientos p { color: var(--texto); line-height: 1.6; }
+
+  @media (max-width: 600px) {
+    .tablero { grid-template-columns: repeat(8, 38px); grid-template-rows: repeat(8, 38px); }
+    .columnas-letras span { width: 38px; }
+    .filas-numeros span { height: 38px; }
+    .pieza { font-size: 2rem; }
+    .panel-variantes, .panel-info { width: 100%; max-width: 340px; }
+  }
+</style>
+</head>
+<body>
+
+  <nav class="nav-modos">
+    <a href="index.html" class="nav-link">♜ Ajedrez Clásico y Entrenamiento</a>
+    <a href="variantes.html" class="nav-link activo">⚔️ Variantes del Ajedrez</a>
+    <a href="variantes-rudo.html" class="nav-link">🥊 Variantes Rudo</a>
+    <a href="curso.html" class="nav-link">🎓 Curso Interactivo</a>
+  </nav>
+
+  <h1>⚔️ Variantes del Ajedrez ⚔️</h1>
+  <p class="subtitulo">Explora modos de juego alternativos, posiciones aleatorias de Fischer (Chess 960), Rey de la Colina, Horda de peones y Tres Jaques.</p>
+
+  <div class="zona-juego">
+    <!-- Selector de Variantes -->
+    <aside class="panel-variantes">
+      <h2>Elige una Variante</h2>
+      
+      <div class="lista-variantes">
+        <button class="btn-variante activo" data-variante="fischer960">
+          <span class="nombre-v">🎲 Chess 960 (Fischer)</span>
+          <span class="sub-v">Posición inicial aleatoria simétrica. 960 posibilidades.</span>
+        </button>
+
+        <button class="btn-variante" data-variante="kingofhill">
+          <span class="nombre-v">👑 Rey de la Colina</span>
+          <span class="sub-v">Lleva tu Rey al centro del tablero (e4, d4, e5, d5) para ganar.</span>
+        </button>
+
+        <button class="btn-variante" data-variante="threecheck">
+          <span class="nombre-v">🎯 Tres Jaques (3-Check)</span>
+          <span class="sub-v">Quien logre dar 3 jaques al rey enemigo gana de inmediato.</span>
+        </button>
+
+        <button class="btn-variante" data-variante="horde">
+          <span class="nombre-v">🛡️ Horda de Peones</span>
+          <span class="sub-v">36 peones Blancos contra el ejército estándar de las Negras.</span>
+        </button>
+
+        <button class="btn-variante" data-variante="sinreinas">
+          <span class="nombre-v">⚔️ Batalla sin Reinas</span>
+          <span class="sub-v">Sin reinas iniciales. Énfasis táctico en piezas menores.</span>
+        </button>
+      </div>
+
+      <div class="acciones-panel">
+        <button id="btnNuevaPartida">🔄 Reiniciar Variante</button>
+        <button id="btnVoltear">🔃 Voltear Tablero</button>
+      </div>
+    </aside>
+
+    <!-- Tablero Central -->
+    <div class="tablero-contenedor-principal">
+      <div class="tablero-envoltorio">
+        <div class="filas-numeros" id="filasNumeros"></div>
+        <div class="tablero-centro">
+          <div class="tablero" id="tablero"></div>
+          <div class="columnas-letras" id="columnasLetras"></div>
+        </div>
+
+        <div class="mensaje-final oculto" id="mensajeFinal">
+          <div class="mensaje-final-caja">
+            <p id="mensajeFinalTexto"></p>
+            <button id="btnCerrarMensaje">Jugar de nuevo</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="panel-estado" id="estadoPartida">Turno de las Blancas</p>
+    </div>
+
+    <!-- Panel de Información y Reglas -->
+    <aside class="panel-info">
+      <h2>Reglas de la Variante</h2>
+
+      <div class="marcador-variante" id="bloqueMarcador">
+        <div class="marcador-titulo" id="marcadorEtiqueta">Modo Actual</div>
+        <div class="marcador-valor" id="marcadorTexto">Chess 960</div>
+      </div>
+
+      <div class="reglas-caja" id="cajaReglas">
+        <!-- Se llena dinámicamente -->
+      </div>
+
+      <div class="historial-movimientos">
+        <h3>Historial</h3>
+        <p id="historialTexto">Partida iniciada.</p>
+      </div>
+    </aside>
+  </div>
+
+<script type="module">
+  import { Chess } from 'https://cdn.jsdelivr.net/npm/chess.js@0.13.4/chess.min.js';
+
+  const LETRAS = ['a','b','c','d','e','f','g','h'];
+  const GLIFOS = { K:'♚', Q:'♛', R:'♜', B:'♝', N:'♞', P:'♟' };
+
+  let varianteActual = 'fischer960';
+  let juego = new Chess();
+  let jaquesContador = { w: 0, b: 0 };
+  let volteado = false;
+  let seleccionOrigen = null;
+  let jugadasLegales = [];
+  let historialSAN = [];
+  let jaquePrevio = false;
+
+  // Audio sintetizado
+  let audioCtx = null;
+  function audio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function sonar(freq, dur, tipo='sine') {
+    try {
+      const ctx = audio();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = tipo; osc.frequency.value = freq;
+      const t = ctx.currentTime;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.12, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t); osc.stop(t + dur);
+    } catch(e) {}
+  }
+
+  // Descripciones y reglas de las variantes
+  const REGLAS_INFO = {
+    fischer960: {
+      titulo: 'Chess 960 (Fischer Random)',
+      reglas: [
+        'Los peones comienzan en sus casillas habituales.',
+        'Las piezas mayores de la 1ª y 8ª fila se posicionan al azar de forma simétrica.',
+        'Los alfiles deben quedar en casillas de distinto color y el Rey entre ambas Torres.',
+        'Mantiene las reglas de jaque y mate tradicionales.'
+      ]
+    },
+    kingofhill: {
+      titulo: 'Rey de la Colina',
+      reglas: [
+        'Mismas piezas y posición inicial que el ajedrez clásico.',
+        'Las 4 casillas centrales (d4, e4, d5, e5) representan la "colina".',
+        '¡Ganas si logras llevar a tu Rey a cualquiera de las 4 casillas centrales!',
+        'También puedes ganar por Jaque Mate tradicional.'
+      ]
+    },
+    threecheck: {
+      titulo: 'Tres Jaques (3-Check)',
+      reglas: [
+        'Cada jugador tiene un contador de jaques.',
+        'El primer jugador en realizar 3 jaques al rey contrario gana inmediatamente.',
+        'El jaque mate clásico también otorga la victoria directa.'
+      ]
+    },
+    horde: {
+      titulo: 'Horda de Peones',
+      reglas: [
+        'Las Blancas tienen un ejército de 36 peones que cubren las filas 1, 2, 3 y 4.',
+        'Las Negras tienen su ejército tradicional.',
+        'Las Blancas ganan si capturan todas las piezas enemigas o dan jaque mate.',
+        'Las Negras ganan si eliminan hasta el último peón blanco.'
+      ]
+    },
+    sinreinas: {
+      titulo: 'Batalla sin Reinas',
+      reglas: [
+        'Se retiran las reinas (d1 y d8) del tablero.',
+        'Énfasis en el desarrollo de piezas menores (Caballos, Alfiles) y coordinación de Torres.',
+        'Victoria por Jaque Mate tradicional.'
+      ]
+    }
+  };
+
+  // Generador FEN Fischer 960
+  function generarFEN960() {
+    let casillas = [null, null, null, null, null, null, null, null];
+    // Alfil en casilla par
+    let b1 = [0, 2, 4, 6][Math.floor(Math.random() * 4)];
+    casillas[b1] = 'B';
+    // Alfil en casilla impar
+    let b2 = [1, 3, 5, 7][Math.floor(Math.random() * 4)];
+    casillas[b2] = 'B';
+    // Reina en casilla libre
+    let libres = casillas.map((v, i) => v === null ? i : null).filter(v => v !== null);
+    let q = libres[Math.floor(Math.random() * libres.length)];
+    casillas[q] = 'Q';
+    // Caballos en casillas libres
+    libres = casillas.map((v, i) => v === null ? i : null).filter(v => v !== null);
+    let n1 = libres.splice(Math.floor(Math.random() * libres.length), 1)[0];
+    let n2 = libres.splice(Math.floor(Math.random() * libres.length), 1)[0];
+    casillas[n1] = 'N';
+    casillas[n2] = 'N';
+    // Las 3 casillas restantes son R, K, R
+    libres = casillas.map((v, i) => v === null ? i : null).filter(v => v !== null);
+    casillas[libres[0]] = 'R';
+    casillas[libres[1]] = 'K';
+    casillas[libres[2]] = 'R';
+
+    const filaBlanca = casillas.join('');
+    const filaNegra = casillas.join('').toLowerCase();
+
+    return `${filaNegra}/pppppppp/8/8/8/8/PPPPPPPP/${filaBlanca} w - - 0 1`;
+  }
+
+  function iniciarVariante(varianteKey) {
+    varianteActual = varianteKey;
+    jaquesContador = { w: 0, b: 0 };
+    historialSAN = [];
+    seleccionOrigen = null;
+    ocultarMensajeFinal();
+
+    if (varianteKey === 'fischer960') {
+      let FEN960 = generarFEN960();
+      juego = new Chess(FEN960);
+    } else if (varianteKey === 'horde') {
+      // FEN Horda: 36 peones blancos (filas 1 a 4 sin reyes ni piezas mayores blancas)
+      const FEN_HORDE = 'rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP w - - 0 1';
+      juego = new Chess(FEN_HORDE);
+    } else if (varianteKey === 'sinreinas') {
+      const FEN_SIN_REINAS = 'rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq - 0 1';
+      juego = new Chess(FEN_SIN_REINAS);
+    } else {
+      juego = new Chess();
+    }
+
+    actualizarPanelInfo();
+    renderizarTablero();
+    actualizarEstado();
+  }
+
+  function actualizarPanelInfo() {
+    const info = REGLAS_INFO[varianteActual];
+    document.getElementById('marcadorTexto').textContent = info.titulo;
+
+    if (varianteActual === 'threecheck') {
+      document.getElementById('marcadorEtiqueta').textContent = 'Contador de Jaques';
+      document.getElementById('marcadorTexto').textContent = `⚪ ${jaquesContador.w}/3  —  ⚫ ${jaquesContador.b}/3`;
+    } else {
+      document.getElementById('marcadorEtiqueta').textContent = 'Variante Seleccionada';
+    }
+
+    const cajaReglas = document.getElementById('cajaReglas');
+    cajaReglas.innerHTML = `
+      <h3>${info.titulo}</h3>
+      <ul>${info.reglas.map(r => `<li>${r}</li>`).join('')}</ul>
+    `;
+    document.getElementById('historialTexto').textContent = 'Partida iniciada.';
+  }
+
+  function renderizarTablero() {
+    const elTablero = document.getElementById('tablero');
+    const elFilas = document.getElementById('filasNumeros');
+    const elColumnas = document.getElementById('columnasLetras');
+
+    elTablero.innerHTML = '';
+    elFilas.innerHTML = '';
+    elColumnas.innerHTML = '';
+
+    const filas = volteado ? [1,2,3,4,5,6,7,8] : [8,7,6,5,4,3,2,1];
+    const cols = volteado ? ['h','g','f','e','d','c','b','a'] : ['a','b','c','d','e','f','g','h'];
+
+    filas.forEach(f => {
+      const spanF = document.createElement('span');
+      spanF.textContent = f;
+      elFilas.appendChild(spanF);
+    });
+
+    cols.forEach(c => {
+      const spanC = document.createElement('span');
+      spanC.textContent = c;
+      elColumnas.appendChild(spanC);
+    });
+
+    filas.forEach(f => {
+      cols.forEach(c => {
+        const sq = `${c}${f}`;
+        const casilla = document.createElement('div');
+        const esClara = (LETRAS.indexOf(c) + f) % 2 !== 0;
+        casilla.className = `casilla ${esClara ? 'clara' : 'oscura'}`;
+        casilla.dataset.sq = sq;
+
+        if (varianteActual === 'kingofhill' && ['d4','e4','d5','e5'].includes(sq)) {
+          casilla.classList.add('centro-colina');
+        }
+
+        const piezaInfo = juego.get(sq);
+        if (piezaInfo) {
+          const elPieza = document.createElement('span');
+          const esBlanca = piezaInfo.color === 'w';
+          elPieza.className = `pieza ${esBlanca ? 'blanca' : 'negra'}`;
+          elPieza.textContent = GLIFOS[piezaInfo.type.toUpperCase()];
+
+          if (seleccionOrigen === sq) {
+            elPieza.classList.add('seleccionada');
+          }
+          casilla.appendChild(elPieza);
+        }
+
+        if (jugadasLegales.includes(sq)) {
+          casilla.classList.add('destino-valido');
+          if (piezaInfo) casilla.classList.add('con-pieza');
+        }
+
+        casilla.addEventListener('click', () => alHacerClicCasilla(sq));
+        elTablero.appendChild(casilla);
+      });
+    });
+  }
+
+  function alHacerClicCasilla(sq) {
+    if (juego.game_over()) return;
+
+    const piezaEnCasilla = juego.get(sq);
+    const turnoActual = juego.turn();
+
+    if (seleccionOrigen) {
+      if (jugadasLegales.includes(sq)) {
+        hacerMovimiento(seleccionOrigen, sq);
+        seleccionOrigen = null;
+        jugadasLegales = [];
+        renderizarTablero();
+        return;
+      }
+    }
+
+    if (piezaEnCasilla && piezaEnCasilla.color === turnoActual) {
+      seleccionOrigen = sq;
+      const movs = juego.moves({ square: sq, verbose: true });
+      jugadasLegales = movs.map(m => m.to);
+      sonar(320, 0.04);
+    } else {
+      seleccionOrigen = null;
+      jugadasLegales = [];
+    }
+
+    renderizarTablero();
+  }
+
+  function hacerMovimiento(desde, hasta) {
+    const esCaptura = !!juego.get(hasta);
+    const res = juego.move({ from: desde, to: hasta, promotion: 'q' });
+
+    if (!res) return;
+
+    historialSAN.push(res.san);
+    const elHist = document.getElementById('historialTexto');
+    elHist.textContent = historialSAN.slice(-12).join('  ');
+
+    if (res.san.includes('+') || res.san.includes('#')) {
+      sonar(650, 0.18, 'triangle');
+    } else if (esCaptura) {
+      sonar(240, 0.12, 'square');
+    } else {
+      sonar(440, 0.06);
+    }
+
+    // Regla especial: Tres Jaques
+    if (varianteActual === 'threecheck') {
+      if (juego.in_check()) {
+        const dador = juego.turn() === 'w' ? 'b' : 'w'; // quien dio el jaque
+        jaquesContador[dador]++;
+        actualizarPanelInfo();
+
+        if (jaquesContador[dador] >= 3) {
+          const ganador = dador === 'w' ? 'Blancas' : 'Negras';
+          mostrarMensajeFinal(`¡Ganaron las ${ganador}! Alcanzaron 3 jaques.`);
+          return;
+        }
+      }
+    }
+
+    // Regla especial: Rey de la Colina
+    if (varianteActual === 'kingofhill') {
+      const reyBlancoSq = encontrarRey('w');
+      const reyNegroSq = encontrarRey('b');
+      const colina = ['d4','e4','d5','e5'];
+
+      if (colina.includes(reyBlancoSq)) {
+        mostrarMensajeFinal('¡Ganaron las Blancas! Su Rey conquistó el centro de la colina 👑');
+        return;
+      }
+      if (colina.includes(reyNegroSq)) {
+        mostrarMensajeFinal('¡Ganaron las Negras! Su Rey conquistó el centro de la colina 👑');
+        return;
+      }
+    }
+
+    // Regla especial: Horda
+    if (varianteActual === 'horde') {
+      const peonesBlancos = contarPiezas('w', 'p');
+      if (peonesBlancos === 0) {
+        mostrarMensajeFinal('¡Ganaron las Negras! Destruyeron hasta el último peón de la Horda.');
+        return;
+      }
+    }
+
+    verificarEstadoPartida();
+  }
+
+  function encontrarRey(color) {
+    const cols = ['a','b','c','d','e','f','g','h'];
+    for (let f = 1; f <= 8; f++) {
+      for (let c of cols) {
+        const p = juego.get(`${c}${f}`);
+        if (p && p.type === 'k' && p.color === color) return `${c}${f}`;
+      }
+    }
+    return null;
+  }
+
+  function contarPiezas(color, tipo) {
+    let cant = 0;
+    const cols = ['a','b','c','d','e','f','g','h'];
+    for (let f = 1; f <= 8; f++) {
+      for (let c of cols) {
+        const p = juego.get(`${c}${f}`);
+        if (p && p.color === color && p.type === tipo) cant++;
+      }
+    }
+    return cant;
+  }
+
+  function verificarEstadoPartida() {
+    if (juego.in_checkmate()) {
+      const ganador = juego.turn() === 'w' ? 'Negras' : 'Blancas';
+      mostrarMensajeFinal(`¡Jaque Mate! Ganaron las ${ganador}.`);
+    } else if (juego.in_draw()) {
+      mostrarMensajeFinal('¡Tablas / Empate!');
+    } else {
+      actualizarEstado();
+    }
+  }
+
+  function actualizarEstado() {
+    const elEstado = document.getElementById('estadoPartida');
+    const turno = juego.turn() === 'w' ? 'Blancas' : 'Negras';
+    if (juego.in_check()) {
+      elEstado.textContent = `¡Jaque a las ${turno}!`;
+    } else {
+      elEstado.textContent = `Turno de las ${turno}`;
+    }
+  }
+
+  function mostrarMensajeFinal(txt) {
+    document.getElementById('mensajeFinalTexto').textContent = txt;
+    document.getElementById('mensajeFinal').classList.remove('oculto');
+    sonar(880, 0.3, 'sine');
+  }
+
+  function ocultarMensajeFinal() {
+    document.getElementById('mensajeFinal').classList.add('oculto');
+  }
+
+  // Event Listeners de Botones
+  document.querySelectorAll('.btn-variante').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.btn-variante').forEach(b => b.classList.remove('activo'));
+      const target = e.currentTarget;
+      target.classList.add('activo');
+      iniciarVariante(target.dataset.variante);
+    });
+  });
+
+  document.getElementById('btnNuevaPartida').addEventListener('click', () => iniciarVariante(varianteActual));
+  document.getElementById('btnVoltear').addEventListener('click', () => {
+    volteado = !volteado;
+    renderizarTablero();
+  });
+  document.getElementById('btnCerrarMensaje').addEventListener('click', () => iniciarVariante(varianteActual));
+
+  // Iniciar por defecto
+  iniciarVariante('fischer960');
+</script>
+</body>
+</html>

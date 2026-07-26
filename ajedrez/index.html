@@ -25,8 +25,20 @@
     background-repeat: no-repeat;
     color: var(--texto);
     min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-    padding: 30px 16px 50px;
+    padding: 20px 16px 50px;
   }
+
+  .nav-modos {
+    display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;
+  }
+  .nav-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--oro);
+    background: rgba(0,0,0,0.4); color: var(--texto); text-decoration: none;
+    font-size: 0.85rem; font-weight: bold; transition: all .2s;
+  }
+  .nav-link:hover { background: rgba(201,162,75,0.25); color: var(--oro-claro); transform: translateY(-1px); }
+  .nav-link.activo { background: var(--oro); color: #1a1005; border-color: var(--oro-claro); box-shadow: 0 0 12px rgba(201,162,75,0.4); }
 
   h1 {
     font-size: 2rem; letter-spacing: 0.08em; color: var(--oro-claro);
@@ -46,11 +58,15 @@
 
   .zona-juego {
     display: flex; gap: 20px; align-items: flex-start; justify-content: center; flex-wrap: wrap;
-    width: 100%; max-width: 1120px;
+    width: 100%; max-width: 1320px;
   }
 
-  .panel-config, .panel-entrenamiento {
-    width: 230px; background: rgba(0,0,0,0.25); border: 1.5px solid rgba(201,162,75,0.4);
+  .panel-entrenamiento {
+    width: 340px; background: rgba(0,0,0,0.25); border: 1.5px solid rgba(201,162,75,0.4);
+    border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 14px;
+  }
+  .panel-config {
+    width: 250px; background: rgba(0,0,0,0.25); border: 1.5px solid rgba(201,162,75,0.4);
     border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 14px;
   }
   .panel-config h2, .panel-entrenamiento h2 {
@@ -73,21 +89,56 @@
     text-align: left; padding: 7px 10px; border-radius: 6px; border: 1.5px solid rgba(201,162,75,0.3);
     background: rgba(255,255,255,0.03); color: var(--texto); font-family: inherit; font-size: 0.76rem;
     cursor: pointer; transition: background .15s, border-color .15s;
+    display: flex; align-items: center; justify-content: space-between; gap: 4px;
   }
   .item-entrenamiento:hover { background: rgba(201,162,75,0.12); }
   .item-entrenamiento.activo { background: rgba(201,162,75,0.22); border-color: var(--oro); color: var(--oro-claro); }
+
+  .badge-nivel {
+    font-size: 0.6rem; padding: 1.5px 5px; border-radius: 8px; font-weight: bold;
+    display: inline-block; white-space: nowrap; flex: none;
+  }
+  .badge-nivel.Principiante { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; }
+  .badge-nivel.Intermedio { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid #eab308; }
+  .badge-nivel.Avanzado { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+
+  .explicacion-leccion {
+    font-size: 0.73rem; color: #d6cbb5; margin-top: 6px; line-height: 1.45;
+    background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 6px; border-left: 3px solid var(--oro);
+  }
+
+  .btn-audio {
+    margin: 8px 0; width: 100%; padding: 6px 10px; border-radius: 6px;
+    border: 1px solid var(--oro); background: rgba(201,162,75,0.15);
+    color: var(--oro-claro); font-size: 0.74rem; font-weight: bold; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: inherit; transition: background .15s;
+  }
+  .btn-audio:hover { background: rgba(201,162,75,0.3); }
 
   .notacion-entrenamiento {
     border-top: 1px solid rgba(201,162,75,0.3); padding-top: 10px; font-size: 0.78rem;
   }
   .notacion-entrenamiento.oculto { display: none; }
   .notacion-entrenamiento h3 {
-    font-size: 0.8rem; color: var(--oro-claro); margin-bottom: 6px; font-weight: bold;
+    font-size: 0.8rem; color: var(--oro-claro); margin: 0; font-weight: bold;
   }
   .notacion-entrenamiento p { line-height: 1.7; color: var(--texto); }
-  .num-jugada { color: #9c8b6e; }
-  .jugada-san { color: var(--texto); }
-  .jugada-san.jugada-actual { color: var(--oro-claro); font-weight: bold; }
+  .selector-variantes {
+    margin-top: 6px; border-top: 1px dashed rgba(201,162,75,0.3); padding-top: 6px;
+  }
+  .selector-variantes.oculto { display: none; }
+  .select-variantes {
+    width: 100%; padding: 6px 8px; border-radius: 6px; border: 1.5px solid var(--oro);
+    background: rgba(0,0,0,0.4); color: var(--oro-claro); font-weight: bold;
+    font-size: 0.75rem; font-family: inherit; cursor: pointer; outline: none; transition: border-color .15s;
+  }
+  .select-variantes:hover { border-color: var(--oro-claro); }
+  .select-variantes option { background: #1c1813; color: var(--claro); font-weight: normal; }
+
+  .num-jugada { color: var(--oro-claro); font-weight: bold; margin-right: 4px; display: inline-block; min-width: 22px; font-size: 0.82rem; }
+  .jugada-san { color: #e2d7c5; padding: 1px 4px; border-radius: 4px; }
+  .jugada-san.jugada-actual { color: #101010; background: var(--oro-claro); font-weight: bold; }
 
   .salir-entrenamiento {
     padding: 7px 10px; border-radius: 6px; border: 1.5px solid var(--oro);
@@ -244,6 +295,13 @@
 </head>
 <body>
 
+  <nav class="nav-modos">
+    <a href="index.html" class="nav-link activo">♜ Ajedrez Clásico y Entrenamiento</a>
+    <a href="variantes.html" class="nav-link">⚔️ Variantes del Ajedrez</a>
+    <a href="variantes-rudo.html" class="nav-link">🥊 Variantes Rudo</a>
+    <a href="curso.html" class="nav-link">🎓 Curso Interactivo</a>
+  </nav>
+
   <h1>♜ Ajedrez ♜</h1>
   <p class="subtitulo">Modo libre o partida con reglas — puedes jugar contra el computador</p>
 
@@ -252,18 +310,32 @@
       <h2>Entrenamiento</h2>
 
       <div class="tabs-entrenamiento">
-        <button class="tab-entrenamiento activo" data-tab="piezas">Pieza por pieza</button>
+        <button class="tab-entrenamiento activo" data-tab="piezas">Piezas</button>
         <button class="tab-entrenamiento" data-tab="aperturas">Aperturas</button>
+        <button class="tab-entrenamiento" data-tab="tacticas">Tácticas</button>
         <button class="tab-entrenamiento" data-tab="mates">Mates</button>
       </div>
 
       <div class="lista-entrenamiento" id="listaPiezas"></div>
       <div class="lista-entrenamiento oculto" id="listaAperturas"></div>
+      <div class="lista-entrenamiento oculto" id="listaTacticas"></div>
       <div class="lista-entrenamiento oculto" id="listaMates"></div>
 
       <div class="notacion-entrenamiento oculto" id="notacionEntrenamiento">
-        <h3 id="notacionTitulo"></h3>
-        <p id="notacionTexto"></p>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px;">
+          <h3 id="notacionTitulo" style="margin:0;"></h3>
+          <span id="notacionBadge" class="badge-nivel"></span>
+        </div>
+
+        <div id="selectorVariantes" class="selector-variantes oculto">
+          <label for="selectVariantes" style="font-size:0.72rem; color:var(--oro-claro); font-weight:bold; display:block; margin-bottom:4px;">Variantes / Respuestas del rival:</label>
+          <select id="selectVariantes" class="select-variantes"></select>
+        </div>
+
+        <p id="notacionTexto" style="margin-top:6px;"></p>
+        <p id="notacionExplicacion" class="explicacion-leccion"></p>
+        <button id="btnAudioHablar" class="btn-audio">🔊 Escuchar explicación</button>
+
         <div class="reproductor-entrenamiento">
           <button id="btnRepInicio" title="Ir al inicio">⏮</button>
           <button id="btnRepAnterior" title="Movimiento anterior">‹</button>
@@ -441,40 +513,140 @@
   const FEN_INICIAL = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
   const NIVELES_MATERIAL = [
-    { nombre: 'Peones', fen: '4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1',
-      descripcion: 'Solo juegan el rey y los peones de ambos bandos.' },
-    { nombre: 'Caballos', fen: '1n2k1n1/pppppppp/8/8/8/8/PPPPPPPP/1N2K1N1 w - - 0 1',
-      descripcion: 'Juegan el rey, los peones y los caballos.' },
-    { nombre: 'Alfiles', fen: '1nb1kbn1/pppppppp/8/8/8/8/PPPPPPPP/1NB1KBN1 w - - 0 1',
-      descripcion: 'Juegan el rey, los peones, los caballos y los alfiles.' },
-    { nombre: 'Reina', fen: '1nbqkbn1/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBN1 w - - 0 1',
-      descripcion: 'Juegan el rey, los peones, los caballos, los alfiles y las reinas.' },
-    { nombre: 'Torres — sin reina', fen: 'rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq - 0 1',
-      descripcion: 'Juegan el rey, los peones, los caballos, los alfiles y las torres (sin reina).' },
+    { nombre: 'Paso 1: Solo Peones', nivel: 'Principiante', fen: '4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1',
+      descripcion: `Paso 1 (Iniciación — Peones y Reyes):
+• Movimiento de avance: 1 paso hacia adelante (o 2 pasos opcionales desde la casilla inicial).
+• Forma de captura: Los peones capturan hacia adelante únicamente en diagonal (1 casilla).
+• Captura especial de Peón al paso (en passant).
+• Protección en cadena: El peón de atrás defiende diagonalmente al peón más avanzado.
+• Cadenas de peones y diagonales de defensa.
+• Técnica de avance: Cómo romper y cruzar en la estructura 3 peones contra 3.
+• Regla de Coronación: Al llegar a la 8ª fila, el peón se promueve a Dama, Torre, Alfil o Caballo.
+• Protección mutua Rey/Peón: El peón cubre al Rey y el Rey escolta a los peones.` },
+    { nombre: 'Paso 2: Sumamos Caballos', nivel: 'Principiante', fen: '1n2k1n1/pppppppp/8/8/8/8/PPPPPPPP/1N2K1N1 w - - 0 1',
+      descripcion: `Paso 2 (Se incorporan los Caballos):
+• Geometría del salto en L sobre peones propios y enemigos.
+• Ataque doble o Tenedor a corta distancia.
+• Protección mutua: Cómo dos caballos se defienden e interconectan entre sí.
+• Valor del material y prioridad al comer: El Caballo vale 3 puntos y el Peón vale 1 punto (¡el Caballo vale el triple!).
+• Criterio de captura: Evitar entregar tu Caballo (3 pts) a cambio de solo un Peón (1 pt).` },
+    { nombre: 'Paso 3: Sumamos Alfiles', nivel: 'Principiante', fen: '1nb1kbn1/pppppppp/8/8/8/8/PPPPPPPP/1NB1KBN1 w - - 0 1',
+      descripcion: `Paso 3 (Se incorporan los Alfiles):
+• Movilidad por grandes diagonales de casillas claras y oscuras.
+• Técnica de la Clavada a piezas defensoras.
+• Coordinación de piezas cercanas (Caballos) con piezas lejanas (Alfiles).
+• Pareja de alfiles dominando el centro.` },
+    { nombre: 'Paso 4: Sumamos la Reina', nivel: 'Principiante', fen: '1nbqkbn1/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBN1 w - - 0 1',
+      descripcion: `Paso 4 (Se incorpora la Reina):
+• Movimiento combinado máximo (vertical, horizontal y diagonal).
+• Ataques directos y coordinados contra el Rey enemigo.
+• Precaución: Evitar exponer a la Reina a ataques de piezas menores.
+• Centralización y redes de mate.` },
+    { nombre: 'Paso 5: Sumamos Torres (Sin Reina)', nivel: 'Principiante', fen: 'rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq - 0 1',
+      descripcion: `Paso 5 (Se incorporan las Torres - Sin Reina):
+• Ocupación y dominio de columnas abiertas verticales.
+• Invasión de la 7ª fila para cortar la movilidad del Rey rival.
+• Doblaje de torres (batería en columna abierta).
+• Transición al tablero completo estándar.` },
   ];
 
   const APERTURAS = [
-    { nombre: 'Apertura Italiana', movidas: ['e4','e5','Nf3','Nc6','Bc4'] },
-    { nombre: 'Ruy López (Española)', movidas: ['e4','e5','Nf3','Nc6','Bb5'] },
-    { nombre: 'Defensa Siciliana', movidas: ['e4','c5'] },
-    { nombre: 'Defensa Francesa', movidas: ['e4','e6'] },
-    { nombre: 'Defensa Caro-Kann', movidas: ['e4','c6'] },
-    { nombre: 'Gambito de Dama', movidas: ['d4','d5','c4'] },
-    { nombre: 'Apertura Inglesa', movidas: ['c4','e5','Nc3'] },
-    { nombre: 'Defensa India de Rey', movidas: ['d4','Nf6','c4','g6','Nc3','Bg7'] },
-    { nombre: 'Apertura Réti', movidas: ['Nf3','d5','c4'] },
-    { nombre: 'Gambito de Rey', movidas: ['e4','e5','f4'] },
+    // --- Principiante ---
+    { nombre: 'Sistema Londres', nivel: 'Principiante', movidas: ['d4','d5','Bf4','Nf6','e3','c5','c3'],
+      descripcion: 'Busca desarrollar una pirámide de piezas sólida y predecible con 1.d4 y 2.Af4, garantizando seguridad y evitando trampas teóricas tempranas.' },
+    { nombre: 'Apertura Italiana', nivel: 'Principiante', movidas: ['e4','e5','Nf3','Nc6','Bc4'],
+      descripcion: 'Busca un desarrollo rápido y rápido control del centro con 1.e4, apuntando directamente con el alfil en c4 a la casilla débil f7 del enroque enemigo.' },
+    { nombre: 'Sistema Colle', nivel: 'Principiante', movidas: ['d4','d5','Nf3','Nf6','e3'],
+      descripcion: 'Busca un desarrollo tranquilo y ultra seguro para las blancas centrado en e3, c3 y Nf3 antes de emprender acciones ofensivas.' },
+    { nombre: 'Defensa Escandinava', nivel: 'Principiante', movidas: ['e4','d5'],
+      descripcion: 'Busca desafiar el peón blanco de e4 desde la jugada 1, forzando simplificaciones y abriendo la posición desde el primer momento.' },
+
+    // --- Intermedio ---
+    { nombre: 'Ruy López (Española)', nivel: 'Intermedio', movidas: ['e4','e5','Nf3','Nc6','Bb5'],
+      descripcion: 'Busca presionar al caballo defensor de c6 para debilitar el peón central de e5 y construir una ventaja posicional sólida y duradera.' },
+    { nombre: 'Defensa Siciliana', nivel: 'Intermedio', movidas: ['e4','c5'],
+      descripcion: 'Busca romper la simetría desde la primera jugada, cambiando un peón lateral por el peón central blanco de d4 para tomar la iniciativa y contragolpear.' },
+    { nombre: 'Defensa Francesa', nivel: 'Intermedio', movidas: ['e4','e6'],
+      descripcion: 'Busca construir un muro de peones resistente con e6 y d5 para frenar los ataques blancos y contraatacar en el flanco de dama con c5.' },
+    { nombre: 'Defensa Caro-Kann', nivel: 'Intermedio', movidas: ['e4','c6'],
+      descripcion: 'Busca disputa sólida del centro con c6 y d5 manteniendo libre el alfil de casillas claras y sin crear debilidades en la estructura propia.' },
+    { nombre: 'Gambito de Dama', nivel: 'Intermedio', movidas: ['d4','d5','c4'],
+      descripcion: 'Busca ofrecer el peón de c4 para desviar el peón negro de d5, logrando el control total del centro del tablero con e4 y abriendo diagonales.' },
+    { nombre: 'Defensa India de Rey', nivel: 'Intermedio', movidas: ['d4','Nf6','c4','g6','Nc3','Bg7'],
+      descripcion: 'Busca resistir la presión central blanca inicial con el alfil en g7 para desencadenar un potente ataque de peones y piezas contra el rey blanco.' },
+    { nombre: 'Apertura Inglesa', nivel: 'Intermedio', movidas: ['c4','e5','Nc3'],
+      descripcion: 'Busca controlar la casilla central d5 desde el flanco de dama con 1.c4, reservándose la opción de transformar la partida a varios esquemas.' },
+    { nombre: 'Gambito de Rey', nivel: 'Intermedio', movidas: ['e4','e5','f4'],
+      descripcion: 'Busca sacrificar el peón de f4 para eliminar el peón central enemigo de e5, abrir la columna f y lanzar un ataque agresivo al enroque.' },
+
+    // --- Avanzado ---
+    { nombre: 'Defensa Pirc', nivel: 'Avanzado', movidas: ['e4','d6','d4','Nf6','Nc3','g6','Nf3','Bg7'],
+      descripcion: 'Busca ceder el centro inicial de peones para incitar al blanco a avanzar, para luego destruirlo mediante un fuerte contragolpe con el alfil en fianchetto en g7.' },
+    { nombre: 'Defensa Alekhine', nivel: 'Avanzado', movidas: ['e4','Nf6'],
+      descripcion: 'Busca provocar el avance apresurado de peones blancos con 1...Nf6 para luego atacarlos y dejar el centro blanco sobreexpuesto e indefenso.' },
+    { nombre: 'Defensa Nimzo-India', nivel: 'Avanzado', movidas: ['d4','Nf6','c4','e6','Nc3','Bb4'],
+      descripcion: 'Busca clavar el caballo blanco en c3 con Bb4 para evitar que las blancas jueguen e4 y debilitar su estructura con peones doblados.' },
+    { nombre: 'Apertura Catalana', nivel: 'Avanzado', movidas: ['d4','Nf6','c4','e6','g3'],
+      descripcion: 'Busca combinar la presión del Gambito de Dama con la fuerza a largo plazo del alfil en fianchetto en g2 ejerciendo gran dominio de la diagonal h1-a8.' },
+    { nombre: 'Apertura Réti', nivel: 'Avanzado', movidas: ['Nf3','d5','c4'],
+      descripcion: 'Busca controlar el centro a distancia con piezas menores (1.Nf3) sin comprometer de inmediato la estructura de peones centrales.' },
+    { nombre: 'Apertura Bird', nivel: 'Avanzado', movidas: ['f4','d5'],
+      descripcion: 'Busca tomar control de la casilla e5 desde el primer turno con 1.f4 e iniciar un ataque de piezas por el flanco de rey.' },
   ];
 
   const MATES = [
-    { nombre: 'Mate del loco', tipo: 'partida', movidas: ['f3','e5','g4','Qh4#'] },
-    { nombre: 'Mate pastor', tipo: 'partida', movidas: ['e4','e5','Bc4','Bc5','Qh5','Nf6','Qxf7#'] },
-    { nombre: 'Mate de pasillo', tipo: 'posicion',
-      fen: '6k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1', movidas: ['Rd8#'] },
-    { nombre: 'Mate de la escalera', tipo: 'posicion',
-      fen: 'k7/2R5/8/8/8/8/8/6KR w - - 0 1', movidas: ['Rh8#'] },
-    { nombre: 'Mate de dama y rey', tipo: 'posicion',
-      fen: 'k7/7Q/1K6/8/8/8/8/8 w - - 0 1', movidas: ['Qb7#'] },
+    { nombre: 'Mate del loco', nivel: 'Principiante', tipo: 'partida', movidas: ['f3','e5','g4','Qh4#'],
+      descripcion: 'Demuestra el peligro letal de debilitar la diagonal e1-h4 o e8-h5 alrededor del rey sin haber desarrollado piezas protectoras.' },
+    { nombre: 'Mate pastor', nivel: 'Principiante', tipo: 'partida', movidas: ['e4','e5','Bc4','Bc5','Qh5','Nf6','Qxf7#'],
+      descripcion: 'Busca explotar la falta de atención rival coordinando Dama y Alfil sobre el peón débil de f7 que solo defiende el Rey.' },
+    { nombre: 'Mate de pasillo', nivel: 'Principiante', tipo: 'posicion',
+      fen: '6k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1', movidas: ['Rd8#'],
+      descripcion: 'Busca castigar la falta de movilidad del rey en la 8ª fila atrapado por sus propios peones, enseñando la importancia de crear una casilla de escape.' },
+    { nombre: 'Mate de la escalera', nivel: 'Principiante', tipo: 'posicion',
+      fen: 'k7/2R5/8/8/8/8/8/6KR w - - 0 1', movidas: ['Rh8#'],
+      descripcion: 'Busca acorralar al rey rival contra el borde del tablero usando dos piezas mayores (Torres/Dama) quitándole filas de forma progresiva.' },
+    { nombre: 'Mate de dama y rey', nivel: 'Principiante', tipo: 'posicion',
+      fen: 'k7/7Q/1K6/8/8/8/8/8 w - - 0 1', movidas: ['Qb7#'],
+      descripcion: 'Busca usar la Dama para acotar el espacio del rey enemigo y aproximar al propio Rey para brindar el jaque mate definitivo.' },
+  ];
+
+  const TACTICAS_ESTRATEGIAS = [
+    { nombre: 'Tenedor de Caballo', nivel: 'Principiante', tipo: 'posicion',
+      fen: 'r3k3/8/8/8/4N3/8/8/4K3 w - - 0 1', movidas: ['Nf6+'],
+      descripcion: 'Busca atacar simultáneamente a dos piezas enemigas (como Rey y Torre), forzando la ganancia de material ya que el rival solo puede mover una pieza.' },
+    { nombre: 'Clavada de Alfil', nivel: 'Principiante', tipo: 'posicion',
+      fen: 'r3k3/4r3/8/2B5/8/8/8/4K3 w - - 0 1', movidas: ['Bxe7'],
+      descripcion: 'Busca inmovilizar una pieza enemiga alineada delante de otra de mayor valor, anulando su capacidad defensiva y forzando la captura.' },
+    { nombre: 'Peones 2vs2', nivel: 'Principiante', tipo: 'posicion',
+      fen: '4k3/1pp5/8/8/8/8/1PP5/4K3 w - - 0 1', movidas: ['b4', 'c5', 'bxc5', 'b6'],
+      variantes: [
+        { nombre: 'Variante 1: Respuesta con ataque c5 ➔ Bloqueo en b6', movidas: ['b4', 'c5', 'bxc5', 'b6'], descripcion: 'Las blancas avanzan b4 y las negras responden c5. Tras la captura (bxc5), el peón en b6 bloquea el paso, paralizando la posición.' },
+        { nombre: 'Variante 2: Respuesta con avance b5 ➔ Bloqueo frontal', movidas: ['b4', 'b5', 'c3', 'c6'], descripcion: 'Si ambos bandos avanzan de frente (b4-b5 y c3-c6), los peones chocan cara a cara sin posibilidad de captura.' }
+      ],
+      descripcion: 'Enfrentamiento de 2 peones contra 2 desde casillas iniciales. Selecciona las variantes arriba para observar cómo se produce el bloqueo.' },
+    { nombre: 'Peones 3vs3', nivel: 'Intermedio', tipo: 'posicion',
+      fen: '4k3/ppp5/8/8/PPP5/8/8/4K3 w - - 0 1', movidas: ['b5', 'axb5', 'c5'],
+      variantes: [
+        { nombre: 'Variante 1: Negras capturan (axb5) ➔ Gana c5', movidas: ['b5', 'axb5', 'c5'], descripcion: 'Si las negras capturan con el peón de a (axb5), las blancas responden avanzando c5. La casilla a5 queda desprotegida y el peón a4 pasa libre e imparable hacia la coronación.' },
+        { nombre: 'Variante 2: Negras capturan (cxb5) ➔ Gana a5', movidas: ['b5', 'cxb5', 'a5'], descripcion: 'Si las negras capturan con el peón de c (cxb5), las blancas responden avanzando a5. La casilla c5 queda desprotegida y el peón c4 pasa libre e imparable hasta la 8ª fila.' },
+        { nombre: 'Variante 3: Negras avanzan (b6) ➔ Gana bxc6', movidas: ['b5', 'b6', 'bxc6'], descripcion: 'Si las negras intentan bloquear avanzando b6, las blancas capturan en c6 (bxc6) abriendo paso libre inmediato hacia la coronación.' }
+      ],
+      descripcion: '¡Lección clave! Con 3 peones contra 3, las blancas avanzan el peón central (b5) ofreciéndolo como sacrificio. Selecciona cada variante para ver cómo las blancas ganan ante cualquier respuesta del rival.' },
+    { nombre: 'Ataque a la descubierta', nivel: 'Intermedio', tipo: 'posicion',
+      fen: 'r2qk2r/ppp2ppp/2n5/3b4/1b1P4/5N2/PP1B1PPP/R2QKB1R w KQkq - 0 1', movidas: ['Bxb4'],
+      descripcion: 'Busca mover una pieza para liberar la línea de fuego de otra pieza oculta detrás, generando una amenaza doble que el rival no puede defender.' },
+    { nombre: 'Enfilada (Skewer)', nivel: 'Intermedio', tipo: 'posicion',
+      fen: '4r3/4k3/8/8/8/8/8/R3K3 w - - 0 1', movidas: ['Ra8'],
+      descripcion: 'Busca atacar una pieza mayor en línea para obligarla a apartarse, dejando al descubierto y sin defensa a la pieza menor de atrás.' },
+    { nombre: 'Desviación de defensor', nivel: 'Intermedio', tipo: 'posicion',
+      fen: '3r2k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1', movidas: ['Rd8+'],
+      descripcion: 'Busca alejar mediante una amenaza o sacrificio a la pieza enemiga que defiende un punto clave para asestar un mate o capturar material.' },
+    { nombre: 'Dominio de columna abierta', nivel: 'Avanzado', tipo: 'posicion',
+      fen: 'r4rk1/ppp2ppp/8/8/8/8/PPP2PPP/R4RK1 w - - 0 1', movidas: ['Rfe1'],
+      descripcion: 'Busca ubicar las Torres en columnas verticales sin peones para invadir la 7ª u 8ª fila enemiga y paralizar las piezas del oponente.' },
+    { nombre: 'Avanzar peón pasado', nivel: 'Avanzado', tipo: 'posicion',
+      fen: '4k3/8/8/3P4/2P5/8/8/4K3 w - - 0 1', movidas: ['d6'],
+      descripcion: 'Busca empujar y apoyar un peón sin peones enemigos enfrente para forzar su coronación a Reina u obligar al rival a entregar piezas para frenarlo.' },
   ];
 
   // --- Sonido (sintetizado con Web Audio, sin archivos externos) ---
@@ -630,7 +802,10 @@
   function formatearNotacion(movidas) {
     let html = '';
     movidas.forEach((san, i) => {
-      if (i % 2 === 0) html += `<span class="num-jugada">${i / 2 + 1}.</span> `;
+      if (i % 2 === 0) {
+        if (i > 0) html += '<br>';
+        html += `<span class="num-jugada">${i / 2 + 1}.</span>`;
+      }
       html += `<span class="jugada-san" data-indice="${i}">${san}</span> `;
     });
     return html;
@@ -642,13 +817,60 @@
     });
   }
 
-  function mostrarNotacion(titulo, movidas) {
+  let textoExplicacionActual = '';
+
+  function mostrarNotacion(titulo, movidas, nivel = '', descripcion = '', variantes = null) {
     document.getElementById('notacionTitulo').textContent = titulo;
+    const badge = document.getElementById('notacionBadge');
+    if (nivel) {
+      badge.textContent = nivel;
+      badge.className = `badge-nivel ${nivel}`;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+
+    const selVarContainer = document.getElementById('selectorVariantes');
+    const selectVar = document.getElementById('selectVariantes');
+    selectVar.innerHTML = '';
+
+    if (variantes && variantes.length > 0) {
+      selVarContainer.classList.remove('oculto');
+      variantes.forEach((v, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = v.nombre;
+        selectVar.appendChild(opt);
+      });
+
+      selectVar.onchange = (e) => {
+        const idx = Number(e.target.value);
+        const v = variantes[idx];
+        secuenciaActual = v.movidas;
+        document.getElementById('notacionTexto').innerHTML = formatearNotacion(v.movidas);
+        const expEl = document.getElementById('notacionExplicacion');
+        expEl.innerHTML = (v.descripcion || '').replace(/\n/g, '<br>');
+        textoExplicacionActual = (v.descripcion || '').replace(/•/g, '');
+        irAMovimiento(0, false);
+      };
+
+      secuenciaActual = variantes[0].movidas;
+      movidas = variantes[0].movidas;
+      descripcion = variantes[0].descripcion || descripcion;
+    } else {
+      selVarContainer.classList.add('oculto');
+    }
+
     document.getElementById('notacionTexto').innerHTML = formatearNotacion(movidas);
+    const expEl = document.getElementById('notacionExplicacion');
+    expEl.innerHTML = (descripcion || '').replace(/\n/g, '<br>');
+    expEl.style.display = descripcion ? 'block' : 'none';
+    textoExplicacionActual = (descripcion || '').replace(/•/g, '');
     document.getElementById('notacionEntrenamiento').classList.remove('oculto');
   }
 
   function ocultarNotacion() {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     document.getElementById('notacionEntrenamiento').classList.add('oculto');
   }
 
@@ -770,11 +992,11 @@
     sincronizarPiezasDesdeChess();
     render();
     actualizarEstadoPartida();
-    ocultarNotacion();
     entrenamientoActivo = { tipo: 'piezas', nombre: nivel.nombre };
     document.getElementById('btnSalirEntrenamiento').classList.remove('oculto');
     document.getElementById('avisoTexto').textContent =
       `Entrenamiento — ${nivel.nombre}. ${nivel.descripcion}`;
+    mostrarNotacion(nivel.nombre, [], nivel.nivel, nivel.descripcion);
   }
 
   function iniciarApertura(apertura) {
@@ -785,8 +1007,8 @@
     entrenamientoActivo = { tipo: 'apertura', nombre: apertura.nombre };
     document.getElementById('btnSalirEntrenamiento').classList.remove('oculto');
     document.getElementById('avisoTexto').textContent =
-      `Entrenamiento — apertura: ${apertura.nombre}.`;
-    mostrarNotacion(apertura.nombre, apertura.movidas);
+      `Entrenamiento — apertura: ${apertura.nombre}. ${apertura.descripcion || ''}`;
+    mostrarNotacion(apertura.nombre, apertura.movidas, apertura.nivel, apertura.descripcion);
     irAMovimiento(0, false);
   }
 
@@ -798,8 +1020,21 @@
     entrenamientoActivo = { tipo: 'mate', nombre: mate.nombre };
     document.getElementById('btnSalirEntrenamiento').classList.remove('oculto');
     document.getElementById('avisoTexto').textContent =
-      `Entrenamiento — mate: ${mate.nombre}.`;
-    mostrarNotacion(mate.nombre, mate.movidas);
+      `Entrenamiento — mate: ${mate.nombre}. ${mate.descripcion || ''}`;
+    mostrarNotacion(mate.nombre, mate.movidas, mate.nivel, mate.descripcion);
+    irAMovimiento(0, false);
+  }
+
+  function iniciarTactica(tactica) {
+    prepararModoEntrenamiento();
+    pausarAuto();
+    fenInicialSecuencia = tactica.tipo === 'posicion' ? tactica.fen : FEN_INICIAL;
+    secuenciaActual = tactica.movidas;
+    entrenamientoActivo = { tipo: 'tactica', nombre: tactica.nombre };
+    document.getElementById('btnSalirEntrenamiento').classList.remove('oculto');
+    document.getElementById('avisoTexto').textContent =
+      `Táctica y Estrategia — ${tactica.nombre}: ${tactica.descripcion || ''}`;
+    mostrarNotacion(tactica.nombre, tactica.movidas, tactica.nivel, tactica.descripcion, tactica.variantes);
     irAMovimiento(0, false);
   }
 
@@ -828,7 +1063,8 @@
     items.forEach(item => {
       const btn = document.createElement('button');
       btn.className = 'item-entrenamiento';
-      btn.textContent = item.nombre;
+      const badgeHtml = item.nivel ? `<span class="badge-nivel ${item.nivel}">${item.nivel}</span>` : '';
+      btn.innerHTML = `<span>${item.nombre}</span> ${badgeHtml}`;
       btn.addEventListener('click', () => {
         document.querySelectorAll('.item-entrenamiento').forEach(b => b.classList.remove('activo'));
         btn.classList.add('activo');
@@ -836,6 +1072,19 @@
       });
       contenedor.appendChild(btn);
     });
+  }
+
+  function hablarExplicacion() {
+    if (!('speechSynthesis' in window)) {
+      alert('Tu navegador no soporta la lectura de voz.');
+      return;
+    }
+    window.speechSynthesis.cancel();
+    if (!textoExplicacionActual) return;
+    const utterance = new SpeechSynthesisUtterance(textoExplicacionActual);
+    utterance.lang = 'es-ES';
+    utterance.rate = 0.95;
+    window.speechSynthesis.speak(utterance);
   }
 
   function crearPieza(tipo, color, ubicacion) {
@@ -1329,6 +1578,7 @@
       const destino = tab.dataset.tab;
       document.getElementById('listaPiezas').classList.toggle('oculto', destino !== 'piezas');
       document.getElementById('listaAperturas').classList.toggle('oculto', destino !== 'aperturas');
+      document.getElementById('listaTacticas').classList.toggle('oculto', destino !== 'tacticas');
       document.getElementById('listaMates').classList.toggle('oculto', destino !== 'mates');
     });
   });
@@ -1340,6 +1590,7 @@
   document.getElementById('btnRepSiguiente').addEventListener('click', () => { pausarAuto(); irAMovimiento(indiceReproduccion + 1, true); });
   document.getElementById('btnRepFin').addEventListener('click', () => { pausarAuto(); irAMovimiento(secuenciaActual ? secuenciaActual.length : 0, false); });
   document.getElementById('btnRepPlayPausa').addEventListener('click', alternarReproduccionAuto);
+  document.getElementById('btnAudioHablar').addEventListener('click', hablarExplicacion);
 
   document.getElementById('btnCerrarMensajeFinal').addEventListener('click', ocultarMensajeFinal);
   document.getElementById('mensajeFinal').addEventListener('click', (e) => {
@@ -1348,6 +1599,7 @@
 
   poblarListaEntrenamiento('listaPiezas', NIVELES_MATERIAL, iniciarNivelMaterial);
   poblarListaEntrenamiento('listaAperturas', APERTURAS, iniciarApertura);
+  poblarListaEntrenamiento('listaTacticas', TACTICAS_ESTRATEGIAS, iniciarTactica);
   poblarListaEntrenamiento('listaMates', MATES, iniciarMate);
 
   posicionInicial();

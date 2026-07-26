@@ -4,6 +4,14 @@ Este documento constituye el plan oficial de estructura, diseño didáctico y pr
 
 ---
 
+## 💡 Propósito y Filosofía del Taller
+
+* **Público Objetivo:** Profesores (principalmente de Matemática).
+* **Propósito Central:** Derribar las barreras de entrada al desarrollo de software mediante Inteligencia Artificial para que los docentes aprendan a crear sus propios Recursos Digitales Interactivos (RDI) de forma autónoma.
+* **Enfoque Didáctico:** No se busca transformar a los docentes en programadores o informáticos. Se enseñan las nociones y consideraciones técnicas fundamentales (estructura básica de archivos web, lógica de interacciones, ciclo de pruebas y resolución de problemas) únicamente para que tengan las herramientas conceptuales necesarias si se topan con eventualidades técnicas al construir sus recursos.
+
+---
+
 ## 🎯 Justificación Pedagógica y Estrategia Didáctica
 
 ### 1. Inicio Ágil y Práctico (Módulos 1, 2 y 3)

@@ -1,0 +1,612 @@
+/* sitio-web/pruebas/fabricaDeDerivadas/styles.css */
+:root {
+  --color-bg-top: #1b2a38;
+  --color-bg-bottom: #0f1823;
+  --color-tarjeta: #243447;
+  --color-primario: #2c7a7b;
+  --color-primario-claro: #4fd1c5;
+  --color-acento: #e53e3e;
+  --color-dorado: #ecc94b;
+  --color-exito: #38a169;
+  --color-texto: #e2e8f0;
+  --color-borde: #3b4d61;
+  --color-cinta: #141d26;
+  --sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --sombra-fuerte: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(180deg, var(--color-bg-top), var(--color-bg-bottom));
+  color: var(--color-texto);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Header & Barra Superior */
+.header-game {
+  background: rgba(15, 24, 35, 0.95);
+  border-bottom: 2px solid var(--color-borde);
+  padding: 10px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--sombra-suave);
+}
+
+.titulo-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-volver {
+  text-decoration: none;
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  color: var(--color-primario-claro);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.btn-volver:hover {
+  background: var(--color-primario);
+  color: #fff;
+  transform: translateX(-2px);
+}
+
+h1 {
+  font-size: 1.1rem;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+/* Marcadores de Estado */
+.hud-stats {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.stat-box {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  padding: 4px 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 75px;
+}
+
+.stat-box__lbl {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  color: #a0aec0;
+  letter-spacing: 0.05em;
+}
+
+.stat-box__val {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-primario-claro);
+}
+
+/* Medidor de Puntos Negativos */
+.stat-box--malos .stat-box__val {
+  color: var(--color-acento);
+}
+
+.puntos-malos-bar {
+  display: flex;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.punto-malo-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4a5568;
+  transition: background 0.3s;
+}
+
+.punto-malo-dot.activo {
+  background: var(--color-acento);
+  box-shadow: 0 0 6px var(--color-acento);
+}
+
+/* Botones de Cabecera */
+.btn-hdr {
+  background: #2b6cb0;
+  border: 1px solid #63b3ed;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-hdr:hover {
+  background: #3182ce;
+  transform: scale(1.04);
+}
+
+/* Portada / Selector de Modo de Fábrica */
+.portada-selector {
+  flex: 1;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.portada-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.portada-header h2 {
+  font-size: 2rem;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.portada-header p {
+  color: #a0aec0;
+  font-size: 0.95rem;
+}
+
+.modos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+.modo-card {
+  background: var(--color-tarjeta);
+  border: 2px solid var(--color-borde);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--sombra-suave);
+}
+
+.modo-card:hover {
+  border-color: var(--color-primario-claro);
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-fuerte);
+  background: #2c3e53;
+}
+
+.modo-card__icon {
+  font-size: 2.2rem;
+}
+
+.modo-card__titulo {
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.modo-card__desc {
+  font-size: 0.82rem;
+  color: #cbd5e0;
+  line-height: 1.4;
+}
+
+/* Contenedor Principal de la Fábrica (Compacto) */
+.fabrica-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 12px 16px;
+}
+
+/* Repisa Superior con Tubos y Dispensador Cuadrado +C */
+.repisa-seccion {
+  background: rgba(36, 52, 71, 0.6);
+  border: 2px solid var(--color-borde);
+  border-radius: 14px;
+  padding: 10px;
+  position: relative;
+  box-shadow: var(--sombra-suave);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tubos-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+/* Tubos Triplicados en Altura */
+.tubo-dispensador {
+  background: linear-gradient(180deg, #101923, #1e2c3b);
+  border: 2px solid #2d3748;
+  border-top: 6px solid var(--color-primario-claro);
+  border-radius: 8px 8px 10px 10px;
+  height: 185px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animación de caída desde arriba del tubo */
+@keyframes caerTubo {
+  0% {
+    transform: translateY(-130px);
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Caja Pequeña de Resultado (arrastrable) */
+.caja-derivada {
+  background: linear-gradient(135deg, #dd6b20, #c05621);
+  border: 2px solid #ed8936;
+  color: #fff;
+  border-radius: 6px;
+  padding: 8px 4px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-align: center;
+  width: 100%;
+  cursor: grab;
+  box-shadow: var(--sombra-suave);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+  touch-action: none;
+}
+
+.caja-derivada.animar-caida {
+  animation: caerTubo 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.caja-derivada:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 12px rgba(237, 137, 54, 0.4);
+}
+
+.caja-derivada:active, .caja-derivada.dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+  transform: scale(1.08);
+  box-shadow: var(--sombra-fuerte);
+  z-index: 3000;
+}
+
+/* Cuadrado Pequeño +C al Costado Derecho de los Tubos */
+.caja-constante {
+  width: 54px;
+  height: 54px;
+  background: linear-gradient(135deg, #805ad5, #553c9a);
+  border: 2px solid #b794f4;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  cursor: grab;
+  box-shadow: var(--sombra-suave);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.caja-constante:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 14px rgba(183, 148, 244, 0.6);
+}
+
+/* Cinta Transportadora Inferior */
+.cinta-seccion {
+  background: var(--color-cinta);
+  border: 3px solid var(--color-borde);
+  border-radius: 14px;
+  height: 155px;
+  position: relative;
+  overflow: hidden;
+  margin-top: 12px;
+  box-shadow: inset 0 0 18px rgba(0,0,0,0.8);
+}
+
+.cinta-patron {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 20px,
+    rgba(255, 255, 255, 0.03) 20px,
+    rgba(255, 255, 255, 0.03) 40px
+  );
+  animation: moverCinta 2s linear infinite;
+}
+
+@keyframes moverCinta {
+  from { transform: translateX(0); }
+  to { transform: translateX(-40px); }
+}
+
+/* Cajas de Función Minimalistas en la Cinta (Solo etiqueta y fórmula) */
+.caja-funcion {
+  position: absolute;
+  top: 12px;
+  width: 155px;
+  height: 125px;
+  background: linear-gradient(135deg, #2b6cb0, #2c5282);
+  border: 2.5px solid #63b3ed;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  cursor: grab;
+  box-shadow: var(--sombra-suave);
+  transition: border-color 0.2s, background 0.3s, transform 0.3s;
+}
+
+.caja-funcion:hover {
+  transform: scale(1.02);
+}
+
+.caja-funcion.dragging {
+  opacity: 0.85;
+  transform: scale(1.06);
+  z-index: 3000;
+}
+
+.caja-funcion__tag {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #e2e8f0;
+}
+
+.caja-funcion__formula {
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-align: center;
+  color: #fff;
+  margin: 2px 0;
+}
+
+/* Área de Resultado Mínimo escrito al soltar */
+.caja-funcion__resultado {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #ecc94b;
+  min-height: 24px;
+  text-align: center;
+  word-break: break-word;
+}
+
+/* Estados de la Caja en Cinta */
+.caja-funcion.lista {
+  background: linear-gradient(135deg, #1c4532, #276749) !important;
+  border-color: #68d391 !important;
+  box-shadow: 0 0 18px rgba(104, 211, 145, 0.6) !important;
+  transform: scale(1.03);
+}
+
+.caja-funcion.lista .caja-funcion__tag {
+  background: #38a169 !important;
+  color: #fff !important;
+  font-weight: bold;
+}
+
+/* Estado de Caja DEFORMADA / INCORRECTA (Rojo Alerta) */
+.caja-funcion.deformada {
+  background: linear-gradient(135deg, #742a2a, #9b2c2c) !important;
+  border-color: #f56565 !important;
+  box-shadow: 0 0 20px rgba(245, 101, 101, 0.75) !important;
+  transform: rotate(-2deg) scale(0.98);
+  border-radius: 16px 6px 14px 8px !important;
+}
+
+.caja-funcion.deformada .caja-funcion__tag {
+  background: #e53e3e !important;
+  color: #fff !important;
+  font-weight: bold;
+}
+
+/* Animación de Rechazo Notorio */
+@keyframes rechazoShake {
+  0%, 100% { transform: translateX(0) scale(1); }
+  20% { transform: translateX(-10px) scale(1.06); border-color: #e53e3e; box-shadow: 0 0 20px #e53e3e; }
+  40% { transform: translateX(10px) scale(1.06); border-color: #e53e3e; box-shadow: 0 0 20px #e53e3e; }
+  60% { transform: translateX(-6px) scale(1.03); border-color: #e53e3e; }
+  80% { transform: translateX(6px) scale(1.03); border-color: #e53e3e; }
+}
+
+.caja-funcion.rechazo-animacion {
+  animation: rechazoShake 0.45s ease-in-out !important;
+  background: linear-gradient(135deg, #742a2a, #2c5282) !important;
+}
+
+/* Animación de Retorno Suave al Tubo */
+@keyframes retornoTubo {
+  0% { transform: scale(1.1) translateY(-6px); opacity: 0.7; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.caja-derivada.retorno-animacion, .caja-constante.retorno-animacion {
+  animation: retornoTubo 0.35s ease-out !important;
+}
+
+/* Zonas Inferiores de Despacho y Basura */
+.zonas-inferiores {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 14px;
+}
+
+.zona-target {
+  width: 330px;
+  height: 135px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: bold;
+  font-size: 1.05rem;
+  transition: all 0.2s;
+  box-shadow: var(--sombra-suave);
+}
+
+.zona-despacho {
+  background: #1c4532;
+  border: 3px dashed #48bb78;
+  color: #68d391;
+}
+
+.zona-despacho.drag-over {
+  background: #276749;
+  border-style: solid;
+  transform: scale(1.04);
+  box-shadow: 0 0 22px rgba(72, 187, 120, 0.6);
+}
+
+.zona-basura {
+  background: #4a1d1d;
+  border: 3px dashed #f56565;
+  color: #feb2b2;
+}
+
+.zona-basura.drag-over {
+  background: #9b2c2c;
+  border-style: solid;
+  transform: scale(1.04);
+  box-shadow: 0 0 22px rgba(245, 101, 101, 0.6);
+}
+
+/* Modales y Paneles Flotantes Opacos */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 24, 35, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.modal-overlay.activo {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-opaco {
+  background: #0f1823 !important;
+  backdrop-filter: none !important;
+  z-index: 2500 !important;
+}
+
+.modal-card {
+  background: var(--color-tarjeta);
+  border: 2px solid var(--color-borde);
+  border-radius: 18px;
+  padding: 26px;
+  max-width: 460px;
+  width: 92%;
+  text-align: center;
+  box-shadow: var(--sombra-fuerte);
+}
+
+.modal-card h2 {
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+}
+
+.modal-card p {
+  color: #cbd5e0;
+  font-size: 0.88rem;
+  margin-bottom: 14px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.modal-card ul {
+  text-align: left;
+  margin: 10px 0 20px 20px;
+  font-size: 0.82rem;
+  color: #cbd5e0;
+  line-height: 1.5;
+}
+
+.btn-modal {
+  background: linear-gradient(135deg, var(--color-primario-claro), var(--color-primario));
+  border: none;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  padding: 10px 24px;
+  border-radius: 25px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(79, 209, 197, 0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-modal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(79, 209, 197, 0.6);
+}
+
+@media (max-width: 700px) {
+  .modos-grid { grid-template-columns: 1fr; }
+  .tubos-grid { grid-template-columns: repeat(3, 1fr); }
+  .tubo-dispensador { height: 140px; }
+  .zonas-inferiores { flex-direction: column; align-items: center; }
+  .zona-target { width: 100%; height: 65px; }
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Fábrica de Cálculo — Platón 6</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header & HUD del Juego -->
+  <header class="header-game" id="header-game">
+    <div class="titulo-panel">
+      <a class="btn-volver" href="../../listado.html">← Volver a Platón 6</a>
+      <h1 id="titulo-fabrica">🏭 La Fábrica de Cálculo</h1>
+    </div>
+
+    <div class="hud-stats" id="hud-stats" style="display: none;">
+      <div class="stat-box">
+        <span class="stat-box__lbl">Ronda</span>
+        <span class="stat-box__val" id="ronda-val">1</span>
+      </div>
+
+      <div class="stat-box">
+        <span class="stat-box__lbl">Puntaje</span>
+        <span class="stat-box__val" id="puntaje-val">0</span>
+      </div>
+
+      <div class="stat-box stat-box--malos">
+        <span class="stat-box__lbl">Alertas (Puntos Malos)</span>
+        <span class="stat-box__val" id="puntos-malos-val">0/10</span>
+        <div class="puntos-malos-bar" id="puntos-malos-dots"></div>
+      </div>
+
+      <!-- Botones de Cabecera -->
+      <button class="btn-hdr" id="btn-cambiar-fabrica">🏭 Selector de Fábrica</button>
+      <button class="btn-hdr" id="btn-instrucciones-hdr">📖 Instrucciones</button>
+      <button class="btn-hdr" id="btn-pausa">⏸️ Pausa</button>
+    </div>
+  </header>
+
+  <!-- PANTALLA 1: Portada y Selector de Fábrica -->
+  <div class="portada-selector" id="pantalla-portada">
+    <div class="portada-header">
+      <h2>🏭 La Fábrica de Cálculo</h2>
+      <p>Selecciona el tipo de fábrica para comenzar la producción:</p>
+    </div>
+
+    <div class="modos-grid">
+      <div class="modo-card" data-modo="derivadas">
+        <div class="modo-card__icon">⚡</div>
+        <div class="modo-card__titulo">1. Fábrica de Derivadas</div>
+        <div class="modo-card__desc">Empaqueta cada función f(x) con su primera derivada f'(x).</div>
+      </div>
+
+      <div class="modo-card" data-modo="integrales">
+        <div class="modo-card__icon">🔄</div>
+        <div class="modo-card__titulo">2. Fábrica de Integrales</div>
+        <div class="modo-card__desc">Empaqueta cada integral ∫ f(x)dx con su antiderivada F(x) y la constante +C.</div>
+      </div>
+
+      <div class="modo-card" data-modo="mixta">
+        <div class="modo-card__icon">🔀</div>
+        <div class="modo-card__titulo">3. Fábrica Mixta</div>
+        <div class="modo-card__desc">Línea de producción combinada: cajas de derivadas e integrales alternadas.</div>
+      </div>
+
+      <div class="modo-card" data-modo="doble_derivada">
+        <div class="modo-card__icon">⏩</div>
+        <div class="modo-card__titulo">4. Fábrica de Doble Derivada</div>
+        <div class="modo-card__desc">Empaqueta cada función f(x) con su segunda derivada f''(x).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA 2: Área Principal de la Fábrica (Oculta hasta elegir modo) -->
+  <div class="fabrica-container" id="pantalla-juego" style="display: none;">
+    
+    <!-- Repisa Superior: 6 Tubos + Cuadrado Pequeño +C al costado derecho -->
+    <div class="repisa-seccion">
+      <div class="tubos-grid" id="tubos-grid">
+        <!-- 6 tubos inyectados dinámicamente -->
+      </div>
+      <!-- Cuadrado pequeño +C al costado derecho de los tubos -->
+      <div class="caja-constante" id="dispenser-constante" draggable="true" style="display: none;" title="Constante +C">
+        +C
+      </div>
+    </div>
+
+    <!-- Cinta Transportadora Inferior -->
+    <div class="cinta-seccion" id="cinta-container">
+      <div class="cinta-patron"></div>
+      <!-- Cajas de función inyectadas dinámicamente por la cinta -->
+    </div>
+
+    <!-- Zonas Inferiores de Despacho y Basura (Debajo de la cinta) -->
+    <div class="zonas-inferiores">
+      <div class="zona-target zona-despacho" id="zona-despacho">
+        📦 DESPACHO
+        <span style="font-size:0.68rem; font-weight:normal; opacity:0.8;">(Arrastra caja lista aquí)</span>
+      </div>
+
+      <div class="zona-target zona-basura" id="zona-basura">
+        🗑️ BASURA
+        <span style="font-size:0.68rem; font-weight:normal; opacity:0.8;">(Descarte de cajas/funciones)</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal de Instrucciones TOTALMENTE OPACO -->
+  <div class="modal-overlay modal-opaco" id="modal-instrucciones">
+    <div class="modal-card">
+      <h2 style="color: var(--color-primario-claro);">📖 Instrucciones de Producción</h2>
+      <p>Bienvenido a la línea de ensamblaje. Tu objetivo es procesar y despachar las cajas de funciones antes de que salgan de la pantalla:</p>
+      <ul>
+        <li><strong>Arrastra la respuesta:</strong> Toma el resultado correcto f'(x) o F(x) de los tubos superiores y suéltalo sobre la caja que corre en la cinta.</li>
+        <li><strong>En Integrales:</strong> No olvides colocar la constante <strong>+C</strong> (ubicada en el cuadrado morado a la derecha de los tubos) sobre la caja. ¡Si la olvidas, la caja estará incompleta!</li>
+        <li><strong>Despacha la caja:</strong> Cuando consideres que la caja está lista, <strong>arrástrala hacia la Zona de Despacho 📦</strong> en la parte inferior.</li>
+        <li><strong>Desechos:</strong> Si una función del tubo no te sirve o una caja viene defectuosa, puedes tirarla a la Basura 🗑️.</li>
+      </ul>
+
+      <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; font-size: 0.78rem; text-align: left; margin-bottom: 16px; border: 1px solid var(--color-borde);">
+        <strong>⚠️ Puntos Malos (Alertas):</strong><br>
+        • Botar función pequeña a la basura: <strong>-1 pto</strong><br>
+        • Botar caja de la cinta a la basura: <strong>-2 ptos</strong><br>
+        • Dejar que una caja escape de pantalla sin despachar: <strong>-3 ptos</strong><br>
+        • Despachar caja con función equivocada o sin +C: <strong>-4 ptos</strong><br>
+        • Acumular 10 puntos malos = Game Over.
+      </div>
+
+      <button class="btn-modal" id="btn-comenzar-juego">¡Entendido! Comenzar Producción ▶</button>
+    </div>
+  </div>
+
+  <!-- Modal de Pausa TOTALMENTE OPACO -->
+  <div class="modal-overlay modal-opaco" id="modal-pausa">
+    <div class="modal-card">
+      <h2 style="font-size: 2.2rem; color: var(--color-dorado);">⏸️ PAUSA</h2>
+      <p>La fábrica de producción está detenida temporalmente.</p>
+      <button class="btn-modal" id="btn-reanudar" style="margin-top: 10px; font-size: 1.1rem; padding: 12px 30px;">▶ Reanudar Juego</button>
+    </div>
+  </div>
+
+  <!-- Modal: Ronda Completada -->
+  <div class="modal-overlay" id="modal-ronda">
+    <div class="modal-card">
+      <h2>🎉 ¡Ronda <span id="ronda-num-modal">1</span> Completada!</h2>
+      <p>¡Excelente trabajo! Todas las cajas de esta ronda han salido de pantalla. La fábrica se ha estabilizado y se han limpiado <strong><span id="puntos-recuperados-modal">5</span> puntos malos</strong> de tu historial.</p>
+      <p style="font-size:0.82rem; color:#a0aec0;">La siguiente ronda incluye más cajas en la cinta y ejercicios de mayor nivel.</p>
+      <button class="btn-modal" id="btn-siguiente-ronda">Comenzar Siguiente Ronda →</button>
+    </div>
+  </div>
+
+  <!-- Modal: Game Over -->
+  <div class="modal-overlay" id="modal-gameover">
+    <div class="modal-card">
+      <h2 style="color: var(--color-acento);">⚠️ ¡Fábrica Detenida!</h2>
+      <p>Has acumulado 10 puntos malos por errores de despacho, basuras o fugas en la línea.</p>
+      <p style="font-size: 1.2rem; font-weight: bold; color: #fff;">Puntaje Final: <span id="puntaje-final-gameover">0</span> Puntos</p>
+      <button class="btn-modal" id="btn-reiniciar">Reintentar Producción ↺</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -65,37 +65,100 @@ function renderFooterNav(root, modId, pageId) {
   const footer = document.getElementById('site-footer');
   if (!footer) return;
 
+  const sequence = [];
+
+  // 1. Portada principal del taller (index.html)
+  sequence.push({
+    type: 'portada',
+    title: 'Volver a la portada',
+    href: `${root}index.html`
+  });
+
+  // 2. Inicio del curso con cuadrícula de módulos (curso.html)
+  sequence.push({
+    type: 'curso',
+    modId: null,
+    pageId: null,
+    title: 'Inicio del curso',
+    href: `${root}curso.html`
+  });
+
+  // 3. Secuencia continua de todas las páginas de todos los módulos
+  TALLER_NAV.modules.forEach(m => {
+    m.pages.forEach(p => {
+      sequence.push({
+        type: 'page',
+        modId: m.id,
+        modSlug: m.slug,
+        pageId: p.id,
+        pageFile: p.file,
+        pageTitle: p.title,
+        href: `${root}${m.slug}/${p.file}`
+      });
+    });
+  });
+
+  // Identificar el índice de la página actual en la secuencia continua
+  let currIndex = -1;
   if (!modId) {
-    // curso.html: sin módulo activo — ofrece empezar por el primero.
-    const primerModulo = TALLER_NAV.modules[0];
-    footer.innerHTML = `
-      <footer class="pie">
-        <div class="nav-prev-next">
-          <span></span>
-          <a class="btn-nav btn-nav--siguiente" href="${root}${primerModulo.slug}/index.html">Comenzar Módulo ${primerModulo.id} →</a>
-        </div>
-      </footer>`;
-    return;
+    // Si no hay modId, estamos en curso.html
+    currIndex = 1;
+  } else {
+    currIndex = sequence.findIndex(s => s.type === 'page' && s.modId === modId && s.pageId === pageId);
   }
 
-  const modIndex = TALLER_NAV.modules.findIndex(m => m.id === modId);
-  const mod = TALLER_NAV.modules[modIndex];
-  const pageIndex = mod.pages.findIndex(p => p.id === pageId);
-  const prevPage = mod.pages[pageIndex - 1] || null;
-  const nextPage = mod.pages[pageIndex + 1] || null;
-  const nextMod = TALLER_NAV.modules[modIndex + 1] || null;
+  if (currIndex === -1) return;
+
+  const prevItem = sequence[currIndex - 1] || null;
+  const nextItem = sequence[currIndex + 1] || null;
+
+  // Renderizar botón Anterior
+  let prevHtml = '<span></span>';
+  if (prevItem) {
+    let label = '';
+    let href = prevItem.href;
+
+    if (prevItem.type === 'portada') {
+      label = '← Volver a la portada';
+    } else if (prevItem.type === 'curso') {
+      label = '← Inicio del curso';
+    } else if (prevItem.type === 'page') {
+      if (prevItem.modId === modId) {
+        label = `← ${prevItem.pageTitle}`;
+        href = prevItem.pageFile;
+      } else {
+        label = `← Mód. ${prevItem.modId}: ${prevItem.pageTitle}`;
+      }
+    }
+    prevHtml = `<a class="btn-nav" href="${href}">${label}</a>`;
+  }
+
+  // Renderizar botón Siguiente
+  let nextHtml = '<span></span>';
+  if (nextItem) {
+    let label = '';
+    let href = nextItem.href;
+
+    if (nextItem.type === 'page') {
+      if (nextItem.modId === modId) {
+        label = `${nextItem.pageTitle} →`;
+        href = nextItem.pageFile;
+      } else {
+        label = `Mód. ${nextItem.modId}: ${nextItem.pageTitle} →`;
+      }
+    } else if (nextItem.type === 'curso') {
+      label = `Inicio del curso →`;
+    }
+    nextHtml = `<a class="btn-nav btn-nav--siguiente" href="${href}">${label}</a>`;
+  } else {
+    nextHtml = `<a class="btn-nav btn-nav--siguiente" href="${root}curso.html">Volver al inicio →</a>`;
+  }
 
   footer.innerHTML = `
     <footer class="pie">
       <div class="nav-prev-next">
-        ${prevPage
-          ? `<a class="btn-nav" href="${prevPage.file}">← ${prevPage.title}</a>`
-          : `<span></span>`}
-        ${nextPage
-          ? `<a class="btn-nav btn-nav--siguiente" href="${nextPage.file}">${nextPage.title} →</a>`
-          : (nextMod
-              ? `<a class="btn-nav btn-nav--siguiente" href="${root}${nextMod.slug}/index.html">Ir a Módulo ${nextMod.id} →</a>`
-              : `<a class="btn-nav btn-nav--siguiente" href="${root}curso.html">Volver al inicio →</a>`)}
+        ${prevHtml}
+        ${nextHtml}
       </div>
     </footer>`;
 }
