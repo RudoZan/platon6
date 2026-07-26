@@ -135,8 +135,8 @@
       cursor: grab; display: flex; justify-content: center; align-items: center;
     }
     .pieza:hover { transform: scale(1.1); }
-    .pieza.blanca { color: #ffffff; text-shadow: 0 2px 5px rgba(0,0,0,0.8), 0 0 2px #000; }
-    .pieza.negra { color: #1a1a1a; text-shadow: 0 1px 3px rgba(255,255,255,0.4); }
+    .pieza.blanca { color: #ffffff; -webkit-text-stroke: 1.5px #8a8a8a; }
+    .pieza.negra { color: #111111; -webkit-text-stroke: 1.5px #8a8a8a; }
 
     .columnas-letras { display: flex; justify-content: space-around; width: 100%; margin-top: 4px; }
     .columnas-letras span { width: 64px; text-align: center; font-size: 0.72rem; color: var(--oro-claro); font-weight: bold; }
@@ -252,7 +252,6 @@
   </nav>
 
   <h1>🎓 Curso Interactivo de Ajedrez 🎓</h1>
-  <p class="subtitulo">Clases Individuales Específicas — Cada tema con su posición, variantes y objetivos guiados</p>
 
   <div class="zona-curso">
 
@@ -591,13 +590,23 @@
       <div class="toggle-ia-box" style="width: 100%; max-width: 512px;">
         <span>Oponente Computador (IA):</span>
         <label class="switch">
-          <input type="checkbox" id="checkOponenteIA">
+          <input type="checkbox" id="checkOponenteIA" checked>
           <span class="slider"></span>
         </label>
       </div>
+
+      <div class="controles-clase" style="width: 100%; max-width: 512px;">
+        <button id="btnClaseAnterior" class="btn-nav-clase">⏮ Anterior</button>
+        <button id="btnClaseSiguiente" class="btn-nav-clase">Siguiente ▶</button>
+      </div>
+
+      <div class="box-objetivos" style="width: 100%; max-width: 512px;">
+        <h3>🎯 Consigue los siguientes hitos de la clase</h3>
+        <ul id="listaObjetivosClase" class="lista-objetivos"></ul>
+      </div>
     </main>
 
-    <!-- Panel de Detalles, Valores Materiales, Variantes y Objetivos -->
+    <!-- Panel de Detalles, Valores Materiales y Variantes -->
     <aside class="panel-info-clase">
       <div class="clase-header">
         <h2 id="tituloClase" class="clase-titulo">Clase 1: Historia y Filosofía del Ajedrez</h2>
@@ -619,16 +628,6 @@
       <div id="descClase" class="clase-descripcion"></div>
 
       <button id="btnAudioClase" class="btn-audio">🔊 Escuchar lección explicada</button>
-
-      <div class="box-objetivos">
-        <h3>🎯 Objetivos de la Clase (Práctica en vivo)</h3>
-        <ul id="listaObjetivosClase" class="lista-objetivos"></ul>
-      </div>
-
-      <div class="controles-clase">
-        <button id="btnClaseAnterior" class="btn-nav-clase">⏮ Anterior</button>
-        <button id="btnClaseSiguiente" class="btn-nav-clase">Siguiente ▶</button>
-      </div>
     </aside>
 
   </div>
