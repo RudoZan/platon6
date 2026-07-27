@@ -42,6 +42,7 @@
         .item-num { color: #777; font-size: 0.75rem; font-weight: bold; min-width: 20px; text-align: center; }
         .item-label { flex: 1; font-size: 0.85rem; color: #ccc; }
         .item-sublabel { font-size: 0.7rem; color: #888; display: block; }
+        .flag-inline { height: 1em; width: auto; vertical-align: middle; border-radius: 2px; margin: 0 2px; }
         .btn { padding: 5px 10px; border: none; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; color: white; white-space: nowrap; }
         .btn-mid { background: #2a6b4a; }
         .btn-mid:hover { background: #1e5a3a; }
@@ -69,6 +70,11 @@
         .welcome-btn { padding: 20px 40px; border: 2px solid #2a5a42; border-radius: 12px; background: #122a1f; color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.2s; min-width: 250px; text-align: center; }
         .welcome-btn:hover { border-color: #5ec4b6; background: #1e4035; }
         .welcome-btns { display: flex; gap: 20px; }
+        .welcome-info { display: flex; gap: 20px; margin-top: 10px; }
+        .welcome-info-card { width: 300px; border: 2px solid #2a5a42; border-radius: 12px; background: #122a1f; padding: 14px; text-align: center; }
+        .welcome-info-card img { width: 100%; border-radius: 8px; border: 1px solid #2a5a42; display: block; }
+        .welcome-info-card h3 { color: #f0a830; font-size: 1rem; margin: 12px 0 6px; }
+        .welcome-info-card p { color: #aaa; font-size: 0.85rem; line-height: 1.4; margin: 0; }
         .act-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px; }
         .act-card { padding: 10px 12px; background: #122a1f; border: 2px solid #2a5a42; border-radius: 10px; cursor: pointer; transition: all 0.2s; text-align: center; font-size: 0.95rem; font-weight: bold; }
         .act-card:hover { border-color: #5ec4b6; background: #1e4035; }
@@ -218,6 +224,18 @@
         <button class="welcome-btn" onclick="selectCourse('5to-6to')">5th & 6th Grade<br><small style="color:#aaa;">Languages</small></button>
         <button class="welcome-btn" onclick="selectCourse('7mo-8vo')">7th & 8th Grade<br><small style="color:#aaa;">Sports</small></button>
     </div>
+    <div class="welcome-info">
+        <div class="welcome-info-card">
+            <img src="Images/EnglishClass_ControlWindow.png" alt="Control Window">
+            <h3>Control Window</h3>
+            <p>This is the teacher's control window. Use it to manage what appears on the presentation window. Select a course and activity, run the stage timer, and manage your camera.</p>
+        </div>
+        <div class="welcome-info-card">
+            <img src="Images/EnglishClass_PresentationWindow.png" alt="Presentation Window">
+            <h3>Presentation Window</h3>
+            <p>This is the presentation window you share with your students. It shows only the activity you select. Kids see the text and images you share from the Control Window.</p>
+        </div>
+    </div>
 </div>
 
 <div id="appContent" style="display:none; flex-direction:column; flex:1; min-height:0;">
@@ -284,6 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
     courseSelect = document.getElementById('courseSelect');
     activitySelect = document.getElementById('activitySelect');
     container = document.getElementById('itemsContainer');
+    openPresentation();
 });
 let suggestionBodyVisible = false;
 
@@ -1616,23 +1635,23 @@ function renderSameWord(act) {
 
         const label = document.createElement('span');
         label.className = 'item-label';
-        label.innerHTML = `${item.icon} ${item.es}<span class="item-sublabel">🇺🇸 ${item.us} | 🇬🇧 ${item.uk} | 🇦🇺 ${item.au}</span>`;
+        label.innerHTML = `${item.icon} ${item.es}<span class="item-sublabel"><img class="flag-inline" src="Images/flags/us.png" alt="US"> ${item.us} | <img class="flag-inline" src="Images/flags/gb.png" alt="UK"> ${item.uk} | <img class="flag-inline" src="Images/flags/au.png" alt="AU"> ${item.au}</span>`;
 
         const btnEs = document.createElement('button');
         btnEs.className = 'btn btn-mid';
-        btnEs.textContent = '🇪🇸 Show';
+        btnEs.innerHTML = '<img class="flag-inline" src="Images/flags/es.png" alt="ES"> Show';
 
         const btnUs = document.createElement('button');
         btnUs.className = 'btn btn-bot';
-        btnUs.textContent = '🇺🇸 USA';
+        btnUs.innerHTML = '<img class="flag-inline" src="Images/flags/us.png" alt="US"> USA';
 
         const btnUk = document.createElement('button');
         btnUk.className = 'btn btn-bot';
-        btnUk.textContent = '🇬🇧 UK';
+        btnUk.innerHTML = '<img class="flag-inline" src="Images/flags/gb.png" alt="UK"> UK';
 
         const btnAu = document.createElement('button');
         btnAu.className = 'btn btn-bot';
-        btnAu.textContent = '🇦🇺 Other';
+        btnAu.innerHTML = '<img class="flag-inline" src="Images/flags/au.png" alt="AU"> Other';
 
         function setLangButtonsEnabled(enabled) {
             [btnUs, btnUk, btnAu].forEach(b => {

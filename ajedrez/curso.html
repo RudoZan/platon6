@@ -315,7 +315,7 @@
         <button id="btnClaseSiguiente" class="btn-nav-clase">Siguiente ▶</button>
       </div>
 
-      <div class="box-objetivos" style="width: 100%; max-width: 512px;">
+      <div id="boxObjetivosClase" class="box-objetivos" style="width: 100%; max-width: 512px;">
         <h3>🎯 Consigue los siguientes hitos de la clase</h3>
         <ul id="listaObjetivosClase" class="lista-objetivos"></ul>
       </div>
@@ -366,10 +366,7 @@ La revolución española (finales del s. XV): la Dama pasa a ser la pieza más p
 La leyenda de los granos de trigo (2⁶⁴−1) es un puente natural con la matemática.
 
 Hitos históricos: Steinitz 1886 (primer campeón oficial) · Fischer–Spassky 1972 · Deep Blue 1997 · AlphaZero 2017 · Gukesh D. 2024 (campeón mundial más joven, 18 años).`,
-    objetivos: [
-      { id: 'h1', texto: 'Ordena cronológicamente 5 hitos históricos (Steinitz 1886 → AlphaZero 2017)', cumplido: false },
-      { id: 'h2', texto: 'Responde qué significa "shah mat"', cumplido: false }
-    ]
+    objetivos: []
   },
   { id: 2, titulo: '2. El Tablero: Geometría y Coordenadas', nivel: 'Principiante', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Objetivo: nombrar cualquier casilla sin contar.
@@ -967,10 +964,7 @@ const CLASES_INTERMEDIO = [
 • Menos de 1200: principiante o de club recién iniciado. 1200-1600: jugador de club con base táctica. 1600-2000: club fuerte / candidato a título. 2000-2200: nivel de Maestro. 2200-2400: Maestro Internacional (MI). 2400-2500: umbral de Gran Maestro. 2500 y más: Gran Maestro (GM) — la élite mundial juega sobre 2700.
 • A diferencia del Elo, que sube y baja, un título es para toda la vida: una vez obtenido, no se pierde aunque el puntaje baje después. Se otorgan combinando un umbral mínimo de Elo con normas (resultados destacados en torneos específicos).
 • Los cuatro títulos FIDE, de menor a mayor: Candidato a Maestro (CM, ~2200) · Maestro FIDE (FM, ~2300) · Maestro Internacional (MI, ~2400) · Gran Maestro (GM, ~2500).`,
-    objetivos: [
-      { id: 'elo_1', texto: 'Explica la diferencia entre Elo (relativo, sube y baja con cada resultado) y título (fijo, de por vida)', cumplido: false },
-      { id: 'elo_2', texto: 'Ordena de menor a mayor los cuatro títulos FIDE (CM, FM, MI, GM) según su umbral aproximado de Elo', cumplido: false }
-    ]
+    objetivos: []
   },
   { id: 2, titulo: '2. Ubicarse en la Escena Competitiva', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Con el curso Principiante ya completo, estos números dejan de ser abstractos. Ajedrecistas chilenos y latinoamericanos como Iván Morović, Rodrigo Vásquez, Cristóbal Henríquez y Valentina Jorquera muestran que esta escalera es alcanzable desde el mismo entorno del estudiante, no solo desde Europa o Asia.',
@@ -1411,10 +1405,7 @@ const CLASES_AVANZADO = [
 • El match por el título: el campeón vigente y el retador juegan una serie de partidas clásicas; si empatan, se define por desempates rápidos y blitz — así perdió Caruana el Mundial 2018 ante Carlsen.
 • Olimpiada de Ajedrez: cada dos años, selecciones nacionales compiten por equipos. Iván Morović ganó una medalla de bronce individual en la Olimpiada de Salónica 1984.
 • Grandes torneos de élite: Tata Steel Chess Tournament (Wijk aan Zee, desde 1938) y Norway Chess, con Carlsen como local.`,
-    objetivos: [
-      { id: 'gt_1', texto: 'Explica cómo funciona el ciclo Candidatos → Match por el título', cumplido: false },
-      { id: 'gt_2', texto: 'Nombra al menos un torneo de élite (Tata Steel, Norway Chess) y qué lo hace relevante', cumplido: false }
-    ]
+    objetivos: []
   },
   { id: 2, titulo: '2. Torneos y Partidas de Chile y Latinoamérica', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `• Torneo Internacional de Ajedrez de Viña del Mar: desde 1945, marcó un antes y un después para el ajedrez chileno; su club organizador lleva hoy el nombre de Iván Morović.
@@ -2204,17 +2195,22 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
 
       document.getElementById('descClase').innerHTML = c.descripcion.replace(/\n/g, '<br>');
 
+      const boxObjetivos = document.getElementById('boxObjetivosClase');
       const listEl = document.getElementById('listaObjetivosClase');
       listEl.innerHTML = '';
-      c.objetivos.forEach(o => {
-        const li = document.createElement('li');
-        li.className = `item-objetivo ${o.cumplido ? 'cumplido' : ''}`;
-        li.innerHTML = `
-          <span class="obj-icon">${o.cumplido ? '✅' : '⏳'}</span>
-          <span>${o.texto}</span>
-        `;
-        listEl.appendChild(li);
-      });
+      const tieneHitos = c.objetivos && c.objetivos.length > 0;
+      boxObjetivos.style.display = tieneHitos ? '' : 'none';
+      if (tieneHitos) {
+        c.objetivos.forEach(o => {
+          const li = document.createElement('li');
+          li.className = `item-objetivo ${o.cumplido ? 'cumplido' : ''}`;
+          li.innerHTML = `
+            <span class="obj-icon">${o.cumplido ? '✅' : ''}</span>
+            <span>${o.texto}</span>
+          `;
+          listEl.appendChild(li);
+        });
+      }
     }
 
     // Speech Synthesis

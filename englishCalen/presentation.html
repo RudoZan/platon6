@@ -191,7 +191,8 @@
             align-items: center;
             position: relative;
         }
-        .sw-flag { font-size: 8rem; line-height: 1; position: relative; z-index: 1; }
+        .sw-flag { line-height: 1; position: relative; z-index: 1; }
+        .sw-flag img { width: 10rem; height: auto; display: block; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.35); }
         .sw-word {
             font-size: 2.2rem;
             font-weight: bold;
@@ -727,9 +728,9 @@
                 swContainer.style.boxSizing = 'border-box';
                 swContainer.innerHTML = `
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%; gap: 100px; box-sizing: border-box;">
-                        <div class="sw-col"><div class="sw-word" id="swWordus"></div><div class="sw-flag">🇺🇸</div></div>
-                        <div class="sw-col"><div class="sw-word" id="swWorduk"></div><div class="sw-flag">🇬🇧</div></div>
-                        <div class="sw-col"><div class="sw-word" id="swWordau"></div><div class="sw-flag">🇦🇺</div></div>
+                        <div class="sw-col"><div class="sw-word" id="swWordus"></div><div class="sw-flag"><img src="Images/flags/us.png" alt="USA"></div></div>
+                        <div class="sw-col"><div class="sw-word" id="swWorduk"></div><div class="sw-flag"><img src="Images/flags/gb.png" alt="UK"></div></div>
+                        <div class="sw-col"><div class="sw-word" id="swWordau"></div><div class="sw-flag"><img src="Images/flags/au.png" alt="Australia"></div></div>
                     </div>
                 `;
                 contentBox.appendChild(swContainer);
