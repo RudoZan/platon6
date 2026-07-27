@@ -2067,6 +2067,7 @@ function renderMultiMode(act) {
 // ══════════════════════════════════════
 function renderCanYou(act) {
     let activeItem = null;
+    let activeAnswer = null; // null | 'yes' | 'no' — which answer is currently shown for activeItem
 
     act.items.forEach((item, i) => {
         const row = document.createElement('div');
@@ -2075,6 +2076,12 @@ function renderCanYou(act) {
         const num = document.createElement('span');
         num.className = 'item-num';
         num.textContent = (i + 1);
+
+        function markShown() {
+            if (num.dataset.shown) return;
+            num.dataset.shown = '1';
+            num.innerHTML = `${i + 1} <span style="color:#5ec4b6;">✓</span>`;
+        }
 
         const label = document.createElement('span');
         label.className = 'item-label';
@@ -2092,6 +2099,8 @@ function renderCanYou(act) {
             if (item.sideImg) { send('side-image', '', item.sideImg); }
             else if (item.icon) { send('side-emoji', item.icon); }
             activeItem = i;
+            activeAnswer = null;
+            markShown();
         };
 
         const btnYes = document.createElement('button');
@@ -2100,6 +2109,11 @@ function renderCanYou(act) {
         btnYes.style.background = '#2e7d32';
 
         btnYes.onclick = () => {
+            if (activeItem === i && activeAnswer === 'yes') {
+                send('clear-bottom', '');
+                activeAnswer = null;
+                return;
+            }
             if (activeItem !== null && activeItem !== i) {
                 send('middle', item.q);
                 if (item.sideImg) { send('side-image', '', item.sideImg); }
@@ -2107,6 +2121,8 @@ function renderCanYou(act) {
             }
             send('bottom', item.yes);
             activeItem = i;
+            activeAnswer = 'yes';
+            markShown();
         };
 
         const btnNo = document.createElement('button');
@@ -2115,6 +2131,11 @@ function renderCanYou(act) {
         btnNo.style.background = '#c62828';
 
         btnNo.onclick = () => {
+            if (activeItem === i && activeAnswer === 'no') {
+                send('clear-bottom', '');
+                activeAnswer = null;
+                return;
+            }
             if (activeItem !== null && activeItem !== i) {
                 send('middle', item.q);
                 if (item.sideImg) { send('side-image', '', item.sideImg); }
@@ -2122,6 +2143,8 @@ function renderCanYou(act) {
             }
             send('bottom', item.no);
             activeItem = i;
+            activeAnswer = 'no';
+            markShown();
         };
 
         row.appendChild(num);
