@@ -961,8 +961,28 @@ Entre lo visto: Sistema Londres, Sistema Colle, Apertura Italiana y Defensa Esca
 
 
 const CLASES_INTERMEDIO = [
-  // --- M1: Aperturas — Ruy López + Gambito de Rey (Clases 1-5) ---
-  { id: 1, titulo: '1. Presentación: Las Dos Caras de 1.e4 e5', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M1: Elo, Títulos y la Escena Competitiva (Clases 1-2) ---
+  { id: 1, titulo: '1. Concepto: Qué Es el Elo y Qué Son los Títulos', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    descripcion: `El sistema Elo (creado por el físico húngaro-estadounidense Arpad Elo) es una medida relativa de fuerza: no dice cuánto sabe alguien en términos absolutos, dice qué tan probable es que le gane a otro jugador con un puntaje distinto.
+• Menos de 1200: principiante o de club recién iniciado. 1200-1600: jugador de club con base táctica. 1600-2000: club fuerte / candidato a título. 2000-2200: nivel de Maestro. 2200-2400: Maestro Internacional (MI). 2400-2500: umbral de Gran Maestro. 2500 y más: Gran Maestro (GM) — la élite mundial juega sobre 2700.
+• A diferencia del Elo, que sube y baja, un título es para toda la vida: una vez obtenido, no se pierde aunque el puntaje baje después. Se otorgan combinando un umbral mínimo de Elo con normas (resultados destacados en torneos específicos).
+• Los cuatro títulos FIDE, de menor a mayor: Candidato a Maestro (CM, ~2200) · Maestro FIDE (FM, ~2300) · Maestro Internacional (MI, ~2400) · Gran Maestro (GM, ~2500).`,
+    objetivos: [
+      { id: 'elo_1', texto: 'Explica la diferencia entre Elo (relativo, sube y baja con cada resultado) y título (fijo, de por vida)', cumplido: false },
+      { id: 'elo_2', texto: 'Ordena de menor a mayor los cuatro títulos FIDE (CM, FM, MI, GM) según su umbral aproximado de Elo', cumplido: false }
+    ]
+  },
+  { id: 2, titulo: '2. Ubicarse en la Escena Competitiva', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    descripcion: 'Con el curso Principiante ya completo, estos números dejan de ser abstractos. Ajedrecistas chilenos y latinoamericanos como Iván Morović, Rodrigo Vásquez, Cristóbal Henríquez y Valentina Jorquera muestran que esta escalera es alcanzable desde el mismo entorno del estudiante, no solo desde Europa o Asia.',
+    objetivos: [
+      { id: 'elo_3', texto: 'Nombra al menos un ajedrecista chileno o latinoamericano y su logro principal (Morović, Vásquez, Henríquez o Jorquera)', cumplido: false },
+      { id: 'elo_4', texto: 'Dado un rango de Elo, estima a qué nivel aproximado corresponde en 5 ejemplos (principiante / club / maestro / GM)', cumplido: false }
+    ]
+  },
+
+
+  // --- M2: Aperturas — Ruy López + Gambito de Rey (Clases 3-7) ---
+  { id: 3, titulo: '3. Presentación: Las Dos Caras de 1.e4 e5', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Ruy López (1561, Ruy López de Segura): presión indefinida sobre el punto de apoyo del centro negro, no una amenaza real e inmediata.
 Ojo: la amenaza de ganar e5 tras 4.Bxc6 dxc6 5.Nxe5 es ILUSORIA — 5…Qd4! recupera el peón con buen juego. Calcularlo por cuenta propia vale más que memorizarlo.
 Gambito de Rey: sacrificio inmediato de f4 por líneas abiertas y ataque directo.`,
@@ -971,7 +991,7 @@ Gambito de Rey: sacrificio inmediato de f4 por líneas abiertas y ataque directo
       { id: 'ap1_2', texto: 'Reconoce ambas aperturas desde la posición', cumplido: false }
     ]
   },
-  { id: 2, titulo: '2. Ejecución Guiada: Ruy López y Gambito de Rey', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 4, titulo: '4. Ejecución Guiada: Ruy López y Gambito de Rey', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Ruy López', movidas: ['e4','e5','Nf3','Nc6','Bb5'], descripcion: 'Incomodar al caballo de c6 para acumular concesiones a largo plazo.' },
       { nombre: 'Gambito de Rey', movidas: ['e4','e5','f4'], descripcion: 'Sacrificar el peón de f4 para abrir la columna f y atacar el enroque.' }
@@ -983,7 +1003,7 @@ Gambito de Rey: sacrificio inmediato de f4 por líneas abiertas y ataque directo
       { id: 'ap1_5', texto: 'Sin pistas', cumplido: false }
     ]
   },
-  { id: 3, titulo: '3. Variantes de la Ruy López', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 5, titulo: '5. Variantes de la Ruy López', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Cerrada', movidas: ['e4','e5','Nf3','Nc6','Bb5','a6','Ba4','Nf6','O-O','Be7'], descripcion: 'La línea principal histórica. Maniobras largas y planificación (Nb1-d2-f1-g3).' },
       { nombre: 'Abierta', movidas: ['e4','e5','Nf3','Nc6','Bb5','a6','Ba4','Nf6','O-O','Nxe4'], descripcion: 'Juego táctico inmediato; buena para practicar cálculo.' },
@@ -997,7 +1017,7 @@ Gambito de Rey: sacrificio inmediato de f4 por líneas abiertas y ataque directo
       { id: 'ap1_8', texto: 'Elige variante según respuesta, 6 veces', cumplido: false }
     ]
   },
-  { id: 4, titulo: '4. Del Otro Lado: Berlinesa y Gambito', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 6, titulo: '6. Del Otro Lado: Berlinesa y Gambito', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Defensa Berlinesa', movidas: ['e4','e5','Nf3','Nc6','Bb5','Nf6'], descripcion: 'Fuerza un final temprano y árido; Kramnik la usó para desactivar a Kasparov en 2000.' },
       { nombre: 'Aceptar el Gambito de Rey', movidas: ['e4','e5','f4','exf4'], descripcion: 'Toma el peón y prepárate a defenderlo o devolverlo a tiempo.' },
@@ -1010,7 +1030,7 @@ Gambito de Rey: sacrificio inmediato de f4 por líneas abiertas y ataque directo
       { id: 'ap1_11', texto: 'Acepta y devuelve el Gambito de Rey a tiempo cuando conviene', cumplido: false }
     ]
   },
-  { id: 5, titulo: '5. Cierre: Partidas Completas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 7, titulo: '7. Cierre: Partidas Completas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Aplicar ambas aperturas en partida real contra rival que no coopera.',
     objetivos: [
       { id: 'ap1_12', texto: '2 partidas ganadas', cumplido: false },
@@ -1020,8 +1040,8 @@ Gambito de Rey: sacrificio inmediato de f4 por líneas abiertas y ataque directo
     ]
   },
 
-  // --- M2: Táctica II (Clases 6-8) ---
-  { id: 6, titulo: '6. Enfilada, Descubierta y Doble Jaque', nivel: 'Intermedio', fen: '4r3/8/8/4k3/8/8/8/R6K w - - 0 1',
+  // --- M3: Táctica II (Clases 8-10) ---
+  { id: 8, titulo: '8. Enfilada, Descubierta y Doble Jaque', nivel: 'Intermedio', fen: '4r3/8/8/4k3/8/8/8/R6K w - - 0 1',
     movidas: ['Re1+','Kd5','Rxe8'],
     descripcion: `Enfilada: la clavada al revés — se ataca primero la pieza valiosa, que al apartarse deja caer a la de atrás. Aquí, Re1+ obliga al Rey a moverse y Rxe8 gana la torre.
 Ataque/jaque a la descubierta: la amenaza la genera la pieza que NO se movió (ejemplo de referencia: Bxa7+ descubre jaque de una torre en e1).
@@ -1031,7 +1051,7 @@ Doble jaque: las dos piezas dan jaque a la vez. Solo se puede responder moviendo
       { id: 'tac2_2', texto: 'Explica por qué el doble jaque no se puede bloquear ni capturar', cumplido: false }
     ]
   },
-  { id: 7, titulo: '7. Práctica con Hitos', nivel: 'Intermedio', fen: '4k3/q7/8/8/8/4B3/8/4R2K w - - 0 1',
+  { id: 9, titulo: '9. Práctica con Hitos', nivel: 'Intermedio', fen: '4k3/q7/8/8/8/4B3/8/4R2K w - - 0 1',
     movidas: ['Bxa7+'],
     descripcion: 'Serie de ejercicios: el Alfil captura la Dama y, al salir de e3, descubre jaque de la Torre de e1 sobre el rey de e8. Descubierta en estado puro.',
     objetivos: [
@@ -1040,7 +1060,7 @@ Doble jaque: las dos piezas dan jaque a la vez. Solo se puede responder moviendo
       { id: 'tac2_5', texto: '6 sin pistas', cumplido: false }
     ]
   },
-  { id: 8, titulo: '8. Aplicación', nivel: 'Intermedio', fen: '4k3/8/8/8/4N3/8/8/4R1K1 w - - 0 1',
+  { id: 10, titulo: '10. Aplicación', nivel: 'Intermedio', fen: '4k3/8/8/8/4N3/8/8/4R1K1 w - - 0 1',
     movidas: ['Nd6+'],
     descripcion: 'El Caballo se mueve a d6 dando jaque él mismo y, al vaciar la columna e, descubre el jaque de la Torre: doble jaque, el recurso más forzante del ajedrez.',
     objetivos: [
@@ -1050,8 +1070,8 @@ Doble jaque: las dos piezas dan jaque a la vez. Solo se puede responder moviendo
     ]
   },
 
-  // --- M3: Estrategia I — Peones (Clases 9-11) ---
-  { id: 9, titulo: '9. Concepto: Estructura de Peones', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M4: Estrategia I — Peones (Clases 11-13) ---
+  { id: 11, titulo: '11. Concepto: Estructura de Peones', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Definir y reconocer la estructura de peones: lo único casi permanente del tablero, porque los peones no vuelven atrás.
 • Peón aislado, doblado, retrasado y peones colgantes: cuatro debilidades típicas.
 • Peón pasado: sin peones enemigos delante ni en columnas vecinas. La ventaja más concreta en un final.
@@ -1061,13 +1081,13 @@ Doble jaque: las dos piezas dan jaque a la vez. Solo se puede responder moviendo
       { id: 'est1_1', texto: 'Identifica aislado, doblado, retrasado y colgante en 12 posiciones', cumplido: false }
     ]
   },
-  { id: 10, titulo: '10. Práctica con Hitos', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 12, titulo: '12. Práctica con Hitos', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Ejercicios de reconocimiento y creación de un peón pasado en partidas guiadas.',
     objetivos: [
       { id: 'est1_2', texto: 'Crea un peón pasado en 3 partidas', cumplido: false }
     ]
   },
-  { id: 11, titulo: '11. Aplicación: Ataque de Minorías', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 13, titulo: '13. Aplicación: Ataque de Minorías', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Ejecutar el plan típico de la estructura Carlsbad en partida real.',
     objetivos: [
       { id: 'est1_3', texto: 'Ejecuta un ataque de minorías', cumplido: false },
@@ -1075,21 +1095,21 @@ Doble jaque: las dos piezas dan jaque a la vez. Solo se puede responder moviendo
     ]
   },
 
-  // --- M4: Repaso Integrado 1 (Clases 12-14) — cubre M1-M3 de este curso ---
-  { id: 12, titulo: '12. Diagnóstico Mixto (M1-M3)', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M5: Repaso Integrado 1 (Clases 14-16) — cubre M1-M4 de este curso ---
+  { id: 14, titulo: '14. Diagnóstico Mixto (M1-M4)', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Cubre los módulos 1 a 3 de este curso: Ruy López/Gambito de Rey, táctica II y estrategia I (peones).',
     objetivos: [
       { id: 'ri1_1', texto: 'Responde un ítem de cada uno de los módulos 1-3', cumplido: false },
       { id: 'ri1_2', texto: 'Nombra de memoria al menos 1 de las 2 aperturas de este tramo', cumplido: false }
     ]
   },
-  { id: 13, titulo: '13. Refuerzo Dirigido', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 15, titulo: '15. Refuerzo Dirigido', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Repetir, con foco, solo lo que falló en la Clase 12.',
     objetivos: [
       { id: 'ri1_3', texto: 'Supera los ítems fallados en la Clase 12', cumplido: false }
     ]
   },
-  { id: 14, titulo: '14. Duelo de Bandos y Síntesis', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 16, titulo: '16. Duelo de Bandos y Síntesis', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Ejemplo de posición: Ruy López Cerrada (centro cerrado, maniobra lenta) contra Gambito de Rey (sacrificio inmediato, líneas abiertas).',
     objetivos: [
       { id: 'ri1_4', texto: 'Elige el bando objetivamente mejor en 3 posiciones', cumplido: false },
@@ -1098,8 +1118,8 @@ Doble jaque: las dos piezas dan jaque a la vez. Solo se puede responder moviendo
     ]
   },
 
-  // --- M5: Aperturas — Francesa + Caro-Kann (Clases 15-19) ---
-  { id: 15, titulo: '15. Presentación: Cadenas de Peones', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M6: Aperturas — Francesa + Caro-Kann (Clases 17-21) ---
+  { id: 17, titulo: '17. Presentación: Cadenas de Peones', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Francesa (1.e4 e6 2.d4 d5): construye la cadena e5/d4 contra e6/d5. Regla de Nimzowitsch: se ataca la cadena por su base (…c5), no por su cabeza.
 Caro-Kann (1.e4 c6 2.d4 d5): es la Francesa sin el problema del alfil — el Alfil de c8 sale libre a f5 antes de cerrar la casa con …e6.
 Concepto transferible: la misma cadena de peones aparece también en la India de Rey.`,
@@ -1107,7 +1127,7 @@ Concepto transferible: la misma cadena de peones aparece también en la India de
       { id: 'ap5_1', texto: 'Reconoce que ambas producen la misma estructura de cadena e5/d4 vs. e6/d5', cumplido: false }
     ]
   },
-  { id: 16, titulo: '16. Ejecución Guiada: Francesa y Caro-Kann', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 18, titulo: '18. Ejecución Guiada: Francesa y Caro-Kann', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Defensa Francesa', movidas: ['e4','e6','d4','d5'], descripcion: 'El plan negro es atacar la base d4 con …c5.' },
       { nombre: 'Defensa Caro-Kann', movidas: ['e4','c6','d4','d5'], descripcion: 'El Alfil de c8 sale libre antes de jugar …e6.' }
@@ -1118,7 +1138,7 @@ Concepto transferible: la misma cadena de peones aparece también en la India de
       { id: 'ap5_3', texto: '3 repeticiones limpias', cumplido: false }
     ]
   },
-  { id: 17, titulo: '17. Variantes de Ambas Defensas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 19, titulo: '19. Variantes de Ambas Defensas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Francesa Avanzada', movidas: ['e4','e6','d4','d5','e5'], descripcion: 'Espacio y cadena fijada. La más clara de entender.' },
       { nombre: 'Francesa Tarrasch/Clásica', movidas: ['e4','e6','d4','d5','Nd2'], descripcion: 'Evita el clavado …Bb4 y reduce teoría. Elección de Karpov y Kasparov.' },
@@ -1131,7 +1151,7 @@ Concepto transferible: la misma cadena de peones aparece también en la India de
       { id: 'ap5_5', texto: 'Elige según la respuesta del rival', cumplido: false }
     ]
   },
-  { id: 18, titulo: '18. Del Otro Lado: Resolver el Alfil de c8', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 20, titulo: '20. Del Otro Lado: Resolver el Alfil de c8', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `El error típico de la Francesa: desarrollar el Alfil de c8 por d7 "porque hay que desarrollar". Ahí no hace nada. Los planes correctos son …b6 con …Ba6, o preparar …f6.
 Con blancas contra la Caro-Kann: aprovechar el momento exacto para jugar Nh4 o g4 contra el Alfil en f5, antes de que se consolide.`,
     objetivos: [
@@ -1139,7 +1159,7 @@ Con blancas contra la Caro-Kann: aprovechar el momento exacto para jugar Nh4 o g
       { id: 'ap5_7', texto: 'Ataca la cadena por su base con …c5, 5 veces', cumplido: false }
     ]
   },
-  { id: 19, titulo: '19. Cierre: Partidas Completas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 21, titulo: '21. Cierre: Partidas Completas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Aplicar ambas defensas en partida real contra rival que no coopera.',
     objetivos: [
       { id: 'ap5_8', texto: 'Gana 2 partidas con cada defensa', cumplido: false },
@@ -1147,8 +1167,8 @@ Con blancas contra la Caro-Kann: aprovechar el momento exacto para jugar Nh4 o g
     ]
   },
 
-  // --- M6: Mates II (Clases 20-22) ---
-  { id: 20, titulo: '20. Concepto: Patrones de Mate Intermedios', nivel: 'Intermedio', fen: '5r1k/6pp/8/6N1/8/1Q6/8/6K1 w - - 0 1',
+  // --- M7: Mates II (Clases 22-24) ---
+  { id: 22, titulo: '22. Concepto: Patrones de Mate Intermedios', nivel: 'Intermedio', fen: '5r1k/6pp/8/6N1/8/1Q6/8/6K1 w - - 0 1',
     movidas: ['Nf7+','Kg8','Nh6+','Kh8','Qg8+','Rxg8','Nf7#'],
     descripcion: `El rey está tan rodeado por sus propias piezas que un Caballo lo mata sin que nadie pueda intervenir. Llega tras un sacrificio de Dama que obliga a taponar la última casilla: Qg8+ obliga a Rxg8, y Nf7# es el remate. Es el mate de la coz (Philidor).
 Reconocer los otros tres patrones antes de calcular: mate del árabe (Caballo+Torre), mate de Anastasia (Caballo en e7+Torre en columna h) y mate de Boden (dos Alfiles cruzados).`,
@@ -1156,7 +1176,7 @@ Reconocer los otros tres patrones antes de calcular: mate del árabe (Caballo+To
       { id: 'mates2_1', texto: 'Reconoce los 4 patrones (coz, árabe, Anastasia, Boden) antes de calcular', cumplido: false }
     ]
   },
-  { id: 21, titulo: '21. Práctica con Hitos', nivel: 'Intermedio', fen: '7k/R7/5N2/8/8/8/8/6K1 w - - 0 1',
+  { id: 23, titulo: '23. Práctica con Hitos', nivel: 'Intermedio', fen: '7k/R7/5N2/8/8/8/8/6K1 w - - 0 1',
     movidas: ['Rh7#'],
     descripcion: `Mate del árabe: el Caballo cubre las casillas de escape del rincón y la Torre da el jaque, protegida por el propio Caballo — aquí, Rh7#.
 Mate de Anastasia: Caballo en e7 (o su simétrico) más Torre invadiendo la columna h. Mate de Boden: dos Alfiles en diagonales que se cruzan sobre un rey enrocado largo.`,
@@ -1165,7 +1185,7 @@ Mate de Anastasia: Caballo en e7 (o su simétrico) más Torre invadiendo la colu
       { id: 'mates2_3', texto: 'Ejecuta los otros 3 patrones (árabe, Anastasia, Boden), 3 veces cada uno', cumplido: false }
     ]
   },
-  { id: 22, titulo: '22. Aplicación en Partida', nivel: 'Intermedio', fen: '2kr4/p2p4/8/1B6/5B2/8/8/6K1 w - - 0 1',
+  { id: 24, titulo: '24. Aplicación en Partida', nivel: 'Intermedio', fen: '2kr4/p2p4/8/1B6/5B2/8/8/6K1 w - - 0 1',
     movidas: ['Ba6#'],
     descripcion: 'Mate de Boden: dos Alfiles en diagonales que se cruzan sobre un rey enrocado largo. Aquí, Ba6# cierra la red sobre el Rey negro en c8. Rematar una partida real con cualquiera de los 4 patrones aprendidos.',
     objetivos: [
@@ -1174,8 +1194,8 @@ Mate de Anastasia: Caballo en e7 (o su simétrico) más Torre invadiendo la colu
     ]
   },
 
-  // --- M7: Aperturas — Gambito de Dama + Eslava (Clases 23-27) ---
-  { id: 23, titulo: '23. Presentación: Por Qué No Es un Gambito', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M8: Aperturas — Gambito de Dama + Eslava (Clases 25-29) ---
+  { id: 25, titulo: '25. Presentación: Por Qué No Es un Gambito', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `No es un gambito real: el peón siempre se recupera. Tras 2…dxc4 3.e3, si las negras intentan aferrarse con 3…b5? sigue 4.a4 y no pueden sostenerlo.
 Idea central: cambiar un peón de flanco (c) por uno central (d), ganando control del centro y espacio duradero.
 Defensa Eslava (2…c6): mantiene libre la diagonal del Alfil de c8 desde el principio.`,
@@ -1183,7 +1203,7 @@ Defensa Eslava (2…c6): mantiene libre la diagonal del Alfil de c8 desde el pri
       { id: 'ap7_1', texto: 'Explica por qué el Gambito de Dama no es un gambito real', cumplido: false }
     ]
   },
-  { id: 24, titulo: '24. Ejecución Guiada', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 26, titulo: '26. Ejecución Guiada', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Aceptado', movidas: ['d4','d5','c4','dxc4'], descripcion: 'Las negras entregan el centro por desarrollo rápido y …c5.' },
       { nombre: 'Rechazado (Ortodoxo)', movidas: ['d4','d5','c4','e6'], descripcion: 'Sólido, cierra el Alfil de c8. La línea clásica.' }
@@ -1194,7 +1214,7 @@ Defensa Eslava (2…c6): mantiene libre la diagonal del Alfil de c8 desde el pri
       { id: 'ap7_3', texto: '3 repeticiones limpias', cumplido: false }
     ]
   },
-  { id: 25, titulo: '25. Variantes: Eslava y Tarrasch', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 27, titulo: '27. Variantes: Eslava y Tarrasch', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Defensa Eslava', movidas: ['d4','d5','c4','c6'], descripcion: 'Mantiene libre la diagonal del Alfil de c8. Muy popular hoy.' },
       { nombre: 'Defensa Tarrasch', movidas: ['d4','d5','c4','e6','Nc3','c5'], descripcion: 'Peón dama aislado a cambio de piezas activas.' }
@@ -1205,7 +1225,7 @@ Defensa Eslava (2…c6): mantiene libre la diagonal del Alfil de c8 desde el pri
       { id: 'ap7_5', texto: 'Monta la estructura Carlsbad', cumplido: false }
     ]
   },
-  { id: 26, titulo: '26. Del Otro Lado', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 28, titulo: '28. Del Otro Lado', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `La estructura Carlsbad (del Gambito de Dama Rechazado): el plan blanco clásico es el ataque de minorías, avanzando b4-b5 para crear una debilidad permanente en c6.
 Error típico: intentar retener el peón de c4 con negras. Es la trampa más común de toda la apertura.`,
     objetivos: [
@@ -1213,7 +1233,7 @@ Error típico: intentar retener el peón de c4 con negras. Es la trampa más com
       { id: 'ap7_7', texto: 'No intenta retenerlo con negras', cumplido: false }
     ]
   },
-  { id: 27, titulo: '27. Cierre: Partidas Completas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 29, titulo: '29. Cierre: Partidas Completas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Aplicar ambas líneas en partida real contra rival que no coopera.',
     objetivos: [
       { id: 'ap7_8', texto: 'Gana 2 partidas', cumplido: false },
@@ -1221,22 +1241,22 @@ Error típico: intentar retener el peón de c4 con negras. Es la trampa más com
     ]
   },
 
-  // --- M8: Repaso Integrado 2 (Clases 28-30) — cubre M5-M7 de este curso ---
-  { id: 28, titulo: '28. Diagnóstico Mixto (M5-M7)', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M9: Repaso Integrado 2 (Clases 30-32) — cubre M6-M8 de este curso ---
+  { id: 30, titulo: '30. Diagnóstico Mixto (M6-M8)', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Cubre los módulos 5 a 7 de este curso: Francesa/Caro-Kann, mates II y Gambito de Dama/Eslava.',
     objetivos: [
       { id: 'ri2_1', texto: 'Responde un ítem de cada uno de los módulos 5-7', cumplido: false },
       { id: 'ri2_2', texto: 'Nombra de memoria al menos 2 de las aperturas de este tramo', cumplido: false }
     ]
   },
-  { id: 29, titulo: '29. Refuerzo Dirigido', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 31, titulo: '31. Refuerzo Dirigido', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Repetir, con foco, solo lo que falló en la Clase 28.',
     objetivos: [
       { id: 'ri2_3', texto: 'Supera los ítems fallados en la Clase 28', cumplido: false },
       { id: 'ri2_4', texto: 'Ejecuta sin apoyo el mate de la coz completo, si fue el punto débil', cumplido: false }
     ]
   },
-  { id: 30, titulo: '30. Duelo de Bandos y Síntesis', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 32, titulo: '32. Duelo de Bandos y Síntesis', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Ejemplo de posición: estructura Carlsbad del Gambito de Dama Rechazado contra la cadena de peones de la Francesa Avanzada.',
     objetivos: [
       { id: 'ri2_5', texto: 'Elige bien el bando en 3 posiciones', cumplido: false },
@@ -1245,15 +1265,15 @@ Error típico: intentar retener el peón de c4 con negras. Es la trampa más com
     ]
   },
 
-  // --- M9: Aperturas — Siciliana + Inglesa (Clases 31-35) ---
-  { id: 31, titulo: '31. Presentación: Romper la Simetría', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M10: Aperturas — Siciliana + Inglesa (Clases 33-37) ---
+  { id: 33, titulo: '33. Presentación: Romper la Simetría', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Siciliana (1.e4 c5): rompe la simetría desde el primer movimiento, ganando columna c semiabierta a cambio de espacio. Ataques en direcciones opuestas: blancas al flanco de rey, negras al de dama.
 Inglesa (1.c4): controla d5 a distancia sin comprometer el centro. 1.c4 e5 es literalmente una Siciliana invertida, con un tiempo de más para las blancas.`,
     objetivos: [
       { id: 'ap9_1', texto: 'Reconoce la Inglesa (Siciliana Invertida) como la Siciliana con colores cambiados', cumplido: false }
     ]
   },
-  { id: 32, titulo: '32. Ejecución Guiada', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 34, titulo: '34. Ejecución Guiada', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Defensa Siciliana', movidas: ['e4','c5','Nf3','d6','d4','cxd4','Nxd4','Nf6','Nc3'], descripcion: 'Columna c semiabierta para las negras.' },
       { nombre: 'Apertura Inglesa (Siciliana Invertida)', movidas: ['c4','e5','Nc3'], descripcion: 'La misma estructura con un tiempo de más para las blancas.' }
@@ -1264,7 +1284,7 @@ Inglesa (1.c4): controla d5 a distancia sin comprometer el centro. 1.c4 e5 es li
       { id: 'ap9_3', texto: '3 repeticiones limpias', cumplido: false }
     ]
   },
-  { id: 33, titulo: '33. Variantes: Anti-Sicilianas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 35, titulo: '35. Variantes: Anti-Sicilianas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Alapin', movidas: ['e4','c5','c3'], descripcion: 'Evita toda la teoría siciliana con un plan sencillo de centro con d4.' },
       { nombre: 'Rossolimo', movidas: ['e4','c5','Nf3','Nc6','Bb5'], descripcion: 'Presiona el caballo de c6 sin entrar en las líneas abiertas de la Siciliana.' }
@@ -1274,13 +1294,13 @@ Inglesa (1.c4): controla d5 a distancia sin comprometer el centro. 1.c4 e5 es li
       { id: 'ap9_4', texto: 'Enfrenta 2 Anti-Sicilianas (Alapin y Rossolimo)', cumplido: false }
     ]
   },
-  { id: 34, titulo: '34. Del Otro Lado', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 36, titulo: '36. Del Otro Lado', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Ocupar la columna c semiabierta con negras, sosteniendo el plan incluso cuando el entrenador se desvía del guion.',
     objetivos: [
       { id: 'ap9_5', texto: 'Ocupa la columna c semiabierta, 5 veces', cumplido: false }
     ]
   },
-  { id: 35, titulo: '35. Cierre: Partidas Completas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 37, titulo: '37. Cierre: Partidas Completas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Aplicar ambas aperturas en partida real contra rival que no coopera.',
     objetivos: [
       { id: 'ap9_6', texto: 'Gana 2 partidas', cumplido: false },
@@ -1288,8 +1308,8 @@ Inglesa (1.c4): controla d5 a distancia sin comprometer el centro. 1.c4 e5 es li
     ]
   },
 
-  // --- M10: Finales II (Clases 36-38) ---
-  { id: 36, titulo: '36. Concepto: Finales de Torre y Peones Avanzados', nivel: 'Intermedio', fen: '2k5/2P5/1K6/8/8/8/r7/1R6 w - - 0 1',
+  // --- M11: Finales II (Clases 38-40) ---
+  { id: 38, titulo: '38. Concepto: Finales de Torre y Peones Avanzados', nivel: 'Intermedio', fen: '2k5/2P5/1K6/8/8/8/r7/1R6 w - - 0 1',
     descripcion: `Regla de Tarrasch: la torre —propia o enemiga— va detrás del peón pasado, nunca delante.
 • Posición de Lucena: método ganador en finales de Torre, construyendo el "puente" para proteger al Rey del jaque continuo.
 • Posición de Philidor: método defensivo, manteniendo la Torre en la 3ª fila hasta que el peón avanza, y entonces atacando por detrás.
@@ -1299,7 +1319,7 @@ Estos conceptos son la continuación natural de los finales de peones 2vs2 y 3vs
       { id: 'fin36_1', texto: 'Explica la regla de Tarrasch (torre detrás del peón pasado)', cumplido: false }
     ]
   },
-  { id: 37, titulo: '37. Práctica con Hitos', nivel: 'Intermedio', fen: '2k5/2P5/1K6/8/8/8/r7/1R6 w - - 0 1',
+  { id: 39, titulo: '39. Práctica con Hitos', nivel: 'Intermedio', fen: '2k5/2P5/1K6/8/8/8/r7/1R6 w - - 0 1',
     movidas: ['Rb4'],
     descripcion: `Posición de Lucena: el Rey negro está atrapado frente a su propio peón de coronación; la Torre propia va detrás del peón pasado y luego se traslada a la 4ª fila para tapar los jaques por el flanco: Rb4 inicia la construcción del puente.
 Posición de Philidor (defensiva): mantener la Torre en la 3ª fila hasta que el peón avance a la 6ª, y entonces cambiar a atacar por detrás con jaques continuos.`,
@@ -1309,7 +1329,7 @@ Posición de Philidor (defensiva): mantener la Torre en la 3ª fila hasta que el
       { id: 'fin37_3', texto: 'Coloca la Torre detrás del peón pasado, 5 veces', cumplido: false }
     ]
   },
-  { id: 38, titulo: '38. Aplicación en Partida', nivel: 'Intermedio', fen: '4k3/8/ppp5/8/PPP5/8/8/4K3 w - - 0 1',
+  { id: 40, titulo: '40. Aplicación en Partida', nivel: 'Intermedio', fen: '4k3/8/ppp5/8/PPP5/8/8/4K3 w - - 0 1',
     movidas: ['b5','axb5','c5'],
     variantes: [
       { nombre: 'Variante 1: Negras capturan (axb5) → Gana c5', movidas: ['b5','axb5','c5'], descripcion: 'Si capturan con el peón a (axb5), las blancas avanzan c5 y el peón a4 queda libre para correr a coronar.' },
@@ -1323,22 +1343,22 @@ Posición de Philidor (defensiva): mantener la Torre en la 3ª fila hasta que el
     ]
   },
 
-  // --- M11: Repaso Integrado 3 (Clases 39-41) — cubre M9-M10 de este curso ---
-  { id: 39, titulo: '39. Diagnóstico Mixto (M9-M10)', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M12: Repaso Integrado 3 (Clases 41-43) — cubre M10-M11 de este curso ---
+  { id: 41, titulo: '41. Diagnóstico Mixto (M10-M11)', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Cubre los módulos 9 y 10 de este curso: Siciliana/Inglesa y finales II.',
     objetivos: [
       { id: 'ri3_1', texto: 'Responde un ítem de cada uno de los módulos 9-10', cumplido: false },
       { id: 'ri3_2', texto: 'Nombra de memoria la Siciliana o la Inglesa', cumplido: false }
     ]
   },
-  { id: 40, titulo: '40. Refuerzo Dirigido', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 42, titulo: '42. Refuerzo Dirigido', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Repetir, con foco, solo lo que falló en la Clase 39.',
     objetivos: [
       { id: 'ri3_3', texto: 'Supera los ítems fallados en la Clase 39', cumplido: false },
       { id: 'ri3_4', texto: 'Repite 2 veces limpias la posición de final de torre que falló', cumplido: false }
     ]
   },
-  { id: 41, titulo: '41. Duelo de Bandos y Síntesis', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 43, titulo: '43. Duelo de Bandos y Síntesis', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Ejemplo de posición: estructura semiabierta de la Siciliana Dragón contra la estructura erizo (Hedgehog) de la Inglesa.',
     objetivos: [
       { id: 'ri3_5', texto: 'Elige bien el bando en 3 posiciones', cumplido: false },
@@ -1347,8 +1367,8 @@ Posición de Philidor (defensiva): mantener la Torre en la 3ª fila hasta que el
     ]
   },
 
-  // --- M12: Cierre — Repertorio Ampliado (Clases 42-44) ---
-  { id: 42, titulo: '42. Ampliar el Repertorio', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M13: Cierre — Repertorio Ampliado (Clases 44-46) ---
+  { id: 44, titulo: '44. Ampliar el Repertorio', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Cierre propio de este curso: se amplía el repertorio básico del curso Principiante (Londres/Colle/Italiana/Escandinava) combinando aperturas de ambos niveles.
 Aperturas nuevas disponibles: Ruy López, Gambito de Rey, Francesa, Caro-Kann, Gambito de Dama, Eslava, Siciliana, Inglesa.
 • Paciente y posicional → Caro-Kann, Inglesa, Gambito de Dama Rechazado.
@@ -1359,7 +1379,7 @@ Aperturas nuevas disponibles: Ruy López, Gambito de Rey, Francesa, Caro-Kann, G
       { id: 'cierre12_2', texto: 'Justifica cada elección', cumplido: false }
     ]
   },
-  { id: 43, titulo: '43. Ejecución del Repertorio Ampliado', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 45, titulo: '45. Ejecución del Repertorio Ampliado', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Ruy López', movidas: ['e4','e5','Nf3','Nc6','Bb5'], descripcion: 'Presión indefinida sobre el centro negro.' },
       { nombre: 'Defensa Francesa', movidas: ['e4','e6','d4','d5'], descripcion: 'Cadena de peones e5/d4 contra e6/d5.' },
@@ -1372,7 +1392,7 @@ Aperturas nuevas disponibles: Ruy López, Gambito de Rey, Francesa, Caro-Kann, G
       { id: 'cierre13_1', texto: 'Ejecuta cada apertura y defensa declarada sin error, 2 veces cada una', cumplido: false }
     ]
   },
-  { id: 44, titulo: '44. Cierre del Curso: Partidas Completas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 46, titulo: '46. Cierre del Curso: Partidas Completas', nivel: 'Intermedio', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Ganar partidas reales, contra un rival que no coopera, con el repertorio ampliado. Al terminar este curso se sigue en el Curso Avanzado.',
     objetivos: [
       { id: 'cierre14_1', texto: 'Gana 2 partidas con cada apertura o defensa nueva del repertorio', cumplido: false },
@@ -1384,8 +1404,32 @@ Aperturas nuevas disponibles: Ruy López, Gambito de Rey, Francesa, Caro-Kann, G
 
 
 const CLASES_AVANZADO = [
-  // --- M1: Aperturas — India de Rey + Nimzoindia (Clases 1-5) ---
-  { id: 1, titulo: '1. Presentación: Ceder el Centro a Propósito', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M1: Grandes Torneos y Partidas Históricas (Clases 1-2) ---
+  { id: 1, titulo: '1. Concepto: El Ciclo del Mundial y los Grandes Torneos', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    descripcion: `Recién ahora, con el Elo y los títulos ya entendidos, el estudiante tiene el contexto necesario para apreciar por qué estos torneos y estas partidas importan.
+• Torneo de Candidatos: cada dos años, ocho jugadores —los mejor clasificados del ciclo anterior— compiten por el derecho a retar al campeón vigente. Javokhir Sindarov lo ganó en 2026 y espera retar a Gukesh a fines de ese mismo año.
+• El match por el título: el campeón vigente y el retador juegan una serie de partidas clásicas; si empatan, se define por desempates rápidos y blitz — así perdió Caruana el Mundial 2018 ante Carlsen.
+• Olimpiada de Ajedrez: cada dos años, selecciones nacionales compiten por equipos. Iván Morović ganó una medalla de bronce individual en la Olimpiada de Salónica 1984.
+• Grandes torneos de élite: Tata Steel Chess Tournament (Wijk aan Zee, desde 1938) y Norway Chess, con Carlsen como local.`,
+    objetivos: [
+      { id: 'gt_1', texto: 'Explica cómo funciona el ciclo Candidatos → Match por el título', cumplido: false },
+      { id: 'gt_2', texto: 'Nombra al menos un torneo de élite (Tata Steel, Norway Chess) y qué lo hace relevante', cumplido: false }
+    ]
+  },
+  { id: 2, titulo: '2. Torneos y Partidas de Chile y Latinoamérica', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    descripcion: `• Torneo Internacional de Ajedrez de Viña del Mar: desde 1945, marcó un antes y un después para el ajedrez chileno; su club organizador lleva hoy el nombre de Iván Morović.
+• Torneo Internacional de Mar del Plata (Argentina): uno de los más históricos de Sudamérica — por él pasaron Fischer (1959, con 16 años), Spassky, Bronstein, Smyslov y Euwe. Miguel Najdorf lo ganó once veces; la variante Mar del Plata de la India de Rey debe su nombre a este torneo.
+• Campeonato Panamericano de Ajedrez: reúne a los mejores jugadores de todas las federaciones americanas.
+• Partidas para conocer: la Partida Inmortal (Anderssen–Kieseritzky, Londres 1851) y Kaspárov contra Deep Blue (1997), el match que marcó el fin de la superioridad humana incuestionable frente a las máquinas.`,
+    objetivos: [
+      { id: 'gt_3', texto: 'Explica por qué el Torneo de Viña del Mar y el de Mar del Plata son relevantes para la región', cumplido: false },
+      { id: 'gt_4', texto: 'Dado el nombre de una partida histórica (la Inmortal, la Partida del Siglo, Kaspárov–Deep Blue), reconoce en qué contexto ocurrió', cumplido: false }
+    ]
+  },
+
+
+  // --- M2: Aperturas — India de Rey + Nimzoindia (Clases 3-7) ---
+  { id: 3, titulo: '3. Presentación: Ceder el Centro a Propósito', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `India de Rey: ceder el centro deliberadamente, enrocar, y golpear con …e5. Centro bloqueado y carreras de ataque en flancos opuestos: blancas al flanco de dama, negras al de rey.
 Nimzoindia: el clavado …Bb4 inmoviliza al caballo c3 e impide que las blancas jueguen e4. No busca doblar peones — busca impedir e4.`,
     objetivos: [
@@ -1393,7 +1437,7 @@ Nimzoindia: el clavado …Bb4 inmoviliza al caballo c3 e impide que las blancas 
       { id: 'ap1_2', texto: 'Explica la idea del clavado que impide e4 (Nimzoindia)', cumplido: false }
     ]
   },
-  { id: 2, titulo: '2. Ejecución Guiada', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 4, titulo: '4. Ejecución Guiada', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Defensa India de Rey', movidas: ['d4','Nf6','c4','g6','Nc3','Bg7'], descripcion: 'Fianchetto de rey preparando …d6 y …e5.' },
       { nombre: 'Defensa Nimzoindia', movidas: ['d4','Nf6','c4','e6','Nc3','Bb4'], descripcion: 'El clavado inmediato sobre el caballo c3.' }
@@ -1404,7 +1448,7 @@ Nimzoindia: el clavado …Bb4 inmoviliza al caballo c3 e impide que las blancas 
       { id: 'ap1_4', texto: '3 repeticiones limpias', cumplido: false }
     ]
   },
-  { id: 3, titulo: '3. Variantes', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 5, titulo: '5. Variantes', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'India de Rey Clásica (Mar del Plata)', movidas: ['d4','Nf6','c4','g6','Nc3','Bg7','e4','d6','Nf3','O-O','Be2','e5'], descripcion: 'La línea principal, con el Mar del Plata como continuación de ataques en flancos opuestos.' },
       { nombre: 'India de Rey Sämisch', movidas: ['d4','Nf6','c4','g6','Nc3','Bg7','e4','d6','f3'], descripcion: 'Refuerza e4 y prepara enroque largo con ataque propio.' },
@@ -1417,7 +1461,7 @@ Nimzoindia: el clavado …Bb4 inmoviliza al caballo c3 e impide que las blancas 
       { id: 'ap1_6', texto: 'Decide cuándo cambiar en c3 en la Nimzoindia y lo justifica', cumplido: false }
     ]
   },
-  { id: 4, titulo: '4. Del Otro Lado', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 6, titulo: '6. Del Otro Lado', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     movidas: ['d4','Nf6','c4','g6','Nf3','Bg7','g3'],
     descripcion: `El Sistema Fianchetto (g3 y Bg2) es la respuesta antipática a la India de Rey: neutraliza el Alfil de g7 y desactiva el ataque negro.
 En la Nimzoindia, impedir e4 con el clavado sostenido sobre el caballo c3.`,
@@ -1426,7 +1470,7 @@ En la Nimzoindia, impedir e4 con el clavado sostenido sobre el caballo c3.`,
       { id: 'ap1_8', texto: 'Responde al Sistema Fianchetto contra la India de Rey', cumplido: false }
     ]
   },
-  { id: 5, titulo: '5. Cierre: Partidas Completas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 7, titulo: '7. Cierre: Partidas Completas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Aplicar ambas defensas en partida real contra rival que no coopera.',
     objetivos: [
       { id: 'ap1_9', texto: 'Gana 2 partidas con cada una', cumplido: false },
@@ -1434,8 +1478,8 @@ En la Nimzoindia, impedir e4 con el clavado sostenido sobre el caballo c3.`,
     ]
   },
 
-  // --- M2: Táctica III (Clases 6-8) ---
-  { id: 6, titulo: '6. Concepto: Desviación, Atracción, Sobrecarga, Jugada Intermedia', nivel: 'Avanzado', fen: '3r2k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1',
+  // --- M3: Táctica III (Clases 8-10) ---
+  { id: 8, titulo: '8. Concepto: Desviación, Atracción, Sobrecarga, Jugada Intermedia', nivel: 'Avanzado', fen: '3r2k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1',
     movidas: ['Re8'],
     descripcion: `Desviación: se obliga a una pieza a abandonar una función defensiva, normalmente amenazándola o sacrificando algo que está forzada a capturar. Aquí, Re8 desafía a la Torre negra a intercambiarse, desviándola de la vigilancia de la octava fila.
 Atracción (señuelo): se atrae a una pieza — casi siempre el Rey — a una casilla mala, normalmente con un sacrificio que no puede rechazarse. El mate de la coz ya visto es un ejemplo perfecto: el sacrificio de Dama obliga a capturar, abriendo paso al mate.
@@ -1445,7 +1489,7 @@ Jugada intermedia (zwischenzug): en medio de una secuencia esperada, se intercal
       { id: 'tac3_1', texto: 'Distingue desviación de atracción en 10 posiciones', cumplido: false }
     ]
   },
-  { id: 7, titulo: '7. Práctica con Hitos', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 9, titulo: '9. Práctica con Hitos', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Sobrecarga: la diferencia con la desviación es que aquí el defensor no se va: simplemente no da abasto entre sus dos tareas.
 Jugada intermedia (zwischenzug): suele ser un jaque o una amenaza mayor, intercalada antes de completar la secuencia obvia.
 Serie de ejercicios para ejecutar ambos motivos en posiciones aisladas.`,
@@ -1454,7 +1498,7 @@ Serie de ejercicios para ejecutar ambos motivos en posiciones aisladas.`,
       { id: 'tac3_3', texto: 'Ejecuta una jugada intermedia en ejercicio aislado', cumplido: false }
     ]
   },
-  { id: 8, titulo: '8. Aplicación', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 10, titulo: '10. Aplicación', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Encontrar una jugada intermedia dentro de una partida real, no en un ejercicio aislado.',
     objetivos: [
       { id: 'tac3_4', texto: 'Encuentra una jugada intermedia en partida real', cumplido: false },
@@ -1462,15 +1506,15 @@ Serie de ejercicios para ejecutar ambos motivos en posiciones aisladas.`,
     ]
   },
 
-  // --- M3: Aperturas — Grünfeld + Catalana (Clases 9-13) ---
-  { id: 9, titulo: '9. Presentación: Ceder el Centro vs. Estrangular', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M4: Aperturas — Grünfeld + Catalana (Clases 11-15) ---
+  { id: 11, titulo: '11. Presentación: Ceder el Centro vs. Estrangular', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Grünfeld: paradoja pura — las negras invitan a las blancas a construir un centro grande de peones para luego demostrar que ese centro es una debilidad, no una fortaleza, atacándolo con …c5.
 Catalana: el Alfil de g2 ejerce presión sobre d5 y la gran diagonal a8-h1 durante toda la partida. Apertura de estrangulamiento: no busca golpear, busca que el rival se quede sin aire.`,
     objetivos: [
       { id: 'ap3_1', texto: 'Contrasta la paradoja de la Grünfeld con el estrangulamiento de la Catalana', cumplido: false }
     ]
   },
-  { id: 10, titulo: '10. Ejecución Guiada', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 12, titulo: '12. Ejecución Guiada', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Defensa Grünfeld', movidas: ['d4','Nf6','c4','g6','Nc3','d5'], descripcion: 'Invita al centro grande blanco para demolerlo después.' },
       { nombre: 'Apertura Catalana', movidas: ['d4','Nf6','c4','e6','g3','d5','Bg2'], descripcion: 'El Alfil de g2 presiona la gran diagonal.' }
@@ -1481,7 +1525,7 @@ Catalana: el Alfil de g2 ejerce presión sobre d5 y la gran diagonal a8-h1 duran
       { id: 'ap3_3', texto: '3 repeticiones limpias', cumplido: false }
     ]
   },
-  { id: 11, titulo: '11. Variantes', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 13, titulo: '13. Variantes', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Grünfeld de Cambio', movidas: ['d4','Nf6','c4','g6','Nc3','d5','cxd5','Nxd5','e4'], descripcion: 'La línea principal y la prueba crítica del centro blanco.' },
       { nombre: 'Grünfeld Sistema Ruso', movidas: ['d4','Nf6','c4','g6','Nc3','d5','Nf3','Bg7','Qb3'], descripcion: 'Presión inmediata sobre d5. Muy teórica.' },
@@ -1494,14 +1538,14 @@ Catalana: el Alfil de g2 ejerce presión sobre d5 y la gran diagonal a8-h1 duran
       { id: 'ap3_5', texto: 'Recupera el peón de c4 en la Catalana', cumplido: false }
     ]
   },
-  { id: 12, titulo: '12. Del Otro Lado', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 14, titulo: '14. Del Otro Lado', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Contra órdenes de jugadas como 3.f3 o 3.Nf3, la Grünfeld puede ser evitada o transformada; hay que reconocer la transposición.
 En la Catalana, si las negras capturan en c4 y no devuelven el peón a tiempo, las blancas recuperan material con Qa4, Qc2 o Ne5 y quedan con clara iniciativa.`,
     objetivos: [
       { id: 'ap3_6', texto: 'Demuele un centro blanco con …c5, 3 veces', cumplido: false }
     ]
   },
-  { id: 13, titulo: '13. Cierre: Partidas Completas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 15, titulo: '15. Cierre: Partidas Completas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Aplicar ambas aperturas en partida real contra rival que no coopera.',
     objetivos: [
       { id: 'ap3_7', texto: 'Gana 2 partidas', cumplido: false },
@@ -1509,21 +1553,21 @@ En la Catalana, si las negras capturan en c4 y no devuelven el peón a tiempo, l
     ]
   },
 
-  // --- M4: Repaso Integrado 1 (Clases 14-16) — cubre M1-M3 de este curso ---
-  { id: 14, titulo: '14. Diagnóstico Mixto (M1-M3)', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M5: Repaso Integrado 1 (Clases 16-18) — cubre M1-M4 de este curso ---
+  { id: 16, titulo: '16. Diagnóstico Mixto (M1-M4)', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Cubre los módulos 1 a 3 de este curso: India de Rey/Nimzoindia, táctica III y Grünfeld/Catalana.',
     objetivos: [
       { id: 'ri1_1', texto: 'Responde un ítem de cada uno de los módulos 1-3', cumplido: false },
       { id: 'ri1_2', texto: 'Nombra de memoria al menos 2 de las 4 aperturas de este tramo', cumplido: false }
     ]
   },
-  { id: 15, titulo: '15. Refuerzo Dirigido', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 17, titulo: '17. Refuerzo Dirigido', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Repetir, con foco, solo lo que falló en la Clase 14.',
     objetivos: [
       { id: 'ri1_3', texto: 'Supera los ítems fallados en la Clase 14', cumplido: false }
     ]
   },
-  { id: 16, titulo: '16. Duelo de Bandos y Síntesis', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 18, titulo: '18. Duelo de Bandos y Síntesis', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Ejemplo de posición: centro bloqueado tipo India de Rey (ataques en flancos opuestos) contra centro grande tipo Grünfeld a punto de derrumbarse.',
     objetivos: [
       { id: 'ri1_4', texto: 'Elige bien el bando en 3 posiciones con centros de distinto tipo', cumplido: false },
@@ -1532,8 +1576,8 @@ En la Catalana, si las negras capturan en c4 y no devuelven el peón a tiempo, l
     ]
   },
 
-  // --- M5: Estrategia II (Clases 17-19) ---
-  { id: 17, titulo: '17. Concepto: Piezas y Casillas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M6: Estrategia II (Clases 19-21) ---
+  { id: 19, titulo: '19. Concepto: Piezas y Casillas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `• Columna abierta: sin peones, territorio natural de las Torres. Séptima fila: una Torre ahí ataca peones y encierra al Rey; dos Torres en la séptima suelen ser decisivas.
 • Casilla fuerte (outpost): casilla en campo enemigo que ningún peón rival puede atacar. Un Caballo instalado ahí vale más que una Torre.
 • Alfil vs. Caballo: el Alfil prefiere posiciones abiertas y peones en ambos flancos; el Caballo prefiere posiciones cerradas y casillas fuertes. Par de alfiles: ventaja pequeña pero permanente, que crece al abrirse la posición.
@@ -1542,14 +1586,14 @@ En la Catalana, si las negras capturan en c4 y no devuelven el peón a tiempo, l
       { id: 'est2_1', texto: 'Explica casilla fuerte, séptima fila y profilaxis', cumplido: false }
     ]
   },
-  { id: 18, titulo: '18. Práctica con Hitos', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 20, titulo: '20. Práctica con Hitos', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Ejercicios de instalación de piezas en casillas fuertes y ocupación de la séptima fila con torres dobladas.',
     objetivos: [
       { id: 'est2_2', texto: 'Instala un Caballo en casilla fuerte y lo mantiene 10 jugadas', cumplido: false },
       { id: 'est2_3', texto: 'Ocupa la séptima fila con Torres dobladas', cumplido: false }
     ]
   },
-  { id: 19, titulo: '19. Aplicación', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 21, titulo: '21. Aplicación', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Jugar contra el plan del rival antes de ejecutar el propio, en partida real.',
     objetivos: [
       { id: 'est2_4', texto: 'Ejecuta una jugada profiláctica y la explica', cumplido: false },
@@ -1557,15 +1601,15 @@ En la Catalana, si las negras capturan en c4 y no devuelven el peón a tiempo, l
     ]
   },
 
-  // --- M6: Aperturas — Najdorf (Clases 20-23) ---
-  { id: 20, titulo: '20. Presentación: La Jugada Más Flexible del Ajedrez', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M7: Aperturas — Najdorf (Clases 22-25) ---
+  { id: 22, titulo: '22. Presentación: La Jugada Más Flexible del Ajedrez', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Miguel Najdorf (1939), varado en Buenos Aires al estallar la Segunda Guerra Mundial, perdió a toda su familia en el Holocausto y desarrolló en Argentina la variante que lleva su nombre.
 Idea central: 5…a6 es una jugada profiláctica de aspecto modesto que quita el cuadro b5 a los caballos y al alfil blancos, y prepara …e5 o …e6 según lo que hagan las blancas. Es la variante de mayor carga teórica de todo el ajedrez.`,
     objetivos: [
       { id: 'ap6_1', texto: 'Ejecuta 5…a6 y explica qué casilla niega', cumplido: false }
     ]
   },
-  { id: 21, titulo: '21. Ejecución Guiada', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 23, titulo: '23. Ejecución Guiada', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     movidas: ['e4','c5','Nf3','d6','d4','cxd4','Nxd4','Nf6','Nc3','a6'],
     descripcion: 'Repite la línea principal contra el entrenador hasta automatizarla: 1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4 Nf6 5.Nc3 a6.',
     objetivos: [
@@ -1573,7 +1617,7 @@ Idea central: 5…a6 es una jugada profiláctica de aspecto modesto que quita el
       { id: 'ap6_3', texto: '3 repeticiones limpias', cumplido: false }
     ]
   },
-  { id: 22, titulo: '22. Variantes: Las Tres Respuestas Principales', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 24, titulo: '24. Variantes: Las Tres Respuestas Principales', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Ataque Inglés (6.Be3)', movidas: ['e4','c5','Nf3','d6','d4','cxd4','Nxd4','Nf6','Nc3','a6','Be3'], descripcion: 'Plan de f3, Qd2, g4, h4, enroque largo y avalancha. La más popular hoy.' },
       { nombre: '6.Bg5 (Peón Envenenado)', movidas: ['e4','c5','Nf3','d6','d4','cxd4','Nxd4','Nf6','Nc3','a6','Bg5'], descripcion: 'Línea histórica y aguda. Tras 6…e6 7.f4 Qb6 aparece el Peón Envenenado: en el Mundial de 1972 Fischer lo tomó y Spassky atrapó la Dama — no conviene tomarlo sin cálculo exacto.' },
@@ -1585,7 +1629,7 @@ Idea central: 5…a6 es una jugada profiláctica de aspecto modesto que quita el
       { id: 'ap6_5', texto: 'No toma el peón envenenado en la línea 6.Bg5', cumplido: false }
     ]
   },
-  { id: 23, titulo: '23. Cierre: Partidas Completas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 25, titulo: '25. Cierre: Partidas Completas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Aplicar la Najdorf en partida real contra rival que no coopera.',
     objetivos: [
       { id: 'ap6_6', texto: 'Gana 2 partidas jugando la Najdorf', cumplido: false },
@@ -1593,15 +1637,15 @@ Idea central: 5…a6 es una jugada profiláctica de aspecto modesto que quita el
     ]
   },
 
-  // --- M7: Aperturas — Pirc + Alekhine (Clases 24-28) ---
-  { id: 24, titulo: '24. Presentación: Provocación Hipermoderna', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M8: Aperturas — Pirc + Alekhine (Clases 26-30) ---
+  { id: 26, titulo: '26. Presentación: Provocación Hipermoderna', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Pirc: hipermodernismo aplicado a 1.e4 — dejar que las blancas ocupen el centro y contraatacarlo después con …e5 o …c5, apoyado por el Alfil de g7.
 Alekhine: provocación pura — el Caballo se ofrece como blanco para que las blancas lo persigan avanzando peones, sobreextendiendo su centro hasta volverlo vulnerable.`,
     objetivos: [
       { id: 'ap7_1', texto: 'Explica la provocación de la Alekhine y el hipermodernismo de la Pirc', cumplido: false }
     ]
   },
-  { id: 25, titulo: '25. Ejecución Guiada', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 27, titulo: '27. Ejecución Guiada', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Defensa Pirc', movidas: ['e4','d6','d4','Nf6','Nc3','g6','Nf3','Bg7'], descripcion: 'Fianchetto de rey contragolpeando el centro blanco.' },
       { nombre: 'Defensa Alekhine', movidas: ['e4','Nf6','e5','Nd5','d4','d6','Nf3'], descripcion: 'Provocación y contragolpe contra el centro sobreextendido.' }
@@ -1612,7 +1656,7 @@ Alekhine: provocación pura — el Caballo se ofrece como blanco para que las bl
       { id: 'ap7_3', texto: '3 repeticiones limpias', cumplido: false }
     ]
   },
-  { id: 26, titulo: '26. Variantes', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 28, titulo: '28. Variantes', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Ataque Austríaco (Pirc)', movidas: ['e4','d6','d4','Nf6','Nc3','g6','f4'], descripcion: 'Máxima agresividad blanca: centro enorme y ataque directo.' },
       { nombre: 'Alekhine Moderna (Principal)', movidas: ['e4','Nf6','e5','Nd5','d4','d6','Nf3'], descripcion: 'La más jugada: las blancas desarrollan en vez de solo avanzar.' }
@@ -1623,7 +1667,7 @@ Alekhine: provocación pura — el Caballo se ofrece como blanco para que las bl
       { id: 'ap7_5', texto: 'Ejecuta la línea moderna de la Alekhine', cumplido: false }
     ]
   },
-  { id: 27, titulo: '27. Del Otro Lado', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 29, titulo: '29. Del Otro Lado', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Con la Pirc: contragolpear con …e5 o …c5 antes de la jugada 12, antes de quedar asfixiado sin haber cometido un solo error visible.
 Con la Alekhine: sobreextender un centro blanco a propósito y castigarlo, jugando la Alekhine con negras.`,
     objetivos: [
@@ -1631,7 +1675,7 @@ Con la Alekhine: sobreextender un centro blanco a propósito y castigarlo, jugan
       { id: 'ap7_7', texto: 'Sobreextiende un centro blanco y lo castiga, jugando la Alekhine con negras', cumplido: false }
     ]
   },
-  { id: 28, titulo: '28. Cierre: Partidas Completas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 30, titulo: '30. Cierre: Partidas Completas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Aplicar ambas defensas en partida real contra rival que no coopera.',
     objetivos: [
       { id: 'ap7_8', texto: 'Gana 2 partidas', cumplido: false },
@@ -1639,22 +1683,22 @@ Con la Alekhine: sobreextender un centro blanco a propósito y castigarlo, jugan
     ]
   },
 
-  // --- M8: Repaso Integrado 2 (Clases 29-31) — cubre M5-M7 de este curso ---
-  { id: 29, titulo: '29. Diagnóstico Mixto (M5-M7)', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M9: Repaso Integrado 2 (Clases 31-33) — cubre M6-M8 de este curso ---
+  { id: 31, titulo: '31. Diagnóstico Mixto (M6-M8)', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Cubre los módulos 5 a 7 de este curso: estrategia II, Najdorf y Pirc/Alekhine.',
     objetivos: [
       { id: 'ri2_1', texto: 'Responde un ítem de cada uno de los módulos 5-7', cumplido: false },
       { id: 'ri2_2', texto: 'Nombra a pedido 2 de las últimas aperturas vistas, sin ver el tablero primero', cumplido: false }
     ]
   },
-  { id: 30, titulo: '30. Refuerzo Dirigido', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 32, titulo: '32. Refuerzo Dirigido', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Repetir, con foco, solo lo que falló en la Clase 29.',
     objetivos: [
       { id: 'ri2_3', texto: 'Supera los ítems fallados en la Clase 29', cumplido: false },
       { id: 'ri2_4', texto: 'Ejecuta sin apoyo la línea principal de la Najdorf, si fue el punto débil (el más probable, con diferencia)', cumplido: false }
     ]
   },
-  { id: 31, titulo: '31. Duelo de Bandos y Síntesis', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 33, titulo: '33. Duelo de Bandos y Síntesis', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Se muestran simultáneamente posiciones de aperturas distintas ya vistas en todo el curso; identifica de qué apertura viene cada una y elige cuál jugarías.',
     objetivos: [
       { id: 'ri2_5', texto: 'Identifica correctamente el origen de 4 posiciones de 4 aperturas distintas', cumplido: false },
@@ -1663,15 +1707,15 @@ Con la Alekhine: sobreextender un centro blanco a propósito y castigarlo, jugan
     ]
   },
 
-  // --- M9: Aperturas — Réti + Bird + Transposiciones (Clases 32-34) ---
-  { id: 32, titulo: '32. Presentación: Aperturas de Flanco', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M10: Aperturas — Réti + Bird + Transposiciones (Clases 34-36) ---
+  { id: 34, titulo: '34. Presentación: Aperturas de Flanco', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Réti (1.Nf3): control a distancia del centro con piezas menores, sin comprometer de inmediato los peones centrales. Apertura camaleónica que puede transponer a muchas otras.
 Bird (1.f4): toma control de la casilla e5 desde el primer turno e inicia un ataque de piezas directo por el flanco de rey. Breve: ambas están en el recurso, pero su prioridad de estudio es baja.`,
     objetivos: [
       { id: 'ap9_1', texto: 'Reconoce la Réti y la Bird desde la posición', cumplido: false }
     ]
   },
-  { id: 33, titulo: '33. Ejecución Guiada y Mapa de Transposiciones', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 35, titulo: '35. Ejecución Guiada y Mapa de Transposiciones', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     variantes: [
       { nombre: 'Apertura Réti', movidas: ['Nf3','d5','c4'], descripcion: 'Control a distancia del centro con piezas menores.' },
       { nombre: 'Apertura Bird', movidas: ['f4','d5'], descripcion: 'Control de e5 desde el primer turno.' }
@@ -1682,7 +1726,7 @@ Bird (1.f4): toma control de la casilla e5 desde el primer turno e inicia un ata
       { id: 'ap9_3', texto: 'Explica las 5 estructuras compartidas', cumplido: false }
     ]
   },
-  { id: 34, titulo: '34. Cierre: Síntesis de Aperturas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 36, titulo: '36. Cierre: Síntesis de Aperturas', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Familia 1.d4 d5 (según dónde va el Alfil de c1): 2.c4 Gambito de Dama · 2.Nf3+3.e3 Colle · 2.Bf4 Londres · 2.Nf3+3.e3+4.b3 Colle-Zukertort.
 Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. Cada paso conserva estructuras familiares y añade una capa de ambición.`,
     objetivos: [
@@ -1691,21 +1735,21 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
     ]
   },
 
-  // --- M10: Repaso Integrado 3, Final (Clases 35-37) ---
-  { id: 35, titulo: '35. Diagnóstico Mixto', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M11: Repaso Integrado 3, Final (Clases 37-39) ---
+  { id: 37, titulo: '37. Diagnóstico Mixto', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'El repaso más exigente de todo el recorrido: cubre el módulo 9 de este curso y sintetiza el mapa de transposiciones de las aperturas vistas en los tres cursos.',
     objetivos: [
       { id: 'ri3_1', texto: 'Responde un ítem del módulo 9', cumplido: false },
       { id: 'ri3_2', texto: 'Reconoce 3 transposiciones entre familias de apertura de todo el curso avanzado', cumplido: false }
     ]
   },
-  { id: 36, titulo: '36. Refuerzo Dirigido', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 38, titulo: '38. Refuerzo Dirigido', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Repetir, con foco, solo lo que falló en la Clase 35.',
     objetivos: [
       { id: 'ri3_3', texto: 'Supera los ítems fallados en la Clase 35', cumplido: false }
     ]
   },
-  { id: 37, titulo: '37. Duelo de Bandos y Síntesis Final', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 39, titulo: '39. Duelo de Bandos y Síntesis Final', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: 'Posiciones de estructuras avanzadas distintas (centro bloqueado, peón dama aislado, contraataque hipermoderno, erizo): elige bando y justifica.',
     objetivos: [
       { id: 'ri3_4', texto: 'Elige bien el bando en 3 posiciones de estructuras avanzadas distintas', cumplido: false },
@@ -1713,8 +1757,8 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
     ]
   },
 
-  // --- M11: Cierre — Análisis Propio, Etiqueta y Repertorio Final (Clases 38-40) ---
-  { id: 38, titulo: '38. Analizar la Propia Partida', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  // --- M12: Cierre — Análisis Propio, Etiqueta y Repertorio Final (Clases 40-42) ---
+  { id: 40, titulo: '40. Analizar la Propia Partida', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `La actividad de mayor rendimiento del ajedrez, y la que casi nadie hace.
 • Analizar primero sin motor: anotar dónde uno cree que se torció la partida, y solo después contrastar.
 • Buscar el patrón que se repite, no el error aislado.`,
@@ -1724,7 +1768,7 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
       { id: 'cierre38_3', texto: 'Nombra tu propio error recurrente', cumplido: false }
     ]
   },
-  { id: 39, titulo: '39. Etiqueta y Reloj de Competición', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 41, titulo: '41. Etiqueta y Reloj de Competición', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Etiqueta general del reloj (ya vista en el curso Principiante) ampliada al contexto de una partida de torneo:
 • Pieza tocada en competencia formal: si se toca una pieza propia con intención de jugar, hay que moverla si tiene jugada legal; si se toca una del rival, hay que capturarla si es legal.
 • Cuándo y cómo llamar al árbitro: detener ambos relojes está permitido para eso, por ejemplo ante una jugada ilegal del rival o una duda de reglamento.
@@ -1736,7 +1780,7 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
       { id: 'cierre39_3', texto: 'Termina 3 partidas con conducta correcta al ganar y al perder', cumplido: false }
     ]
   },
-  { id: 40, titulo: '40. Construir el Repertorio Final', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  { id: 42, titulo: '42. Construir el Repertorio Final', nivel: 'Avanzado', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     descripcion: `Cierre del recorrido completo Principiante → Intermedio → Avanzado.
 • Una apertura con blancas y una defensa contra cada primera jugada relevante de las blancas. No veinte.
 • Usar el índice por personalidad de la guía de aperturas para elegir con criterio propio, cubriendo los tres niveles del curso.
@@ -1754,47 +1798,49 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
     // --- Metadatos de módulos por nivel, para renderizar el temario del sidebar ---
     const MODULOS = {
       principiante: [
-        { titulo: 'M1 · 🏛️ Fundamentos e Historia', desde: 1, hasta: 5 },
-        { titulo: 'M2 · 💎 Progresivo: Pasos 1-6', desde: 6, hasta: 11 },
-        { titulo: 'M3 · ⚡ Mates Rápidos: Loco y Pastor', desde: 12, hasta: 14 },
-        { titulo: 'M4 · ⚔️ Aperturas: Londres + Colle', desde: 15, hasta: 19 },
-        { titulo: 'M5 · 🎯 Táctica I: Tenedor y Clavada', desde: 20, hasta: 22 },
-        { titulo: 'M6 · ⚖️ Ventaja Material', desde: 23, hasta: 25 },
-        { titulo: 'M7 · 🔁 Repaso Integrado 1', desde: 26, hasta: 28 },
-        { titulo: 'M8 · 🎯 Mate en una Jugada', desde: 29, hasta: 31 },
-        { titulo: 'M9 · ♛ Mates I', desde: 32, hasta: 35 },
-        { titulo: 'M10 · ⚔️ Aperturas: Italiana + Escandinava', desde: 36, hasta: 40 },
-        { titulo: 'M11 · 🏁 Finales I', desde: 41, hasta: 43 },
-        { titulo: 'M12 · 🔁 Repaso Integrado 2', desde: 44, hasta: 46 },
-        { titulo: 'M13 · ⏰ Reloj', desde: 47, hasta: 51 },
-        { titulo: 'M14 · 🏆 Cierre: Repertorio Básico', desde: 52, hasta: 54 }
+        { titulo: 'M1 · Fundamentos e Historia', desde: 1, hasta: 5 },
+        { titulo: 'M2 · Progresivo: Pasos 1-6', desde: 6, hasta: 11 },
+        { titulo: 'M3 · Mates Rápidos: Loco y Pastor', desde: 12, hasta: 14 },
+        { titulo: 'M4 · Aperturas: Londres + Colle', desde: 15, hasta: 19 },
+        { titulo: 'M5 · Táctica I: Tenedor y Clavada', desde: 20, hasta: 22 },
+        { titulo: 'M6 · Ventaja Material', desde: 23, hasta: 25 },
+        { titulo: 'M7 · Repaso Integrado 1', desde: 26, hasta: 28 },
+        { titulo: 'M8 · Mate en una Jugada', desde: 29, hasta: 31 },
+        { titulo: 'M9 · Mates I', desde: 32, hasta: 35 },
+        { titulo: 'M10 · Aperturas: Italiana + Escandinava', desde: 36, hasta: 40 },
+        { titulo: 'M11 · Finales I', desde: 41, hasta: 43 },
+        { titulo: 'M12 · Repaso Integrado 2', desde: 44, hasta: 46 },
+        { titulo: 'M13 · Reloj', desde: 47, hasta: 51 },
+        { titulo: 'M14 · Cierre: Repertorio Básico', desde: 52, hasta: 54 }
       ],
       intermedio: [
-        { titulo: 'M1 · ⚔️ Aperturas: Ruy López + Gambito de Rey', desde: 1, hasta: 5 },
-        { titulo: 'M2 · 🎯 Táctica II', desde: 6, hasta: 8 },
-        { titulo: 'M3 · 🧠 Estrategia I: Peones', desde: 9, hasta: 11 },
-        { titulo: 'M4 · 🔁 Repaso Integrado 1', desde: 12, hasta: 14 },
-        { titulo: 'M5 · ⚔️ Aperturas: Francesa + Caro-Kann', desde: 15, hasta: 19 },
-        { titulo: 'M6 · ♛ Mates II', desde: 20, hasta: 22 },
-        { titulo: 'M7 · ⚔️ Aperturas: Gambito de Dama + Eslava', desde: 23, hasta: 27 },
-        { titulo: 'M8 · 🔁 Repaso Integrado 2', desde: 28, hasta: 30 },
-        { titulo: 'M9 · ⚔️ Aperturas: Siciliana + Inglesa', desde: 31, hasta: 35 },
-        { titulo: 'M10 · 🏁 Finales II', desde: 36, hasta: 38 },
-        { titulo: 'M11 · 🔁 Repaso Integrado 3', desde: 39, hasta: 41 },
-        { titulo: 'M12 · 🏆 Cierre: Repertorio Ampliado', desde: 42, hasta: 44 }
+        { titulo: 'M1 · Elo, Títulos y la Escena Competitiva', desde: 1, hasta: 2 },
+        { titulo: 'M2 · Aperturas: Ruy López + Gambito de Rey', desde: 3, hasta: 7 },
+        { titulo: 'M3 · Táctica II', desde: 8, hasta: 10 },
+        { titulo: 'M4 · Estrategia I: Peones', desde: 11, hasta: 13 },
+        { titulo: 'M5 · Repaso Integrado 1', desde: 14, hasta: 16 },
+        { titulo: 'M6 · Aperturas: Francesa + Caro-Kann', desde: 17, hasta: 21 },
+        { titulo: 'M7 · Mates II', desde: 22, hasta: 24 },
+        { titulo: 'M8 · Aperturas: Gambito de Dama + Eslava', desde: 25, hasta: 29 },
+        { titulo: 'M9 · Repaso Integrado 2', desde: 30, hasta: 32 },
+        { titulo: 'M10 · Aperturas: Siciliana + Inglesa', desde: 33, hasta: 37 },
+        { titulo: 'M11 · Finales II', desde: 38, hasta: 40 },
+        { titulo: 'M12 · Repaso Integrado 3', desde: 41, hasta: 43 },
+        { titulo: 'M13 · Cierre: Repertorio Ampliado', desde: 44, hasta: 46 }
       ],
       avanzado: [
-        { titulo: 'M1 · ⚔️ Aperturas: India de Rey + Nimzoindia', desde: 1, hasta: 5 },
-        { titulo: 'M2 · 🎯 Táctica III', desde: 6, hasta: 8 },
-        { titulo: 'M3 · ⚔️ Aperturas: Grünfeld + Catalana', desde: 9, hasta: 13 },
-        { titulo: 'M4 · 🔁 Repaso Integrado 1', desde: 14, hasta: 16 },
-        { titulo: 'M5 · 🧠 Estrategia II', desde: 17, hasta: 19 },
-        { titulo: 'M6 · ⚔️ Aperturas: Najdorf', desde: 20, hasta: 23 },
-        { titulo: 'M7 · ⚔️ Aperturas: Pirc + Alekhine', desde: 24, hasta: 28 },
-        { titulo: 'M8 · 🔁 Repaso Integrado 2', desde: 29, hasta: 31 },
-        { titulo: 'M9 · ⚔️ Aperturas: Réti + Bird + Transposiciones', desde: 32, hasta: 34 },
-        { titulo: 'M10 · 🔁 Repaso Integrado 3, Final', desde: 35, hasta: 37 },
-        { titulo: 'M11 · 🏆 Cierre: Análisis Propio, Etiqueta y Repertorio Final', desde: 38, hasta: 40 }
+        { titulo: 'M1 · Grandes Torneos y Partidas Históricas', desde: 1, hasta: 2 },
+        { titulo: 'M2 · Aperturas: India de Rey + Nimzoindia', desde: 3, hasta: 7 },
+        { titulo: 'M3 · Táctica III', desde: 8, hasta: 10 },
+        { titulo: 'M4 · Aperturas: Grünfeld + Catalana', desde: 11, hasta: 15 },
+        { titulo: 'M5 · Repaso Integrado 1', desde: 16, hasta: 18 },
+        { titulo: 'M6 · Estrategia II', desde: 19, hasta: 21 },
+        { titulo: 'M7 · Aperturas: Najdorf', desde: 22, hasta: 25 },
+        { titulo: 'M8 · Aperturas: Pirc + Alekhine', desde: 26, hasta: 30 },
+        { titulo: 'M9 · Repaso Integrado 2', desde: 31, hasta: 33 },
+        { titulo: 'M10 · Aperturas: Réti + Bird + Transposiciones', desde: 34, hasta: 36 },
+        { titulo: 'M11 · Repaso Integrado 3, Final', desde: 37, hasta: 39 },
+        { titulo: 'M12 · Cierre: Análisis Propio, Etiqueta y Repertorio Final', desde: 40, hasta: 42 }
       ]
     };
 
