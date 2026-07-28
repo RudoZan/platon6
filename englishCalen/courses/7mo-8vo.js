@@ -92,6 +92,7 @@ COURSES['7mo-8vo'] = {
         suggestion: PENDING_SUGGESTION,
         qLabel: "Activity",
         aLabel: "Opinion",
+        adjectives: ["exciting", "fun", "relaxing", "interesting", "dangerous", "boring", "cool"],
         items: [
             { q: "What do you think about basketball?", a: "In my opinion, basketball is exciting!", sideImg: IMG+'play-basketball.png', icon: "🏀" },
             { q: "What do you think about soccer?", a: "In my opinion, soccer is fun!", sideImg: IMG+'play-soccer.png', icon: "⚽" },
@@ -209,7 +210,7 @@ COURSES['7mo-8vo'] = {
     {
         title: "Custom Activities",
         activities: [
-            { name: "🧠 I Already Know English", type: "already-know", items: ALREADY_KNOW_ENGLISH, suggestion: PENDING_SUGGESTION },
+            { name: "🧠 I Already Know English", type: "already-know", items: ALREADY_KNOW_ENGLISH, suggestion: PENDING_SUGGESTION, inlineAnswer: true },
             { name: "📖 Interactive Story", type: "game", items: [], suggestion: PENDING_SUGGESTION },
             { name: "📸 Calen Photos", type: "photo-gallery", items: CALEN_PHOTOS, suggestion: PENDING_SUGGESTION },
         ]

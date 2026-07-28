@@ -145,6 +145,29 @@
             color: #e8e4d9;
             text-align: center;
         }
+        .adjective-bank-panel {
+            display: none;
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            background: rgba(18, 42, 31, 0.92);
+            border-top: 2px solid rgba(240, 168, 48, 0.4);
+            z-index: 65;
+            padding: 6px 30px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .adjective-bank-panel.active { display: flex; }
+        .adjective-chip {
+            background: #234a3a;
+            color: #f0a830;
+            font-weight: bold;
+            font-size: 1.6rem;
+            padding: 4px 22px;
+            border-radius: 999px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+        }
         .photo-panel-words {
             flex: 1;
             background: #234a3a;
@@ -177,6 +200,7 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
+        .side-image.white-bg { background: #ffffff; }
         .side-image-caption {
             font-size: 1.5rem;
             font-weight: bold;
@@ -528,6 +552,7 @@
             <div class="photo-panel-words" id="photoPanelWords"></div>
         </div>
     </div>
+    <div class="adjective-bank-panel" id="adjectiveBankPanel"></div>
     <div class="country-panel" id="countryPanel">
         <img class="country-panel-img" id="countryPanelImg" src="" alt="">
         <div class="country-panel-caption" id="countryPanelCaption">
@@ -595,6 +620,14 @@
         const sideImageDiv = document.getElementById('sideImage');
 
         function matchSideHeight() {
+            if (!webcam.videoWidth || !webcam.videoHeight) {
+                // No hay stream de cámara real cargado (permiso denegado, sin
+                // cámara disponible, etc.) — no limitar la altura del panel de
+                // imagen a la caja vacía del video, o el contenido se recorta.
+                sideImageDiv.style.maxHeight = '';
+                document.getElementById('sideImg').style.maxHeight = '';
+                return;
+            }
             const h = webcam.offsetHeight + 'px';
             sideImageDiv.style.maxHeight = h;
             document.getElementById('sideImg').style.maxHeight = h;
@@ -623,6 +656,7 @@
         const countryPanelPlace = document.getElementById('countryPanelPlace');
         const countryListPanel = document.getElementById('countryListPanel');
         const countryListGrid = document.getElementById('countryListGrid');
+        const adjectiveBankPanel = document.getElementById('adjectiveBankPanel');
         const videoContainer = document.getElementById('videoContainer');
         const COUNTRY_ZOOM_START_SCALE = 3.4;   // qué tan cerca empieza el zoom
         const COUNTRY_ZOOM_DURATION_MS = 20000; // 20s para revelar el lugar completo
@@ -1136,6 +1170,7 @@
                 if (banner) {
                     banner.innerHTML = formatActivityTitle(d.activityName);
                 }
+                document.getElementById('sideImage').classList.toggle('white-bg', d.activityName === '🤔 In my opinion...');
             } else if (d.type === 'game-mode') {
                 showStoryMenu();
             } else if (d.type === 'names') {
@@ -1306,6 +1341,14 @@
                     countryListPanel.classList.add('active');
                 } else {
                     countryListPanel.classList.remove('active');
+                }
+            } else if (d.type === 'adjective-bank') {
+                if (d.show && d.words && d.words.length) {
+                    adjectiveBankPanel.innerHTML = d.words.map(w => `<div class="adjective-chip">${w}</div>`).join('');
+                    adjectiveBankPanel.classList.add('active');
+                } else {
+                    adjectiveBankPanel.classList.remove('active');
+                    adjectiveBankPanel.innerHTML = '';
                 }
             } else if (d.type === 'photo-word') {
                 const wordsEl = document.getElementById('photoPanelWords');

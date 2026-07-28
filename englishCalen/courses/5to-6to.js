@@ -237,6 +237,7 @@ COURSES['5to-6to'] = {
         bigText: true,
         qLabel: "Show",
         aLabel: "Faster!",
+        keepIcon: true,
         items: [
             { q: "Tea with cream for me, please.", a: "🏆 Say it faster!", icon: "👅", highlight: [["Tea", "TEA"], ["cream", "crEAm"], ["me", "mE"], ["please", "plEAse"]] },
             { q: "It's easy to see the eagle on the green tree.", a: "🏆 Say it faster!", icon: "👅", highlight: [["easy", "EAsy"], ["see", "sEE"], ["eagle", "EAgle"], ["green", "grEEn"], ["tree", "trEE"]] },
@@ -249,7 +250,7 @@ COURSES['5to-6to'] = {
     {
         title: "Custom Activities",
         activities: [
-            { name: "🧠 I Already Know English", type: "already-know", items: ALREADY_KNOW_ENGLISH, suggestion: PENDING_SUGGESTION },
+            { name: "🧠 I Already Know English", type: "already-know", items: ALREADY_KNOW_ENGLISH, suggestion: PENDING_SUGGESTION, inlineAnswer: true },
             { name: "📖 Interactive Story", type: "game", items: [], suggestion: PENDING_SUGGESTION },
             { name: "📸 Calen Photos", type: "photo-gallery", items: CALEN_PHOTOS, suggestion: PENDING_SUGGESTION },
             { name: "🌍 Guess the Country", type: "country-photos", items: COUNTRY_PHOTOS, suggestion: GUESS_THE_COUNTRY_SUGGESTION },

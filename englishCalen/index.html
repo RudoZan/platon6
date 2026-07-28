@@ -29,6 +29,12 @@
         .switch input:checked + .slider { background: #e8732a; }
         .switch input:checked + .slider:before { transform: translateX(18px); }
         .switch-label { font-size: 0.8rem; color: #aaa; }
+        .adjective-panel { border: 1.5px solid #2a5a42; border-radius: 10px; background: #0f2019; padding: 12px 16px; margin-top: 14px; }
+        .adjective-panel-header { display: flex; align-items: center; justify-content: space-between; color: #f0a830; font-weight: bold; margin-bottom: 10px; }
+        .adjective-switch-list { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 10px; }
+        .adjective-switch-item { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #ddd; }
+        .adjective-custom-row { display: flex; gap: 16px; flex-wrap: wrap; }
+        .adjective-custom-input { width: 170px; padding: 6px 10px; border-radius: 6px; border: 1px solid #2a5a42; background: #122a1f; color: white; font-size: 0.85rem; }
         .kid-btn { padding: 3px 8px; border: none; border-radius: 4px; font-size: 0.7rem; font-weight: bold; cursor: pointer; color: white; background: #2a6b4a; }
         .kid-btn:hover { background: #1e5a3a; }
         .kid-btn.active { background: #e8732a; }
@@ -42,6 +48,7 @@
         .item-num { color: #777; font-size: 0.75rem; font-weight: bold; min-width: 20px; text-align: center; }
         .item-label { flex: 1; font-size: 0.85rem; color: #ccc; }
         .item-sublabel { font-size: 0.7rem; color: #888; display: block; }
+        .item-sublabel-inline { font-size: 0.7rem; color: #888; display: inline; margin-left: 6px; }
         .flag-inline { height: 1em; width: auto; vertical-align: middle; border-radius: 2px; margin: 0 2px; }
         .btn { padding: 5px 10px; border: none; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; color: white; white-space: nowrap; }
         .btn-mid { background: #2a6b4a; }
@@ -67,7 +74,7 @@
         .welcome { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70vh; gap: 20px; }
         .welcome h2 { font-size: 1.5rem; color: #f0a830; }
         .welcome p { color: #aaa; font-size: 0.95rem; }
-        .welcome-btn { padding: 20px 40px; border: 2px solid #2a5a42; border-radius: 12px; background: #122a1f; color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.2s; min-width: 250px; text-align: center; }
+        .welcome-btn { padding: 40px 40px; border: 2px solid #2a5a42; border-radius: 12px; background: #122a1f; color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.2s; min-width: 250px; text-align: center; }
         .welcome-btn:hover { border-color: #5ec4b6; background: #1e4035; }
         .welcome-btns { display: flex; gap: 20px; }
         .welcome-info { display: flex; gap: 20px; margin-top: 10px; }
@@ -119,7 +126,7 @@
         .main-header { position: relative; display: flex; align-items: center; padding: 18px 20px 10px; }
         .main-header-nav { display: flex; gap: 8px; }
         .clear-bar .window-tag { font-size: 1rem; font-weight: bold; color: #9cb8a8; }
-        .main-header .course-name { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 1.4rem; font-weight: bold; color: #f0a830; white-space: nowrap; }
+        .main-header .course-name { margin-left: auto; font-size: 1.4rem; font-weight: bold; color: #f0a830; white-space: nowrap; }
         .review-stamp {
             display: inline-block;
             border: 2px solid #e8732a;
@@ -940,6 +947,10 @@ function renderActivity() {
     } else {
         renderDefault(act);
     }
+
+    if (act.adjectives && act.adjectives.length) {
+        renderAdjectiveBank(act);
+    }
 }
 
 // ══════════════════════════════════════
@@ -965,7 +976,11 @@ function renderAlreadyKnow(act, showQLabel, showALabel, hideQLabel, hideALabel) 
 
         const label = document.createElement('span');
         label.className = 'item-label';
-        label.innerHTML = `${item.q}<span class="item-sublabel">${item.a}</span>`;
+        if (act.inlineAnswer) {
+            label.innerHTML = `${item.q} <span class="item-sublabel-inline">(${item.a})</span>`;
+        } else {
+            label.innerHTML = `${item.q}<span class="item-sublabel">${item.a}</span>`;
+        }
 
         const flagMode = !!act.flagButton;
         const bigText = !!act.bigText;
@@ -1009,7 +1024,7 @@ function renderAlreadyKnow(act, showQLabel, showALabel, hideQLabel, hideALabel) 
                 btnQ.dataset.state = 'hide';
             } else {
                 send('clear-middle', '');
-                if (!flagMode) {
+                if (!flagMode && !act.keepIcon) {
                     send('side-image', '', null);
                     send('side-emoji', '');
                 }
@@ -1056,7 +1071,7 @@ function renderAlreadyKnow(act, showQLabel, showALabel, hideQLabel, hideALabel) 
                 btnW.dataset.state = 'hide';
             } else {
                 send('clear-bottom', '');
-                if (!flagMode) {
+                if (!flagMode && !act.keepIcon) {
                     send('side-image', '', null);
                     send('side-emoji', '');
                 }
@@ -2154,6 +2169,95 @@ function renderCanYou(act) {
         row.appendChild(btnNo);
         container.appendChild(row);
     });
+}
+
+// ══════════════════════════════════════
+// ADJECTIVE BANK — panel with switches to control which
+// adjectives are shown at the bottom of the presentation window
+// ══════════════════════════════════════
+function renderAdjectiveBank(act) {
+    let panelShown = false;
+
+    const panel = document.createElement('div');
+    panel.className = 'adjective-panel';
+
+    const header = document.createElement('div');
+    header.className = 'adjective-panel-header';
+    header.innerHTML = `<span>🎯 Adjective Bank</span>`;
+
+    const btnShow = document.createElement('button');
+    btnShow.className = 'btn btn-mid';
+    btnShow.textContent = 'Show';
+    header.appendChild(btnShow);
+    panel.appendChild(header);
+
+    const switchList = document.createElement('div');
+    switchList.className = 'adjective-switch-list';
+
+    const checkboxes = [];
+    act.adjectives.forEach((word, i) => {
+        const item = document.createElement('label');
+        item.className = 'adjective-switch-item';
+        const cbId = `adjSwitch${i}`;
+        item.innerHTML = `
+            <label class="switch"><input type="checkbox" id="${cbId}" checked><span class="slider"></span></label>
+            <span>${word}</span>
+        `;
+        switchList.appendChild(item);
+        const cb = item.querySelector('input');
+        cb.dataset.word = word;
+        cb.addEventListener('change', updateIfShown);
+        checkboxes.push(cb);
+    });
+    panel.appendChild(switchList);
+
+    const customRow = document.createElement('div');
+    customRow.className = 'adjective-custom-row';
+    const customInputs = [];
+    const customSwitches = [];
+    for (let i = 0; i < 2; i++) {
+        const item = document.createElement('label');
+        item.className = 'adjective-switch-item';
+        item.innerHTML = `
+            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+            <input type="text" class="adjective-custom-input" placeholder="Extra adjective ${i + 1}">
+        `;
+        const cb = item.querySelector('input[type=checkbox]');
+        const inp = item.querySelector('input[type=text]');
+        cb.addEventListener('change', updateIfShown);
+        inp.addEventListener('input', updateIfShown);
+        customRow.appendChild(item);
+        customInputs.push(inp);
+        customSwitches.push(cb);
+    }
+    panel.appendChild(customRow);
+
+    function collectWords() {
+        const words = checkboxes.filter(cb => cb.checked).map(cb => cb.dataset.word);
+        customInputs.forEach((inp, i) => {
+            const v = inp.value.trim();
+            if (v && customSwitches[i].checked) words.push(v);
+        });
+        return words;
+    }
+
+    function updateIfShown() {
+        if (panelShown) {
+            channel.postMessage({ type: 'adjective-bank', show: true, words: collectWords() });
+        }
+    }
+
+    btnShow.onclick = () => {
+        panelShown = !panelShown;
+        btnShow.textContent = panelShown ? 'Hide' : 'Show';
+        if (panelShown) {
+            channel.postMessage({ type: 'adjective-bank', show: true, words: collectWords() });
+        } else {
+            channel.postMessage({ type: 'adjective-bank', show: false });
+        }
+    };
+
+    container.appendChild(panel);
 }
 
 // ══════════════════════════════════════
