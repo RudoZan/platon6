@@ -123,20 +123,22 @@ COURSES['7mo-8vo'] = {
         ]
     },
     {
-        name: "⏳ While vs When",
+        name: "⏳ Past Continuous - When While",
         type: "question-answer",
         suggestion: PENDING_SUGGESTION,
         qLabel: "Clue",
         aLabel: "Sentence",
         items: [
-            { q: "Mbappé / defend  ↔  Messi / play", a: "While Mbappé was defending, Messi was playing.", icon: "⚽" },
-            { q: "I / run with ball  →  defender / kick ankle", a: "I was running with the ball when a defender kicked my ankle.", icon: "🏃" },
-            { q: "We / play soccer  →  it / start to rain", a: "While we were playing soccer, it started to rain.", icon: "🌧️" },
-            { q: "She / swim  →  referee / blow whistle", a: "She was swimming when the referee blew the whistle.", icon: "🏊" },
-            { q: "They / dance  ↔  they / listen to music", a: "While they were dancing, they were listening to music.", icon: "💃" },
-            { q: "I / watch TV  →  lights / go out", a: "I was watching TV when the lights went out.", icon: "📺" },
-            { q: "He / ride bicycle  →  he / fall down", a: "He was riding his bicycle when he fell down.", icon: "🚲" },
-            { q: "We / play cards  ↔  Mom / cook dinner", a: "While we were playing cards, Mom was cooking dinner.", icon: "🃏" },
+            { q: "Dad / chop wood  ↔  Mom / milk the cows", a: "While Dad was chopping wood, Mom was milking the cows.", icon: "🪓" },
+            { q: "I / walk to school  →  it / start to rain", a: "I was walking to school when it started to rain.", icon: "🌧️" },
+            { q: "Grandma / cook curanto  ↔  we / set the table", a: "While Grandma was cooking curanto, we were setting the table.", icon: "🍲" },
+            { q: "We / dig up potatoes  →  the wind / knock down a tree", a: "We were digging up potatoes when the wind knocked down a tree.", icon: "🥔" },
+            { q: "Dad / fish at the old pier  ↔  brother / collect mussels", a: "While Dad was fishing at the old pier, my brother was collecting mussels.", icon: "🎣" },
+            { q: "I / feed the chickens  →  the dog / start barking", a: "I was feeding the chickens when the dog started barking.", icon: "🐔" },
+            { q: "We / wait for the ferry  ↔  we / watch the sea lions", a: "While we were waiting for the ferry, we were watching the sea lions.", icon: "⛴️" },
+            { q: "She / ride her horse  →  she / see a Pudú", a: "She was riding her horse when she saw a Pudú.", icon: "🐴" },
+            { q: "Grandpa / tell stories by the fire  ↔  we / drink hot chocolate milk", a: "While Grandpa was telling stories by the fire, we were drinking hot chocolate milk.", icon: "🔥" },
+            { q: "We / watch TV  →  the power / go out", a: "We were watching TV when the power went out.", icon: "📺" },
         ]
     },
     {

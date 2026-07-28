@@ -100,6 +100,8 @@
         .photo-word-btn.active { background: #e8732a; }
         .photo-word-btn:disabled { opacity: 0.35; cursor: not-allowed; }
         .photo-word-btn:disabled:hover { background: #2a6b4a; }
+        .photo-word-input { width: 90px; padding: 2px 6px; font-size: 0.65rem; border-radius: 4px; border: 1px solid #2a5a42; background: #122a1f; color: white; text-align: center; }
+        .photo-word-input:disabled { opacity: 0.35; cursor: not-allowed; }
         .group-header { color: #5ec4b6; font-size: 0.85rem; font-weight: bold; padding: 8px 8px 4px; margin-top: 8px; border-top: 1px solid #2a5a42; }
         .mode-bar { display: flex; gap: 8px; margin-bottom: 10px; }
         .mode-btn { padding: 7px 14px; border: 2px solid #2a5a42; border-radius: 6px; background: #122a1f; color: #9cb8a8; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
@@ -2336,6 +2338,7 @@ function renderPhotoGallery(act) {
     const grid = document.createElement('div');
     grid.className = 'photo-grid';
     const allWordBtns = [];
+    const allCustomInputs = [];
 
     act.items.forEach(photo => {
         const wrap = document.createElement('div');
@@ -2349,6 +2352,14 @@ function renderPhotoGallery(act) {
         const words = document.createElement('div');
         words.className = 'photo-words';
         const wordBtns = [];
+
+        function updateShown() {
+            const shown = wordBtns.filter(b => b.classList.contains('active')).map(b => b.textContent);
+            const custom = customInput.value.trim();
+            if (custom) shown.push(custom);
+            send('photo-word', shown.join('\n'));
+        }
+
         photo.words.forEach(word => {
             const btn = document.createElement('button');
             btn.className = 'photo-word-btn';
@@ -2356,20 +2367,31 @@ function renderPhotoGallery(act) {
             btn.disabled = true;
             btn.onclick = () => {
                 btn.classList.toggle('active');
-                const shown = wordBtns.filter(b => b.classList.contains('active')).map(b => b.textContent);
-                send('photo-word', shown.join('\n'));
+                updateShown();
             };
             wordBtns.push(btn);
             allWordBtns.push(btn);
             words.appendChild(btn);
         });
+
+        const customInput = document.createElement('input');
+        customInput.type = 'text';
+        customInput.className = 'photo-word-input';
+        customInput.placeholder = '+ word';
+        customInput.disabled = true;
+        customInput.oninput = updateShown;
+        allCustomInputs.push(customInput);
+        words.appendChild(customInput);
+
         wrap.appendChild(words);
 
         card.onclick = () => {
             send('photo', '', photo.src);
             send('photo-word', '');
             allWordBtns.forEach(b => { b.classList.remove('active'); b.disabled = true; });
+            allCustomInputs.forEach(i => { i.value = ''; i.disabled = true; });
             wordBtns.forEach(b => b.disabled = false);
+            customInput.disabled = false;
         };
 
         grid.appendChild(wrap);
