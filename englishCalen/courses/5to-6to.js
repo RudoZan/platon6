@@ -50,7 +50,7 @@ const COUNTRY_PHOTOS = [
     { src: CPHOTOS + 'china_mapa.webp', country: 'China', place: 'Map', originX: 58, originY: 53 },
 
     { src: CPHOTOS + 'alemania_foto1_brandenburg_gate.webp', country: 'Germany', place: 'Brandenburg Gate' },
-    { src: CPHOTOS + 'alemania_foto2_bavarian_couple.png', country: 'Germany', place: 'Traditional Bavarian Couple' },
+    { src: CPHOTOS + 'alemania_foto2_bavarian_couple.webp', country: 'Germany', place: 'Traditional Bavarian Couple' },
     { src: CPHOTOS + 'alemania_mapa.webp', country: 'Germany', place: 'Map', originX: 46, originY: 54 },
 
     { src: CPHOTOS + 'italia_foto1_colosseum.webp', country: 'Italy', place: 'Colosseum' },
@@ -201,11 +201,11 @@ COURSES['5to-6to'] = {
         type: "same-word",
         suggestion: PENDING_SUGGESTION,
         items: [
-            { es: "Dulces", us: "candy", uk: "sweets", au: "lollies", icon: "🍬", img: "Images/vocabulario/dulces.png" },
-            { es: "Zapatillas", us: "sneakers", uk: "trainers", au: "runners", icon: "👟", img: "Images/vocabulario/zapatillas.png" },
-            { es: "Papas fritas", us: "French fries", uk: "chips", au: "hot chips", icon: "🍟", img: "Images/vocabulario/papas_fritas.png" },
-            { es: "Ascensor", us: "elevator", uk: "lift", au: "lift", icon: "🛗", img: "Images/vocabulario/ascensor.png" },
-            { es: "Semáforo", us: "traffic lights", uk: "traffic lights", au: "robots (South Africa)", icon: "🚦", img: "Images/vocabulario/semaforo.png" },
+            { es: "Dulces", us: "candy", uk: "sweets", au: "lollies", icon: "🍬", img: "dibujos/vocabulario/dulces.png" },
+            { es: "Zapatillas", us: "sneakers", uk: "trainers", au: "runners", icon: "👟", img: "dibujos/vocabulario/zapatillas.png" },
+            { es: "Papas fritas", us: "French fries", uk: "chips", au: "hot chips", icon: "🍟", img: "dibujos/vocabulario/papas_fritas.png" },
+            { es: "Ascensor", us: "elevator", uk: "lift", au: "lift", icon: "🛗", img: "dibujos/vocabulario/ascensor.png" },
+            { es: "Semáforo", us: "traffic lights", uk: "traffic lights", au: "robots (South Africa)", icon: "🚦", img: "dibujos/vocabulario/semaforo.png" },
         ]
     },
     {
