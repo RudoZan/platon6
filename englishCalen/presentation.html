@@ -619,16 +619,23 @@
         const webcam = document.getElementById('webcam');
         const sideImageDiv = document.getElementById('sideImage');
 
+        let lastGoodSideHeight = null;
+
         function matchSideHeight() {
             if (!webcam.videoWidth || !webcam.videoHeight) {
-                // No hay stream de cámara real cargado (permiso denegado, sin
-                // cámara disponible, etc.) — no limitar la altura del panel de
-                // imagen a la caja vacía del video, o el contenido se recorta.
-                sideImageDiv.style.maxHeight = '';
-                document.getElementById('sideImg').style.maxHeight = '';
+                // No hay stream de cámara real cargado ahora mismo (cámara
+                // escondida por el profesor, permiso denegado, sin cámara
+                // disponible, etc.). Si antes tuvimos una altura buena,
+                // mantenerla (que el panel no salte de tamaño); si nunca la
+                // tuvimos, no limitar la altura del panel de imagen para que
+                // el contenido no se recorte.
+                const h = lastGoodSideHeight || '';
+                sideImageDiv.style.maxHeight = h;
+                document.getElementById('sideImg').style.maxHeight = h;
                 return;
             }
             const h = webcam.offsetHeight + 'px';
+            lastGoodSideHeight = h;
             sideImageDiv.style.maxHeight = h;
             document.getElementById('sideImg').style.maxHeight = h;
         }
