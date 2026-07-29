@@ -907,7 +907,7 @@ function actualizarTextoResultado(cajaObj) {
   if (cajaObj.item.colocadoTarget !== null) {
     texto += cajaObj.item.colocadoTarget;
   }
-  if (cajaObj.item.colocadoConstante === true) {
+  if (cajaObj.item.tipo === 'integral' && cajaObj.item.colocadoConstante === true) {
     texto += (texto ? " " : "") + "+ C";
   }
   resEl.textContent = texto;
