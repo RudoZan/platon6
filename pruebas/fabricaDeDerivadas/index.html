@@ -32,6 +32,13 @@
         <div class="puntos-malos-bar" id="puntos-malos-dots"></div>
       </div>
 
+      <!-- Switch FX (sonidos) -->
+      <label class="switch-fx" title="Activar o desactivar efectos de sonido">
+        <span class="switch-fx__label">🔊 FX</span>
+        <input type="checkbox" id="switch-fx" checked>
+        <span class="switch-fx__slider"></span>
+      </label>
+
       <!-- Botones de Cabecera -->
       <button class="btn-hdr" id="btn-cambiar-fabrica">🏭 Selector de Fábrica</button>
       <button class="btn-hdr" id="btn-instrucciones-hdr">📖 Instrucciones</button>
@@ -76,14 +83,26 @@
   <!-- PANTALLA 2: Área Principal de la Fábrica (Oculta hasta elegir modo) -->
   <div class="fabrica-container" id="pantalla-juego" style="display: none;">
     
-    <!-- Repisa Superior: 6 Tubos + Cuadrado Pequeño +C al costado derecho -->
+    <!-- Repisa Superior: 6 Tubos + Columna Lateral (Velocidad + Cuadrado +C) -->
     <div class="repisa-seccion">
       <div class="tubos-grid" id="tubos-grid">
         <!-- 6 tubos inyectados dinámicamente -->
       </div>
-      <!-- Cuadrado pequeño +C al costado derecho de los tubos -->
-      <div class="caja-constante" id="dispenser-constante" draggable="true" style="display: none;" title="Constante +C">
-        +C
+
+      <!-- Columna lateral fija: la palanca de velocidad siempre queda arriba,
+           en la misma posición, tanto si aparece +C debajo como si no -->
+      <div class="repisa-lateral">
+        <div class="velocidad-control velocidad-control--vertical" id="velocidad-control" title="Multiplicador de velocidad de la cinta">
+          <span class="velocidad-control__label">⚡</span>
+          <button class="velocidad-btn activo" data-mult="1">1x</button>
+          <button class="velocidad-btn" data-mult="2">2x</button>
+          <button class="velocidad-btn" data-mult="3">3x</button>
+        </div>
+
+        <!-- Cuadrado pequeño +C (oculto con visibility para no mover la palanca de arriba) -->
+        <div class="caja-constante caja-constante--oculta" id="dispenser-constante" draggable="true" title="Constante +C">
+          +C
+        </div>
       </div>
     </div>
 

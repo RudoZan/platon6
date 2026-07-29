@@ -146,6 +146,119 @@ h1 {
   transform: scale(1.04);
 }
 
+/* Palanca de Velocidad de la Cinta (1x / 2x / 3x) */
+.velocidad-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+
+.velocidad-control__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #a0aec0;
+  margin-right: 2px;
+}
+
+.velocidad-btn {
+  background: transparent;
+  border: 1px solid var(--color-borde);
+  color: #a0aec0;
+  font-weight: 800;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.velocidad-btn:hover {
+  border-color: var(--color-primario-claro);
+  color: #fff;
+}
+
+.velocidad-btn.activo {
+  background: var(--color-dorado);
+  border-color: var(--color-dorado);
+  color: #1b2a38;
+  box-shadow: 0 0 10px rgba(236, 201, 75, 0.5);
+}
+
+/* Variante vertical: junto a los tubos, apilada justo sobre el +C */
+.velocidad-control--vertical {
+  flex-direction: column;
+  gap: 3px;
+  width: 54px;
+  padding: 6px 4px;
+}
+
+.velocidad-control--vertical .velocidad-control__label {
+  margin-right: 0;
+  font-size: 0.85rem;
+}
+
+.velocidad-control--vertical .velocidad-btn {
+  width: 100%;
+  padding: 3px 0;
+  text-align: center;
+}
+
+/* Switch FX (sonidos on/off) */
+.switch-fx {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  padding: 5px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.switch-fx__label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.switch-fx input {
+  display: none;
+}
+
+.switch-fx__slider {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  background: #4a5568;
+  border-radius: 20px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.switch-fx__slider::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.switch-fx input:checked + .switch-fx__slider {
+  background: var(--color-exito);
+}
+
+.switch-fx input:checked + .switch-fx__slider::before {
+  transform: translateX(14px);
+}
+
 /* Portada / Selector de Modo de Fábrica */
 .portada-selector {
   flex: 1;
@@ -336,6 +449,22 @@ h1 {
 .caja-constante:hover {
   transform: scale(1.06);
   box-shadow: 0 0 14px rgba(183, 148, 244, 0.6);
+}
+
+/* Oculta el +C sin quitarle su espacio, para que la palanca de velocidad de
+   arriba nunca cambie de posición al aparecer/desaparecer el +C */
+.caja-constante--oculta {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Columna lateral fija junto a los tubos: Velocidad arriba, +C abajo */
+.repisa-lateral {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 /* Cinta Transportadora Inferior */
@@ -609,4 +738,47 @@ h1 {
   .tubo-dispensador { height: 140px; }
   .zonas-inferiores { flex-direction: column; align-items: center; }
   .zona-target { width: 100%; height: 65px; }
+}
+
+/* Puntaje Flotante: número que aparece donde se genera el puntaje (despacho/basura/fuga) */
+.puntaje-flotante {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+  font-weight: 800;
+  font-size: 1.7rem;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 900;
+  opacity: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  animation: puntajeFlotanteAnim 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.puntaje-flotante.positivo { color: #48bb78; }
+.puntaje-flotante.negativo { color: #f56565; }
+
+@keyframes puntajeFlotanteAnim {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -85%) scale(1.35);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(-50%, -105%) scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, -150%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -190%) scale(0.5);
+  }
 }

@@ -76,6 +76,116 @@ const BANCOS = {
   ]
 };
 
+// ══════════════════════════════════════
+// Sonidos (sintetizados con Web Audio API, sin archivos externos)
+// ══════════════════════════════════════
+let audioCtx = null;
+
+function obtenerAudioCtx() {
+  if (!audioCtx) {
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) return null;
+    audioCtx = new AudioContextCtor();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function reproducirTono({ frecuencia, duracion = 0.15, tipo = 'sine', volumen = 0.2, retardo = 0, deslizarA = null }) {
+  if (!estado.sonidoActivo) return;
+
+  const ctx = obtenerAudioCtx();
+  if (!ctx) return;
+
+  const inicio = ctx.currentTime + retardo;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = tipo;
+  osc.frequency.setValueAtTime(frecuencia, inicio);
+  if (deslizarA) {
+    osc.frequency.exponentialRampToValueAtTime(deslizarA, inicio + duracion);
+  }
+
+  gain.gain.setValueAtTime(0, inicio);
+  gain.gain.linearRampToValueAtTime(volumen, inicio + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, inicio + duracion);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(inicio);
+  osc.stop(inicio + duracion + 0.02);
+}
+
+function reproducirSecuencia(notas) {
+  notas.forEach(reproducirTono);
+}
+
+function sonidoDespachoCorrecto() {
+  reproducirSecuencia([
+    { frecuencia: 523.25, duracion: 0.11, tipo: 'triangle', volumen: 0.22 },
+    { frecuencia: 659.25, duracion: 0.11, tipo: 'triangle', volumen: 0.22, retardo: 0.09 },
+    { frecuencia: 783.99, duracion: 0.18, tipo: 'triangle', volumen: 0.24, retardo: 0.18 }
+  ]);
+}
+
+function sonidoDespachoIncorrecto() {
+  reproducirTono({ frecuencia: 220, deslizarA: 110, duracion: 0.28, tipo: 'sawtooth', volumen: 0.18 });
+}
+
+function sonidoBasuraChica() {
+  reproducirTono({ frecuencia: 300, deslizarA: 180, duracion: 0.12, tipo: 'square', volumen: 0.12 });
+}
+
+function sonidoBasuraCaja() {
+  reproducirTono({ frecuencia: 200, deslizarA: 90, duracion: 0.22, tipo: 'square', volumen: 0.16 });
+}
+
+function sonidoFuga() {
+  reproducirSecuencia([
+    { frecuencia: 400, deslizarA: 250, duracion: 0.15, tipo: 'sawtooth', volumen: 0.16 },
+    { frecuencia: 350, deslizarA: 200, duracion: 0.15, tipo: 'sawtooth', volumen: 0.14, retardo: 0.1 }
+  ]);
+}
+
+function sonidoColocar() {
+  reproducirTono({ frecuencia: 660, duracion: 0.08, tipo: 'sine', volumen: 0.14 });
+}
+
+function sonidoRechazo() {
+  reproducirTono({ frecuencia: 140, duracion: 0.1, tipo: 'square', volumen: 0.15 });
+}
+
+function sonidoRonda() {
+  reproducirSecuencia([
+    { frecuencia: 523.25, duracion: 0.12, tipo: 'triangle', volumen: 0.2 },
+    { frecuencia: 659.25, duracion: 0.12, tipo: 'triangle', volumen: 0.2, retardo: 0.11 },
+    { frecuencia: 783.99, duracion: 0.12, tipo: 'triangle', volumen: 0.2, retardo: 0.22 },
+    { frecuencia: 1046.5, duracion: 0.3, tipo: 'triangle', volumen: 0.24, retardo: 0.33 }
+  ]);
+}
+
+function sonidoGameOver() {
+  reproducirSecuencia([
+    { frecuencia: 300, duracion: 0.25, tipo: 'sawtooth', volumen: 0.2 },
+    { frecuencia: 220, duracion: 0.25, tipo: 'sawtooth', volumen: 0.2, retardo: 0.22 },
+    { frecuencia: 150, duracion: 0.5, tipo: 'sawtooth', volumen: 0.22, retardo: 0.44 }
+  ]);
+}
+
+function sonidoInicio() {
+  reproducirSecuencia([
+    { frecuencia: 392.00, duracion: 0.1, tipo: 'triangle', volumen: 0.18 },
+    { frecuencia: 523.25, duracion: 0.1, tipo: 'triangle', volumen: 0.18, retardo: 0.1 },
+    { frecuencia: 659.25, duracion: 0.1, tipo: 'triangle', volumen: 0.18, retardo: 0.2 },
+    { frecuencia: 783.99, duracion: 0.1, tipo: 'triangle', volumen: 0.2, retardo: 0.3 },
+    { frecuencia: 1046.50, duracion: 0.3, tipo: 'triangle', volumen: 0.24, retardo: 0.42 }
+  ]);
+}
+
 // Estado Global del Juego
 const estado = {
   modo: null, // 'derivadas', 'integrales', 'mixta', 'doble_derivada'
@@ -87,12 +197,14 @@ const estado = {
   cajasProcesadasRonda: 0,
   velocidadBaseCinta: 0.425, // Reducida a la mitad (antes 0.85)
   velocidadActual: 0.425,
+  multiplicadorVelocidad: 1, // Palanca 1x / 2x / 3x
   pausado: true,
   cargandoTubosIniciales: false,
   itemsColaCinta: [],
   cajasEnCinta: [],
   tubos: [null, null, null, null, null, null],
-  elementoArrastrado: null // Puede ser { tipo: 'funcion_tubo' | 'caja_cinta' | 'constante' }
+  elementoArrastrado: null, // Puede ser { tipo: 'funcion_tubo' | 'caja_cinta' | 'constante' }
+  sonidoActivo: true
 };
 
 // Referencias DOM
@@ -124,7 +236,9 @@ const dom = {
   btnReanudar: document.getElementById('btn-reanudar'),
   btnComenzarJuego: document.getElementById('btn-comenzar-juego'),
   btnSiguienteRonda: document.getElementById('btn-siguiente-ronda'),
-  btnReiniciar: document.getElementById('btn-reiniciar')
+  btnReiniciar: document.getElementById('btn-reiniciar'),
+  switchFx: document.getElementById('switch-fx'),
+  velocidadControl: document.getElementById('velocidad-control')
 };
 
 // Inicialización
@@ -133,6 +247,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupPortadaEvents();
   setupHUDButtons();
   setupZonasTargets();
+  setupControlFx();
+  setupControlVelocidad();
   gameLoop();
 });
 
@@ -154,7 +270,27 @@ function setupPortadaEvents() {
   });
 }
 
+// Descarta por completo la partida anterior (cinta, tubos, cola, ronda y puntajes)
+// para que elegir una nueva fábrica siempre arranque desde cero.
+function reiniciarEstadoRonda() {
+  estado.pausado = true;
+  dom.cintaContainer.querySelectorAll('.caja-funcion').forEach(el => el.remove());
+  estado.cajasEnCinta = [];
+  estado.itemsColaCinta = [];
+  estado.tubos = [null, null, null, null, null, null];
+  estado.cargandoTubosIniciales = false;
+  estado.cajasProcesadasRonda = 0;
+  estado.cajasTotalesRonda = 8;
+  estado.ronda = 1;
+  estado.puntaje = 0;
+  estado.puntosMalos = 0;
+  renderizarTubos();
+  actualizarHUD();
+}
+
 function seleccionarModoFábrica(modo) {
+  obtenerAudioCtx(); // Desbloquear audio en el primer gesto del usuario
+  reiniciarEstadoRonda(); // Salir del juego anterior por completo antes de empezar el nuevo
   estado.modo = modo;
   dom.pantallaPortada.style.display = 'none';
   dom.pantallaJuego.style.display = 'flex';
@@ -168,10 +304,10 @@ function seleccionarModoFábrica(modo) {
   dom.tituloFabrica.textContent = titulo;
 
   if (modo === 'integrales' || modo === 'mixta') {
-    dom.dispenserConstante.style.display = 'flex';
+    dom.dispenserConstante.classList.remove('caja-constante--oculta');
     setupConstanteDrag();
   } else {
-    dom.dispenserConstante.style.display = 'none';
+    dom.dispenserConstante.classList.add('caja-constante--oculta');
   }
 
   // Abrir Modal de Instrucciones antes de iniciar
@@ -207,6 +343,7 @@ function setupHUDButtons() {
   dom.btnComenzarJuego.addEventListener('click', () => {
     dom.modalInstrucciones.classList.remove('activo');
     if (estado.cajasEnCinta.length === 0 && estado.cajasProcesadasRonda === 0) {
+      sonidoInicio();
       iniciarRonda(1);
     } else {
       estado.pausado = false;
@@ -222,6 +359,43 @@ function setupHUDButtons() {
     dom.modalPausa.classList.remove('activo');
     estado.pausado = false;
   });
+}
+
+function setupControlFx() {
+  dom.switchFx.addEventListener('change', () => {
+    estado.sonidoActivo = dom.switchFx.checked;
+    if (estado.sonidoActivo) {
+      obtenerAudioCtx();
+      sonidoColocar();
+    }
+  });
+}
+
+function setupControlVelocidad() {
+  dom.velocidadControl.querySelectorAll('.velocidad-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      estado.multiplicadorVelocidad = Number(btn.dataset.mult);
+      dom.velocidadControl.querySelectorAll('.velocidad-btn').forEach(b => {
+        b.classList.toggle('activo', b === btn);
+      });
+    });
+  });
+}
+
+// Muestra un número flotante (verde si es positivo, rojo si es negativo) en las
+// coordenadas de pantalla indicadas, cerca de donde se generó el cambio de puntaje.
+function mostrarPuntajeFlotante(valor, xClient, yClient) {
+  const contenedor = dom.pantallaJuego;
+  const rectContenedor = contenedor.getBoundingClientRect();
+
+  const el = document.createElement('div');
+  el.className = `puntaje-flotante ${valor >= 0 ? 'positivo' : 'negativo'}`;
+  el.textContent = `${valor > 0 ? '+' : ''}${valor}`;
+  el.style.left = `${xClient - rectContenedor.left}px`;
+  el.style.top = `${yClient - rectContenedor.top}px`;
+
+  contenedor.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
 }
 
 function actualizarHUD() {
@@ -481,6 +655,9 @@ function evaluarDropEnZona(zonaEl) {
   if (estado.elementoArrastrado.tipo === 'funcion_tubo' && esBasura) {
     const item = estado.elementoArrastrado.item;
     estado.puntosMalos += 1; // REGLA: Función pequeña a basura = -1
+    const rectBasura = dom.zonaBasura.getBoundingClientRect();
+    mostrarPuntajeFlotante(-1, rectBasura.left + rectBasura.width / 2, rectBasura.top);
+    sonidoBasuraChica();
     estado.tubos[item.tuboIndex] = null;
     llenarTubosGarantizados();
     actualizarHUD();
@@ -494,6 +671,9 @@ function evaluarDropEnZona(zonaEl) {
     if (esBasura) {
       // REGLA: Botar caja de la cinta a la basura (buena, mala o vacía) = -2 ptos malos
       estado.puntosMalos += 2;
+      const rectBasura = dom.zonaBasura.getBoundingClientRect();
+      mostrarPuntajeFlotante(-2, rectBasura.left + rectBasura.width / 2, rectBasura.top);
+      sonidoBasuraCaja();
       removerCajaDeCinta(cajaObj);
       actualizarHUD();
       return;
@@ -502,13 +682,18 @@ function evaluarDropEnZona(zonaEl) {
     if (esDespacho) {
       // Evaluar Despacho
       const esCorrecto = cajaObj.item.colocadoTarget === cajaObj.item.target && cajaObj.item.colocadoConstante;
+      const rectDespacho = dom.zonaDespacho.getBoundingClientRect();
 
       if (esCorrecto) {
         // REGLA: Despacho Correcto = +100 puntos positivos
         estado.puntaje += 100;
+        mostrarPuntajeFlotante(100, rectDespacho.left + rectDespacho.width / 2, rectDespacho.top);
+        sonidoDespachoCorrecto();
       } else {
         // REGLA: Despachar caja con función equivocada o incompleta = -4 ptos malos
         estado.puntosMalos += 4;
+        mostrarPuntajeFlotante(-4, rectDespacho.left + rectDespacho.width / 2, rectDespacho.top);
+        sonidoDespachoIncorrecto();
       }
       removerCajaDeCinta(cajaObj);
       actualizarHUD();
@@ -577,7 +762,7 @@ function actualizarCinta() {
   // Mover cajas en la cinta de derecha a izquierda
   for (let i = estado.cajasEnCinta.length - 1; i >= 0; i--) {
     const cajaObj = estado.cajasEnCinta[i];
-    cajaObj.x -= estado.velocidadActual;
+    cajaObj.x -= estado.velocidadActual * estado.multiplicadorVelocidad;
     cajaObj.el.style.left = `${cajaObj.x}px`;
 
     // REGLA: No despachar caja y dejar que escape por la izquierda = -3 ptos malos
@@ -585,6 +770,10 @@ function actualizarCinta() {
     if (cajaObj.x < -180) {
       if (!cajaObj.procesada) {
         estado.puntosMalos += 3;
+        const rectCinta = dom.cintaContainer.getBoundingClientRect();
+        const rectCaja = cajaObj.el.getBoundingClientRect();
+        mostrarPuntajeFlotante(-3, rectCinta.left, rectCaja.top + rectCaja.height / 2);
+        sonidoFuga();
         actualizarHUD();
       }
       cajaObj.el.remove();
@@ -655,6 +844,7 @@ function crearCajaEnCinta(item, posXInicial) {
 function colocarEnCajaSlot(cajaObj, itemTubo) {
   if (cajaObj.item.colocadoTarget !== null) {
     // RECHAZO NOTORIO: El slot de función ya contiene un elemento
+    sonidoRechazo();
     cajaObj.el.classList.remove('rechazo-animacion');
     void cajaObj.el.offsetWidth; // Fuerza reflow para reiniciar la animación
     cajaObj.el.classList.add('rechazo-animacion');
@@ -677,6 +867,7 @@ function colocarEnCajaSlot(cajaObj, itemTubo) {
 
   cajaObj.item.colocadoTarget = itemTubo.target;
   actualizarTextoResultado(cajaObj);
+  sonidoColocar();
 
   // Vaciar el tubo dispensador usado
   estado.tubos[itemTubo.tuboIndex] = null;
@@ -688,6 +879,7 @@ function colocarEnCajaSlot(cajaObj, itemTubo) {
 function colocarConstanteEnCaja(cajaObj) {
   if (cajaObj.item.colocadoConstante === true) {
     // RECHAZO NOTORIO: La constante +C ya está en la caja
+    sonidoRechazo();
     cajaObj.el.classList.remove('rechazo-animacion');
     void cajaObj.el.offsetWidth; // Fuerza reflow
     cajaObj.el.classList.add('rechazo-animacion');
@@ -704,6 +896,7 @@ function colocarConstanteEnCaja(cajaObj) {
 
   cajaObj.item.colocadoConstante = true;
   actualizarTextoResultado(cajaObj);
+  sonidoColocar();
 
   verificarCajaEstado(cajaObj);
 }
@@ -767,12 +960,14 @@ function dispararExitoRonda() {
   dom.rondaNumModal.textContent = estado.ronda;
   dom.puntosRecuperadosModal.textContent = puntosLimpiados;
   dom.modalRonda.classList.add('activo');
+  sonidoRonda();
 }
 
 function dispararGameOver() {
   estado.pausado = true;
   dom.puntajeFinalGameOver.textContent = estado.puntaje;
   dom.modalGameOver.classList.add('activo');
+  sonidoGameOver();
 }
 
 // Handlers de botones modales
