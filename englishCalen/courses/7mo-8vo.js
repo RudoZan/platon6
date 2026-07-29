@@ -142,12 +142,13 @@ COURSES['7mo-8vo'] = {
         ]
     },
     {
-        name: "👯 Sport Actions",
+        name: "👯 Past Continuous Actions",
         type: "question-answer",
         suggestion: PENDING_SUGGESTION,
-        qLabel: "Act it out!",
+        qLabel: "Show Action",
         aLabel: "Answer",
         multiAnswer: true,
+        keepIcon: true,
         items: [
             { q: "Action: Kick the ball!", icon: "🦵", sideImg: DIBUJOS+"patearPelota.webp", answers: [
                 { label: "She", text: "She was KICKING the ball!" },

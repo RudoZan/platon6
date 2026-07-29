@@ -929,7 +929,7 @@ function renderActivity() {
     } else if (act.type === 'story-sorter') {
         renderStorySorter(act);
     } else if (act.type === 'question-answer') {
-        renderAlreadyKnow(act, act.qLabel || 'Question', act.aLabel || 'Answer', 'Hide ' + (act.qLabel || 'Question'), 'Hide ' + (act.aLabel || 'Answer'));
+        renderAlreadyKnow(act, act.qLabel || 'Question', act.aLabel || 'Answer', 'Hide ' + (act.qLabel || 'Question').replace(/^Show /, ''), 'Hide ' + (act.aLabel || 'Answer'));
     } else if (act.type === 'multi-mode') {
         renderMultiMode(act);
     } else if (act.type === 'same-word') {
@@ -980,6 +980,8 @@ function renderAlreadyKnow(act, showQLabel, showALabel, hideQLabel, hideALabel) 
         label.className = 'item-label';
         if (act.inlineAnswer) {
             label.innerHTML = `${item.q} <span class="item-sublabel-inline">(${item.a})</span>`;
+        } else if (act.multiAnswer) {
+            label.innerHTML = item.q;
         } else {
             label.innerHTML = `${item.q}<span class="item-sublabel">${item.a}</span>`;
         }
