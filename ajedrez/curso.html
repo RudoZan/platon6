@@ -72,8 +72,34 @@
     /* Sidebar de Clases Individuales */
     .sidebar-curso {
       width: 340px; background: var(--bg-card); border: 1.5px solid rgba(var(--oro-rgb),0.35);
-      border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 14px;
+      border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 12px;
       backdrop-filter: blur(10px); max-height: 850px; overflow-y: auto;
+      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s ease, min-width 0.25s ease;
+      position: relative;
+    }
+    .header-sidebar-toggle {
+      display: flex; justify-content: flex-end; width: 100%; margin-bottom: 2px;
+    }
+    .btn-toggle-sidebar {
+      background: rgba(var(--oro-rgb),0.15); border: 1.5px solid var(--oro); color: var(--oro-claro);
+      border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s ease;
+      font-family: inherit; width: 100%;
+    }
+    .btn-toggle-sidebar:hover {
+      background: var(--oro); color: #101010; box-shadow: 0 0 10px rgba(var(--oro-rgb),0.4);
+    }
+    .sidebar-curso.colapsado {
+      width: 52px !important; min-width: 52px !important; padding: 12px 6px; overflow: hidden;
+    }
+    .sidebar-curso.colapsado .sidebar-content-wrapper {
+      display: none !important;
+    }
+    .sidebar-curso.colapsado .header-sidebar-toggle {
+      justify-content: center; margin: 0;
+    }
+    .sidebar-curso.colapsado .btn-toggle-sidebar {
+      width: 38px; height: 38px; padding: 0; border-radius: 8px; font-size: 1rem;
     }
     .sidebar-curso h2 {
       font-size: 1rem; color: var(--oro-claro); border-bottom: 1px solid rgba(var(--oro-rgb),0.3);
@@ -255,9 +281,62 @@
     input:checked + .slider { background-color: var(--oro); }
     input:checked + .slider:before { transform: translateX(16px); }
 
+    /* Panel de Tipo Presentación (Diapositivas - Layout Horizontal Compacto) */
+    .panel-presentacion-curso {
+      flex: 1; max-width: 940px; width: 100%; background: var(--bg-card); border: 1.5px solid rgba(var(--oro-rgb),0.35);
+      border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px;
+      backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+    .diapositiva-box {
+      display: flex; flex-direction: row; align-items: stretch; gap: 18px; width: 100%;
+    }
+    .diapositiva-img-wrapper {
+      width: 320px; flex-shrink: 0; height: 310px; border-radius: 10px; overflow: hidden;
+      border: 1.5px solid var(--oro); box-shadow: 0 6px 18px rgba(0,0,0,0.6); background: #0b0c10;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .diapositiva-img-wrapper img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .diapositiva-content {
+      flex: 1; display: flex; flex-direction: column; gap: 10px; justify-content: flex-start; min-width: 0;
+    }
+    .diapositiva-titulo {
+      font-size: 1.18rem; color: var(--oro-claro); font-weight: 800; text-align: left; margin: 0;
+    }
+    .diapositiva-texto {
+      font-size: 0.88rem; line-height: 1.65; color: var(--texto); background: rgba(0,0,0,0.35);
+      padding: 14px 16px; border-radius: 8px; border: 1px solid rgba(var(--oro-rgb),0.25); flex: 1; overflow-y: auto;
+    }
+    .nav-diapositivas {
+      display: flex; justify-content: space-between; align-items: center; width: 100%;
+      background: rgba(0,0,0,0.4); padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(var(--oro-rgb),0.3);
+      margin-top: 4px;
+    }
+    .btn-pag-diapositiva {
+      padding: 7px 14px; border-radius: 6px; border: 1.5px solid var(--oro);
+      background: rgba(var(--oro-rgb),0.15); color: var(--oro-claro); font-weight: bold;
+      font-size: 0.78rem; cursor: pointer; transition: all .15s ease; font-family: inherit;
+    }
+    .btn-pag-diapositiva:hover:not(:disabled) {
+      background: var(--oro); color: #101010; box-shadow: 0 0 10px rgba(var(--oro-rgb),0.4);
+    }
+    .btn-pag-diapositiva:disabled {
+      opacity: 0.35; cursor: not-allowed; border-color: rgba(var(--oro-rgb),0.2);
+    }
+    .indicador-diapositivas {
+      font-size: 0.82rem; font-weight: bold; color: var(--oro-claro); letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 850px) {
+      .diapositiva-box { flex-direction: column; align-items: center; }
+      .diapositiva-img-wrapper { width: 100%; max-width: 320px; height: 220px; }
+      .diapositiva-titulo { text-align: center; }
+    }
+
     @media (max-width: 1200px) {
       .zona-curso { flex-direction: column; align-items: center; }
-      .sidebar-curso, .panel-info-clase { width: 100%; max-width: 512px; max-height: none; }
+      .sidebar-curso, .panel-info-clase, .panel-presentacion-curso { width: 100%; max-width: 512px; max-height: none; }
     }
   </style>
 </head>
@@ -275,23 +354,28 @@
   <div class="zona-curso">
 
     <!-- Sidebar de Clases Individuales, tres niveles conmutables -->
-    <aside class="sidebar-curso">
-      <div class="selector-nivel-curso">
-        <button class="btn-nivel principiante activo" data-nivel="principiante">🟢 Principiante</button>
-        <button class="btn-nivel intermedio" data-nivel="intermedio">🟠 Intermedio</button>
-        <button class="btn-nivel avanzado" data-nivel="avanzado">🔴 Avanzado</button>
+    <aside class="sidebar-curso" id="sidebarCurso">
+      <div class="header-sidebar-toggle">
+        <button id="btnToggleSidebar" class="btn-toggle-sidebar" title="Colapsar / Mostrar Temario">◀ Colapsar Temario</button>
       </div>
-      <h2>
-        <span>Temario del Curso</span>
-        <span class="progreso-curso-badge" id="badgeProgresoCurso">0 / 54 completadas</span>
-      </h2>
 
-      <div id="contenedorModulos"></div>
+      <div class="sidebar-content-wrapper" id="sidebarContentWrapper">
+        <div class="selector-nivel-curso">
+          <button class="btn-nivel principiante activo" data-nivel="principiante">🟢 Principiante</button>
+          <button class="btn-nivel intermedio" data-nivel="intermedio">🟠 Intermedio</button>
+          <button class="btn-nivel avanzado" data-nivel="avanzado">🔴 Avanzado</button>
+        </div>
+        <h2>
+          <span>Temario del Curso</span>
+          <span class="progreso-curso-badge" id="badgeProgresoCurso">0 / 54 completadas</span>
+        </h2>
 
+        <div id="contenedorModulos"></div>
+      </div>
     </aside>
 
     <!-- Tablero de Práctica -->
-    <main class="panel-tablero-curso">
+    <main class="panel-tablero-curso" id="panelTableroCurso">
       <div class="marco-tablero">
         <div class="filas-numeros">
           <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
@@ -321,9 +405,13 @@
       </div>
     </main>
 
+    <!-- Panel de Presentación (Solo para clases tipo Presentación) -->
+    <main class="panel-presentacion-curso" id="panelPresentacionCurso" style="display:none;"></main>
+
     <!-- Panel de Detalles, Valores Materiales y Variantes -->
-    <aside class="panel-info-clase">
+    <aside class="panel-info-clase" id="panelInfoClase">
       <div class="clase-header">
+        <div id="moduloClase" class="modulo-subtitulo-header" style="font-size:0.75rem; font-weight:800; text-transform:uppercase; color:var(--oro); letter-spacing:0.05em; margin-bottom:2px;"></div>
         <h2 id="tituloClase" class="clase-titulo">Clase 1: Historia y Filosofía del Ajedrez</h2>
         <span id="badgeNivelClase" class="badge-nivel Principiante">Principiante</span>
       </div>
@@ -353,19 +441,30 @@
     // --- Tres cursos por nivel: 51 + 44 + 40 = 135 clases individuales ---
 const CLASES_PRINCIPIANTE = [
   // --- M1: Fundamentos e Historia (Clases 1-5) ---
-  { id: 1, titulo: '1. Historia, Naturaleza y Leyendas', nivel: 'Principiante', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-    descripcion: `El ajedrez es un juego de estrategia para dos personas sobre un tablero de 64 casillas (8×8). Nace en la India (s. VI) como Chaturanga, pasa a Persia como Shatranj (de ahí "jaque", shah, y "jaque mate", shah mat) y llega a Europa por España.
-
-¿Qué lo hace único?
-• Sin azar: toda la información está a la vista. Perder enseña más que ganar.
-• Finito pero inagotable: las partidas posibles superan los átomos del universo observable.
-• Universal: no importa la edad, el idioma ni la fuerza física.
-
-La revolución española (finales del s. XV): la Dama pasa a ser la pieza más poderosa y el Alfil gana su alcance largo. La partida más antigua conservada con estas reglas es del poema valenciano Scachs d'amor (hacia 1475) y empieza con 1.e4 d5.
-
-La leyenda de los granos de trigo (2⁶⁴−1) es un puente natural con la matemática.
-
-Hitos históricos: Steinitz 1886 (primer campeón oficial) · Fischer–Spassky 1972 · Deep Blue 1997 · AlphaZero 2017 · Gukesh D. 2024 (campeón mundial más joven, 18 años).`,
+  { id: 1, titulo: '1. Historia, Naturaleza y Leyendas', nivel: 'Principiante', tipoFuncionalidad: 'presentacion',
+    diapositivas: [
+      {
+        titulo: '1. El Origen del Ajedrez: Chaturanga (Siglo VI)',
+        imagen: 'images/chaturanga_india.webp',
+        texto: `El ajedrez es un juego de estrategia para dos personas sobre un tablero de 64 casillas (8×8). Nació en la India hacia el siglo VI con el nombre de <strong>Chaturanga</strong> ("cuatro divisiones": infantería, caballería, elefantes y carros).<br><br>Posteriormente pasó a Persia como <em>Shatranj</em> (de donde derivan los términos "jaque" del persa <em>shah</em> - rey, y "jaque mate" de <em>shah mat</em> - el rey ha caído) y fue introducido en Europa a través de España por los árabes.`
+      },
+      {
+        titulo: '2. La Revolución Española del Siglo XV',
+        imagen: 'images/ajedrez_reina_medieval.webp',
+        texto: `Hacia finales del siglo XV en España se produjo la mayor transformación de las reglas modernas: la <strong>Dama (Reina)</strong> pasó a ser la pieza más poderosa del juego combinando la movilidad de la Torre y el Alfil, y el Alfil ganó su largo alcance diagonal.<br><br>La partida conservada más antigua con estas reglas modernas proviene del poema valenciano <em>Scachs d'amor</em> (hacia 1475) y comienza con la jugada <code>1.e4 d5</code>.`
+      },
+      {
+        titulo: '3. La Leyenda del Trigo y el Ajedrez',
+        imagen: 'images/leyenda_trigo_ajedrez.webp',
+        texto: `Según la leyenda, el sabio Sissa inventó el ajedrez para entretener al Rey. Como recompensa, solo pidió 1 grano de trigo en la primera casilla, 2 en la segunda, 4 en la tercera y así sucesivamente duplicando en cada una de las 64 casillas.<br><br>El rey aceptó risueño, sin saber que la suma total es <strong>2⁶⁴ − 1 = 18.446.744.073.709.551.615 granos</strong>, una cantidad mayor que toda la producción de trigo de la Tierra en milenios.`
+      },
+      {
+        titulo: '4. Naturaleza Única y la Era de la Inteligencia Artificial',
+        imagen: 'images/ajedrez_ia_moderno.webp',
+        texto: `<strong>¿Qué hace único al ajedrez?</strong><br>• <em>Sin azar:</em> Toda la información está a la vista. Perder enseña más que ganar.<br>• <em>Finito pero inagotable:</em> Hay más partidas posibles que átomos en el universo observable.<br>• <em>Universal:</em> No importa la edad, el idioma ni la fuerza física.<br><br><strong>Hitos históricos clave:</strong><br>• <strong>1886:</strong> Wilhelm Steinitz, 1er Campeón Mundial oficial.<br>• <strong>1972:</strong> Fischer vs Spassky ("Match del Siglo").<br>• <strong>1997:</strong> Deep Blue vence a Garry Kasparov.<br>• <strong>2017:</strong> AlphaZero revoluciona la comprensión con IA.<br>• <strong>2024:</strong> Gukesh D. es el Campeón Mundial más joven de la historia (18 años).`
+      }
+    ],
+    descripcion: `Clase interactiva de tipo Presentación sobre la historia, origen y leyendas del ajedrez.`,
     objetivos: []
   },
   { id: 2, titulo: '2. El Tablero: Geometría y Coordenadas', nivel: 'Principiante', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
@@ -1908,7 +2007,7 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
 
           const elCasilla = document.createElement('div');
           elCasilla.className = `casilla ${esClara ? 'clara' : 'oscura'}`;
-          elCasilla.dataset.square = casillaId;
+          elCasilla.setAttribute('data-square', casillaId);
 
           if (casillaSeleccionada === casillaId) elCasilla.classList.add('seleccionada');
           if (jaqueCasilla === casillaId) elCasilla.classList.add('jaque');
@@ -2045,7 +2144,7 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
     function actualizarProgresoGeneral() {
       let completadas = 0;
       clasesActivas().forEach((c, idx) => {
-        const todascumplidas = c.objetivos.every(o => o.cumplido);
+        const todascumplidas = (c.objetivos && c.objetivos.length > 0) ? c.objetivos.every(o => o.cumplido) : false;
         if (todascumplidas) completadas++;
         const btnClase = document.querySelector(`.btn-clase[data-idx="${idx}"]`);
         if (btnClase) {
@@ -2076,9 +2175,9 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
           if (!c) continue;
           const btn = document.createElement('button');
           btn.className = 'btn-clase';
-          btn.dataset.idx = String(idx);
+          btn.setAttribute('data-idx', String(idx));
           btn.innerHTML = `<span>${c.titulo}</span><span class="clase-check">✓</span>`;
-          btn.addEventListener('click', () => cargarClase(Number(btn.dataset.idx)));
+          btn.addEventListener('click', () => cargarClase(Number(btn.getAttribute('data-idx'))));
           divLista.appendChild(btn);
         }
         divGrupo.appendChild(divLista);
@@ -2088,35 +2187,12 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
 
     function actualizarBotonesNivel() {
       document.querySelectorAll('.btn-nivel').forEach(b => {
-        b.classList.toggle('activo', b.dataset.nivel === NIVEL_ACTUAL);
+        b.classList.toggle('activo', b.getAttribute('data-nivel') === NIVEL_ACTUAL);
       });
     }
 
     function actualizarTituloNivel() {
       document.getElementById('tituloPrincipal').textContent = `🎓 Curso de Ajedrez — Nivel ${NOMBRE_NIVEL[NIVEL_ACTUAL]} 🎓`;
-    }
-
-    function actualizarBotonesNav() {
-      const arr = clasesActivas();
-      const nivelIdx = NIVELES_ORDEN.indexOf(NIVEL_ACTUAL);
-      const btnSig = document.getElementById('btnClaseSiguiente');
-      const btnAnt = document.getElementById('btnClaseAnterior');
-
-      if (claseActualIdx < arr.length - 1) {
-        btnSig.textContent = 'Siguiente ▶';
-      } else if (nivelIdx < NIVELES_ORDEN.length - 1) {
-        btnSig.textContent = `Continuar en Curso ${NOMBRE_NIVEL[NIVELES_ORDEN[nivelIdx + 1]]} →`;
-      } else {
-        btnSig.textContent = '🏆 Curso completo — Volver al inicio';
-      }
-
-      if (claseActualIdx > 0) {
-        btnAnt.textContent = '⏮ Anterior';
-      } else if (nivelIdx > 0) {
-        btnAnt.textContent = `⏮ Volver a Curso ${NOMBRE_NIVEL[NIVELES_ORDEN[nivelIdx - 1]]}`;
-      } else {
-        btnAnt.textContent = '⏮ Anterior';
-      }
     }
 
     function cambiarNivel(nuevoNivel, idxDestino) {
@@ -2130,64 +2206,229 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
       cargarClase(idx);
     }
 
+    let diapositivaActualIdx = 0;
+
     // --- Cargar Clase ---
     function cargarClase(idx) {
       claseActualIdx = idx;
       const c = clasesActivas()[claseActualIdx];
 
-      juego.load(c.fen);
-      casillaSeleccionada = null;
-      movimientosPosibles = [];
-      contadorMovimientosClase = 0;
-
       document.querySelectorAll('.btn-clase').forEach(b => {
-        b.classList.toggle('activo', Number(b.dataset.idx) === claseActualIdx);
+        b.classList.toggle('activo', Number(b.getAttribute('data-idx')) === claseActualIdx);
       });
       actualizarBotonesNav();
 
-      // Tarjeta Valor Material
-      const tarjetaVal = document.getElementById('tarjetaValorMaterial');
-      const gridVal = document.getElementById('gridValoresPiezas');
-      gridVal.innerHTML = '';
-      if (c.valoresPiezas && c.valoresPiezas.length > 0) {
-        tarjetaVal.style.display = 'block';
-        c.valoresPiezas.forEach(v => {
-          const divV = document.createElement('div');
-          divV.className = 'val-item';
-          divV.innerHTML = `<span>${v.pieza}:</span> <span class="val-pts">${v.pts}</span>`;
-          gridVal.appendChild(divV);
-        });
-      } else {
-        tarjetaVal.style.display = 'none';
-      }
+      const panelTablero = document.getElementById('panelTableroCurso');
+      const panelInfo = document.getElementById('panelInfoClase');
+      const panelPres = document.getElementById('panelPresentacionCurso');
 
-      // Selector de Variantes
-      const boxVar = document.getElementById('boxVariantesClase');
-      const selectVar = document.getElementById('selectVarClase');
-      selectVar.innerHTML = '';
-      if (c.variantes && c.variantes.length > 0) {
-        boxVar.style.display = 'block';
-        c.variantes.forEach((v, i) => {
-          const opt = document.createElement('option');
-          opt.value = i;
-          opt.textContent = v.nombre;
-          selectVar.appendChild(opt);
-        });
-        selectVar.onchange = (e) => {
-          const v = c.variantes[Number(e.target.value)];
-          document.getElementById('descClase').innerHTML = (v.descripcion || c.descripcion).replace(/\n/g, '<br>');
-        };
-      } else {
-        boxVar.style.display = 'none';
-      }
+      if (c.tipoFuncionalidad === 'presentacion') {
+        panelTablero.style.display = 'none';
+        panelInfo.style.display = 'none';
+        panelPres.style.display = 'flex';
 
-      renderTablero();
-      renderInfoClase();
+        diapositivaActualIdx = 0;
+        renderPresentacion(c);
+      } else {
+        panelTablero.style.display = 'flex';
+        panelInfo.style.display = 'flex';
+        panelPres.style.display = 'none';
+
+        juego.load(c.fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+        casillaSeleccionada = null;
+        movimientosPosibles = [];
+        contadorMovimientosClase = 0;
+
+        // Tarjeta Valor Material
+        const tarjetaVal = document.getElementById('tarjetaValorMaterial');
+        const gridVal = document.getElementById('gridValoresPiezas');
+        gridVal.innerHTML = '';
+        if (c.valoresPiezas && c.valoresPiezas.length > 0) {
+          tarjetaVal.style.display = 'block';
+          c.valoresPiezas.forEach(v => {
+            const divV = document.createElement('div');
+            divV.className = 'val-item';
+            divV.innerHTML = `<span>${v.pieza}:</span> <span class="val-pts">${v.pts}</span>`;
+            gridVal.appendChild(divV);
+          });
+        } else {
+          tarjetaVal.style.display = 'none';
+        }
+
+        // Selector de Variantes
+        const boxVar = document.getElementById('boxVariantesClase');
+        const selectVar = document.getElementById('selectVarClase');
+        selectVar.innerHTML = '';
+        if (c.variantes && c.variantes.length > 0) {
+          boxVar.style.display = 'block';
+          c.variantes.forEach((v, i) => {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = v.nombre;
+            selectVar.appendChild(opt);
+          });
+          selectVar.onchange = (e) => {
+            const v = c.variantes[Number(e.target.value)];
+            document.getElementById('descClase').innerHTML = (v.descripcion || c.descripcion).replace(/\n/g, '<br>');
+          };
+        } else {
+          boxVar.style.display = 'none';
+        }
+
+        renderTablero();
+        renderInfoClase();
+      }
       actualizarProgresoGeneral();
+    }
+
+    function obtenerModuloDeClase(claseId) {
+      const mods = MODULOS[NIVEL_ACTUAL] || [];
+      const mod = mods.find(m => claseId >= m.desde && claseId <= m.hasta);
+      return mod ? mod.titulo : '';
+    }
+
+    function renderPresentacion(c) {
+      const panelPres = document.getElementById('panelPresentacionCurso');
+      const diapositivas = c.diapositivas || [];
+      const dia = diapositivas[diapositivaActualIdx] || { titulo: c.titulo, texto: c.descripcion, imagen: '' };
+
+      panelPres.innerHTML = `
+        <div class="clase-header" style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div class="modulo-subtitulo-header" style="font-size:0.75rem; font-weight:800; text-transform:uppercase; color:var(--oro); letter-spacing:0.05em; margin-bottom:2px;">${obtenerModuloDeClase(c.id)}</div>
+            <h2 class="clase-titulo">${c.titulo}</h2>
+            <span class="badge-nivel ${c.nivel}">${c.nivel} · Presentación</span>
+          </div>
+          <button id="btnAudioPresentacion" class="btn-audio" style="width:auto; padding:6px 12px;">🔊 Escuchar Diapositiva</button>
+        </div>
+
+        <div class="diapositiva-box">
+          ${dia.imagen ? `
+            <div class="diapositiva-img-wrapper">
+              <img src="${dia.imagen}" alt="${dia.titulo}">
+            </div>
+          ` : ''}
+          <div class="diapositiva-content">
+            <h3 class="diapositiva-titulo">${dia.titulo}</h3>
+            <div class="diapositiva-texto">${dia.texto}</div>
+          </div>
+        </div>
+
+        <div class="nav-diapositivas">
+          <button id="btnPrevDiapositiva" class="btn-pag-diapositiva" ${diapositivaActualIdx === 0 ? 'disabled' : ''}>⏮ Anterior Página</button>
+          <span class="indicador-diapositivas">Página ${diapositivaActualIdx + 1} de ${diapositivas.length}</span>
+          <button id="btnNextDiapositiva" class="btn-pag-diapositiva" ${diapositivaActualIdx >= diapositivas.length - 1 ? 'disabled' : ''}>Siguiente Página ▶</button>
+        </div>
+
+        <div class="controles-clase" style="width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(var(--oro-rgb),0.3);">
+          <button id="btnClaseAnteriorPres" class="btn-nav-clase">◀ Clase anterior</button>
+          <button id="btnClaseSiguientePres" class="btn-nav-clase">Clase siguiente ▶</button>
+        </div>
+      `;
+
+      document.getElementById('btnPrevDiapositiva').addEventListener('click', () => {
+        if (diapositivaActualIdx > 0) {
+          diapositivaActualIdx--;
+          renderPresentacion(c);
+        }
+      });
+
+      document.getElementById('btnNextDiapositiva').addEventListener('click', () => {
+        if (diapositivaActualIdx < diapositivas.length - 1) {
+          diapositivaActualIdx++;
+          renderPresentacion(c);
+        }
+      });
+
+      document.getElementById('btnAudioPresentacion').addEventListener('click', () => {
+        reproducirVoz(`${dia.titulo}. ${dia.texto}`);
+      });
+
+      const bAntP = document.getElementById('btnClaseAnteriorPres');
+      const bSigP = document.getElementById('btnClaseSiguientePres');
+      if (bAntP) bAntP.addEventListener('click', ejecutarClaseAnterior);
+      if (bSigP) bSigP.addEventListener('click', ejecutarClaseSiguiente);
+
+      actualizarBotonesNav();
+    }
+
+    // --- Sistema de Voz Optimizado (TTS) ---
+    let vocesCargadas = [];
+    function cargarVoces() {
+      if ('speechSynthesis' in window) {
+        vocesCargadas = window.speechSynthesis.getVoices();
+      }
+    }
+    if ('speechSynthesis' in window) {
+      cargarVoces();
+      if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = cargarVoces;
+      }
+    }
+
+    function obtenerMejorVozEspanol() {
+      if (!vocesCargadas || vocesCargadas.length === 0) {
+        cargarVoces();
+      }
+      const vocesEs = vocesCargadas.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+      if (vocesEs.length === 0) return null;
+
+      const prioridades = ['Google', 'Natural', 'Premium', 'Monica', 'Jorge', 'Paulina', 'Sabina', 'Helena', 'Microsoft', 'Apple', 'Diego'];
+      for (const pref of prioridades) {
+        const encontrada = vocesEs.find(v => v.name && v.name.includes(pref));
+        if (encontrada) return encontrada;
+      }
+      return vocesEs.find(v => v.lang === 'es-ES' || v.lang === 'es-CL' || v.lang === 'es-MX') || vocesEs[0];
+    }
+
+    function prepararTextoParaVoz(textoHtml) {
+      if (!textoHtml) return '';
+      let text = textoHtml;
+
+      text = text.replace(/<br\s*\/?>/gi, '. ');
+      text = text.replace(/<\/p>/gi, '. ');
+      text = text.replace(/<[^>]*>/g, '');
+
+      text = text.replace(/2⁶⁴\s*[−|-]\s*1/g, 'dos elevado a 64 menos uno');
+      text = text.replace(/2⁶⁴/g, 'dos elevado a 64');
+      text = text.replace(/18\.446\.744\.073\.709\.551\.615/g, 'dieciocho trillones cuatrocientos cuarenta y seis mil setecientos cuarenta y cuatro billones setenta y tres mil setecientos nueve millones quinientos cincuenta y un mil seiscientos quince');
+      text = text.replace(/8×8/g, 'ocho por ocho');
+      text = text.replace(/8x8/g, 'ocho por ocho');
+
+      text = text.replace(/1\.e4 d5/g, 'uno peón e cuatro, respuesta d cinco');
+      text = text.replace(/1\.f3 e5 2\.g4 Qh4#/g, 'uno f tres e cinco, dos g cuatro dama h cuatro jaque mate');
+      text = text.replace(/O-O-O/g, 'enroque largo');
+      text = text.replace(/O-O/g, 'enroque corto');
+
+      text = text.replace(/•/g, '. ');
+      text = text.replace(/\s+-\s+/g, ', ');
+      text = text.replace(/\.+/g, '.');
+      text = text.replace(/\s+/g, ' ').trim();
+
+      return text;
+    }
+
+    function reproducirVoz(texto) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const limpio = prepararTextoParaVoz(texto);
+      const u = new SpeechSynthesisUtterance(limpio);
+      const voz = obtenerMejorVozEspanol();
+      if (voz) {
+        u.voice = voz;
+        u.lang = voz.lang;
+      } else {
+        u.lang = 'es-ES';
+      }
+      u.rate = 0.9;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
     }
 
     function renderInfoClase() {
       const c = clasesActivas()[claseActualIdx];
+      const modEl = document.getElementById('moduloClase');
+      if (modEl) modEl.textContent = obtenerModuloDeClase(c.id);
       document.getElementById('tituloClase').textContent = c.titulo;
       const badge = document.getElementById('badgeNivelClase');
       badge.textContent = c.nivel;
@@ -2215,17 +2456,61 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
 
     // Speech Synthesis
     document.getElementById('btnAudioClase').addEventListener('click', () => {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const c = clasesActivas()[claseActualIdx];
-        const texto = `${c.titulo}. ${c.descripcion.replace(/•/g, '')}`;
-        const u = new SpeechSynthesisUtterance(texto);
-        u.lang = 'es-ES'; u.rate = 0.95;
-        window.speechSynthesis.speak(u);
-      }
+      const c = clasesActivas()[claseActualIdx];
+      reproducirVoz(`${c.titulo}. ${c.descripcion}`);
     });
 
-    document.getElementById('btnClaseAnterior').addEventListener('click', () => {
+    function actualizarBotonesNav() {
+      const arr = clasesActivas();
+      const cActual = arr[claseActualIdx];
+      if (!cActual) return;
+      const modActual = obtenerModuloDeClase(cActual.id);
+      const nivelIdx = NIVELES_ORDEN.indexOf(NIVEL_ACTUAL);
+
+      let textoSig = 'Clase siguiente ▶';
+      let textoAnt = '◀ Clase anterior';
+
+      // Evaluar siguiente
+      if (claseActualIdx < arr.length - 1) {
+        const cSig = arr[claseActualIdx + 1];
+        const modSig = obtenerModuloDeClase(cSig.id);
+        if (modSig !== modActual) {
+          textoSig = 'Módulo siguiente ▶';
+        } else {
+          textoSig = 'Clase siguiente ▶';
+        }
+      } else if (nivelIdx < NIVELES_ORDEN.length - 1) {
+        textoSig = 'Módulo siguiente ▶';
+      } else {
+        textoSig = '🏆 Finalizar Curso';
+      }
+
+      // Evaluar anterior
+      if (claseActualIdx > 0) {
+        const cAnt = arr[claseActualIdx - 1];
+        const modAnt = obtenerModuloDeClase(cAnt.id);
+        if (modAnt !== modActual) {
+          textoAnt = '◀ Módulo anterior';
+        } else {
+          textoAnt = '◀ Clase anterior';
+        }
+      } else if (nivelIdx > 0) {
+        textoAnt = '◀ Módulo anterior';
+      } else {
+        textoAnt = '◀ Clase anterior';
+      }
+
+      const btnsSig = [document.getElementById('btnClaseSiguiente'), document.getElementById('btnClaseSiguientePres')].filter(Boolean);
+      const btnsAnt = [document.getElementById('btnClaseAnterior'), document.getElementById('btnClaseAnteriorPres')].filter(Boolean);
+
+      btnsSig.forEach(b => { b.textContent = textoSig; });
+      btnsAnt.forEach(b => {
+        b.textContent = textoAnt;
+        b.style.opacity = (claseActualIdx === 0 && nivelIdx === 0) ? '0.4' : '1';
+      });
+    }
+
+    function ejecutarClaseAnterior() {
       if (claseActualIdx > 0) {
         cargarClase(claseActualIdx - 1);
         return;
@@ -2235,9 +2520,9 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
         const nivelAnterior = NIVELES_ORDEN[nivelIdx - 1];
         cambiarNivel(nivelAnterior, CLASES_POR_NIVEL[nivelAnterior].length - 1);
       }
-    });
+    }
 
-    document.getElementById('btnClaseSiguiente').addEventListener('click', () => {
+    function ejecutarClaseSiguiente() {
       const arr = clasesActivas();
       if (claseActualIdx < arr.length - 1) {
         cargarClase(claseActualIdx + 1);
@@ -2249,14 +2534,43 @@ Ruta de crecimiento sugerida: Londres → Colle-Zukertort → Gambito de Dama. C
       } else {
         window.location.href = 'index.html';
       }
-    });
+    }
+
+    document.getElementById('btnClaseAnterior').addEventListener('click', ejecutarClaseAnterior);
+    document.getElementById('btnClaseSiguiente').addEventListener('click', ejecutarClaseSiguiente);
 
     document.querySelectorAll('.btn-nivel').forEach(btn => {
       btn.addEventListener('click', () => {
-        if (btn.dataset.nivel === NIVEL_ACTUAL) return;
-        cambiarNivel(btn.dataset.nivel);
+        const nivel = btn.getAttribute('data-nivel');
+        if (nivel === NIVEL_ACTUAL) return;
+        cambiarNivel(nivel);
       });
     });
+
+    // --- Toggle Colapso Sidebar Temario ---
+    const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+    const sidebarCurso = document.getElementById('sidebarCurso');
+    if (btnToggleSidebar && sidebarCurso) {
+      btnToggleSidebar.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isColapsado = sidebarCurso.classList.toggle('colapsado');
+        if (isColapsado) {
+          btnToggleSidebar.textContent = '▶';
+          btnToggleSidebar.title = 'Mostrar Temario del Curso';
+        } else {
+          btnToggleSidebar.textContent = '◀ Colapsar Temario';
+          btnToggleSidebar.title = 'Colapsar / Ocultar Temario';
+        }
+      });
+
+      sidebarCurso.addEventListener('click', (e) => {
+        if (sidebarCurso.classList.contains('colapsado') && e.target !== btnToggleSidebar) {
+          sidebarCurso.classList.remove('colapsado');
+          btnToggleSidebar.textContent = '◀ Colapsar Temario';
+          btnToggleSidebar.title = 'Colapsar / Ocultar Temario';
+        }
+      });
+    }
 
     // Iniciar en Principiante, Clase 1
     document.body.className = `tema-${NIVEL_ACTUAL}`;
