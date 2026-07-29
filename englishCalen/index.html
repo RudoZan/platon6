@@ -1084,6 +1084,57 @@ function renderAlreadyKnow(act, showQLabel, showALabel, hideQLabel, hideALabel) 
             }
         };
 
+        const makeAnswerVariantBtn = (ans) => {
+            const b = document.createElement('button');
+            b.className = 'btn btn-bot';
+            b.textContent = ans.label;
+            b.dataset.idx = i;
+            b.dataset.state = 'show';
+            b.dataset.type = 'w';
+            b.dataset.label = ans.label;
+
+            b.onclick = () => {
+                if (b.dataset.state === 'show') {
+                    if (shownQuestion !== null && shownQuestion !== i) {
+                        send('clear-middle', '');
+                        resetAllBtns('q', showQLabel);
+                        shownQuestion = null;
+                    }
+                    if (shownTrans !== null) {
+                        resetAllBtns('t', '¿Cómo diría...?');
+                        shownTrans = null;
+                    }
+                    if (flagMode) {
+                        if (shownFlag !== null && shownFlag !== i) {
+                            send('side-image', '', null);
+                            resetAllBtns('f', 'Show Flag');
+                            shownFlag = null;
+                        }
+                    } else {
+                        if (item.sideImg) { send('side-image', '', item.sideImg); }
+                        else { send('side-emoji', item.icon || ''); }
+                    }
+                    send('bottom', ans.text, null, bigText);
+                    resetAllBtns('w', showALabel);
+                    shownWord = i;
+                    b.textContent = 'Hide ' + ans.label;
+                    b.className = 'btn btn-hide';
+                    b.dataset.state = 'hide';
+                } else {
+                    send('clear-bottom', '');
+                    if (!flagMode && !act.keepIcon) {
+                        send('side-image', '', null);
+                        send('side-emoji', '');
+                    }
+                    shownWord = null;
+                    b.textContent = ans.label;
+                    b.className = 'btn btn-bot';
+                    b.dataset.state = 'show';
+                }
+            };
+            return b;
+        };
+
         row.appendChild(num);
         row.appendChild(label);
         row.appendChild(btnQ);
@@ -1170,7 +1221,11 @@ function renderAlreadyKnow(act, showQLabel, showALabel, hideQLabel, hideALabel) 
             row.appendChild(btnHi);
         }
 
-        row.appendChild(btnW);
+        if (act.multiAnswer && item.answers) {
+            item.answers.forEach(ans => row.appendChild(makeAnswerVariantBtn(ans)));
+        } else {
+            row.appendChild(btnW);
+        }
 
         if (flagMode) {
             const btnF = document.createElement('button');
@@ -1212,7 +1267,7 @@ function resetAllBtns(type, showLabel) {
     container.querySelectorAll('.item-row').forEach(row => {
         row.querySelectorAll('button').forEach(btn => {
             if (btn.dataset.state !== undefined && btn.dataset.type === type) {
-                btn.textContent = showLabel;
+                btn.textContent = btn.dataset.label || showLabel;
                 if (type === 'q') {
                     btn.className = 'btn btn-mid';
                 } else if (type === 'w') {

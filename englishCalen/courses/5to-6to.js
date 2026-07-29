@@ -201,11 +201,11 @@ COURSES['5to-6to'] = {
         type: "same-word",
         suggestion: PENDING_SUGGESTION,
         items: [
-            { es: "Dulces", us: "candy", uk: "sweets", au: "lollies", icon: "🍬", img: "dibujos/vocabulario/dulces.png" },
-            { es: "Zapatillas", us: "sneakers", uk: "trainers", au: "runners", icon: "👟", img: "dibujos/vocabulario/zapatillas.png" },
-            { es: "Papas fritas", us: "French fries", uk: "chips", au: "hot chips", icon: "🍟", img: "dibujos/vocabulario/papas_fritas.png" },
-            { es: "Ascensor", us: "elevator", uk: "lift", au: "lift", icon: "🛗", img: "dibujos/vocabulario/ascensor.png" },
-            { es: "Semáforo", us: "traffic lights", uk: "traffic lights", au: "robots (South Africa)", icon: "🚦", img: "dibujos/vocabulario/semaforo.png" },
+            { es: "Dulces", us: "candy", uk: "sweets", au: "lollies", icon: "🍬", img: "dibujos/vocabulario/dulces.webp" },
+            { es: "Zapatillas", us: "sneakers", uk: "trainers", au: "runners", icon: "👟", img: "dibujos/vocabulario/zapatillas.webp" },
+            { es: "Papas fritas", us: "French fries", uk: "chips", au: "hot chips", icon: "🍟", img: "dibujos/vocabulario/papas_fritas.webp" },
+            { es: "Ascensor", us: "elevator", uk: "lift", au: "lift", icon: "🛗", img: "dibujos/vocabulario/ascensor.webp" },
+            { es: "Semáforo", us: "traffic lights", uk: "traffic lights", au: "robots (South Africa)", icon: "🚦", img: "dibujos/vocabulario/semaforo.webp" },
         ]
     },
     {
