@@ -467,6 +467,14 @@ h1 {
   flex-shrink: 0;
 }
 
+/* Texto breve de instrucción sobre la cinta */
+.cinta-instrucciones {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #a0aec0;
+  margin-top: 12px;
+}
+
 /* Cinta Transportadora Inferior */
 .cinta-seccion {
   background: var(--color-cinta);
