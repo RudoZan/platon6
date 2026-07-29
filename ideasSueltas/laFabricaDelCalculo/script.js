@@ -1,4 +1,4 @@
-// sitio-web/pruebas/fabricaDeDerivadas/script.js
+// sitio-web/ideasSueltas/laFabricaDelCalculo/script.js
 
 // Banco de Datos por Tipo de Fábrica y Nivel
 const BANCOS = {
