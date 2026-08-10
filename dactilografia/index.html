@@ -241,17 +241,20 @@
     transition: background-color 0.3s ease, border-color 0.3s ease;
   }
 
-  /* Foco de Entrada Oculto */
+  /* Foco de Entrada Oculto pero Receptor */
   #typingInput {
     position: absolute;
-    opacity: 0;
-    pointer-events: none;
+    opacity: 0.01;
+    width: 1px;
+    height: 1px;
+    top: 0; left: 0;
+    z-index: 1;
   }
 
   .focus-warning {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.92);
     border-radius: 23px;
     display: flex;
     flex-direction: column;
@@ -268,40 +271,146 @@
     transition: opacity 0.25s ease;
   }
   body.dark-mode .focus-warning {
-    background: rgba(15, 23, 42, 0.9);
+    background: rgba(15, 23, 42, 0.92);
   }
   .game-container:not(.focused) .focus-warning {
     opacity: 1;
     pointer-events: auto;
   }
 
-  /* Caja de Texto estilo TypingClub */
+  /* Opciones de Encabezado y Modo Estricto */
+  .header-options {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .strict-mode-container {
+    display: flex;
+    align-items: center;
+    background: var(--bg-main);
+    padding: 8px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+  }
+
+  .switch-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+    user-select: none;
+  }
+  .switch-label input { display: none; }
+  .slider {
+    width: 40px;
+    height: 22px;
+    background-color: #cbd5e1;
+    border-radius: 99px;
+    position: relative;
+    transition: background-color 0.25s ease;
+  }
+  body.dark-mode .slider { background-color: #475569; }
+  .slider::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px;
+    top: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.25s ease;
+  }
+  .switch-label input:checked + .slider { background-color: var(--accent); }
+  .switch-label input:checked + .slider::before { transform: translateX(18px); }
+
+  /* Toast de Alerta de Modo Estricto */
+  .strict-toast {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: #dc2626;
+    color: #ffffff;
+    padding: 8px 20px;
+    border-radius: 99px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 20;
+  }
+  .strict-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Caja de Texto Estilo Courier New (50 letras x 4 líneas = 200 car. sin saltos) */
   .text-display-box {
     background: var(--bg-main);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    padding: 32px;
+    padding: 24px 30px;
     position: relative;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     transition: background-color 0.3s ease, border-color 0.3s ease;
   }
 
   .text-display {
-    font-family: 'Space Mono', monospace;
-    font-size: 2.2rem;
-    letter-spacing: 0.08em;
-    line-height: 3.4rem;
-    word-break: break-word;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     user-select: none;
-    text-align: center;
-    max-height: 200px;
-    overflow-y: auto;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .text-line {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    white-space: nowrap;
+  }
+
+  .line-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    width: 20px;
+    text-align: right;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .line-chars {
+    display: flex;
+    flex-wrap: nowrap;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.32rem; /* Letras agrandadas y muy legibles */
+    font-weight: 700;
+    line-height: 2.1rem;
   }
 
   .char {
+    width: 1ch;
+    text-align: center;
+    flex-shrink: 0;
+    white-space: pre;
     position: relative;
     color: var(--text-pending);
-    border-radius: 4px;
+    border-radius: 3px;
     transition: all 0.08s ease;
   }
 
@@ -323,9 +432,9 @@
     content: '';
     position: absolute;
     left: 0;
-    bottom: -4px;
+    bottom: -2px;
     width: 100%;
-    height: 4px;
+    height: 3px;
     background-color: var(--primary);
     box-shadow: 0 0 8px var(--primary);
     animation: cursorBlink 1s infinite;
@@ -590,7 +699,8 @@
     main { padding: 0 10px 20px; }
     .course-header { flex-direction: column; align-items: stretch; padding: 16px; }
     .level-dropdown { min-width: 100%; }
-    .text-display { font-size: 1.5rem; line-height: 2.4rem; }
+    .line-chars { font-size: 0.9rem; line-height: 1.5rem; }
+    .text-display-box { padding: 16px 12px; }
     .key { height: 38px; min-width: 32px; font-size: 0.8rem; }
     .key.backspace { width: 50px; }
     .key.tab { width: 42px; }
@@ -598,7 +708,7 @@
     .key.enter { width: 60px; }
     .key.shift { width: 70px; }
     .key.space { width: 160px; }
-    .hands-section { display: none; } /* Ocultar manos en pantallas móviles por espacio */
+    .hands-section { display: none; }
   }
 </style>
 </head>
@@ -615,32 +725,55 @@
   </header>
 
   <main>
-    <!-- Encabezado del Curso (Título y Selector de Nivel) -->
+    <!-- Encabezado del Curso (Título, Modo Estricto y Selector de Nivel) -->
     <div class="course-header">
       <div class="course-title">
         <h1>Curso de Dactilografía Interactiva</h1>
-        <p class="course-subtitle">Aprende a escribir al tacto de forma progresiva y visual</p>
+        <p class="course-subtitle">Aprende a escribir al tacto — 200 caracteres (4 líneas de 50 letras)</p>
       </div>
-      <div class="level-selector-container">
-        <label for="levelSelect" class="level-label">Nivel:</label>
-        <div class="select-wrapper">
-          <select id="levelSelect" class="level-dropdown">
-            <option value="1">Nivel 1: Las Teclas Guía (F, J, Espacio)</option>
-            <option value="2">Nivel 2: Fila Central Básica (D, K, F, J)</option>
-            <option value="3">Nivel 3: Fila Central Completa (A, S, D, F, J, K, L, Ñ)</option>
-            <option value="4">Nivel 4: Fila Superior Básica (E, I, R, U + Central)</option>
-            <option value="5">Nivel 5: Palabras y Citas (Frases Completas)</option>
-          </select>
-          <span class="select-arrow">▼</span>
+      <div class="header-options">
+        <div class="strict-mode-container" title="Si cometes 5 errores en una misma línea de 50 letras, serás devuelto al inicio de esa línea">
+          <label class="switch-label">
+            <input type="checkbox" id="strictModeToggle">
+            <span class="slider"></span>
+            <span class="switch-text">🎯 Modo Estricto (5º error reinicia línea)</span>
+          </label>
+        </div>
+        <div class="level-selector-container">
+          <label for="levelSelect" class="level-label">Nivel:</label>
+          <div class="select-wrapper">
+            <select id="levelSelect" class="level-dropdown">
+              <option value="1">Nivel 1: Teclas Guía Básicas (F, J)</option>
+              <option value="2">Nivel 2: Fila Central Corta (F, D, J, K)</option>
+              <option value="3">Nivel 3: Fila Central Intermedia (S, D, F, J, K, L)</option>
+              <option value="4">Nivel 4: Fila Central Externa (A, S, D, F, J, K, L, Ñ)</option>
+              <option value="5">Nivel 5: Extensión de Índices (F, G, H, J)</option>
+              <option value="6">Nivel 6: Zona Central Ampliada (D, F, G, H, J, K)</option>
+              <option value="7">Nivel 7: Fila Central Extendida (S, D, F, G, H, J, K, L)</option>
+              <option value="8">Nivel 8: Fila Central COMPLETA (A, S, D, F, G, H, J, K, L, Ñ)</option>
+              <option value="9">Nivel 9: Fila Superior — Vocales (E, I + Fila Central)</option>
+              <option value="10">Nivel 10: Fila Superior — Índices (R, U + E, I + Fila Central)</option>
+              <option value="11">Nivel 11: Fila Superior — Anulares y Meñiques (W, O, Q, P)</option>
+              <option value="12">Nivel 12: Fila Superior COMPLETA (QWERTYUIOP)</option>
+              <option value="13">Nivel 13: Fila Inferior — Índices (V, B, N, M)</option>
+              <option value="14">Nivel 14: Fila Inferior — Medio y Anular (C, X, Coma, Punto)</option>
+              <option value="15">Nivel 15: Fila Inferior COMPLETA (ZXCVBNM)</option>
+              <option value="16">Nivel 16: Todo el Abecedario Integrado (A-Z, Ñ)</option>
+              <option value="17">Nivel 17: Frases Cortas y Fluidez</option>
+              <option value="18">Nivel 18: Citas Filosóficas y Sabiduría (Platón y Clásicos)</option>
+            </select>
+            <span class="select-arrow">▼</span>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Caja del Juego principal -->
     <div class="game-container" id="gameContainer">
+      <div class="strict-toast" id="strictToast">⚠️ 5 errores en la línea: ¡Reiniciando línea!</div>
       <div class="focus-warning" id="focusWarning">
-        <span>⌨️ Haz clic aquí para enfocar y empezar a escribir</span>
-        <small style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">(Asegúrate de colocar tus dedos en la posición de reposo: ASDF y JKLÑ)</small>
+        <span>⌨️ Presiona ENTER o haz clic aquí para empezar a escribir</span>
+        <small style="font-size: 0.85rem; color: var(--text-muted); font-weight: normal;">(Coloca tus dedos en la posición de reposo: ASDF y JKLÑ)</small>
       </div>
       <input type="text" id="typingInput" autocomplete="off" autofocus>
       
@@ -658,9 +791,17 @@
           <div class="stat-val" id="statErrors">0</div>
           <div class="stat-lbl">Errores</div>
         </div>
+        <div class="stat-item">
+          <div class="stat-val" id="statTime">00:00</div>
+          <div class="stat-lbl">Tiempo (Meta: <span id="statTargetTime">60s</span>)</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" id="statDelta">--</div>
+          <div class="stat-lbl">Vs Meta</div>
+        </div>
       </div>
 
-      <!-- Pantalla de Texto -->
+      <!-- Pantalla de Texto en 4 líneas fijas de 50 caracteres (Total = 200) -->
       <div class="text-display-box">
         <div class="text-display" id="textDisplay"></div>
       </div>
@@ -739,24 +880,24 @@
       </div>
 
       <!-- Manos Virtuales SVG -->
-      <div class="hands-section">
+      <div class="hands-section" id="handsSection">
         <!-- Mano Izquierda -->
         <svg class="hand-svg" viewBox="0 0 120 120">
           <g id="left-hand">
-            <path d="M20,100 C20,70 30,60 50,60 C70,60 80,70 80,100 Z" class="palm-path" />
+            <path d="M18,105 C18,65 28,55 50,55 C72,55 84,68 84,105 Z" class="palm-path" />
             <rect id="finger-L5" x="20" y="32" width="9" height="35" rx="4.5" class="finger-rect pinky-l" />
             <rect id="finger-L4" x="32" y="15" width="9" height="48" rx="4.5" class="finger-rect ring-l" />
             <rect id="finger-L3" x="44" y="6" width="9" height="56" rx="4.5" class="finger-rect middle-l" />
             <rect id="finger-L2" x="56" y="15" width="9" height="48" rx="4.5" class="finger-rect index-l" />
-            <rect id="finger-L1" x="73" y="46" width="9" height="32" rx="4.5" transform="rotate(-38 73 46)" class="finger-rect thumb" />
+            <rect id="finger-L1" x="66" y="38" width="9" height="34" rx="4.5" transform="rotate(-26 66 38)" class="finger-rect thumb" />
           </g>
         </svg>
 
         <!-- Mano Derecha -->
         <svg class="hand-svg" viewBox="0 0 120 120">
           <g id="right-hand">
-            <path d="M100,100 C100,70 90,60 70,60 C50,60 40,70 40,100 Z" class="palm-path" />
-            <rect id="finger-R1" x="38" y="46" width="9" height="32" rx="4.5" transform="rotate(38 47 46)" class="finger-rect thumb" />
+            <path d="M102,105 C102,65 92,55 70,55 C48,55 36,68 36,105 Z" class="palm-path" />
+            <rect id="finger-R1" x="45" y="38" width="9" height="34" rx="4.5" transform="rotate(26 45 38)" class="finger-rect thumb" />
             <rect id="finger-R2" x="55" y="15" width="9" height="48" rx="4.5" class="finger-rect index-r" />
             <rect id="finger-R3" x="67" y="6" width="9" height="56" rx="4.5" class="finger-rect middle-r" />
             <rect id="finger-R4" x="79" y="15" width="9" height="48" rx="4.5" class="finger-rect ring-r" />
@@ -764,39 +905,41 @@
           </g>
         </svg>
       </div>
+
+      <!-- Panel de Resultados Inline (sin tapar el texto completado) -->
+      <div class="results-panel" id="resultsPanel">
+        <div class="results-header">
+          <h2 class="results-title" id="resultsTitle">¡Nivel Completado!</h2>
+          <p class="results-quote" id="resultsQuote"></p>
+        </div>
+        
+        <div class="results-grid">
+          <div class="result-item">
+            <div class="result-label">Velocidad (WPM)</div>
+            <div class="result-value accent" id="resultWpm">0</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Precisión</div>
+            <div class="result-value correct" id="resultAccuracy">0%</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Tiempo Real</div>
+            <div class="result-value" id="resultTime">0s</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Evaluación Meta</div>
+            <div class="result-value" id="resultTimeEval">--</div>
+          </div>
+        </div>
+
+        <div id="resultRecordBadge" class="record-badge"></div>
+        
+        <button class="btn-modal" id="btnNextLevel">
+          <span>🎮</span> Siguiente Nivel (Presiona ENTER)
+        </button>
+      </div>
     </div>
   </main>
-
-  <!-- Modal de Resultados -->
-  <div class="results-modal" id="resultsModal">
-    <div class="results-card">
-      <div class="results-title" id="resultsTitle">¡Muy Bien!</div>
-      <div class="results-quote" id="resultsQuote"></div>
-      
-      <div class="results-grid">
-        <div class="result-item">
-          <div class="result-label">Palabras por Minuto</div>
-          <div class="result-value accent" id="resultWpm">0</div>
-        </div>
-        <div class="result-item">
-          <div class="result-label">Precisión</div>
-          <div class="result-value correct" id="resultAccuracy">0%</div>
-        </div>
-        <div class="result-item">
-          <div class="result-label">Total Aciertos</div>
-          <div class="result-value" id="resultHits">0</div>
-        </div>
-        <div class="result-item">
-          <div class="result-label">Total Errores</div>
-          <div class="result-value" id="resultErrors">0</div>
-        </div>
-      </div>
-      
-      <button class="btn-modal" id="btnNextLevel">
-        <span>🎮</span> Siguiente Nivel
-      </button>
-    </div>
-  </div>
 
   <footer>
     - Desarrollado por Astutosoft 2026 -
@@ -963,52 +1106,192 @@
     // Datos del Nivel al estilo TypingClub
     const LEVELS = {
       1: {
-        name: "Las Teclas Guía",
+        name: "Teclas Guía Básicas",
         keys: ["f", "j", " "],
         texts: [
-          "f f j j ff jj fj jf ff jj ff jf jf ff jj",
-          "f j f j ff jj f f j j fj jf f j f j ff jj",
-          "f f f j j j fj fj jf jf f f j j ff jj fj jf"
+          "f j ff jj fj jf fjfj jfjf ffjj jjff fjfjfj jffjff fjjfjj f j ff jj fj jf fjfj jfjf ffjj jjff fjfjfj jffjff fjjfjj fj jf ff jj fjfj jfjf",
+          "fj jf f j ff jj fjfj jfjf fjjfjj jffjff fjfjfj jfjfjf ff jj f j fj jf fjfj jfjf ffjj jjff fjfjfj jffjff fj jf ff jj fjfj jfjf fjjfjj jffjff",
+          "f f j j ff jj fj jf fjfj jfjf ffjj jjff fjfjfj jffjff fjjfjj fj jf ff jj fjfj jfjf ffjj jjff fjfjfj jffjff fj jf f j ff jj fjfj jfjf"
         ]
       },
       2: {
-        name: "Fila Central Básica",
+        name: "Fila Central Corta",
         keys: ["d", "k", "f", "j", " "],
         texts: [
-          "d d k k dk kd dd kk df jk fd kj dk fj jf dk",
-          "f j d k fd jk kd fj dk jd kf dj fk jd kf dk",
-          "f d k j fd kj dk fj jd kf df jk kd fj dd kk"
+          "f d j k fd kj dk fj fjdk kdjf dfjk jkdf fdjkfd kdjffd f d j k fd kj dk fj fjdk kdjf dfjk jkdf fdjkfd kdjffd fd kj dk fj fjdk kdjf dfjk jkdf",
+          "df jk kd fj fjdk kdjf dkfj kfdj dfjkdf jkdfjd fd kj dk fj fjdk kdjf dfjk jkdf fdjkfd kdjffd dfjkdf jkdfjd f d j k fd kj dk fj fjdk kdjf",
+          "fd kj dk fj fjdk kdjf dfjk jkdf fdjkfd kdjffd f d j k fd kj dk fj fjdk kdjf dfjk jkdf fdjkfd kdjffd dfjk jkdf fdjkfd kdjffd f d j k"
         ]
       },
       3: {
-        name: "Fila Central Completa",
-        keys: ["a", "s", "d", "f", "j", "k", "l", "ñ", " "],
+        name: "Fila Central Intermedia",
+        keys: ["s", "d", "f", "j", "k", "l", " "],
         texts: [
-          "a s d f j k l ñ asdf jklñ salsa laña alaska falda salada",
-          "las faldas de alaska son de salsa alada y salada",
-          "la salsa alada es salada y la falda de lino de la niña"
+          "s d f j k l sd kl df jk sdf jkl sdfjkl jklsdf lsdfjk sdfjkl jklsdf s d f j k l sd kl df jk sdfjkl jklsdf lsdfjk sdfjkl jklsdf sd kl df",
+          "sdf jkl lsdf lsjk dflk fjsl sdfjkl jklsdf lsdfjk sdfjkl jklsdf s d f j k l sd kl df jk sdfjkl jklsdf lsdfjk sdfjkl jklsdf sdf jkl lsdf",
+          "lsdfjk sdfjkl jklsdf s d f j k l sd kl df jk sdfjkl jklsdf lsdfjk sdfjkl jklsdf sd kl df jk sdfjkl jklsdf lsdfjk sdfjkl jklsdf s d f"
         ]
       },
       4: {
-        name: "Fila Superior Básica",
-        keys: ["e", "i", "r", "u", "a", "s", "d", "f", "j", "k", "l", "ñ", " "],
+        name: "Fila Central Externa",
+        keys: ["a", "s", "d", "f", "j", "k", "l", "ñ", " "],
         texts: [
-          "e i r u er iu re ur de ki fe ju se li se re el ir un",
-          "quiero poder ver perito equipo de rio y de ruiseñor",
-          "el ruiseñor quiere ver el equipo de lino en la orilla"
+          "a s d f j k l ñ as kl df jñ asdf jklñ asdfjklñ jklñasdf asdfjklñ jklñasdf asdf jklñ salsa laña alaska falda salada asdfjklñ jklñasdf asdf jklñ",
+          "asdf jklñ laña falda alaska salada salsa alada asdfjklñ jklñasdf faldalina las faldas de alaska son de salsa alada y salada asdfjklñ jklñasdf",
+          "la salsa alada es salada y la falda de lino de la niña de alaska asdf jklñ asdfjklñ jklñasdf asdfjklñ jklñasdf asdf jklñ salsa laña alaska"
         ]
       },
       5: {
-        name: "Palabras y Citas",
+        name: "Extensión de Índices",
+        keys: ["f", "g", "h", "j", " "],
+        texts: [
+          "f g h j fg hj gh jf fghj hjfg fghjhj hjfghj f g h j fg hj gh jf fghj hjfg fghjhj hjfghj f g h j fg hj gh jf fghj hjfg fghjhj hjfghj f g h j",
+          "fh gj gf hj fghj hjfg ghjf jfgh fghjhj hjfghj f g h j fg hj gh jf fghj hjfg fghjhj hjfghj f g h j fg hj gh jf fghj hjfg fghjhj hjfghj",
+          "fghj hjfg ghjf jfgh fghjhj hjfghj f g h j fg hj gh jf fghj hjfg fghjhj hjfghj f g h j fg hj gh jf fghj hjfg fghjhj hjfghj f g h j fg hj"
+        ]
+      },
+      6: {
+        name: "Zona Central Ampliada",
+        keys: ["d", "f", "g", "h", "j", "k", " "],
+        texts: [
+          "d f g h j k df hk gh fj dfghjk jkghfd dfghjk jkghfd d f g h j k df hk gh fj dfghjk jkghfd dfghjk jkghfd d f g h j k df hk gh fj dfghjk jkghfd",
+          "dfgh jkgh ghdf fkjd dfghjk jkghfd dfghjk jkghfd d f g h j k df hk gh fj dfghjk jkghfd dfghjk jkghfd dfgh jkgh ghdf fkjd dfghjk jkghfd",
+          "dfghjk jkghfd d f g h j k df hk gh fj dfghjk jkghfd dfghjk jkghfd dfgh jkgh ghdf fkjd dfghjk jkghfd dfghjk jkghfd d f g h j k df hk gh"
+        ]
+      },
+      7: {
+        name: "Fila Central Extendida",
+        keys: ["s", "d", "f", "g", "h", "j", "k", "l", " "],
+        texts: [
+          "s d f g h j k l sd kl gh fj sdfg hjkl sdfghjkl hjklsdfg s d f g h j k l sd kl gh fj sdfghjkl hjklsdfg s d f g h j k l sd kl gh fj sdfghjkl",
+          "sdfg hjkl ghsd fklj sdfghjkl hjklsdfg sdfghjkl hjklsdfg s d f g h j k l sd kl gh fj sdfghjkl hjklsdfg sdfg hjkl ghsd fklj sdfghjkl hjklsdfg",
+          "sdfghjkl hjklsdfg s d f g h j k l sd kl gh fj sdfghjkl hjklsdfg sdfg hjkl ghsd fklj sdfghjkl hjklsdfg sdfghjkl hjklsdfg s d f g h j k l"
+        ]
+      },
+      8: {
+        name: "Fila Central COMPLETA",
+        keys: ["a", "s", "d", "f", "g", "h", "j", "k", "l", "ñ", " "],
+        texts: [
+          "a s d f g h j k l ñ asdf ghjklñ asdfghjklñ jklñghasdf haga halaga falda gafa alhaja alfajor asdfghjklñ jklñghasdf asdf ghjklñ asdfghjklñ",
+          "haga la falda alagada la alhaja de alaska halaga la gafa de seda la alfajor de la gala halaga a la niña de alaska con salsa salada y alada",
+          "asdfghjklñ jklñghasdf haga la falda alagada la alhaja de alaska halaga la gafa de seda la alfajor de la gala halaga a la niña de alaska"
+        ]
+      },
+      9: {
+        name: "Fila Superior — Vocales (E, I)",
+        keys: ["e", "i", "a", "s", "d", "f", "g", "h", "j", "k", "l", "ñ", " "],
+        texts: [
+          "e i er iu de ki fe ju seide kide el ir ese esa fije pide dijo fila e i er iu de ki fe ju seide kide el ir ese esa fije pide dijo fila",
+          "el jefe pide esa fila de seda e i er iu el jefe pide fijar la fila de seda en el estante de la isla de lino fino y verde con elegancia",
+          "fije la fila de seda en la mesa de la isla el jefe pide ver el lino fino de la silla de la niña e i er iu seide kide el ir ese esa fije"
+        ]
+      },
+      10: {
+        name: "Fila Superior — Índices (R, U)",
+        keys: ["r", "u", "e", "i", "a", "s", "d", "f", "g", "h", "j", "k", "l", "ñ", " "],
+        texts: [
+          "r u ru ur de ju fe ru rude kuru er ir ur ru de ruiseñor rio rueda duda r u ru ur de ju fe ru rude kuru er ir ur ru de ruiseñor rio rueda",
+          "el ruiseñor ve el rio y la rueda rueda de prisa la jarra de agua esta llena de risa y salud r u ru ur de ju fe ru rude kuru er ir ur ru",
+          "rueda la rueda por el rio de la orilla el ruiseñor quiere ver la jugada de lino y de seda pura r u ru ur de ju fe ru rude kuru er ir ur ru"
+        ]
+      },
+      11: {
+        name: "Fila Superior — Anulares y Meñiques (W, O, Q, P)",
+        keys: ["w", "o", "q", "p", "r", "u", "e", "i", "a", "s", "d", "f", "g", "h", "j", "k", "l", "ñ", " "],
+        texts: [
+          "w o q p wo qp op qw po qu quipo queso pero polo poco equipo w o q p wo qp op qw po qu quipo queso pero polo poco equipo w o q p wo qp",
+          "el equipo de polo come queso y pan poco a poco el perro corre por el parque de la parroquia w o q p wo qp op qw po qu quipo queso pero",
+          "poco a poco el equipo de polo pide queso fresco y pan fino en el parque de la plaza verde w o q p wo qp op qw po qu quipo queso pero polo"
+        ]
+      },
+      12: {
+        name: "Fila Superior COMPLETA (QWERTYUIOP)",
+        keys: ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "ñ", " "],
+        texts: [
+          "q w e r t y u i o p qwertyuiop poiuytrewq equipo puerto tiro tipo tuyo q w e r t y u i o p qwertyuiop poiuytrewq equipo puerto tiro",
+          "el tiroteo en el puerto y el equipo de poetas requiere que todos dejen sus puestos a tiempo q w e r t y u i o p qwertyuiop poiuytrewq",
+          "equipo del puerto requiere escribir todo el repertorio de la poetisa en papel limpio y elegante q w e r t y u i o p qwertyuiop poiuytrewq"
+        ]
+      },
+      13: {
+        name: "Fila Inferior — Índices (V, B, N, M)",
+        keys: ["v", "b", "n", "m", "a", "s", "d", "f", "g", "h", "j", "k", "l", "ñ", " "],
+        texts: [
+          "v b n m vb nm bn mv bien buen vino vaso mano mina nave bienvenido v b n m vb nm bn mv bien buen vino vaso mano mina nave bienvenido",
+          "el buen vino en el vaso de la mesa la nave va por el mar buen viento para la mina de carbon v b n m vb nm bn mv bien buen vino vaso",
+          "bienvenido a la nave del mar el buen viento mueve las velas de la marina con gran firmeza v b n m vb nm bn mv bien buen vino vaso mano"
+        ]
+      },
+      14: {
+        name: "Fila Inferior — Medio y Anular (C, X, Coma, Punto)",
+        keys: ["c", "x", ",", ".", "v", "b", "n", "m", "a", "s", "d", "f", "g", "h", "j", "k", "l", "ñ", " "],
+        texts: [
+          "c x cx xc casa cosa exito fino, agua. fino, agua. examen cerca c x cx xc casa cosa exito fino, agua. fino, agua. examen cerca c x cx xc",
+          "la casa blanca de la colina tiene flores, agua fresca y pan. el examen de ciencias fue un exito total. c x cx xc casa cosa exito fino, agua.",
+          "examen de ciencias con exito, flores blancas cerca del camino de la casa. c x cx xc casa cosa exito fino, agua. fino, agua. examen cerca"
+        ]
+      },
+      15: {
+        name: "Fila Inferior COMPLETA (ZXCVBNM)",
+        keys: ["z", "x", "c", "v", "b", "n", "m", ",", ".", "a-z", "ñ", " "],
+        texts: [
+          "z x c v b n m zxcvbnm mnbvcxz zapato zorro azul taza luz paz voz z x c v b n m zxcvbnm mnbvcxz zapato zorro azul taza luz paz voz zxcvbnm",
+          "el zorro azul corre veloz por la manzana, buscando la paz y la luz del amanecer en la plaza. z x c v b n m zxcvbnm mnbvcxz zapato zorro",
+          "una taza de cafe en la mesa de madera con la luz azul del zorro veloz en la plaza de la paz. z x c v b n m zxcvbnm mnbvcxz zapato zorro"
+        ]
+      },
+      16: {
+        name: "Todo el Abecedario Integrado (A-Z, Ñ)",
         keys: ["a-z", "ñ", " "],
         texts: [
-          "El conocimiento empieza en el asombro dijo el sabio Socrates",
-          "La medida de un hombre es lo que hace con el poder segun Platon",
-          "La felicidad depende de nosotros mismos afirmo Aristoteles",
-          "La educacion es el encendido de una llama en la mente de las personas"
+          "a b c d e f g h i j k l m n ñ o p q r s t u v w x y z abecedario completo de dactilografia al tacto para dominar los diez dedos con agilidad",
+          "el veloz murcielago hindu comia feliz cardillo y escabeche la lechuza pirata volaba alto sobre la nieve de las montañas lejanas",
+          "un joven escribano especializado en quimica exploraba la bella zona volcanica con gran entusiasmo y precision en cada paso"
+        ]
+      },
+      17: {
+        name: "Frases Cortas y Fluidez",
+        keys: ["a-z", "ñ", " ", ",", "."],
+        texts: [
+          "escribir sin mirar el teclado aumenta tu velocidad y mejora la precision en cada pulsacion diaria de manera constante.",
+          "la practica constante desarrolla la memoria muscular en tus diez dedos de forma natural, eficiente y extremadamente fluida.",
+          "mantener la espalda recta y las muñecas relajadas previene la fatiga al digitar textos largos en cualquier tipo de trabajo."
+        ]
+      },
+      18: {
+        name: "Citas Filosóficas y Sabiduría",
+        keys: ["a-z", "ñ", " ", ",", "."],
+        texts: [
+          "El conocimiento empieza en el asombro y la busqueda constante de la verdad dijo el sabio Socrates en la antigua Grecia.",
+          "La medida de un hombre es lo que hace con el poder y el conocimiento segun afirmo el filosofo Platon.",
+          "La felicidad depende de nosotros mismos y del esfuerzo por cultivar la virtud segun enseno Aristoteles a sus alumnos.",
+          "La educacion es el encendido de una llama en la mente de las personas para iluminar su propio camino de vida."
         ]
       }
     };
+
+    // Metas estrictas de tiempo en segundos para 200 caracteres (40 palabras)
+    const TARGET_TIMES = {
+      1: 90,  // 26.6 WPM
+      2: 85,  // 28 WPM
+      3: 80,  // 30 WPM
+      4: 75,  // 32 WPM
+      5: 75,  // 32 WPM
+      6: 70,  // 34 WPM
+      7: 70,  // 34 WPM
+      8: 65,  // 37 WPM
+      9: 65,  // 37 WPM
+      10: 60, // 40 WPM
+      11: 60, // 40 WPM
+      12: 55, // 43.6 WPM
+      13: 55, // 43.6 WPM
+      14: 50, // 48 WPM
+      15: 50, // 48 WPM
+      16: 48, // 50 WPM
+      17: 45, // 53 WPM
+      18: 45  // 53 WPM
+    };
+
 
     // Mapeo detallado de Teclas a Dedos (L5 a R5)
     const KEY_TO_FINGER = {
@@ -1041,6 +1324,7 @@
 
     // Estado del juego
     let currentLevelNum = 1;
+    let preparedLines = [];
     let rawText = '';
     let chars = [];
     let currentIndex = 0;
@@ -1052,6 +1336,11 @@
     let errors = 0;
     let isErrorState = false;
 
+    // Seguimiento por líneas (4 líneas en total)
+    let lineErrorCounts = [0, 0, 0, 0];
+    let timerInterval = null;
+    let toastTimer = null;
+
     // Elementos DOM
     const textDisplay = document.getElementById('textDisplay');
     const typingInput = document.getElementById('typingInput');
@@ -1059,28 +1348,128 @@
     const focusWarning = document.getElementById('focusWarning');
     const audioToggle = document.getElementById('audioToggle');
     const themeToggle = document.getElementById('themeToggle');
+    const strictModeToggle = document.getElementById('strictModeToggle');
+    const strictToast = document.getElementById('strictToast');
+
     const statWpm = document.getElementById('statWpm');
     const statAccuracy = document.getElementById('statAccuracy');
     const statErrors = document.getElementById('statErrors');
+    const statTime = document.getElementById('statTime');
+    const statTargetTime = document.getElementById('statTargetTime');
+    const statDelta = document.getElementById('statDelta');
+
     const levelSelect = document.getElementById('levelSelect');
-    const resultsModal = document.getElementById('resultsModal');
+    const keyboardSection = document.getElementById('keyboardSection');
+    const handsSection = document.getElementById('handsSection');
+    const resultsPanel = document.getElementById('resultsPanel');
     const resultsTitle = document.getElementById('resultsTitle');
     const resultsQuote = document.getElementById('resultsQuote');
     const resultWpm = document.getElementById('resultWpm');
     const resultAccuracy = document.getElementById('resultAccuracy');
-    const resultHits = document.getElementById('resultHits');
-    const resultErrors = document.getElementById('resultErrors');
+    const resultTime = document.getElementById('resultTime');
+    const resultTimeEval = document.getElementById('resultTimeEval');
     const btnNextLevel = document.getElementById('btnNextLevel');
+
+    // Función para empaquetar 4 líneas de texto
+    // En Niveles 1-16 (Drills): Exactamente 50 letras por línea (comienza y termina en letra)
+    // En Niveles 17-18 (Frases/Citas): Palabras completas sin cortar palabras a la mitad
+    function prepare200CharText(textStr, levelNum) {
+      const words = textStr.trim().split(/\s+/).filter(w => w.length > 0);
+      if (words.length === 0) return Array(4).fill('f'.repeat(50));
+
+      let resultLines = [];
+      let wordIdx = 0;
+
+      // NIVELES 17 Y 18: Palabras completas sin partir palabras
+      if (levelNum >= 17) {
+        for (let l = 0; l < 4; l++) {
+          let line = "";
+          while (wordIdx < words.length || line.length < 35) {
+            let word = words[wordIdx % words.length];
+            if (line.length === 0) {
+              line = word;
+              wordIdx++;
+            } else if ((line + " " + word).length <= 50) {
+              line += " " + word;
+              wordIdx++;
+            } else {
+              break; // Pasa a la siguiente línea para mantener la palabra entera
+            }
+          }
+          resultLines.push(line);
+        }
+        return resultLines;
+      }
+
+      // NIVELES 1 A 16: Drills de letras (50 caracteres exactos por línea)
+      for (let l = 0; l < 4; l++) {
+        let line = "";
+        while (line.length < 50) {
+          let word = words[wordIdx % words.length];
+          wordIdx++;
+
+          if (line.length === 0) {
+            line = word;
+          } else {
+            let spaceLeft = 50 - line.length;
+            if (spaceLeft >= word.length + 1) {
+              line += " " + word;
+            } else if (spaceLeft === 1) {
+              line += word[0] || 'f';
+            } else {
+              let chunk = word.slice(0, spaceLeft - 1);
+              if (chunk.length > 0) {
+                line += " " + chunk;
+              } else {
+                line += (word[0] || 'f').repeat(spaceLeft);
+              }
+            }
+          }
+        }
+
+        if (line.length > 50) line = line.slice(0, 50);
+
+        if (line[0] === ' ') {
+          line = (words[0][0] || 'f') + line.slice(1);
+        }
+        if (line[49] === ' ') {
+          const replacementChar = words[0][0] || 'f';
+          line = line.slice(0, 49) + replacementChar;
+        }
+
+        resultLines.push(line);
+      }
+
+      return resultLines;
+    }
 
     function init() {
       loadLevel(currentLevelNum);
 
-      // Eventos
+      // Eventos de Enfoque
       gameContainer.addEventListener('click', focusInput);
+      focusWarning.addEventListener('click', (e) => {
+        e.stopPropagation();
+        focusInput();
+      });
+
       typingInput.addEventListener('focus', () => gameContainer.classList.add('focused'));
       typingInput.addEventListener('blur', () => gameContainer.classList.remove('focused'));
       typingInput.addEventListener('input', handleInput);
       typingInput.addEventListener('keydown', handleKeydown);
+      
+      // Permitir iniciar o avanzar con la tecla Enter de forma 100% fiable
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          if (resultsPanel && resultsPanel.style.display !== 'none') {
+            e.preventDefault();
+            btnNextLevel.click();
+          } else if (!gameContainer.classList.contains('focused') || document.activeElement !== typingInput) {
+            e.preventDefault();
+            focusInput();
+          }
+        }
+      });
       
       // Control de Audio
       audioToggle.addEventListener('click', () => {
@@ -1101,8 +1490,8 @@
       });
 
       btnNextLevel.addEventListener('click', () => {
-        resultsModal.classList.remove('show');
-        if (currentLevelNum < 5) {
+        resultsPanel.style.display = 'none';
+        if (currentLevelNum < 18) {
           currentLevelNum++;
           levelSelect.value = currentLevelNum;
         }
@@ -1114,14 +1503,26 @@
 
     function focusInput() {
       typingInput.focus();
-      initAudio(); // Garantizar activación de audio mediante el evento click del usuario
+      gameContainer.classList.add('focused');
+      initAudio();
+    }
+
+    function showToast(msg) {
+      strictToast.textContent = msg;
+      strictToast.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        strictToast.classList.remove('show');
+      }, 1800);
     }
 
     function loadLevel(levelNum) {
       const level = LEVELS[levelNum];
       const texts = level.texts;
-      // Seleccionar texto aleatorio de los del nivel
-      rawText = texts[Math.floor(Math.random() * texts.length)];
+      const rawSelected = texts[Math.floor(Math.random() * texts.length)];
+      
+      preparedLines = prepare200CharText(rawSelected, levelNum);
+      rawText = preparedLines.join('');
       
       resetSession();
       renderText();
@@ -1136,32 +1537,67 @@
       hits = 0;
       errors = 0;
       isErrorState = false;
+      lineErrorCounts = [0, 0, 0, 0];
+
+      if (timerInterval) clearInterval(timerInterval);
+
+      // Restaurar visibilidad de teclado y ocultar panel de resultados
+      keyboardSection.style.display = 'flex';
+      if (handsSection) handsSection.style.display = 'flex';
+      resultsPanel.style.display = 'none';
 
       statWpm.textContent = '0';
       statAccuracy.textContent = '100%';
       statErrors.textContent = '0';
+      statTime.textContent = '00:00';
+      statDelta.textContent = '--';
+      statDelta.style.color = 'var(--text-main)';
       typingInput.value = '';
       
+      const targetSec = TARGET_TIMES[currentLevelNum] || 60;
+      statTargetTime.textContent = targetSec + 's';
+
       // Limpiar estados visuales
       document.querySelectorAll('.key').forEach(k => k.classList.remove('pressed', 'target'));
       document.querySelectorAll('.finger-rect').forEach(f => f.classList.remove('active'));
     }
 
+    // Renderizar 4 líneas contenedoras
     function renderText() {
       textDisplay.innerHTML = '';
-      chars = rawText.split('').map((char, index) => {
-        const span = document.createElement('span');
-        span.classList.add('char');
-        span.textContent = char;
-        if (index === 0) span.classList.add('current');
-        textDisplay.appendChild(span);
-        return span;
-      });
+      chars = [];
+
+      let overallIndex = 0;
+      for (let lineIndex = 0; lineIndex < preparedLines.length; lineIndex++) {
+        const lineStr = preparedLines[lineIndex];
+        const lineDiv = document.createElement('div');
+        lineDiv.classList.add('text-line');
+
+        const lineNum = document.createElement('span');
+        lineNum.classList.add('line-num');
+        lineNum.textContent = (lineIndex + 1);
+        lineDiv.appendChild(lineNum);
+
+        const lineCharsContainer = document.createElement('div');
+        lineCharsContainer.classList.add('line-chars');
+
+        for (let c = 0; c < lineStr.length; c++) {
+          const char = lineStr[c];
+          const span = document.createElement('span');
+          span.classList.add('char');
+          span.textContent = char;
+          if (overallIndex === 0) span.classList.add('current');
+          lineCharsContainer.appendChild(span);
+          chars[overallIndex] = span;
+          overallIndex++;
+        }
+        lineDiv.appendChild(lineCharsContainer);
+        textDisplay.appendChild(lineDiv);
+      }
     }
 
     // Lógica para resaltar teclas y dedos
     function highlightKeyboardAndHands() {
-      // Limpiar activos
       document.querySelectorAll('.key.target').forEach(k => k.classList.remove('target'));
       document.querySelectorAll('.finger-rect.active').forEach(f => f.classList.remove('active'));
 
@@ -1171,14 +1607,10 @@
       const lowerChar = charToType.toLowerCase();
       const requiresShift = (charToType !== lowerChar && charToType.match(/[A-Z]/));
 
-      // Determinar dedo principal
       let finger = KEY_TO_FINGER[lowerChar];
       if (lowerChar === ' ') finger = 'thumb';
 
-      // Resaltar tecla del carácter base
       let keyId = 'key-' + (lowerChar === ' ' ? 'space' : lowerChar);
-      
-      // Ajustar caracteres especiales para ID de teclas
       if (lowerChar === ',') keyId = 'key-,';
       if (lowerChar === '.') keyId = 'key-.';
       if (lowerChar === '-') keyId = 'key--';
@@ -1189,30 +1621,23 @@
       if (lowerChar === 'ç') keyId = 'key-ç';
 
       const keyEl = document.getElementById(keyId);
-      if (keyEl) {
-        keyEl.classList.add('target');
-      }
+      if (keyEl) keyEl.classList.add('target');
 
-      // Resaltar dedo correspondiente en el SVG
       if (finger) {
-        let fingerElId = '';
         if (finger === 'thumb') {
-          fingerElId = 'finger-R1';
+          const thumbL = document.getElementById('finger-L1');
+          const thumbR = document.getElementById('finger-R1');
+          if (thumbL) thumbL.classList.add('active');
+          if (thumbR) thumbR.classList.add('active');
         } else {
-          fingerElId = 'finger-' + finger;
-        }
-        
-        const fingerEl = document.getElementById(fingerElId);
-        if (fingerEl) {
-          fingerEl.classList.add('active');
+          const fingerEl = document.getElementById('finger-' + finger);
+          if (fingerEl) fingerEl.classList.add('active');
         }
       }
 
-      // Si requiere Mayúsculas (Shift)
       if (requiresShift) {
         const leftHandFingers = ['L5', 'L4', 'L3', 'L2'];
         const isLeftHandKey = leftHandFingers.includes(finger);
-        
         const shiftKeyId = isLeftHandKey ? 'key-shift-r' : 'key-shift';
         const shiftFingerId = isLeftHandKey ? 'finger-R5' : 'finger-L5';
 
@@ -1229,6 +1654,7 @@
       if (!isPlaying) {
         isPlaying = true;
         startTime = new Date();
+        startTimer();
       }
 
       const inputVal = typingInput.value;
@@ -1238,6 +1664,20 @@
       if (currentIndex >= rawText.length) return;
 
       totalKeystrokes++;
+
+      // Calcular línea actual e inicio de línea dinámicamente según preparedLines
+      let currentLine = 0;
+      let lineStartPos = 0;
+      let charAcc = 0;
+      for (let l = 0; l < preparedLines.length; l++) {
+        let len = preparedLines[l].length;
+        if (currentIndex >= charAcc && currentIndex < charAcc + len) {
+          currentLine = l;
+          lineStartPos = charAcc;
+          break;
+        }
+        charAcc += len;
+      }
 
       if (typedChar === expectedChar) {
         // Acierto
@@ -1257,23 +1697,74 @@
 
         if (currentIndex < rawText.length) {
           chars[currentIndex].classList.add('current');
-          chars[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
           endSession();
         }
       } else {
-        // Error (no avanza hasta corregir)
+        // Error
         chars[currentIndex].className = 'char incorrect current';
         errors++;
+        lineErrorCounts[currentLine]++;
         isErrorState = true;
         playSound('error');
+
+        // REGLA MODO ESTRICTO: al 5° error en una misma línea, reinicia al inicio de esa línea
+        if (strictModeToggle.checked && lineErrorCounts[currentLine] >= 5) {
+          lineErrorCounts[currentLine] = 0;
+
+          let lineLen = preparedLines[currentLine] ? preparedLines[currentLine].length : 50;
+          let lineEndPos = lineStartPos + lineLen - 1;
+
+          // Limpiar estilo visual de las letras de esta línea
+          for (let i = lineStartPos; i <= lineEndPos; i++) {
+            if (chars[i]) chars[i].className = 'char';
+          }
+
+          currentIndex = lineStartPos;
+          if (chars[currentIndex]) chars[currentIndex].className = 'char current';
+          
+          typingInput.value = '';
+          showToast('⚠️ 5º error en la línea ' + (currentLine + 1) + ': ¡Reiniciando línea!');
+          updateStatsDisplay();
+          highlightKeyboardAndHands();
+          return;
+        }
       }
 
-      // Limpiar input
       typingInput.value = '';
 
       updateStatsDisplay();
       highlightKeyboardAndHands();
+    }
+
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (isPlaying && startTime) {
+          updateTimerDisplay();
+        }
+      }, 500);
+    }
+
+    function updateTimerDisplay() {
+      if (!startTime) return;
+      const elapsedSec = Math.floor((new Date() - startTime) / 1000);
+      const mins = Math.floor(elapsedSec / 60);
+      const secs = elapsedSec % 60;
+      statTime.textContent = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+
+      const targetSec = TARGET_TIMES[currentLevelNum] || 60;
+      const totalLen = rawText.length || 200;
+      const expectedSecNow = Math.round((currentIndex / totalLen) * targetSec);
+      const delta = elapsedSec - expectedSecNow;
+
+      if (delta <= 0) {
+        statDelta.textContent = (delta === 0 ? '0s' : delta + 's');
+        statDelta.style.color = 'var(--correct-color)';
+      } else {
+        statDelta.textContent = '+' + delta + 's';
+        statDelta.style.color = 'var(--incorrect-color)';
+      }
     }
 
     // Efecto visual al presionar teclas físicas
@@ -1306,56 +1797,93 @@
     }
 
     function updateStatsDisplay() {
-      // Precisión
       const accuracy = totalKeystrokes > 0 ? Math.round((hits / totalKeystrokes) * 100) : 100;
       statAccuracy.textContent = accuracy + '%';
       statErrors.textContent = errors;
 
-      // Calcular WPM (basado en tiempo real)
       if (startTime) {
         const timeElapsedMins = (new Date() - startTime) / 60000;
         if (timeElapsedMins > 0.005) {
           const wpm = Math.round((hits / 5) / timeElapsedMins);
           statWpm.textContent = wpm;
         }
+        updateTimerDisplay();
       }
     }
 
     function endSession() {
       isPlaying = false;
+      if (timerInterval) clearInterval(timerInterval);
       playSound('complete');
       
-      const timeElapsedMins = (new Date() - startTime) / 60000;
+      const elapsedSec = startTime ? Math.round((new Date() - startTime) / 1000) : 0;
+      const timeElapsedMins = elapsedSec / 60;
       const wpm = timeElapsedMins > 0 ? Math.round((hits / 5) / timeElapsedMins) : 0;
       const accuracy = totalKeystrokes > 0 ? Math.round((hits / totalKeystrokes) * 100) : 100;
+
+      const targetSec = TARGET_TIMES[currentLevelNum] || 60;
+      const diffSec = elapsedSec - targetSec;
+
+      // Ocultar teclado y manos, mostrar panel de resultados en su lugar (texto de arriba permanece 100% visible)
+      keyboardSection.style.display = 'none';
+      if (handsSection) handsSection.style.display = 'none';
+      resultsPanel.style.display = 'block';
 
       // Mostrar Resultados
       resultWpm.textContent = wpm;
       resultAccuracy.textContent = accuracy + '%';
-      resultHits.textContent = hits;
-      resultErrors.textContent = errors;
+      resultTime.textContent = elapsedSec + 's';
 
-      let title = "¡Buen Intento!";
+      if (diffSec <= 0) {
+        const margin = Math.abs(diffSec);
+        resultTimeEval.textContent = margin === 0 ? '¡Justo a tiempo! ⚡' : margin + 's más rápido ⚡';
+        resultTimeEval.className = 'result-value correct';
+      } else {
+        resultTimeEval.textContent = '+' + diffSec + 's por debajo ⏱️';
+        resultTimeEval.className = 'result-value incorrect';
+      }
+
+      // Registro de récords en localStorage
+      let levelRecords = {};
+      try {
+        levelRecords = JSON.parse(localStorage.getItem('dactilografia_records') || '{}');
+      } catch(e) {}
+
+      const prevBest = levelRecords[currentLevelNum];
+      const isNewBest = (!prevBest || elapsedSec < prevBest);
+      if (isNewBest) {
+        levelRecords[currentLevelNum] = elapsedSec;
+        try {
+          localStorage.setItem('dactilografia_records', JSON.stringify(levelRecords));
+        } catch(e) {}
+      }
+
+      const bestVal = levelRecords[currentLevelNum] ? levelRecords[currentLevelNum] + 's' : elapsedSec + 's';
+      const recordBadgeEl = document.getElementById('resultRecordBadge');
+      recordBadgeEl.innerHTML = `Meta de tiempo: <strong>${targetSec}s</strong> | Tu tiempo: <strong>${elapsedSec}s</strong> | Mejor Récord: <strong>${bestVal}</strong> ${isNewBest ? '🏆 ¡NUEVO RÉCORD!' : ''}`;
+
+      let title = "¡Nivel Completado!";
       let quote = "La práctica constante hace al maestro de las teclas.";
 
-      if (accuracy >= 95) {
+      if (diffSec <= 0 && accuracy >= 95) {
+        title = "¡Excelente Desempeño!";
+        quote = "¡Superaste la meta de tiempo y mantuviste una precisión impecable!";
+      } else if (accuracy >= 95) {
         title = "¡Excelente Precisión!";
-        quote = "¡Qué gran puntería! Mantén esa posición de los dedos.";
-      } else if (wpm >= 40) {
-        title = "¡Velocidad Impresionante!";
-        quote = "¡Vas volando! Tu memoria muscular está funcionando genial.";
+        quote = "¡Puntería perfecta! Ahora intenta agilizar un poco más el tiempo.";
+      } else if (diffSec <= 0) {
+        title = "¡Gran Velocidad!";
+        quote = "¡Gran tiempo de respuesta! Procura cuidar la precisión de cada dedo.";
       }
 
       resultsTitle.textContent = title;
       resultsQuote.textContent = quote;
 
-      if (currentLevelNum === 5) {
-        btnNextLevel.innerHTML = '<span>🔄</span> Repetir Nivel';
+      if (currentLevelNum === 18) {
+        btnNextLevel.innerHTML = '<span>🔄</span> Repetir Nivel (Presiona ENTER)';
       } else {
-        btnNextLevel.innerHTML = '<span>🎮</span> Siguiente Nivel';
+        btnNextLevel.innerHTML = '<span>🎮</span> Siguiente Nivel (Presiona ENTER)';
       }
-
-      resultsModal.classList.add('show');
     }
 
     window.onload = init;
