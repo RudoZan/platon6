@@ -92,6 +92,223 @@
       overflow-x: hidden;
     }
 
+    /* Pantalla de Selección de Niveles */
+    .level-selection-screen {
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto 30px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .suggested-banner {
+      background: linear-gradient(135deg, var(--primary-light), var(--bg-card));
+      border: 2px solid var(--primary);
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      box-shadow: 0 4px 20px var(--primary-glow);
+      flex-wrap: wrap;
+    }
+
+    .suggested-info h3 {
+      font-size: 1.25rem;
+      color: var(--primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .suggested-info p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .suggested-badge-reason {
+      display: inline-block;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .btn-start-suggested {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px var(--primary-glow);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-start-suggested:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    .selection-header h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .selection-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .level-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .level-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .level-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    .level-card.suggested-highlight {
+      border: 2px solid #10b981;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
+    }
+
+    .level-card-num {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    .level-card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.3;
+    }
+
+    .level-card-keys {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--bg-main);
+      padding: 4px 8px;
+      border-radius: 6px;
+      word-break: break-all;
+    }
+
+    .level-card-record {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .record-val {
+      font-weight: 700;
+      color: var(--correct-color);
+    }
+
+    .record-empty {
+      color: var(--text-pending);
+      font-style: italic;
+    }
+
+    .level-card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .btn-go-sq {
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px var(--primary-glow);
+      transition: all 0.2s ease;
+    }
+
+    .btn-go-sq.btn-go-green,
+    .level-card.suggested-highlight .btn-go-sq {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-go-sq.btn-go-gray,
+    .btn-go-sq.btn-go-dark {
+      background: #64748b;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(100, 116, 139, 0.3);
+    }
+
+    body.dark-mode .btn-go-sq.btn-go-gray,
+    body.dark-mode .btn-go-sq.btn-go-dark {
+      background: #475569;
+      color: #f8fafc;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .level-card:hover .btn-go-sq,
+    .btn-go-sq:hover {
+      transform: scale(1.08);
+      filter: brightness(1.12);
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .level-card.suggested-highlight:hover .btn-go-sq,
+    .btn-go-sq.btn-go-green:hover {
+      box-shadow: 0 5px 14px rgba(16, 185, 129, 0.6);
+    }
+
     header {
       max-width: 1100px;
       width: 100%;
@@ -1150,9 +1367,14 @@
 <body>
 
   <header>
-    <a class="btn-volver" href="../listado.html">
-      <span>←</span> Volver a Platón 6
-    </a>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <a class="btn-volver" href="../listado.html">
+        <span>←</span> Volver a Platón 6
+      </a>
+      <button class="btn-volver" id="btnNavHomeLevels" style="display: none; cursor: pointer;">
+        <span>🏠</span> Selección de Niveles
+      </button>
+    </div>
     <div class="header-controls">
       <div class="audio-indicator" id="audioToggle" title="Activar/Silenciar sonido de teclado">🔊</div>
       <button class="theme-toggle-btn" id="themeToggle" title="Cambiar Tema">🌙</button>
@@ -1160,6 +1382,22 @@
   </header>
 
   <main>
+    <!-- Pantalla de Selección de Niveles (Vista de Inicio) -->
+    <section id="levelSelectionScreen" class="level-selection-screen">
+      <div class="suggested-banner" id="suggestedBanner">
+        <!-- Banner del nivel sugerido generado por JS -->
+      </div>
+
+      <div class="selection-header">
+        <h2>Galería de Niveles de Dactilografía</h2>
+        <p>Selecciona el nivel que deseas practicar o continúa con tu progreso guardado.</p>
+      </div>
+
+      <div class="level-grid" id="levelGridContainer">
+        <!-- Tarjetas de los 18 niveles generadas por JS -->
+      </div>
+    </section>
+
     <!-- Encabezado del Curso (Título, Modo Estricto y Selector de Nivel) -->
     <div class="course-header">
       <div class="course-title">
@@ -1425,6 +1663,12 @@
               <button class="btn-modal" id="btnNextLevel">
                 <span>🎮</span> Siguiente Nivel (Presiona ENTER)
               </button>
+              <button class="btn-modal" id="btnSuggestedNextLevel" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                <span>🎯</span> Nivel Sugerido
+              </button>
+              <button class="btn-modal" id="btnHomeFromResults" style="background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
+                <span>🏠</span> Menú de Niveles
+              </button>
             </div>
           </div>
         </div>
@@ -1481,6 +1725,65 @@
       }
     }
 
+    function persistRecords(records) {
+      const jsonStr = JSON.stringify(records);
+      try {
+        setCookie('dactilografia_records_top5', jsonStr, 3650);
+      } catch (e) {}
+      try {
+        localStorage.setItem('dactilografia_records_top5', jsonStr);
+      } catch (e) {}
+    }
+
+    function getNormalizedLevelData(records, levelNum) {
+      const raw = records[levelNum];
+      const defaultRanks = { 'A+':0, 'A':0, 'B+':0, 'B':0, 'C+':0, 'C':0, 'D+':0, 'D':0, 'E+':0, 'E':0, 'F+':0, 'F':0 };
+      const defaultData = {
+        top5: [],
+        recent3: [],
+        stats: { totalAttempts: 0, totalCompleted: 0, ranks: { ...defaultRanks } },
+        lastPlayed: 0
+      };
+
+      if (!raw) return defaultData;
+
+      if (typeof raw === 'object' && !Array.isArray(raw) && (raw.top5 || raw.stats)) {
+        return {
+          top5: Array.isArray(raw.top5) ? raw.top5 : [],
+          recent3: Array.isArray(raw.recent3) ? raw.recent3 : [],
+          stats: {
+            totalAttempts: (raw.stats && raw.stats.totalAttempts) || (raw.top5 ? raw.top5.length : 0),
+            totalCompleted: (raw.stats && raw.stats.totalCompleted) || (raw.top5 ? raw.top5.length : 0),
+            ranks: (raw.stats && raw.stats.ranks) ? { ...defaultRanks, ...raw.stats.ranks } : { ...defaultRanks }
+          },
+          lastPlayed: raw.lastPlayed || 0
+        };
+      }
+
+      if (Array.isArray(raw)) {
+        const ranksObj = { ...defaultRanks };
+        raw.forEach(r => {
+          if (r && r.rank && ranksObj[r.rank] !== undefined) {
+            ranksObj[r.rank]++;
+          }
+        });
+        const lastTs = raw[0] && raw[0].timestamp ? raw[0].timestamp : (raw[0] && raw[0].date ? Date.parse(raw[0].date) || 0 : 0);
+
+        return {
+          top5: raw.slice(0, 5),
+          recent3: raw.slice(0, 3),
+          stats: {
+            totalAttempts: raw.length,
+            totalCompleted: raw.length,
+            ranks: ranksObj
+          },
+          lastPlayed: lastTs
+        };
+      }
+
+      return defaultData;
+    }
+
     function getScoreRank(score, errorCount) {
       let letter = 'F';
       if (score >= 6000) letter = 'A';
@@ -1496,15 +1799,23 @@
       return letter;
     }
 
+    function recordAttemptStart(levelNum) {
+      const records = getSavedRecords();
+      const lvlData = getNormalizedLevelData(records, levelNum);
+
+      lvlData.stats.totalAttempts = (lvlData.stats.totalAttempts || 0) + 1;
+      lvlData.lastPlayed = Date.now();
+
+      records[levelNum] = lvlData;
+      persistRecords(records);
+    }
+
     function saveLevelRecord(levelNum, elapsedSec, wpm, accuracy, score, errorCount) {
       const records = getSavedRecords();
-      if (!records[levelNum]) {
-        records[levelNum] = [];
-      } else if (!Array.isArray(records[levelNum])) {
-        records[levelNum] = [{ time: records[levelNum], wpm: 0, accuracy: 100, score: 0, rank: 'F', date: 'Anterior' }];
-      }
+      const lvlData = getNormalizedLevelData(records, levelNum);
 
       const rankStr = getScoreRank(score || 0, errorCount || 0);
+      const nowTs = Date.now();
 
       const newEntry = {
         time: elapsedSec,
@@ -1512,39 +1823,46 @@
         accuracy: accuracy,
         score: score || 0,
         rank: rankStr,
-        date: formatDateTime()
+        date: formatDateTime(),
+        timestamp: nowTs
       };
 
-      records[levelNum].push(newEntry);
+      lvlData.stats.totalCompleted = (lvlData.stats.totalCompleted || 0) + 1;
+      if (lvlData.stats.totalAttempts < lvlData.stats.totalCompleted) {
+        lvlData.stats.totalAttempts = lvlData.stats.totalCompleted;
+      }
+      if (!lvlData.stats.ranks) lvlData.stats.ranks = {};
+      lvlData.stats.ranks[rankStr] = (lvlData.stats.ranks[rankStr] || 0) + 1;
 
-      // Ordenar por mayor puntaje, luego por mayor WPM y menor tiempo
-      records[levelNum].sort((a, b) => {
+      if (!Array.isArray(lvlData.recent3)) lvlData.recent3 = [];
+      lvlData.recent3.unshift(newEntry);
+      lvlData.recent3 = lvlData.recent3.slice(0, 3);
+
+      if (!Array.isArray(lvlData.top5)) lvlData.top5 = [];
+      lvlData.top5.push(newEntry);
+      lvlData.top5.sort((a, b) => {
         const scoreA = typeof a === 'object' && a.score !== undefined ? a.score : 0;
         const scoreB = typeof b === 'object' && b.score !== undefined ? b.score : 0;
         if (scoreA !== scoreB) return scoreB - scoreA;
         if (a.wpm !== b.wpm) return b.wpm - a.wpm;
         return a.time - b.time;
       });
+      lvlData.top5 = lvlData.top5.slice(0, 5);
 
-      // Retener únicamente los 5 mejores récords por nivel
-      const top5 = records[levelNum].slice(0, 5);
-      records[levelNum] = top5;
+      lvlData.lastPlayed = nowTs;
+      records[levelNum] = lvlData;
 
-      const isBestEver = (top5[0].date === newEntry.date);
-      const isTop5 = top5.some(r => r.date === newEntry.date);
+      persistRecords(records);
 
-      const jsonStr = JSON.stringify(records);
-      try {
-        setCookie('dactilografia_records_top5', jsonStr, 3650); // Cookie guardada por 10 años
-      } catch (e) {}
-      try {
-        localStorage.setItem('dactilografia_records_top5', jsonStr);
-      } catch (e) {}
+      const isBestEver = (lvlData.top5[0].timestamp === newEntry.timestamp || lvlData.top5[0].date === newEntry.date);
+      const isTop5 = lvlData.top5.some(r => r.timestamp === newEntry.timestamp || r.date === newEntry.date);
 
       return {
         isBestEver,
         isTop5,
-        top5Records: top5
+        top5Records: lvlData.top5,
+        recent3Records: lvlData.recent3,
+        levelStats: lvlData.stats
       };
     }
 
@@ -1553,7 +1871,8 @@
       if (!sidebarListEl) return;
 
       const records = getSavedRecords();
-      const levelTop5 = records[currentLevelNum] || [];
+      const lvlData = getNormalizedLevelData(records, currentLevelNum);
+      const levelTop5 = lvlData.top5 || [];
 
       if (!Array.isArray(levelTop5) || levelTop5.length === 0) {
         sidebarListEl.innerHTML = '<div class="top5-empty">Sin récords aún</div>';
@@ -2096,6 +2415,222 @@
       return resultLines;
     }
 
+    // --- MOTOR DE SUGERENCIA INTELIGENTE Y SELECCIÓN DE NIVELES ---
+    let sessionHistory = [];
+
+    function getSmartSuggestedLevel() {
+      const records = getSavedRecords();
+      const now = Date.now();
+
+      // 1. Regla Anti-Bucle: Prevenir sugerir un nivel si se ha jugado 3 veces seguidas recientemente
+      let blockedLevel = null;
+      if (sessionHistory.length >= 3) {
+        const last3 = sessionHistory.slice(-3);
+        if (last3[0] === last3[1] && last3[1] === last3[2]) {
+          blockedLevel = last3[0];
+        }
+      }
+
+      // 2. Determinar el nivel máximo alcanzado
+      let maxLevelReached = 1;
+      for (let i = 1; i <= 18; i++) {
+        const lvlData = getNormalizedLevelData(records, i);
+        if (lvlData.stats.totalAttempts > 0 || lvlData.top5.length > 0) {
+          maxLevelReached = i;
+        }
+      }
+
+      // 3. Evaluar niveles previos (1 a maxLevelReached) en busca de REFUERZO o REPASO ESPACIADO
+      let reviewCandidates = [];
+      for (let i = 1; i <= maxLevelReached; i++) {
+        if (i === blockedLevel) continue;
+
+        const lvlData = getNormalizedLevelData(records, i);
+        const top1 = lvlData.top5[0];
+
+        if (!top1) {
+          reviewCandidates.push({
+            levelNum: i,
+            weight: 1000 - i,
+            reason: `Nivel pendiente por completar`
+          });
+          continue;
+        }
+
+        const mainRankLetter = top1.rank ? top1.rank.charAt(0) : 'F';
+        const daysAgo = lvlData.lastPlayed ? (now - lvlData.lastPlayed) / (1000 * 60 * 60 * 24) : 99;
+
+        // Criterio A: Necesita refuerzo de precisión o rango (Rangos C, D, E, F)
+        if (['C', 'D', 'E', 'F'].includes(mainRankLetter)) {
+          reviewCandidates.push({
+            levelNum: i,
+            weight: 900 - (top1.score || 0),
+            reason: `Refuerzo pedagógico: Tu mejor marca es Rango ${top1.rank} (precisión/velocidad mejorable)`
+          });
+        }
+        // Criterio B: Repaso Espaciado (Más de 2 días sin practicarse)
+        else if (daysAgo >= 2) {
+          reviewCandidates.push({
+            levelNum: i,
+            weight: 700 + daysAgo * 10,
+            reason: `Repaso espaciado: Hace ${Math.floor(daysAgo)} días que no practicas este nivel`
+          });
+        }
+      }
+
+      if (reviewCandidates.length > 0) {
+        reviewCandidates.sort((a, b) => b.weight - a.weight);
+        const chosen = reviewCandidates[0];
+        return {
+          levelNum: chosen.levelNum,
+          levelObj: LEVELS[chosen.levelNum],
+          reason: chosen.reason
+        };
+      }
+
+      // 4. Si los niveles anteriores están bien consolidados (Rangos A o B), avanzar al siguiente nivel
+      let candidateNext = maxLevelReached < 18 ? maxLevelReached + 1 : 1;
+      if (candidateNext === blockedLevel && candidateNext < 18) {
+        candidateNext++;
+      }
+
+      return {
+        levelNum: candidateNext,
+        levelObj: LEVELS[candidateNext],
+        reason: candidateNext > maxLevelReached
+          ? `Nuevo Desafío: ¡Dominas las bases previas! Avanza a ${LEVELS[candidateNext].name}`
+          : `Práctica libre para mantener tu fluidez`
+      };
+    }
+
+    function renderLevelSelectionScreen() {
+      const container = document.getElementById('levelGridContainer');
+      const banner = document.getElementById('suggestedBanner');
+      if (!container || !banner) return;
+
+      const records = getSavedRecords();
+      const suggested = getSmartSuggestedLevel();
+
+      // Banner Nivel Sugerido
+      const suggestedData = getNormalizedLevelData(records, suggested.levelNum);
+      const topRecordSuggested = suggestedData.top5[0];
+      const suggestedRecordStr = topRecordSuggested
+        ? `Mejor Récord: <strong>${topRecordSuggested.wpm} PPM (${topRecordSuggested.rank || 'A'})</strong>`
+        : 'Sin intentos previos';
+
+      const keysFormated = suggested.levelObj.keys.map(k => k === ' ' ? 'ESPACIO' : k.toUpperCase()).join(' ');
+
+      banner.innerHTML = `
+        <div class="suggested-info">
+          <h3>🎯 Sugerencia de Aprendizaje: Nivel ${suggested.levelNum} — ${suggested.levelObj.name} <span class="suggested-badge-reason">${suggested.reason}</span></h3>
+          <p>Teclas: <code>${keysFormated}</code> | ${suggestedRecordStr}</p>
+        </div>
+        <button class="btn-start-suggested" onclick="startLevel(${suggested.levelNum})">
+          🚀 Empezar Nivel Sugerido
+        </button>
+      `;
+
+      // Cards de Niveles 1 al 18
+      let gridHtml = '';
+      for (let i = 1; i <= 18; i++) {
+        const lvl = LEVELS[i];
+        const lvlData = getNormalizedLevelData(records, i);
+        const top1 = lvlData.top5[0];
+        const stats = lvlData.stats;
+        const recent3 = lvlData.recent3;
+        const isSuggested = (i === suggested.levelNum);
+
+        let goBtnClass = '';
+        if (isSuggested) {
+          goBtnClass = 'btn-go-green';
+        } else if (!top1) {
+          goBtnClass = 'btn-go-gray';
+        }
+
+        const keysStr = lvl.keys.map(k => k === ' ' ? '␣' : k.toUpperCase()).join(' ');
+
+        let recordHtml = `<span class="record-empty">Sin registro</span>`;
+        if (top1) {
+          recordHtml = `<span class="record-val">🥇 ${top1.wpm} PPM (${top1.rank || 'A'})</span>`;
+        }
+
+        let mostFreqRank = '--';
+        if (stats.ranks) {
+          let maxCount = 0;
+          for (const [r, count] of Object.entries(stats.ranks)) {
+            if (count > maxCount) {
+              maxCount = count;
+              mostFreqRank = r;
+            }
+          }
+        }
+
+        const recentStr = recent3.length > 0 ? recent3.map(r => `${r.wpm}PPM`).join(', ') : 'Ninguno';
+        const cardTitleTooltip = `Intentos: ${stats.totalAttempts || 0} (${stats.totalCompleted || 0} completados)\nÚltimos 3 intentos: ${recentStr}`;
+
+        gridHtml += `
+          <div class="level-card ${isSuggested ? 'suggested-highlight' : ''}" onclick="startLevel(${i})" style="cursor: pointer;" title="${cardTitleTooltip}">
+            <div class="level-card-header-row">
+              <div>
+                <div class="level-card-num">Nivel ${i} ${isSuggested ? '⭐ Sugerido' : ''}</div>
+                <div class="level-card-title">${lvl.name}</div>
+              </div>
+              <button class="btn-go-sq ${goBtnClass}" onclick="event.stopPropagation(); startLevel(${i});" title="Iniciar Nivel ${i}">
+                GO
+              </button>
+            </div>
+            <div class="level-card-keys" style="margin-top: 6px;" title="Teclas del nivel">${keysStr}</div>
+            <div class="level-card-record">
+              <span>Top Récord:</span>
+              ${recordHtml}
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-top: 2px;">
+              <span>Intentos: ${stats.totalAttempts || 0}</span>
+              <span>Habitual: <strong>${mostFreqRank}</strong></span>
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = gridHtml;
+    }
+
+    function showLevelSelection() {
+      const selectionScreen = document.getElementById('levelSelectionScreen');
+      const gameContainer = document.getElementById('gameContainer');
+      const courseHeader = document.querySelector('.course-header');
+      const btnNavHomeLevels = document.getElementById('btnNavHomeLevels');
+
+      renderLevelSelectionScreen();
+
+      if (selectionScreen) selectionScreen.style.display = 'flex';
+      if (gameContainer) gameContainer.style.display = 'none';
+      if (courseHeader) courseHeader.style.display = 'none';
+      if (btnNavHomeLevels) btnNavHomeLevels.style.display = 'none';
+    }
+
+    function startLevel(levelNum) {
+      const selectionScreen = document.getElementById('levelSelectionScreen');
+      const gameContainer = document.getElementById('gameContainer');
+      const courseHeader = document.querySelector('.course-header');
+      const btnNavHomeLevels = document.getElementById('btnNavHomeLevels');
+      const levelSelect = document.getElementById('levelSelect');
+
+      currentLevelNum = levelNum;
+      sessionHistory.push(levelNum);
+
+      if (levelSelect) levelSelect.value = levelNum;
+
+      if (selectionScreen) selectionScreen.style.display = 'none';
+      if (gameContainer) gameContainer.style.display = 'flex';
+      if (courseHeader) courseHeader.style.display = 'flex';
+      if (btnNavHomeLevels) btnNavHomeLevels.style.display = 'inline-flex';
+
+      recordAttemptStart(levelNum);
+      loadLevel(levelNum);
+      focusInput();
+    }
+
     function init() {
       loadLevel(currentLevelNum);
 
@@ -2114,7 +2649,12 @@
       // Permitir iniciar o avanzar con la tecla Enter de forma 100% fiable
       window.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
-          if (resultsPanel && resultsPanel.style.display !== 'none') {
+          const selectionScreen = document.getElementById('levelSelectionScreen');
+          if (selectionScreen && selectionScreen.style.display !== 'none') {
+            e.preventDefault();
+            const suggested = getSmartSuggestedLevel();
+            startLevel(suggested.levelNum);
+          } else if (resultsPanel && resultsPanel.style.display !== 'none') {
             e.preventDefault();
             btnNextLevel.click();
           } else if (!gameContainer.classList.contains('focused') || document.activeElement !== typingInput) {
@@ -2150,20 +2690,37 @@
         });
       }
 
+      // Navegación a selección de niveles desde header
+      const btnNavHomeLevels = document.getElementById('btnNavHomeLevels');
+      if (btnNavHomeLevels) {
+        btnNavHomeLevels.addEventListener('click', showLevelSelection);
+      }
+
+      // Navegación a selección de niveles desde modal de resultados
+      const btnHomeFromResults = document.getElementById('btnHomeFromResults');
+      if (btnHomeFromResults) {
+        btnHomeFromResults.addEventListener('click', () => {
+          resultsPanel.style.display = 'none';
+          showLevelSelection();
+        });
+      }
+
+      // Botón Siguiente Nivel en modal
       btnNextLevel.addEventListener('click', () => {
         resultsPanel.style.display = 'none';
         if (currentLevelNum < 18) {
           currentLevelNum++;
-          levelSelect.value = currentLevelNum;
         }
-        loadLevel(currentLevelNum);
+        startLevel(currentLevelNum);
       });
 
+      // Botón Repetir Nivel en modal (Con re-enfoque automático)
       const btnRepeatLevel = document.getElementById('btnRepeatLevel');
       if (btnRepeatLevel) {
         btnRepeatLevel.addEventListener('click', () => {
           resultsPanel.style.display = 'none';
           loadLevel(currentLevelNum);
+          focusInput();
         });
       }
 
@@ -2195,7 +2752,8 @@
 
       preparedLines = prepare200CharText(rawSelected, levelNum);
       if (requireLineEnter) {
-        rawText = preparedLines.map(l => l + '\n').join('');
+        // Requerir Enter al final de las líneas previas (excluyendo la última fila para evitar avance automático de nivel)
+        rawText = preparedLines.map((l, idx) => idx < preparedLines.length - 1 ? l + '\n' : l).join('');
       } else {
         rawText = preparedLines.join('');
       }
@@ -2276,7 +2834,8 @@
           overallIndex++;
         }
 
-        if (requireLineEnter) {
+        // Solo requerir Enter (↩) en las líneas previas a la última
+        if (requireLineEnter && lineIndex < preparedLines.length - 1) {
           const enterSpan = document.createElement('span');
           enterSpan.classList.add('char', 'char-enter');
           enterSpan.textContent = '↩';
@@ -2368,7 +2927,7 @@
       let lineStartPos = 0;
       let charAcc = 0;
       for (let l = 0; l < preparedLines.length; l++) {
-        let len = preparedLines[l].length + (requireLineEnter ? 1 : 0);
+        let len = preparedLines[l].length + (requireLineEnter && l < preparedLines.length - 1 ? 1 : 0);
         if (currentIndex >= charAcc && currentIndex < charAcc + len) {
           currentLine = l;
           lineStartPos = charAcc;
@@ -2627,6 +3186,27 @@
       resultsTitle.textContent = title;
       resultsQuote.textContent = quote;
 
+      // Configurar botón Nivel Sugerido al finalizar
+      let suggestedNextNum = currentLevelNum;
+      let suggestedReason = '';
+      if (accuracy < 90) {
+        suggestedNextNum = currentLevelNum;
+        suggestedReason = `Repetir Nivel ${currentLevelNum} (Reforzar precisión: ${accuracy.toFixed(0)}%)`;
+      } else {
+        suggestedNextNum = currentLevelNum < 18 ? currentLevelNum + 1 : 1;
+        suggestedReason = `¡Excelente precisión! Avanzar al Nivel ${suggestedNextNum}`;
+      }
+
+      const btnSuggestedNextLevel = document.getElementById('btnSuggestedNextLevel');
+      if (btnSuggestedNextLevel) {
+        btnSuggestedNextLevel.innerHTML = `<span>🎯</span> Sugerido: Nivel ${suggestedNextNum}`;
+        btnSuggestedNextLevel.title = suggestedReason;
+        btnSuggestedNextLevel.onclick = () => {
+          resultsPanel.style.display = 'none';
+          startLevel(suggestedNextNum);
+        };
+      }
+
       if (currentLevelNum === 18) {
         btnNextLevel.innerHTML = '<span>🔄</span> Repetir Nivel (Presiona ENTER)';
       } else {
@@ -2634,7 +3214,10 @@
       }
     }
 
-    window.onload = init;
+    window.onload = () => {
+      init();
+      showLevelSelection();
+    };
   </script>
 </body>
 
