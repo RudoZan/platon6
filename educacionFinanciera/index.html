@@ -80,7 +80,7 @@
     }
 
     /* ==========================================================================
-       1. ZONA SUPERIOR: DIAPOSITIVAS PPT (CABECERA ÚNICA COMPACTA SIN BARRA EXTRA)
+       1. ZONA SUPERIOR: DIAPOSITIVAS PPT (CABECERA ESTRUCTURADA CON SCROLL NATURAL)
        ========================================================================== */
     .top-slide-zone {
       position: sticky;
@@ -89,54 +89,35 @@
       background: #ffffff;
       border-bottom: 2px solid #cbd5e1;
       padding: 0;
-      position: relative;
       width: 100%;
-      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.06);
-    }
-
-    /* Botones de Navegación en los Extremos de la Diapositiva */
-    .slide-edge-nav {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 15;
-      width: 26px;
-      height: 48px;
-      background: rgba(15, 23, 42, 0.72);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      color: #ffffff;
-      border: none;
-      border-radius: 6px;
+      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.08);
       display: flex;
-      align-items: center;
+      flex-direction: column;
+    }
+
+    /* Barra Superior Ejecutiva: Aporta peso visual, equilibrio y contexto general */
+    .slide-top-bar {
+      display: flex;
       justify-content: center;
-      cursor: pointer;
+      align-items: center;
+      padding: 5px 12px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border-bottom: 1px solid #334155;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .slide-workshop-title {
+      font-family: var(--font-title);
       font-size: 0.72rem;
-      transition: all 0.15s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-      user-select: none;
-      padding: 0;
-      line-height: 1;
-    }
-
-    .slide-edge-nav:hover {
-      background: rgba(15, 23, 42, 0.95);
-      color: #34d399;
-      transform: translateY(-50%) scale(1.06);
-    }
-
-    .slide-edge-nav:active {
-      transform: translateY(-50%) scale(0.92);
-      background: #10b981;
-    }
-
-    .prev-edge-btn {
-      left: 4px;
-    }
-
-    .next-edge-btn {
-      right: 4px;
+      font-weight: 700;
+      color: #f1f5f9;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* Pista Deslizable Horizontalmente */
@@ -154,7 +135,7 @@
       display: none;
     }
 
-    /* Tarjeta Diapositiva Individual: Compacta (~96px) con espacio para flechas laterales */
+    /* Tarjeta Diapositiva Individual: Proporción Equilibrada (~96px altura para gráficos) */
     .slide-card {
       flex: 0 0 100%;
       width: 100%;
@@ -163,7 +144,7 @@
       box-sizing: border-box;
       scroll-snap-align: start;
       background: #ffffff;
-      padding: 8px 36px;
+      padding: 8px 14px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -1302,22 +1283,15 @@
          1. ZONA SUPERIOR: DIAPOSITIVAS PPT FONDO CLARO (100% ANCHO) (~22% altura)
          ====================================================================== -->
     <header class="top-slide-zone">
-      <!-- Botón Lateral Izquierdo -->
-      <button class="slide-edge-nav prev-edge-btn" onclick="scrollSlideBy(-1)" title="Diapositiva anterior"
-        aria-label="Anterior">
-        ◀
-      </button>
+      <!-- Barra Superior de Contexto General (Equilibrio y soporte visual) -->
+      <div class="slide-top-bar">
+        <div class="slide-workshop-title">Taller: Educación Financiera</div>
+      </div>
 
-      <!-- Pista Horizontal de Diapositivas Deslizables -->
+      <!-- Pista Horizontal de Diapositivas (Navegación fluida por scroll / swipe) -->
       <div class="slide-carousel-track" id="slide-track" onscroll="onTrackScroll()">
         <!-- Las diapositivas se renderizan dinámicamente con JS -->
       </div>
-
-      <!-- Botón Lateral Derecho -->
-      <button class="slide-edge-nav next-edge-btn" onclick="scrollSlideBy(1)" title="Siguiente diapositiva"
-        aria-label="Siguiente">
-        ▶
-      </button>
     </header>
 
 
@@ -2116,17 +2090,10 @@
         card.id = `slide-card-${idx}`;
         card.onclick = () => selectSlide(idx);
 
-        const tagRow = `
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-            <span class="slide-category-tag">${slide.tag}</span>
-            <span style="font-size: 0.62rem; font-weight: 800; color: #94a3b8; letter-spacing: 0.5px;">${idx + 1}/${slidesData.length}</span>
-          </div>
-        `;
-
         if (slide.hasTriangle) {
           card.innerHTML = `
             <div class="slide-split-text">
-              ${tagRow}
+              <div class="slide-category-tag">${slide.tag}</div>
               <div class="slide-card-title">${slide.title}</div>
               <div class="slide-card-desc">${slide.desc}</div>
             </div>
@@ -2148,7 +2115,7 @@
           `;
         } else {
           card.innerHTML = `
-            ${tagRow}
+            <div class="slide-category-tag">${slide.tag}</div>
             <div class="slide-card-title">${slide.title}</div>
             <div class="slide-card-desc">${slide.desc}</div>
           `;
