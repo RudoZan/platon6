@@ -109,15 +109,16 @@
 
     .slide-workshop-title {
       font-family: var(--font-title);
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #f1f5f9;
+      font-size: 0.70rem;
+      font-weight: 800;
+      color: #38bdf8;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.7px;
       text-align: center;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      transition: color 0.2s ease;
     }
 
     /* Pista Deslizable Horizontalmente */
@@ -135,7 +136,7 @@
       display: none;
     }
 
-    /* Tarjeta Diapositiva Individual: Proporción Equilibrada (~96px altura para gráficos) */
+    /* Tarjeta Diapositiva Individual: Proporción Optimizada (~88px altura) */
     .slide-card {
       flex: 0 0 100%;
       width: 100%;
@@ -148,7 +149,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-height: 96px;
+      min-height: 88px;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.15s ease;
@@ -1283,9 +1284,9 @@
          1. ZONA SUPERIOR: DIAPOSITIVAS PPT FONDO CLARO (100% ANCHO) (~22% altura)
          ====================================================================== -->
     <header class="top-slide-zone">
-      <!-- Barra Superior de Contexto General (Equilibrio y soporte visual) -->
+      <!-- Barra Superior Dinámica: Muestra el Módulo de la Diapositiva Actual -->
       <div class="slide-top-bar">
-        <div class="slide-workshop-title">Taller: Educación Financiera</div>
+        <div class="slide-workshop-title" id="slide-top-module">PRESENTACIÓN TALLER • UAH / EXPERIAN</div>
       </div>
 
       <!-- Pista Horizontal de Diapositivas (Navegación fluida por scroll / swipe) -->
@@ -2093,7 +2094,6 @@
         if (slide.hasTriangle) {
           card.innerHTML = `
             <div class="slide-split-text">
-              <div class="slide-category-tag">${slide.tag}</div>
               <div class="slide-card-title">${slide.title}</div>
               <div class="slide-card-desc">${slide.desc}</div>
             </div>
@@ -2115,7 +2115,6 @@
           `;
         } else {
           card.innerHTML = `
-            <div class="slide-category-tag">${slide.tag}</div>
             <div class="slide-card-title">${slide.title}</div>
             <div class="slide-card-desc">${slide.desc}</div>
           `;
@@ -2129,6 +2128,12 @@
       state.currentSlideIdx = idx;
       const slide = slidesData[idx];
       if (!slide) return;
+
+      // Actualizar título de módulo dinámico en la barra superior
+      const topModule = document.getElementById('slide-top-module');
+      if (topModule) {
+        topModule.innerText = slide.tag;
+      }
 
       // Actualizar clase activa en tarjetas
       document.querySelectorAll('.slide-card').forEach((el, i) => {
