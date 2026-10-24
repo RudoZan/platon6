@@ -183,11 +183,22 @@
       padding: 4px;
     }
 
+    .slide-figure-box {
+      width: 52px;
+      height: 80px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
+      border: 1.5px solid #bfdbfe;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.08);
+      padding: 3px;
+    }
+
     .slide-mini-triangle {
       width: 105px;
       height: 85px;
       display: block;
     }
+
 
     .slide-category-tag {
       font-size: 0.60rem;
@@ -262,124 +273,116 @@
     }
 
     /* ==========================================================================
-       RESUMEN DEL PERSONAJE (FICHA CONSOLIDADA)
+       RESUMEN DEL PERSONAJE (PÁRRAFO NARRATIVO INTEGRADO)
        ========================================================================== */
-    .summary-section-title {
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #64748b;
-      margin-bottom: 8px;
-    }
-
-    .summary-lifestyle-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .summary-item-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #f8fafc;
+    .summary-narrative-box {
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
       border: 1px solid #e2e8f0;
-      border-radius: 10px;
+      border-radius: 9px;
       padding: 10px 12px;
-    }
-
-    .summary-item-icon {
-      font-size: 1.4rem;
-      width: 38px;
-      height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      flex-shrink: 0;
-    }
-
-    .summary-item-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .summary-item-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: #64748b;
-    }
-
-    .summary-item-name {
-      font-size: 0.88rem;
-      font-weight: 800;
-      color: #0f172a;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .summary-item-sub {
-      font-size: 0.73rem;
-      color: #059669;
-      font-weight: 600;
-    }
-
-    .summary-interests-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .summary-interest-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 9999px;
-      padding: 5px 12px;
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: #1e293b;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
     }
 
-    .summary-interest-badge {
-      background: #10b981;
-      color: #ffffff;
-      font-size: 0.68rem;
-      font-weight: 800;
-      padding: 2px 7px;
-      border-radius: 9999px;
-    }
-
-    .summary-diagnosis-box {
-      margin-top: 14px;
-      background: #f0fdf4;
-      border: 1.5px solid #bbf7d0;
-      border-radius: 10px;
-      padding: 12px 14px;
-    }
-
-    .summary-diagnosis-header {
+    .summary-narrative-header {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-      margin-bottom: 4px;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #f1f5f9;
     }
 
-    .summary-diagnosis-text {
-      font-size: 0.78rem;
-      color: #166534;
-      line-height: 1.48;
-      font-weight: 500;
+    .summary-narrative-text {
+      font-size: 0.76rem;
+      color: #1e293b;
+      line-height: 1.5;
       margin: 0;
+    }
+
+    .summary-narrative-text strong {
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    .summary-narrative-text em {
+      color: #047857;
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    .summary-incomplete-card {
+      background: #fffbeb;
+      border: 1.5px dashed #fcd34d;
+      border-radius: 9px;
+      padding: 12px 14px;
+      text-align: left;
+    }
+
+    .summary-incomplete-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+
+    .summary-incomplete-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #92400e;
+    }
+
+    .summary-incomplete-text {
+      font-size: 0.75rem;
+      color: #78350f;
+      line-height: 1.4;
+      margin: 0 0 10px 0;
+    }
+
+    .summary-missing-items {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .summary-missing-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #ffffff;
+      border: 1px solid #fef3c7;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.74rem;
+    }
+
+    .summary-missing-row strong {
+      color: #92400e;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    .summary-missing-row span {
+      color: #475569;
+    }
+
+    .summary-missing-btn {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      border-radius: 5px;
+      padding: 3px 8px;
+      font-size: 0.70rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .summary-missing-btn:hover {
+      background: #fde68a;
+      color: #78350f;
     }
 
     .btn-select-profile,
@@ -426,13 +429,14 @@
 
     .btn-step-prev {
       flex: 1;
-      padding: 12px 14px;
+      padding: 6px 12px;
+      min-height: 32px;
       background: #ffffff;
       color: #334155;
       border: 1.5px solid #cbd5e1;
       border-radius: var(--radius-md);
       font-family: var(--font-title);
-      font-size: 0.88rem;
+      font-size: 0.80rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
@@ -455,13 +459,14 @@
 
     .btn-step-next {
       flex: 2;
-      padding: 12px 18px;
+      padding: 6px 14px;
+      min-height: 32px;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
       border: none;
       border-radius: var(--radius-md);
       font-family: var(--font-title);
-      font-size: 0.92rem;
+      font-size: 0.82rem;
       font-weight: 800;
       letter-spacing: 0.2px;
       cursor: pointer;
@@ -469,7 +474,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
       transition: all 0.2s ease;
       user-select: none;
     }
@@ -542,21 +547,21 @@
     .setup-tab-btn {
       flex: 1;
       min-width: 0;
-      height: 36px;
-      padding: 6px 8px;
+      height: 29px;
+      padding: 4px 6px;
       background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
       border: 1.5px solid #cbd5e1;
       border-bottom: 1.5px solid #cbd5e1;
-      border-radius: 9px 9px 0 0;
+      border-radius: 7px 7px 0 0;
       font-family: var(--font-title);
-      font-size: 0.77rem;
+      font-size: 0.73rem;
       font-weight: 700;
       color: #64748b;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 4px;
       position: relative;
       user-select: none;
       white-space: nowrap;
@@ -572,15 +577,15 @@
 
     /* Pestaña Activa: lengüeta frontal en primer plano, fusionada sin costura a la tarjeta */
     .setup-tab-btn.active {
-      height: 44px; /* Sobresale hacia arriba de las demás */
+      height: 36px; /* Sobresale hacia arriba de las demás */
       background: #ffffff !important; /* Mismo fondo blanco de la tarjeta */
       border: 1.5px solid #cbd5e1;
-      border-top: 3.5px solid #10b981; /* Borde superior distintivo verde esmeralda */
-      border-bottom: 3.5px solid #ffffff !important; /* Borde inferior BLANCO que borra la línea de la tarjeta */
-      border-radius: 9px 9px 0 0;
+      border-top: 3px solid #10b981; /* Borde superior distintivo verde esmeralda */
+      border-bottom: 3px solid #ffffff !important; /* Borde inferior BLANCO que borra la línea de la tarjeta */
+      border-radius: 7px 7px 0 0;
       color: #0f172a;
       font-weight: 800;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       margin-bottom: -1.5px;
       z-index: 10;
       box-shadow: 0 -3px 8px rgba(15, 23, 42, 0.05);
@@ -663,26 +668,28 @@
     .categories-single-list {
       display: flex;
       flex-direction: column;
-      margin-top: 10px;
+      margin-top: 4px;
     }
 
     .category-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 4px;
+      padding: 4px 3px;
       border-bottom: 1px solid #f1f5f9;
+      min-height: 28px;
     }
 
     .category-label {
-      font-size: 0.81rem;
+      font-size: 0.79rem;
       color: #1e293b;
       font-weight: 600;
       display: flex;
       align-items: center;
       gap: 6px;
       flex: 1;
-      padding-right: 8px;
+      padding-right: 6px;
+      line-height: 1.15;
     }
 
     .bolitas-control {
@@ -692,79 +699,71 @@
 
     .bolitas-slots {
       display: flex;
-      gap: 7px;
+      gap: 6px;
       align-items: center;
     }
 
-    /* SLOT INTERACTIVO DIRECTO (26px, ÁREA TÁCTIL CÓMODA PARA 3 NIVELES) */
-    .dot-slot {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: #f1f5f9;
-      border: 1.5px dashed #cbd5e1;
+    /* SLOT DE ESTRELLA (AUMENTADO ~20% PARA MAYOR COMODIDAD) */
+    .star-slot {
+      width: 20px;
+      height: 20px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
+      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
     }
 
-    .dot-slot:hover {
-      background: #e2e8f0;
-      border-color: #94a3b8;
-      transform: scale(1.12);
+    .star-slot:hover {
+      transform: scale(1.22);
     }
 
-    /* BOLITA LLENA / ACTIVA */
-    .dot-slot.filled {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      border: 1.5px solid #047857;
-      box-shadow: 0 2px 5px rgba(16, 185, 129, 0.45);
+    .star-svg {
+      width: 17px;
+      height: 17px;
+      display: block;
+      fill: #f1f5f9;
+      stroke: #94a3b8;
+      stroke-width: 1.2;
+      stroke-linejoin: round;
+      transition: all 0.18s ease;
     }
 
-    .dot-slot.filled::after {
-      content: '';
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.8);
-      position: absolute;
-      top: 4px;
-      left: 5px;
+    /* ESTRELLA ACTIVA / ASIGNADA (DORADO/ÁMBAR) */
+    .star-slot.filled .star-svg {
+      fill: #eab308;
+      stroke: #ca8a04;
+      stroke-width: 1.1;
+      filter: drop-shadow(0 1px 2px rgba(234, 179, 8, 0.45));
     }
 
-    .dot-slot.filled:hover {
-      transform: scale(1.15);
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
-      filter: brightness(1.08);
+    .star-slot.filled:hover .star-svg {
+      filter: drop-shadow(0 0 4px rgba(234, 179, 8, 0.75));
     }
 
-    /* ANIMACIÓN TITILAR CUANDO NO HAY BOLITAS EN EL POZO */
-    @keyframes dotBlinkAlert {
+    /* ANIMACIÓN TITILAR AL LLEGAR AL TOPE DE 25 ESTRELLAS */
+    @keyframes starBlinkAlert {
       0%, 100% {
         transform: scale(1);
-        box-shadow: 0 2px 5px rgba(16, 185, 129, 0.45);
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border-color: #047857;
+        fill: #eab308;
+        stroke: #ca8a04;
       }
       25%, 75% {
-        transform: scale(1.35);
-        box-shadow: 0 0 14px rgba(239, 68, 68, 0.95), 0 0 20px rgba(245, 158, 11, 0.9);
-        background: linear-gradient(135deg, #ef4444 0%, #f59e0b 100%);
-        border-color: #dc2626;
+        transform: scale(1.3);
+        fill: #ef4444;
+        stroke: #dc2626;
+        filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.9));
       }
       50% {
-        transform: scale(0.92);
-        background: #f87171;
-        border-color: #b91c1c;
+        transform: scale(0.9);
+        fill: #f59e0b;
+        stroke: #d97706;
       }
     }
 
-    .dot-slot.filled.blink-alert {
-      animation: dotBlinkAlert 0.42s ease-in-out 3 !important;
+    .star-slot.filled.blink-alert .star-svg {
+      animation: starBlinkAlert 0.42s ease-in-out 3 !important;
     }
 
     /* 2. ELECCIÓN DE DECISIONES INICIALES (VIVIENDA, TRABAJO, VEHÍCULO - COMPACTO) */
@@ -785,16 +784,16 @@
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 6px 6px;
-      text-align: center;
+      padding: 5px 6px;
+      text-align: left;
       cursor: pointer;
       transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      justify-content: center;
-      gap: 2px;
-      min-height: 48px;
+      justify-content: flex-start;
+      gap: 6px;
+      min-height: 38px;
       position: relative;
       user-select: none;
     }
@@ -807,49 +806,95 @@
     }
 
     .anchor-option.selected {
-      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
-      border-color: #10b981;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.18);
+      background: #ecfdf5 !important;
+      border-color: #059669 !important;
+      box-shadow: 0 0 0 2px #059669, 0 3px 8px rgba(5, 150, 105, 0.22) !important;
+      transform: translateY(-1px);
     }
 
-    .anchor-option.selected::after {
-      content: '✓';
-      position: absolute;
-      top: 3px;
-      right: 3px;
-      font-size: 0.55rem;
-      font-weight: 900;
-      color: #ffffff;
-      background: #10b981;
-      width: 13px;
-      height: 13px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
-      box-shadow: 0 1px 2px rgba(16, 185, 129, 0.4);
+    .anchor-option.selected .anchor-name {
+      color: #065f46;
+      font-weight: 800;
     }
 
     .anchor-icon {
       font-size: 1.15rem;
       margin-bottom: 0;
       line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .anchor-text-block {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      flex: 1;
     }
 
     .anchor-name {
-      font-size: 0.68rem;
+      font-size: 0.67rem;
       font-weight: 700;
       color: #0f172a;
       line-height: 1.15;
     }
 
     .anchor-cost {
-      font-size: 0.58rem;
+      font-size: 0.57rem;
       color: #047857;
       font-weight: 600;
       margin-top: 1px;
       line-height: 1.1;
+    }
+
+    /* 2. BLOQUES DE ESTILO DE VIDA CON DEGRADÉ A BLANCO HACIA ABAJO */
+    .anchor-block {
+      border-radius: 9px;
+      padding: 4px 6px 5px 6px;
+      margin-top: 4px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    /* 🏠 Vivienda: Azul cielo suave degradándose a blanco hacia abajo */
+    .anchor-block.block-home {
+      background: linear-gradient(180deg, #eff6ff 0%, #f8faff 45%, #ffffff 100%);
+      border-color: #dbeafe;
+    }
+
+    /* 💼 Trabajo: Ámbar / Dorado cálido suave degradándose a blanco hacia abajo */
+    .anchor-block.block-job {
+      background: linear-gradient(180deg, #fefce8 0%, #fffdf5 45%, #ffffff 100%);
+      border-color: #fef08a;
+    }
+
+    /* 🚌 Transporte: Verde esmeralda suave degradándose a blanco hacia abajo */
+    .anchor-block.block-transport {
+      background: linear-gradient(180deg, #f0fdf4 0%, #f7fef9 45%, #ffffff 100%);
+      border-color: #bbf7d0;
+    }
+
+    .anchor-block-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 2px;
+      padding: 1px 3px;
+      line-height: 1.2;
+      letter-spacing: 0.15px;
+    }
+
+    .block-home .anchor-block-title {
+      color: #1d4ed8;
+    }
+
+    .block-job .anchor-block-title {
+      color: #a16207;
+    }
+
+    .block-transport .anchor-block-title {
+      color: #15803d;
     }
 
     /* 3. TRIÁNGULO DE INVERSIÓN (SVG INTERACTIVO) */
@@ -1305,118 +1350,165 @@
            VISTA 1: SETEO DE BOLITAS DE INTERÉS (PRIMER PASO DEL TALLER)
            ================================================================== -->
       <section id="view-step-4" class="step-view">
-        <!-- Tarjeta de Intereses (Listado Sencillo de 11 Categorías y 20 Bolitas) -->
-        <div class="glass-card">
-          <div class="glass-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <div class="glass-card-title">Intereses Personales</div>
-            <div class="simple-counter-badge" title="Bolitas asignadas del total de 20">
-              <span id="assigned-bolitas">11</span> / <span id="max-bolitas">20</span>
-            </div>
-          </div>
+        <!-- Lengüetas Superiores: Intereses, Estilo, Resumen -->
+        <div class="setup-tabs-bar">
+          <button class="setup-tab-btn active" onclick="goToInterestsScreen()">
+            <span>Intereses</span>
+          </button>
+          <button class="setup-tab-btn" onclick="goToAnchorsScreen()">
+            <span>Estilo</span>
+          </button>
+          <button class="setup-tab-btn" onclick="goToSummaryScreen()">
+            <span>Resumen</span>
+          </button>
+        </div>
 
+        <!-- Tarjeta de Intereses (Listado Sencillo de Categorías y 25 Estrellas) -->
+        <div class="glass-card setup-tab-card">
           <!-- Listado único de categorías -->
           <div class="categories-single-list" id="cats-list">
             <!-- Renderizado dinámico con JS -->
           </div>
 
-          <!-- Botón de Navegación: Siguiente -->
-          <button class="btn-step-next" style="width: 100%; margin-top: 10px; padding: 10px 14px;" onclick="goToAnchorsScreen()">
-            <span>Siguiente (Decisiones iniciales)</span>
-            <span style="font-size: 0.95rem;">➔</span>
-          </button>
+          <!-- Barra Inferior: Botón Siguiente a la izquierda y Cuadrito contador a la derecha -->
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px;">
+            <button id="btn-next-interests" class="btn-step-next" style="flex: 1; margin: 0; justify-content: center;" onclick="confirmInterestsAndContinue()" disabled>
+              <span>Siguiente</span>
+              <span style="font-size: 0.90rem;">➔</span>
+            </button>
+            <div class="simple-counter-badge" title="Estrellas asignadas del total de 25" style="padding: 5px 12px; font-size: 0.80rem; border-radius: 8px;">
+              <span id="assigned-bolitas">14</span> / <span id="max-bolitas">25</span> ⭐
+            </div>
+          </div>
+          <div id="interests-warning-msg" class="step-warning-msg hidden"></div>
         </div>
       </section>
 
       <!-- ==================================================================
-           VISTA 2: ELECCIÓN DE DECISIONES INICIALES (VIVIENDA, TRABAJO, VEHÍCULO)
+           VISTA 2: ELECCIÓN DE ESTILO DE VIDA (VIVIENDA, TRABAJO, VEHÍCULO)
            ================================================================== -->
       <section id="view-anchors" class="step-view hidden">
-        <div class="glass-card">
-          <div class="glass-card-title" style="margin-bottom: 6px;">🧭 Decisiones Iniciales</div>
+        <!-- Lengüetas Superiores: Intereses, Estilo, Resumen -->
+        <div class="setup-tabs-bar">
+          <button class="setup-tab-btn" onclick="goToInterestsScreen()">
+            <span>Intereses</span>
+          </button>
+          <button class="setup-tab-btn active" onclick="goToAnchorsScreen()">
+            <span>Estilo</span>
+          </button>
+          <button class="setup-tab-btn" onclick="goToSummaryScreen()">
+            <span>Resumen</span>
+          </button>
+        </div>
 
+        <div class="glass-card setup-tab-card">
           <!-- 1. Vivienda (4 opciones) -->
-          <div style="margin-top: 6px;">
-            <div style="font-size: 0.76rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 4px;">
+          <div class="anchor-block block-home" style="margin-top: 1px;">
+            <div class="anchor-block-title">
               <span>🏠</span> <span>1. Vivienda:</span>
             </div>
             <div class="anchor-card-selector" id="anchor-home">
               <div class="anchor-option" onclick="selectAnchor('home', 0, this, 'Casa o Depto')">
                 <div class="anchor-icon">🏡</div>
-                <div class="anchor-name">Casa o Depto</div>
-                <div class="anchor-cost">En condominio</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">Casa o Depto</div>
+                  <div class="anchor-cost">En condominio elegante</div>
+                </div>
               </div>
               <div class="anchor-option" onclick="selectAnchor('home', 1, this, 'Departamento centro')">
                 <div class="anchor-icon">🏢</div>
-                <div class="anchor-name">Departamento centro</div>
-                <div class="anchor-cost">Conectividad central</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">Departamento centro</div>
+                  <div class="anchor-cost">Conectividad central</div>
+                </div>
               </div>
-              <div class="anchor-option" onclick="selectAnchor('home', 2, this, 'Casa Barrio tradicional')">
+              <div class="anchor-option" onclick="selectAnchor('home', 2, this, 'Casa o departamento')">
                 <div class="anchor-icon">🏘️</div>
-                <div class="anchor-name">Casa Barrio tradicional</div>
-                <div class="anchor-cost">Tranquila y familiar</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">Casa o departamento</div>
+                  <div class="anchor-cost">Vida de barrio</div>
+                </div>
               </div>
               <div class="anchor-option" onclick="selectAnchor('home', 3, this, 'Parcela de agrado')">
                 <div class="anchor-icon">🌲</div>
-                <div class="anchor-name">Parcela de agrado</div>
-                <div class="anchor-cost">Espacio y naturaleza</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">Parcela de agrado</div>
+                  <div class="anchor-cost">Espacio y naturaleza</div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- 2. Trabajo (4 opciones con 2 sueldos medios) -->
-          <div style="margin-top: 8px;">
-            <div style="font-size: 0.76rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 4px;">
+          <!-- 2. Trabajo (4 opciones) -->
+          <div class="anchor-block block-job">
+            <div class="anchor-block-title">
               <span>💼</span> <span>2. Trabajo:</span>
             </div>
             <div class="anchor-card-selector" id="anchor-job">
-              <div class="anchor-option" onclick="selectAnchor('job', 0, this, 'Freelance sueldo medio')">
+              <div class="anchor-option" onclick="selectAnchor('job', 0, this, 'Freelance')">
                 <div class="anchor-icon">⚡</div>
-                <div class="anchor-name">Freelance sueldo medio</div>
-                <div class="anchor-cost">Sueldo medio variable</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">Freelance</div>
+                  <div class="anchor-cost">Sueldo medio variable</div>
+                </div>
               </div>
-              <div class="anchor-option" onclick="selectAnchor('job', 1, this, 'Trabajo dependiente sueldo medio')">
+              <div class="anchor-option" onclick="selectAnchor('job', 1, this, 'Trabajo dependiente')">
                 <div class="anchor-icon">💼</div>
-                <div class="anchor-name">Trabajo dependiente sueldo medio</div>
-                <div class="anchor-cost">Sueldo medio fijo</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">Trabajo dependiente</div>
+                  <div class="anchor-cost">Sueldo medio</div>
+                </div>
               </div>
-              <div class="anchor-option" onclick="selectAnchor('job', 2, this, 'Trabajo sueldo mínimo')">
-                <div class="anchor-icon">🛠️</div>
-                <div class="anchor-name">Trabajo sueldo mínimo</div>
-                <div class="anchor-cost">Sueldo mínimo regulado</div>
+              <div class="anchor-option" onclick="selectAnchor('job', 2, this, 'Trabajo dependiente')">
+                <div class="anchor-icon">🏪</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">Trabajo dependiente</div>
+                  <div class="anchor-cost">Sueldo mínimo</div>
+                </div>
               </div>
-              <div class="anchor-option" onclick="selectAnchor('job', 3, this, 'Trabajo administrativo sueldo alto')">
+              <div class="anchor-option" onclick="selectAnchor('job', 3, this, 'Trabajo administrativo')">
                 <div class="anchor-icon">🏛️</div>
-                <div class="anchor-name">Trabajo administrativo sueldo alto</div>
-                <div class="anchor-cost">Sueldo alto corporativo</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">Trabajo administrativo</div>
+                  <div class="anchor-cost">Sueldo alto</div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- 3. Transporte (4 opciones con auto deportivo o de lujo) -->
-          <div style="margin-top: 8px;">
-            <div style="font-size: 0.76rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 4px;">
+          <!-- 3. Transporte (4 opciones) -->
+          <div class="anchor-block block-transport">
+            <div class="anchor-block-title">
               <span>🚌</span> <span>3. Transporte:</span>
             </div>
             <div class="anchor-card-selector" id="anchor-transport">
-              <div class="anchor-option" onclick="selectAnchor('transport', 0, this, 'SUV')">
+              <div class="anchor-option" onclick="selectAnchor('transport', 0, this, 'SUV o Camioneta')">
                 <div class="anchor-icon">🚙</div>
-                <div class="anchor-name">SUV</div>
-                <div class="anchor-cost">Espaciosa y familiar</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">SUV o Camioneta</div>
+                  <div class="anchor-cost">Espaciosa y familiar</div>
+                </div>
               </div>
               <div class="anchor-option" onclick="selectAnchor('transport', 1, this, 'City Car')">
                 <div class="anchor-icon">🚗</div>
-                <div class="anchor-name">City Car</div>
-                <div class="anchor-cost">Ágil y muy económico</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">City Car</div>
+                  <div class="anchor-cost">Económico y rendidor</div>
+                </div>
               </div>
               <div class="anchor-option" onclick="selectAnchor('transport', 2, this, 'Locomoción colectiva')">
                 <div class="anchor-icon">🚌</div>
-                <div class="anchor-name">Locomoción colectiva</div>
-                <div class="anchor-cost">Micro y Metro • Económico</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">Locomoción colectiva</div>
+                  <div class="anchor-cost">Micro, Metro, Taxi, Uber</div>
+                </div>
               </div>
-              <div class="anchor-option" onclick="selectAnchor('transport', 3, this, 'Auto deportivo o de lujo')">
+              <div class="anchor-option" onclick="selectAnchor('transport', 3, this, 'Deportivo o de lujo')">
                 <div class="anchor-icon">🏎️</div>
-                <div class="anchor-name">Auto deportivo o de lujo</div>
-                <div class="anchor-cost">Alta gama y exclusivo</div>
+                <div class="anchor-text-block">
+                  <div class="anchor-name">Deportivo o de lujo</div>
+                  <div class="anchor-cost">Alta gama y exclusivo</div>
+                </div>
               </div>
             </div>
           </div>
@@ -1440,28 +1532,34 @@
            VISTA 3: RESUMEN DEL PERSONAJE CONSOLIDADO
            ================================================================== -->
       <section id="view-character-summary" class="step-view hidden">
-        <div class="glass-card">
-          <div class="glass-card-header" style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-            <div class="glass-card-title">👤 Ficha de tu Personaje</div>
-            <div style="background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #047857; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 9999px;">
-              ✨ Listo
-            </div>
-          </div>
+        <!-- Lengüetas Superiores: Intereses, Estilo, Resumen -->
+        <div class="setup-tabs-bar">
+          <button class="setup-tab-btn" onclick="goToInterestsScreen()">
+            <span>Intereses</span>
+          </button>
+          <button class="setup-tab-btn" onclick="goToAnchorsScreen()">
+            <span>Estilo</span>
+          </button>
+          <button class="setup-tab-btn active" onclick="goToSummaryScreen()">
+            <span>Resumen</span>
+          </button>
+        </div>
 
+        <div class="glass-card setup-tab-card">
           <!-- Contenido dinámico del resumen -->
           <div id="character-summary-content">
             <!-- Inyectado por renderCharacterSummary() -->
           </div>
 
           <!-- Botones de navegación -->
-          <div class="step-nav-buttons" style="margin-top: 18px;">
+          <div class="step-nav-buttons" style="margin-top: 10px;">
             <button class="btn-step-prev" onclick="goToAnchorsScreen()">
               <span>◀</span>
-              <span>Ajustar estilo</span>
+              <span>Anterior</span>
             </button>
-            <button class="btn-step-next" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); font-size: 0.92rem; padding: 12px 20px;" onclick="startSimulationFromSummary()">
-              <span>Comenzar Taller</span>
-              <span>🚀</span>
+            <button id="btn-summary-next" class="btn-step-next" onclick="startSimulationFromSummary()" disabled>
+              <span>Siguiente</span>
+              <span>➔</span>
             </button>
           </div>
         </div>
@@ -1804,320 +1902,308 @@
       {
         step: 1,
         tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "🌱 Finanzas Personales y Bienestar",
+        title: "Finanzas Personales y Bienestar",
         desc: "El dinero como herramienta al servicio de tus proyectos de vida, tu seguridad y tu tranquilidad personal.",
         view: "view-generic",
         genericTitle: "🌱 Finanzas Personales y Bienestar",
-        genericDesc: "Simulador vivencial interactivo: experimenta en tiempo real cómo el dinero sirve a tus proyectos de vida y paz mental.",
-        genericIcon: "🌱"
+        genericDesc: "El dinero como herramienta al servicio de tus proyectos de vida, tu seguridad y tu tranquilidad personal.",
+        genericIcon: "🌱",
+        figureIcon: "🌱",
+        figureSvg: `<svg viewBox="0 0 52 52" style="width: 38px; height: 38px; display: block;" fill="none"><path d="M26 42V26" stroke="#059669" stroke-width="2.8" stroke-linecap="round" /><path d="M26 31C26 23 37 18 39 18C39 25 32 31 26 31Z" fill="#34d399" fill-opacity="0.35" stroke="#059669" stroke-width="2.2" stroke-linejoin="round" /><path d="M26 26C26 20 17 15 14 15C14 22 20 26 26 26Z" fill="#10b981" fill-opacity="0.45" stroke="#059669" stroke-width="2.2" stroke-linejoin="round" /><circle cx="26" cy="42" r="2.5" fill="#047857" /></svg>`
       },
       {
         step: 2,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Temario del Taller",
-        desc: "4 bloques clave: Fundamentos, Inversión real, Mundo del crédito y Simulación de vida.",
-        view: "view-generic",
-        genericTitle: "📋 Temario del Taller (90 Minutos)",
-        genericDesc: "Bloque 1: Presupuesto • Bloque 2: Ahorro e Inversión • Bloque 3: Créditos y CAE • Bloque 4: Simulación y Cierre.",
-        genericIcon: "📋"
+        tag: "Perfil del personaje",
+        title: "Intereses personales",
+        desc: "Indica con estrellas qué aspectos te interesan más. Distribuye máximo 25 estrellas; no es necesario ocuparlas todas. Pincha las estrellas para agregar y quitar interés.",
+        view: "view-step-4",
+        figureIcon: "👤",
+        figureSvg: `<svg viewBox="0 0 52 52" style="width: 40px; height: 40px; display: block;" fill="none"><circle cx="26" cy="14" r="8" fill="#0284c7" /><path d="M10 40C10 31.5 17 25 26 25C35 25 42 31.5 42 40" fill="#38bdf8" fill-opacity="0.35" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" /></svg>`
       },
       {
         step: 3,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Finanzas Personales",
-        desc: "Administración de dinero y recursos económicos. Presupuesto: Ahorro, Inversión, Deudas, Protección y Patrimonio.",
-        view: "view-generic",
-        genericTitle: "💼 Finanzas Personales",
-        genericDesc: "Administración de dinero y recursos económicos. La gestión integrada de Presupuesto, Ahorro, Inversión, Deudas, Protección y Patrimonio.",
-        genericIcon: "💼"
+        tag: "Perfil del personaje",
+        title: "Estilo de vida",
+        desc: "Selecciona tu vivienda, trabajo y transporte.",
+        view: "view-anchors",
+        figureIcon: "👤",
+        figureSvg: `<svg viewBox="0 0 52 52" style="width: 40px; height: 40px; display: block;" fill="none"><circle cx="26" cy="14" r="8" fill="#0284c7" /><path d="M10 40C10 31.5 17 25 26 25C35 25 42 31.5 42 40" fill="#38bdf8" fill-opacity="0.35" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" /></svg>`
       },
       {
         step: 4,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Seteo Inicial y Bolitas de Interés",
-        desc: "Distribuye tus 20 bolitas de interés para definir tus prioridades personales de vida.",
-        view: "view-step-4"
+        tag: "Perfil del personaje",
+        title: "Resumen del perfil",
+        desc: "Ficha consolidada de tu personaje: revisa tus intereses y estilo de vida elegidos.",
+        view: "view-character-summary",
+        figureIcon: "👤",
+        figureSvg: `<svg viewBox="0 0 52 52" style="width: 40px; height: 40px; display: block;" fill="none"><circle cx="26" cy="14" r="8" fill="#0284c7" /><path d="M10 40C10 31.5 17 25 26 25C35 25 42 31.5 42 40" fill="#38bdf8" fill-opacity="0.35" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" /></svg>`
       },
       {
         step: 5,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Importancia del Presupuesto: \"Págate Primero\"",
-        desc: "Gasta lo que queda tras ahorrar. Fijos (50%), Estilo de Vida (30%) y Reservas (20%).",
-        view: "view-anchors"
+        tag: "PRESUPUESTO INTELIGENTE",
+        title: "Presupuesto",
+        desc: "Definición de presupuesto: 50% Gastos Fijos, 30% Estilo de Vida y 20% Reservas.",
+        view: "view-generic"
       },
       {
         step: 6,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Primer Mes: Pago de Gastos Fijos",
+        tag: "PRIMER MES Y REALIDAD",
+        title: "Inicio del Simulador",
         desc: "Se procesan tus compromisos iniciales: revisa tu liquidez real y capacidad de ahorro.",
-        view: "view-character-summary"
+        view: "view-generic"
       },
       {
         step: 7,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Ahorro, Inversión y Crédito (General)",
-        desc: "Los tres pilares: Ahorro para seguridad, Inversión para crecer y Crédito para adelantar consumo.",
-        view: "view-generic",
-        genericTitle: "🌐 El Ecosistema Financiero",
-        genericDesc: "Comprende la función de cada pilar antes de comprometer tus ingresos mensuales.",
-        genericIcon: "🌐"
+        tag: "ECOSISTEMA FINANCIERO",
+        title: "Ahorro, Inversión y Crédito",
+        desc: "Simulador corriendo: los tres pilares del ecosistema financiero.",
+        view: "view-character-summary"
       },
       {
         step: 8,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Consideraciones al Ahorrar e Invertir",
-        desc: "Las tres variables indispensables del dinero: Rentabilidad, Liquidez y Nivel de Riesgo.",
+        tag: "CRITERIOS DE DECISIÓN",
+        title: "Consideraciones al Invertir",
+        desc: "Simulador corriendo: rentabilidad, liquidez y nivel de riesgo.",
         view: "view-step-9"
       },
       {
         step: 9,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "El Triángulo de la Inversión",
-        desc: "Ninguna alternativa maximiza simultáneamente las tres variables del dinero.",
+        tag: "VARIABLES DEL DINERO",
+        title: "Triángulo de la Inversión",
+        desc: "Simulador corriendo: ninguna alternativa maximiza las tres variables a la vez.",
         hasTriangle: true,
         view: "view-step-9"
       },
       {
         step: 10,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Ahorro y Guardar Plata",
-        desc: "Diferencia entre saldo ocioso en cuenta corriente y fondos con metas específicas.",
-        view: "view-generic",
-        genericTitle: "🏦 Fondos con Propósito Específico",
-        genericDesc: "Separa reservas en fondos concretos: emergencias, metas anuales y proyectos familiares.",
-        genericIcon: "💰"
+        tag: "AHORRO CON PROPÓSITO",
+        title: "Ahorrar y Guardar Dinero",
+        desc: "Ver instrumentos de ahorro: separa reservas con metas específicas.",
+        view: "view-generic"
       },
       {
         step: 11,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Evento de Bienestar y Pasiones",
-        desc: "Tus aficiones demandan presupuesto real: decir sí a todo sobreendeuda, decir no frustra.",
+        tag: "ESTILO DE VIDA Y BIENESTAR",
+        title: "Darse un Gusto",
+        desc: "Evento de darse un gusto: 4 alternativas según el perfil de tu personaje.",
         view: "view-step-11"
       },
       {
         step: 12,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Instrumentos Comunes: Depósitos a Plazo (DAP)",
-        desc: "Renta fija con capital 100% garantizado por ley (CMF). Cero riesgo de mercado.",
-        view: "view-generic",
-        genericTitle: "🏦 Depósitos a Plazo (DAP)",
-        genericDesc: "Ideal para compromisos anuales conocidos y reservas de bajo riesgo a 30, 90 o 360 días.",
-        genericIcon: "🏦"
+        tag: "INSTRUMENTOS 1 • RENTA FIJA",
+        title: "Instrumentos Comunes de Inversión",
+        desc: "Ver instrumentos comunes: depósitos a plazo (DAP) con capital garantizado.",
+        view: "view-generic"
       },
       {
         step: 13,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Instrumentos Tipo 2: Fondos Mutuos y Cuenta 2",
-        desc: "Diversificación profesional y liquidez en 48 horas para horizontes de mediano plazo.",
-        view: "view-generic",
-        genericTitle: "📊 Fondos Mutuos y Cuenta 2 AFP",
-        genericDesc: "Mezcla administrada de renta fija y acciones para equilibrar retorno y liquidez.",
-        genericIcon: "📊"
+        tag: "AHORRO PREVISIONAL",
+        title: "APV y Cuenta 2",
+        desc: "Ver instrumentos APV y Cuenta 2: beneficios tributarios y horizontes de ahorro.",
+        view: "view-generic"
       },
       {
         step: 14,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Instrumentos Tipo 3: Acciones y Cripto",
-        desc: "Mayor rentabilidad potencial a largo plazo a cambio de alta volatilidad y riesgo de capital.",
-        view: "view-generic",
-        genericTitle: "📈 Renta Variable y Alternativos",
-        genericDesc: "Acciones individuales y activos digitales: potencial de apreciación con riesgo de pérdida.",
-        genericIcon: "📈"
+        tag: "INSTRUMENTOS 2 • BALANCEADOS",
+        title: "Instrumentos Tipo 2: Fondos Mutuos",
+        desc: "Ver instrumentos Fondos Mutuos y Cuenta 2: diversificación profesional y liquidez.",
+        view: "view-generic"
       },
       {
         step: 15,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "\"No poner todos los huevos en la misma canasta\"",
-        desc: "Diversifica por tipo de activo, horizonte de plazo, sector económico e institución.",
-        view: "view-generic",
-        genericTitle: "🥚 Regla de Oro: Diversificación",
-        genericDesc: "Concentrar todo tu patrimonio en un solo instrumento te deja vulnerable a crisis sectoriales.",
-        genericIcon: "🥚"
+        tag: "INSTRUMENTOS 3 • RENTA VARIABLE",
+        title: "Instrumentos Tipo 3: Acciones y Cripto",
+        desc: "Ver instrumentos Acciones y Cripto: mayor rentabilidad potencial y volatilidad.",
+        view: "view-generic"
       },
       {
         step: 16,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Evento Simulador: Choque de Mercado",
-        desc: "Caída del 20% en el sector tecnológico: amortigua quien diversificó, sufre quien concentró.",
-        view: "view-generic",
-        genericTitle: "📉 Impacto de Choque de Mercado (-20%)",
-        genericDesc: "Quien tenía DAP y Fondos Mutuos amortiguó el golpe; quien tenía 100% acciones sufrió pérdidas agudas.",
-        genericIcon: "📉"
+        tag: "GESTIÓN DE CARTERA",
+        title: "\"No poner todos los huevos en la misma canasta\"",
+        desc: "Simulador corriendo: diversificación por instrumento, plazo y sector.",
+        view: "view-generic"
       },
       {
         step: 17,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Perfil de Riesgo y Tolerancia",
-        desc: "La cartera correcta es siempre aquella que te permite dormir tranquilo en la noche.",
-        view: "view-step-18"
+        tag: "SIMULACIÓN DE IMPACTO",
+        title: "Evento Simulador: Choque de Mercado",
+        desc: "Choque de Mercado: caída del 20% en el sector tecnológico.",
+        view: "view-generic"
       },
       {
         step: 18,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Encuesta / Test de Perfil de Riesgo",
-        desc: "Test oficial UAH / Experian: clasifícate en Conservador (5-8), Moderado (9-11) o Arriesgado (12-15).",
+        tag: "PERFIL DE INVERSOR",
+        title: "Perfil de Riesgo y Tolerancia",
+        desc: "Simulador corriendo: la cartera correcta es la que te permite dormir tranquilo.",
         view: "view-step-18"
       },
       {
         step: 19,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Reflexión sobre Riesgos y Estrategia",
-        desc: "Alinear horizontes de tiempo y objetivos vitales con el nivel real de tolerancia al riesgo.",
-        view: "view-generic",
-        genericTitle: "🧭 Calibración de Estrategia",
-        genericDesc: "Un perfil conservador no debe tener cripto; un horizonte a 20 años no debe ser solo DAP.",
-        genericIcon: "🧭"
+        tag: "EVALUACIÓN OFICIAL",
+        title: "Test de Perfil de Riesgo",
+        desc: "Test de Perfil de Riesgo: clasifícate en Conservador, Moderado o Arriesgado.",
+        view: "view-step-18"
       },
       {
         step: 20,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Tipos de Créditos y Mecánicas",
-        desc: "Adelantar consumo presente comprometiendo ingresos futuros con un costo financiero asociado.",
-        view: "view-generic",
-        genericTitle: "💳 Panorama del Crédito",
-        genericDesc: "Diferencias estructurales entre crédito rotativo, crédito de consumo, automotriz e hipotecario.",
-        genericIcon: "💳"
+        tag: "REFLEXIÓN Y PORTAFOLIO",
+        title: "Reflexión sobre Riesgos y Estrategia",
+        desc: "Resultados del perfil: alinea tus horizontes de tiempo y tolerancia al riesgo.",
+        view: "view-generic"
       },
       {
         step: 21,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Tarjetas de Crédito y la Trampa del Pago Mínimo",
-        desc: "Tasas entre 25% y 45% anual: el pago mínimo capitaliza intereses y multiplica los años de deuda.",
-        view: "view-generic",
-        genericTitle: "💳 La Trampa del Pago Mínimo",
-        genericDesc: "Deuda en tarjeta: $450.000 CLP. Pagar el mínimo de $25.000 tarda 4 años y pagas $890.000.",
-        genericIcon: "💳"
+        tag: "OPORTUNIDAD PATRIMONIAL",
+        title: "Evento: Oportunidad",
+        desc: "Oportunidad: adquiere un activo o bien de valor según tu personalidad.",
+        view: "view-step-11"
       },
       {
         step: 22,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Línea de Crédito y Sobregiro",
-        desc: "Uso exclusivo como salvavidas de emergencia inmediata; costo por interés diario muy elevado.",
-        view: "view-generic",
-        genericTitle: "⚡ Línea de Sobregiro Bancario",
-        genericDesc: "Liquidez inmediata 24/7 para emergencias puntuales; debe cubrirse lo antes posible.",
-        genericIcon: "⚡"
+        tag: "AJUSTE ESTRATÉGICO",
+        title: "Actividad: Ajuste de Inversiones",
+        desc: "Simulador corriendo: rebalanceo libre de cartera según tu perfil diagnosticado.",
+        view: "view-character-summary"
       },
       {
         step: 23,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Crédito Hipotecario y Bienes Raíces",
-        desc: "Dividendos a 20-30 años, importancia del pie y seguros obligatorios de desgravamen e incendio.",
-        view: "view-generic",
-        genericTitle: "🏠 Crédito Hipotecario",
-        genericDesc: "La mayor inversión patrimonial: dividendo mensual (máx 30% renta) y tasa en UF a largo plazo.",
-        genericIcon: "🏠"
+        tag: "MUNDO DEL CRÉDITO",
+        title: "Tipos de Créditos y Mecánicas",
+        desc: "Ver tipos de crédito: adelantar consumo presente comprometiendo ingresos futuros.",
+        view: "view-generic"
       },
       {
         step: 24,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Crédito de Consumo en Cuotas Fijas",
-        desc: "Préstamos en cuotas pactadas para consolidación o proyectos; evaluar el Costo Total del Crédito (CTC).",
-        view: "view-generic",
-        genericTitle: "💵 Crédito de Consumo en Cuotas",
-        genericDesc: "Permite ordenar deudas o financiar proyectos personales; vital comparar ofertas antes de firmar.",
-        genericIcon: "💵"
+        tag: "CRÉDITO ROTATIVO",
+        title: "Tarjetas de Crédito y Pago Mínimo",
+        desc: "Simulador corriendo: el pago mínimo capitaliza intereses y alarga la deuda.",
+        view: "view-generic"
       },
       {
         step: 25,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "El CAE (Costo Anual Equivalente)",
-        desc: "La tasa de interés nominal engaña. El CAE incluye seguros obligatorios, timbres y comisiones.",
-        view: "view-generic",
-        genericTitle: "⚖️ Comparador de Créditos por CAE",
-        genericDesc: "A igual monto y plazo, elige siempre la alternativa con menor porcentaje de CAE.",
-        genericIcon: "⚖️"
+        tag: "LÍNEA DE CRÉDITO",
+        title: "Línea de Crédito y Sobregiro",
+        desc: "Simulador corriendo: salvavidas de emergencia inmediata con costo diario elevado.",
+        view: "view-generic"
       },
       {
         step: 26,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "El Cisne Negro: Imprevistos Mayores",
-        desc: "Urgencias médicas o del hogar en 15 segundos: tu fondo de emergencias es tu escudo protector.",
-        view: "view-step-26"
+        tag: "CRÉDITO HIPOTECARIO",
+        title: "Crédito Hipotecario y Bienes Raíces",
+        desc: "Simulador corriendo: dividendos a largo plazo, pie y seguros obligatorios.",
+        view: "view-generic"
       },
       {
         step: 27,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Sistema de Amortización Francés",
-        desc: "Cuotas fijas mensuales: en los primeros años casi todo es interés y muy poco amortiza la deuda.",
-        view: "view-generic",
-        genericTitle: "📐 Curva de Amortización Francesa",
-        genericDesc: "Al inicio pagas el costo del dinero; solo en las últimas cuotas reduces fuertemente el capital.",
-        genericIcon: "📐"
+        tag: "CRÉDITO DE CONSUMO",
+        title: "Crédito de Consumo en Cuotas Fijas",
+        desc: "Simulador corriendo: préstamos en cuotas pactadas y evaluación del CTC.",
+        view: "view-generic"
       },
       {
         step: 28,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Interés Simple vs. Interés Compuesto",
-        desc: "La fuerza multiplicadora: genera intereses sobre intereses al ahorrar, o una trampa al endeudarse.",
-        view: "view-generic",
-        genericTitle: "📈 La Fuerza del Interés Compuesto",
-        genericDesc: "Multiplica exponencialmente tu patrimonio cuando comienzas a ahorrar e invertir a tiempo.",
-        genericIcon: "📈"
+        tag: "EVENTO SOCIAL",
+        title: "Actividad Evento: Celebración",
+        desc: "Simulador presenta situación de gasto por celebración según tu perfil.",
+        view: "view-step-11"
       },
       {
         step: 29,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Evento: Impacto del Interés en el Tiempo",
-        desc: "Comprobación en vivo: la enorme brecha acumulada entre quienes ahorraron y quienes pagaron intereses.",
-        view: "view-generic",
-        genericTitle: "⏳ Brecha Financiera Acumulada",
-        genericDesc: "Observa cómo evolucionaron los saldos reales: dinero ganado en rentabilidad vs perdido en intereses.",
-        genericIcon: "⏳"
+        tag: "PROTECCIÓN Y BLINDAJE",
+        title: "Seguros y Protección",
+        desc: "Simulador corriendo: se revisan opciones de seguro para blindar tu patrimonio.",
+        view: "view-generic"
       },
       {
         step: 30,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Dilema: Renovar Computador de $600.000",
-        desc: "Ahorro programado ($50k/mes ganando intereses) vs Compra a crédito hoy (12 cuotas con sobreprecio).",
-        view: "view-generic",
-        genericTitle: "💻 Votación: Computador $600.000 CLP",
-        genericDesc: "Opción A (Ahorro programado: +$15.000) vs Opción B (Comprar a crédito hoy: -$75.000 en cuotas).",
-        genericIcon: "💻"
+        tag: "GESTIÓN DE CRISIS",
+        title: "Actividad Evento Negativo: Cisne Negro",
+        desc: "El Cisne Negro: imprevistos mayores según perfil con timer de 15 segundos.",
+        view: "view-step-26"
       },
       {
         step: 31,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Revisión General del Tablero",
-        desc: "Inspecciona tus indicadores consolidados: liquidez, nivel de endeudamiento y paz mental.",
-        view: "view-character-summary"
+        tag: "COMPARACIÓN TRANSPARENTE",
+        title: "El CAE (Costo Anual Equivalente)",
+        desc: "Simulador corriendo: compara créditos por CAE y no solo por tasa nominal.",
+        view: "view-generic"
       },
       {
         step: 32,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Ajustes Finales del Participante",
-        desc: "60 segundos para prepagar deudas caras, reasignar fondos y blindar tu posición antes del cierre.",
-        view: "view-character-summary"
+        tag: "MATEMÁTICA FINANCIERA",
+        title: "Sistema de Amortización Francés",
+        desc: "Simulador corriendo: cuotas fijas donde al inicio casi todo es interés.",
+        view: "view-generic"
       },
       {
         step: 33,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Proyección Simulador: 8 Años de Vida",
-        desc: "El motor ejecuta la inercia compuesta de tus hábitos a lo largo de casi una década de decisiones.",
-        view: "view-generic",
-        genericTitle: "🏆 Radiografía Final a 8 Años",
-        genericDesc: "Patrimonio Acumulado: $14.800.000 CLP • Intereses pagados a bancos: $2.100.000 • Paz Mental: 82%.",
-        genericIcon: "🏆"
+        tag: "INTERÉS COMPUESTO",
+        title: "Interés Simple vs. Interés Compuesto",
+        desc: "Simulador corriendo: la fuerza multiplicadora de generar intereses sobre intereses.",
+        view: "view-generic"
       },
       {
         step: 34,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Reflexión Final: ¿Con qué me quedo?",
-        desc: "Síntesis de aprendizajes: el dinero es una herramienta para la vida, no el fin en sí mismo.",
-        view: "view-generic",
-        genericTitle: "🎯 Lecciones Clave del Taller",
-        genericDesc: "1. Págate primero. 2. Respeta tu perfil de riesgo. 3. Compara por CAE. 4. Fondo de emergencia siempre.",
-        genericIcon: "🎯"
+        tag: "SIMULACIÓN DE TIEMPO",
+        title: "Impacto del Interés en el Tiempo",
+        desc: "Simulador corriendo: brecha acumulada entre ahorro con rentabilidad e intereses de deuda.",
+        view: "view-generic"
       },
       {
         step: 35,
-        tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
+        tag: "CASO PRÁCTICO REAL",
+        title: "Dilema: Renovar Computador de $600.000",
+        desc: "Simulador plantea dilema según perfil: ahorro previo vs. compra a crédito hoy.",
+        view: "view-generic"
+      },
+      {
+        step: 36,
+        tag: "CONTROL DE MANDO",
+        title: "Revisión General del Tablero",
+        desc: "Simulador corriendo: inspecciona tus indicadores consolidados de liquidez y deuda.",
+        view: "view-character-summary"
+      },
+      {
+        step: 37,
+        tag: "PATRIMONIO Y BIENESTAR",
+        title: "Patrimonio",
+        desc: "Simulador corriendo: balance entre activos construidos, pasivos y paz mental.",
+        view: "view-character-summary"
+      },
+      {
+        step: 38,
+        tag: "ÚLTIMAS DECISIONES",
+        title: "Actividad Patrimonio: Ajustes Finales",
+        desc: "Simulador corriendo: 60 segundos para prepagar deudas y reasignar fondos.",
+        view: "view-character-summary"
+      },
+      {
+        step: 39,
+        tag: "HORIZONTE 8 AÑOS",
+        title: "Actividad Patrimonio: Proyección Simulador",
+        desc: "Simulador corriendo: 8 Años de Vida. El motor ejecuta la inercia compuesta de tus hábitos.",
+        view: "view-generic"
+      },
+      {
+        step: 40,
+        tag: "REFLEXIÓN Y APRENDIZAJES",
+        title: "Reflexión Final: ¿Con qué me quedo?",
+        desc: "Simulador corriendo: síntesis de aprendizajes para la vida cotidiana.",
+        view: "view-generic"
+      },
+      {
+        step: 41,
+        tag: "ESPACIO DE PREGUNTAS",
+        title: "Preguntas",
+        desc: "Simulador corriendo: resolución de inquietudes prácticas con el facilitador.",
+        view: "view-generic"
+      },
+      {
+        step: 42,
+        tag: "CIERRE Y DESPEDIDA",
         title: "Cierre Final del Taller",
-        desc: "Felicitaciones por completar el taller. Toma el control de tus finanzas personales informadas.",
-        view: "view-generic",
-        genericTitle: "🎓 Cierre Oficial del Taller",
-        genericDesc: "Gracias por participar. Pon en práctica tus decisiones financieras informadas todos los días.",
-        genericIcon: "🎓"
+        desc: "Simulador corriendo: felicitaciones por completar la experiencia vivencial.",
+        view: "view-generic"
       }
     ];
 
@@ -2125,8 +2211,8 @@
     const state = {
       currentSlideIdx: 0,
       activeHudTab: null,
-      totalBolitas: 20,
-      assignedBolitas: 11, // 11 categorías x 1 bolita inicial
+      totalBolitas: 25,
+      assignedBolitas: 14, // 14 categorías x 1 estrella inicial
       selectedHome: null,
       selectedJob: null,
       selectedTransport: null,
@@ -2141,25 +2227,45 @@
       monthlyDebt: 85000,
       mentalPeace: 78,
       categories: [
-        { id: 'vivienda', name: '🏠 Vivienda & Espacio Propio', dots: 1 },
-        { id: 'movilidad', name: '🚗 Movilidad & Transporte Comodo', dots: 1 },
+        { id: 'vivienda', name: '🏠 Hogar & Decoración', dots: 1 },
+        { id: 'movilidad', name: '🚗 Comodidad al movilizarse', dots: 1 },
+        { id: 'mascotas', name: '🐾 Mascotas & Animales', dots: 1 },
         { id: 'tech', name: '💻 Tecnología & Herramientas', dots: 1 },
         { id: 'viajes', name: '✈️ Viajes & Vacaciones', dots: 1 },
         { id: 'gastronomia', name: '🍽️ Gastronomía & Salidas', dots: 1 },
         { id: 'conciertos', name: '🎸 Conciertos & Festivales', dots: 1 },
-        { id: 'aprendizaje', name: '📚 Aprendizaje & Pasatiempos', dots: 1 },
+        { id: 'educacion', name: '📚 Educación & Aprendizaje', dots: 1 },
+        { id: 'hobbies', name: '🎨 Hobbies & Pasatiempos', dots: 1 },
         { id: 'deporte', name: '🏋️ Deporte & Salud Física', dots: 1 },
+        { id: 'naturaleza', name: '🏕️ Naturaleza & Vida al Aire Libre', dots: 1 },
         { id: 'moda', name: '👗 Moda, Imagen & Estilo', dots: 1 },
         { id: 'gaming', name: '🎮 Gaming & Ocio Digital', dots: 1 },
         { id: 'familia', name: '🤝 Familia & Amigos', dots: 1 }
       ]
     };
 
+    // COMPROBACIÓN DE PERFIL COMPLETO (INTERESES PRIORIZADOS + ESTILO DE VIDA)
+    function checkProfileCompletion() {
+      const hasPrioritizedInterests = state.categories && state.categories.some(c => c.dots > 1);
+      const hasHome = state.selectedHome !== null;
+      const hasJob = state.selectedJob !== null;
+      const hasTransport = state.selectedTransport !== null;
+      const isComplete = Boolean(hasPrioritizedInterests && hasHome && hasJob && hasTransport);
+      return {
+        isComplete,
+        hasPrioritizedInterests,
+        hasHome,
+        hasJob,
+        hasTransport
+      };
+    }
+
     // INICIALIZACIÓN
     window.addEventListener('DOMContentLoaded', () => {
       renderSlideCarousel();
       renderBolitas();
       updateHUD();
+      updateInterestsValidation();
       selectSlide(0);
     });
 
@@ -2168,101 +2274,95 @@
       const container = document.getElementById('character-summary-content');
       if (!container) return;
 
+      const status = checkProfileCompletion();
+      const btnNext = document.getElementById('btn-summary-next');
+      if (btnNext) {
+        btnNext.disabled = !status.isComplete;
+      }
+
+      // Si el perfil NO está completo, mostrar mensaje informativo y no dar el resumen
+      if (!status.isComplete) {
+        const missingAnchors = [];
+        if (!status.hasHome) missingAnchors.push('Vivienda');
+        if (!status.hasJob) missingAnchors.push('Trabajo');
+        if (!status.hasTransport) missingAnchors.push('Transporte');
+
+        container.innerHTML = `
+          <div class="summary-incomplete-card">
+            <div class="summary-incomplete-header">
+              <span style="font-size: 1.15rem; line-height: 1;">⚠️</span>
+              <span class="summary-incomplete-title">Perfil incompleto</span>
+            </div>
+            <p class="summary-incomplete-text">
+              Para generar el resumen de tu personaje y avanzar al taller, debes completar las siguientes selecciones:
+            </p>
+            <div class="summary-missing-items">
+              ${!status.hasPrioritizedInterests ? `
+                <div class="summary-missing-row">
+                  <div style="flex: 1;">
+                    <strong>Intereses personales:</strong>
+                    <span>Debes priorizar al menos un interés con más de 1 estrella.</span>
+                  </div>
+                  <button type="button" class="summary-missing-btn" onclick="goToInterestsScreen()">Ir a Intereses ➔</button>
+                </div>
+              ` : ''}
+              ${missingAnchors.length > 0 ? `
+                <div class="summary-missing-row">
+                  <div style="flex: 1;">
+                    <strong>Estilo de vida:</strong>
+                    <span>Falta seleccionar ${missingAnchors.join(', ')}.</span>
+                  </div>
+                  <button type="button" class="summary-missing-btn" onclick="goToAnchorsScreen()">Ir a Estilo ➔</button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
       const homeOptions = [
-        { icon: '🏡', name: 'Casa o Depto', tag: 'En condominio', cost: 'Costo fijo alto' },
-        { icon: '🏢', name: 'Departamento centro', tag: 'Conectividad urbana', cost: 'Costo fijo moderado' },
-        { icon: '🏘️', name: 'Casa Barrio tradicional', tag: 'Tranquila y familiar', cost: 'Costo fijo accesible' },
-        { icon: '🌲', name: 'Parcela de agrado', tag: 'Espacio y naturaleza', cost: 'Costo fijo alto / rural' }
+        { name: 'Casa o Depto', sub: 'En condominio elegante' },
+        { name: 'Departamento centro', sub: 'Conectividad central' },
+        { name: 'Casa o departamento', sub: 'Vida de barrio' },
+        { name: 'Parcela de agrado', sub: 'Espacio y naturaleza' }
       ];
 
       const jobOptions = [
-        { icon: '⚡', name: 'Freelance sueldo medio', tag: 'Sueldo medio variable', income: 'Ingreso Variable (~$1.4M)' },
-        { icon: '💼', name: 'Trabajo dependiente sueldo medio', tag: 'Sueldo medio fijo', income: 'Ingreso Fijo (~$1.4M)' },
-        { icon: '🛠️', name: 'Trabajo sueldo mínimo', tag: 'Sueldo mínimo regulado', income: 'Ingreso Base (~$500k)' },
-        { icon: '🏛️', name: 'Trabajo administrativo sueldo alto', tag: 'Sueldo alto corporativo', income: 'Ingreso Alto (~$2.2M)' }
+        { name: 'Freelance', sub: 'Sueldo medio variable' },
+        { name: 'Trabajo dependiente', sub: 'Sueldo medio' },
+        { name: 'Trabajo dependiente', sub: 'Sueldo mínimo' },
+        { name: 'Trabajo administrativo', sub: 'Sueldo alto' }
       ];
 
       const transportOptions = [
-        { icon: '🚙', name: 'SUV', tag: 'Espaciosa y familiar', cost: 'Costo operacional alto' },
-        { icon: '🚗', name: 'City Car', tag: 'Ágil y muy económico', cost: 'Costo muy económico' },
-        { icon: '🚌', name: 'Locomoción colectiva', tag: 'Micro y Metro • Económico', cost: 'Costo mínimo mensual' },
-        { icon: '🏎️', name: 'Auto deportivo o de lujo', tag: 'Alta gama y exclusivo', cost: 'Costo mantención muy alto' }
+        { name: 'SUV o Camioneta', sub: 'Espaciosa y familiar' },
+        { name: 'City Car', sub: 'Económico y rendidor' },
+        { name: 'Locomoción colectiva', sub: 'Micro, Metro, Taxi, Uber' },
+        { name: 'Deportivo o de lujo', sub: 'Alta gama y exclusivo' }
       ];
 
-      const home = homeOptions[state.selectedHome] || { icon: '🏠', name: 'No seleccionado', tag: 'Pendiente', cost: '-' };
-      const job = jobOptions[state.selectedJob] || { icon: '💼', name: 'No seleccionado', tag: 'Pendiente', income: '-' };
-      const transport = transportOptions[state.selectedTransport] || { icon: '🚗', name: 'No seleccionado', tag: 'Pendiente', cost: '-' };
+      const home = homeOptions[state.selectedHome] || { name: 'No seleccionado', sub: '-' };
+      const job = jobOptions[state.selectedJob] || { name: 'No seleccionado', sub: '-' };
+      const transport = transportOptions[state.selectedTransport] || { name: 'No seleccionado', sub: '-' };
 
-      // Top intereses asignados con más de 1 bolita (o top 4)
+      // Lista de intereses prioritarios para el texto narrativo (los 4 más altos, sin íconos en el texto)
       const sortedCats = [...state.categories].sort((a, b) => b.dots - a.dots);
-      const topCats = sortedCats.filter(c => c.dots > 1);
-      const displayedInterests = (topCats.length >= 2) ? topCats.slice(0, 4) : sortedCats.slice(0, 4);
-
-      // Diagnóstico personalizado pedagógico
-      let diagnosis = "";
-      if (state.selectedJob === 3) {
-        diagnosis = "Tu sueldo administrativo alto te entrega una gran capacidad de ahorro e inversión inicial. El principal desafío en el taller será evitar que los gastos fijos crezcan sin control.";
-      } else if (state.selectedJob === 0) {
-        diagnosis = "Como freelance con ingresos medios y variables, tu mayor fortaleza es la flexibilidad. Crear un Fondo de Emergencias robusto será tu prioridad #1 para amortiguar los meses bajos.";
-      } else if (state.selectedJob === 1) {
-        diagnosis = "Tu trabajo dependiente con sueldo medio te entrega estabilidad y predictibilidad mensual. La clave en el taller será aplicar la regla de ahorrar primero antes de comprometer cuotas.";
-      } else {
-        diagnosis = "Con un sueldo mínimo regulado, tu presupuesto requerirá máxima disciplina y priorización inteligente. Cuidar cada gasto hormiga y evitar el crédito de consumo rotativo será vital.";
-      }
-
-      if (state.selectedTransport === 2) {
-        diagnosis += " Tu elección de locomoción colectiva optimiza al máximo tus gastos de transporte, dejando más holgura mensual.";
-      } else if (state.selectedTransport === 3) {
-        diagnosis += " Tu auto deportivo o de lujo te entrega gran satisfacción pero demandará altos gastos en bencina, seguro y patentes; mantén un fondo específico para su mantención.";
-      } else if ((state.selectedHome === 0 || state.selectedHome === 3) && state.selectedTransport === 0) {
-        diagnosis += " Al combinar vivienda amplia con SUV, tus compromisos mensuales son exigentes; vigila que tus gastos fijos no superen el 50% de tus ingresos.";
-      }
+      const mainInterests = sortedCats.slice(0, 4);
+      const interestNames = mainInterests.map(c => {
+        const cleanName = c.name.replace(/^[^\p{L}\p{N}]+\s*/u, '').trim();
+        return `<strong>${cleanName}</strong>`;
+      });
+      const interestsText = interestNames.join(', ') + ', entre otros';
 
       container.innerHTML = `
-        <div class="summary-section-title">🧭 Decisiones Iniciales Elegidas</div>
-        <div class="summary-lifestyle-grid">
-          <div class="summary-item-card">
-            <div class="summary-item-icon">${home.icon}</div>
-            <div class="summary-item-info">
-              <div class="summary-item-label">Vivienda</div>
-              <div class="summary-item-name">${home.name}</div>
-              <div class="summary-item-sub">${home.tag} • ${home.cost}</div>
-            </div>
-          </div>
-          <div class="summary-item-card">
-            <div class="summary-item-icon">${job.icon}</div>
-            <div class="summary-item-info">
-              <div class="summary-item-label">Trabajo e Ingresos</div>
-              <div class="summary-item-name">${job.name}</div>
-              <div class="summary-item-sub">${job.income}</div>
-            </div>
-          </div>
-          <div class="summary-item-card">
-            <div class="summary-item-icon">${transport.icon}</div>
-            <div class="summary-item-info">
-              <div class="summary-item-label">Transporte Diario</div>
-              <div class="summary-item-name">${transport.name}</div>
-              <div class="summary-item-sub">${transport.tag} • ${transport.cost}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="summary-section-title" style="margin-top: 14px;">🎯 Mayores Prioridades e Intereses</div>
-        <div class="summary-interests-container">
-          ${displayedInterests.map(c => `
-            <div class="summary-interest-pill">
-              <span>${c.name}</span>
-              <span class="summary-interest-badge">${c.dots} ${c.dots === 1 ? 'bolita' : 'bolitas'}</span>
-            </div>
-          `).join('')}
-        </div>
-
-        <div class="summary-diagnosis-box">
-          <div class="summary-diagnosis-header">
-            <span style="font-size: 1.05rem;">💡</span>
-            <span style="font-weight: 800; color: #065f46;">Diagnóstico Financiero de Partida:</span>
-          </div>
-          <p class="summary-diagnosis-text">${diagnosis}</p>
+        <div class="summary-narrative-box">
+          <p class="summary-narrative-text">
+            Tu personaje se desempeña en <strong>${job.name}</strong> (<em>${job.sub}</em>), vive en <strong>${home.name}</strong> (<em>${home.sub}</em>) y se moviliza diariamente en <strong>${transport.name}</strong> (<em>${transport.sub}</em>).
+          </p>
+          <p class="summary-narrative-text" style="margin-top: 8px;">
+            En su vida personal, prioriza especialmente dedicar sus recursos a ${interestsText}.
+          </p>
         </div>
       `;
     }
@@ -2275,7 +2375,8 @@
 
       slidesData.forEach((slide, idx) => {
         const card = document.createElement('div');
-        card.className = `slide-card ${slide.hasTriangle ? 'split-layout' : ''} ${idx === 0 ? 'active' : ''}`;
+        const isSplit = slide.hasTriangle || slide.figureIcon;
+        card.className = `slide-card ${isSplit ? 'split-layout' : ''} ${idx === 0 ? 'active' : ''}`;
         card.id = `slide-card-${idx}`;
         card.onclick = () => selectSlide(idx);
 
@@ -2299,6 +2400,16 @@
                 <text x="104" y="88" font-size="7.5" font-weight="800" text-anchor="end" fill="#d97706">RIESGO</text>
                 <circle cx="55" cy="55" r="4.5" fill="#7c3aed" />
               </svg>
+            </div>
+          `;
+        } else if (slide.figureIcon) {
+          card.innerHTML = `
+            <div class="slide-split-visual slide-figure-box" title="Figura">
+              ${slide.figureSvg || `<span style="font-size: 2rem; line-height: 1;">${slide.figureIcon}</span>`}
+            </div>
+            <div class="slide-split-text">
+              <div class="slide-card-title">${slide.title}</div>
+              <div class="slide-card-desc">${slide.desc}</div>
             </div>
           `;
         } else {
@@ -2393,11 +2504,13 @@
       }
     }
 
-    // RENDERIZAR BOLITAS EN UN SOLO LISTADO SENCILLO (SIN BLOQUES)
+    // RENDERIZAR ESTRELLAS EN UN SOLO LISTADO SENCILLO (SIN BLOQUES)
     function renderBolitas() {
       const container = document.getElementById('cats-list');
       if (!container) return;
       container.innerHTML = '';
+
+      const starSvg = `<svg class="star-svg" viewBox="0 0 20 20"><polygon points="10,1 12.6,6.8 19,7.5 14.3,12 15.6,18.5 10,15.2 4.4,18.5 5.7,12 1,7.5 7.4,6.8" /></svg>`;
 
       state.categories.forEach((cat, idx) => {
         const row = document.createElement('div');
@@ -2405,11 +2518,13 @@
         row.innerHTML = `
           <div class="category-label">${cat.name}</div>
           <div class="bolitas-control">
-            <div class="bolitas-slots" title="Pincha una bolita para quitarla o un espacio vacío para agregar">
+            <div class="bolitas-slots" title="Pincha una estrella para quitarla o un espacio vacío para agregar">
               ${[1, 2, 3].map(slotNum => `
-                <span class="dot-slot ${slotNum <= cat.dots ? 'filled' : ''}"
+                <span class="star-slot ${slotNum <= cat.dots ? 'filled' : ''}"
                       onclick="onDotClick(${idx}, ${slotNum})"
-                      title="${slotNum <= cat.dots ? 'Pincha para quitar bolita' : 'Pincha para agregar bolita'}"></span>
+                      title="${slotNum <= cat.dots ? 'Pincha para quitar estrella' : 'Pincha para agregar estrella'}">
+                  ${starSvg}
+                </span>
               `).join('')}
             </div>
           </div>
@@ -2420,19 +2535,19 @@
       calculateTotalBolitas();
     }
 
-    // GESTIÓN DE TOQUE DIRECTO EN LAS BOLITAS
+    // GESTIÓN DE TOQUE DIRECTO EN LAS ESTRELLAS
     function onDotClick(catIdx, slotNum) {
       const cat = state.categories[catIdx];
       const currentAssigned = state.categories.reduce((acc, c) => acc + c.dots, 0);
       const available = state.totalBolitas - currentAssigned;
 
-      // Caso 1: El usuario pincha una bolita ya activa (para quitarla o reducirla)
+      // Caso 1: El usuario pincha una estrella ya activa (para quitarla o reducirla)
       if (slotNum <= cat.dots) {
         if (slotNum === cat.dots) {
-          // Pinchó la última bolita: la quita (reduce en 1)
+          // Pinchó la última estrella: la quita (reduce en 1)
           cat.dots = Math.max(0, cat.dots - 1);
         } else {
-          // Pinchó una bolita anterior: ajusta a esa posición
+          // Pinchó una estrella anterior: ajusta a esa posición
           cat.dots = slotNum;
         }
         renderBolitas();
@@ -2443,7 +2558,7 @@
       const needed = slotNum - cat.dots;
 
       if (available <= 0) {
-        // No quedan bolitas para agregar (llegó a 20): TITILAR BOLITAS ACTIVAS
+        // No quedan estrellas para agregar (llegó a 25): TITILAR ESTRELLAS ACTIVAS
         triggerNoBallsAlert();
         return;
       }
@@ -2458,20 +2573,20 @@
       renderBolitas();
     }
 
-    // ANIMACIÓN DE TITILAR CUANDO NO HAY BOLITAS PARA AGREGAR
+    // ANIMACIÓN DE TITILAR CUANDO NO HAY ESTRELLAS PARA AGREGAR
     let alertTimeout;
     function triggerNoBallsAlert() {
-      // Hacer titilar todas las bolitas llenas activas en la pantalla
-      const filledDots = document.querySelectorAll('#view-step-4 .dot-slot.filled');
-      filledDots.forEach(dot => {
-        dot.classList.remove('blink-alert');
-        void dot.offsetWidth; // Forzar reflow para reiniciar la animación
-        dot.classList.add('blink-alert');
+      // Hacer titilar todas las estrellas llenas activas en la pantalla
+      const filledStars = document.querySelectorAll('#view-step-4 .star-slot.filled');
+      filledStars.forEach(star => {
+        star.classList.remove('blink-alert');
+        void star.offsetWidth; // Forzar reflow para reiniciar la animación
+        star.classList.add('blink-alert');
       });
 
       clearTimeout(alertTimeout);
       alertTimeout = setTimeout(() => {
-        filledDots.forEach(dot => dot.classList.remove('blink-alert'));
+        filledStars.forEach(star => star.classList.remove('blink-alert'));
       }, 1400);
     }
 
@@ -2484,26 +2599,48 @@
 
       const maxEl = document.getElementById('max-bolitas');
       if (maxEl) maxEl.innerText = state.totalBolitas;
+
+      updateInterestsValidation();
+    }
+
+    // VALIDACIÓN DE INTERESES (DEBE PRIORIZAR AL MENOS UN INTERÉS CON > 1 ESTRELLA)
+    function updateInterestsValidation() {
+      const hasPrioritized = state.categories && state.categories.some(c => c.dots > 1);
+      const btn = document.getElementById('btn-next-interests');
+      if (btn) {
+        btn.disabled = !hasPrioritized;
+      }
+      const warningEl = document.getElementById('interests-warning-msg');
+      if (warningEl && hasPrioritized) {
+        warningEl.classList.add('hidden');
+      }
+    }
+
+    function confirmInterestsAndContinue() {
+      const hasPrioritized = state.categories && state.categories.some(c => c.dots > 1);
+      if (!hasPrioritized) {
+        const warningEl = document.getElementById('interests-warning-msg');
+        if (warningEl) {
+          warningEl.innerText = "⚠️ Por favor prioriza al menos un interés asignándole más de 1 estrella.";
+          warningEl.classList.remove('hidden');
+        }
+        return;
+      }
+      goToAnchorsScreen();
     }
 
     // NAVEGACIÓN ENTRE PASOS DE CONFIGURACIÓN DEL PERSONAJE
     function goToInterestsScreen() {
-      selectSlide(0);
-    }
-
-    function goToAnchorsScreen() {
       selectSlide(1);
     }
 
-    function goToSummaryScreen() {
-      const isComplete = (state.selectedHome !== null && state.selectedJob !== null && state.selectedTransport !== null);
-      if (!isComplete) {
-        goToAnchorsScreen();
-        flashMissingAnchors();
-        return;
-      }
-      renderCharacterSummary();
+    function goToAnchorsScreen() {
       selectSlide(2);
+    }
+
+    function goToSummaryScreen() {
+      renderCharacterSummary();
+      selectSlide(3);
     }
 
     // SELECCIÓN DE OPCIÓN EN ESTILO DE VIDA (VIVIENDA, TRABAJO, TRANSPORTE)
@@ -2552,7 +2689,12 @@
 
     // COMENZAR SIMULACIÓN / TALLER DESDE LA FICHA DEL PERSONAJE
     function startSimulationFromSummary() {
-      selectSlide(3);
+      const status = checkProfileCompletion();
+      if (!status.isComplete) {
+        renderCharacterSummary();
+        return;
+      }
+      selectSlide(4);
     }
 
     function flashMissingAnchors(missing) {
