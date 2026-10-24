@@ -1804,9 +1804,8 @@
       {
         step: 1,
         tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
-        title: "Finanzas Personales y Bienestar",
+        title: "🌱 Finanzas Personales y Bienestar",
         desc: "El dinero como herramienta al servicio de tus proyectos de vida, tu seguridad y tu tranquilidad personal.",
-        hasSprout: true,
         view: "view-generic",
         genericTitle: "🌱 Finanzas Personales y Bienestar",
         genericDesc: "Simulador vivencial interactivo: experimenta en tiempo real cómo el dinero sirve a tus proyectos de vida y paz mental.",
@@ -2276,7 +2275,7 @@
 
       slidesData.forEach((slide, idx) => {
         const card = document.createElement('div');
-        card.className = `slide-card ${slide.hasTriangle || slide.hasSprout ? 'split-layout' : ''} ${idx === 0 ? 'active' : ''}`;
+        card.className = `slide-card ${slide.hasTriangle ? 'split-layout' : ''} ${idx === 0 ? 'active' : ''}`;
         card.id = `slide-card-${idx}`;
         card.onclick = () => selectSlide(idx);
 
@@ -2299,29 +2298,6 @@
                 <circle cx="96" cy="78" r="5" fill="#d97706" />
                 <text x="104" y="88" font-size="7.5" font-weight="800" text-anchor="end" fill="#d97706">RIESGO</text>
                 <circle cx="55" cy="55" r="4.5" fill="#7c3aed" />
-              </svg>
-            </div>
-          `;
-        } else if (slide.hasSprout) {
-          card.innerHTML = `
-            <div class="slide-split-text">
-              <div class="slide-card-title">${slide.title}</div>
-              <div class="slide-card-desc">${slide.desc}</div>
-            </div>
-            <div class="slide-split-visual" title="Plantita de crecimiento y bienestar financiero">
-              <svg viewBox="0 0 64 64" class="slide-mini-sprout" style="width: 56px; height: 56px; display: block;">
-                <!-- Fondo circular sutil -->
-                <circle cx="32" cy="32" r="28" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5" />
-                <!-- Base / tierra suave -->
-                <path d="M20 48 Q32 44 44 48" fill="none" stroke="#86efac" stroke-width="2.5" stroke-linecap="round" />
-                <!-- Tallo central -->
-                <path d="M32 46 C32 36 33 27 31 18" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" />
-                <!-- Hoja izquierda curvada -->
-                <path d="M31 31 C21 30 14 23 17 15 C24 15 29 23 31 31 Z" fill="#22c55e" stroke="#15803d" stroke-width="1" />
-                <path d="M31 31 C25 26 21 21 18 17" fill="none" stroke="#bbf7d0" stroke-width="1" stroke-linecap="round" />
-                <!-- Hoja derecha curvada -->
-                <path d="M32 25 C41 23 48 16 45 9 C38 9 33 17 32 25 Z" fill="#4ade80" stroke="#16a34a" stroke-width="1" />
-                <path d="M32 25 C37 20 41 15 44 11" fill="none" stroke="#f0fdf4" stroke-width="1" stroke-linecap="round" />
               </svg>
             </div>
           `;
