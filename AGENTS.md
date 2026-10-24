@@ -6,7 +6,7 @@
 ## 🛠️ Stack Tecnológico
 * **Core:** Vanilla HTML5, CSS3 moderno y JavaScript ES6+.
 * **Filosofía:** Cero frameworks pesados (sin React, Vue, Next o bundlers innecesarios). Todas las aplicaciones deben ejecutarse de inmediato en cualquier navegador web moderno sin proceso de compilación previo.
-* **Diseño y Estética:** Inspirada en la vegetación y bosques del sur de Chile (tonos verdes y terrosos con alto contraste), pensada para armonizar con salas de clase y proyección en paredes de madera.
+* **Diseño y Estética:** Paleta limpia y luminosa con gradiente azul/cian suave (`#cdf0f8` a `#c2ebf5`), azul marino primario (`#235e82`) y acento ámbar (`#ef9d4f`). Cada sub-app define su propia identidad visual adaptada a su objetivo pedagógico.
 
 ## 📁 Estructura del Repositorio
 * `index.html`: Portada principal con acceso por código y panel rápido.
