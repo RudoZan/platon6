@@ -176,7 +176,7 @@
       display: none;
     }
 
-    /* Tarjeta Diapositiva Individual: Compacta (~85px altura mínima) */
+    /* Tarjeta Diapositiva Individual: Ultra-Compacta (~42px altura) */
     .slide-card {
       flex: 0 0 100%;
       width: 100%;
@@ -185,11 +185,11 @@
       box-sizing: border-box;
       scroll-snap-align: start;
       background: #ffffff;
-      padding: 8px 14px 8px 14px;
+      padding: 5px 12px 4px 12px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-height: 85px;
+      min-height: 42px;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.15s ease;
@@ -200,37 +200,29 @@
     }
 
     .slide-category-tag {
-      font-size: 0.68rem;
+      font-size: 0.58rem;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.6px;
       color: #0284c7;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
+      line-height: 1;
     }
 
     .slide-card-title {
       font-family: var(--font-title);
-      font-size: 0.98rem;
+      font-size: 0.84rem;
       font-weight: 800;
       color: #0f172a;
-      line-height: 1.25;
-      margin-bottom: 3px;
+      line-height: 1.2;
+      margin-bottom: 1px;
     }
 
     .slide-card-desc {
-      font-size: 0.78rem;
-      color: #334155;
-      line-height: 1.35;
-      margin-bottom: 4px;
-    }
-
-    .slide-card-hint {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #059669;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      font-size: 0.70rem;
+      color: #475569;
+      line-height: 1.2;
+      margin-bottom: 0;
     }
 
     /* ==========================================================================
@@ -785,12 +777,12 @@
       animation: dotBlinkAlert 0.42s ease-in-out 3 !important;
     }
 
-    /* 2. ELECCIÓN DE DECISIONES INICIALES (VIVIENDA, TRABAJO, VEHÍCULO - 4 OPCIONES C/U) */
+    /* 2. ELECCIÓN DE DECISIONES INICIALES (VIVIENDA, TRABAJO, VEHÍCULO - COMPACTO) */
     .anchor-card-selector {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-top: 8px;
+      gap: 6px;
+      margin-top: 5px;
     }
 
     @media (min-width: 640px) {
@@ -801,18 +793,18 @@
 
     .anchor-option {
       background: #ffffff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 10px 8px 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 6px 6px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      gap: 3px;
-      min-height: 90px;
+      justify-content: center;
+      gap: 2px;
+      min-height: 48px;
       position: relative;
       user-select: none;
     }
@@ -820,54 +812,54 @@
     .anchor-option:hover {
       border-color: #94a3b8;
       background: #f8fafc;
-      transform: translateY(-2px);
-      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
     }
 
     .anchor-option.selected {
       background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
       border-color: #10b981;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.18);
     }
 
     .anchor-option.selected::after {
       content: '✓';
       position: absolute;
-      top: 5px;
-      right: 5px;
-      font-size: 0.62rem;
+      top: 3px;
+      right: 3px;
+      font-size: 0.55rem;
       font-weight: 900;
       color: #ffffff;
       background: #10b981;
-      width: 15px;
-      height: 15px;
+      width: 13px;
+      height: 13px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       line-height: 1;
-      box-shadow: 0 1px 3px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 1px 2px rgba(16, 185, 129, 0.4);
     }
 
     .anchor-icon {
-      font-size: 1.45rem;
-      margin-bottom: 2px;
+      font-size: 1.15rem;
+      margin-bottom: 0;
       line-height: 1;
     }
 
     .anchor-name {
-      font-size: 0.73rem;
+      font-size: 0.68rem;
       font-weight: 700;
       color: #0f172a;
-      line-height: 1.25;
+      line-height: 1.15;
     }
 
     .anchor-cost {
-      font-size: 0.65rem;
+      font-size: 0.58rem;
       color: #047857;
       font-weight: 600;
-      margin-top: auto;
-      line-height: 1.2;
+      margin-top: 1px;
+      line-height: 1.1;
     }
 
     /* 3. TRIÁNGULO DE INVERSIÓN (SVG INTERACTIVO) */
@@ -1000,54 +992,54 @@
     }
 
     /* ==========================================================================
-       GRILLA DE 2 COLUMNAS Y TARJETAS DE OPCIONES DE LOS ÍCONOS
+       GRILLA DE 2 COLUMNAS Y TARJETAS DE OPCIONES DE LOS ÍCONOS (COMPACTO)
        ========================================================================== */
     .hub-grid-2col {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
+      gap: 5px;
     }
 
     .hub-option-card {
       background: #ffffff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 12px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 5px 7px;
       display: flex;
       align-items: center;
-      gap: 9px;
-      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+      gap: 6px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
       cursor: pointer;
-      transition: all 0.18s ease;
-      min-height: 56px;
+      transition: all 0.15s ease;
+      min-height: 34px;
       text-align: left;
     }
 
     .hub-option-card:hover {
       background: #ffffff;
       border-color: #0284c7;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.12);
-      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.12);
+      transform: translateY(-1px);
     }
 
     .hub-option-card:active {
-      transform: scale(0.97);
+      transform: scale(0.98);
       background: #f8fafc;
     }
 
     .hub-option-icon {
-      font-size: 1.3rem;
-      width: 36px;
-      height: 36px;
-      min-width: 36px;
-      border-radius: 10px;
+      font-size: 0.92rem;
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      border-radius: 6px;
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       border: 1px solid #cbd5e1;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     }
 
     .hub-option-text {
@@ -1059,18 +1051,18 @@
     }
 
     .hub-option-name {
-      font-size: 0.77rem;
+      font-size: 0.69rem;
       font-weight: 700;
       color: #0f172a;
-      line-height: 1.25;
+      line-height: 1.15;
       word-break: break-word;
     }
 
     .hub-option-desc {
-      font-size: 0.66rem;
+      font-size: 0.58rem;
       color: #64748b;
-      line-height: 1.22;
-      margin-top: 3px;
+      line-height: 1.1;
+      margin-top: 1px;
     }
 
     /* ==========================================================================
@@ -1333,31 +1325,10 @@
            VISTA 1: SETEO DE BOLITAS DE INTERÉS (PRIMER PASO DEL TALLER)
            ================================================================== -->
       <section id="view-step-4" class="step-view">
-        <!-- Lengüetas Superiores: Paso 1 de 3 (Intereses) -->
-        <div class="setup-tabs-bar">
-          <button class="setup-tab-btn active" onclick="goToInterestsScreen()">
-            <span class="setup-tab-num">1</span>
-            <span>Intereses</span>
-          </button>
-          <button class="setup-tab-btn" onclick="goToAnchorsScreen()">
-            <span class="setup-tab-num">2</span>
-            <span>Decisiones iniciales</span>
-          </button>
-          <button class="setup-tab-btn" onclick="goToSummaryScreen()">
-            <span class="setup-tab-num">3</span>
-            <span>Resumen</span>
-          </button>
-        </div>
-
         <!-- Tarjeta de Intereses (Listado Sencillo de 11 Categorías y 20 Bolitas) -->
-        <div class="glass-card setup-tab-card">
-          <div class="glass-card-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-            <div>
-              <div class="glass-card-title">Intereses Personales</div>
-              <div class="glass-card-subtitle" style="margin-top: 4px; font-size: 0.8rem; color: #475569; line-height: 1.35;">
-                Asigna más bolitas para representar qué tanto valoras o te interesa cada tema
-              </div>
-            </div>
+        <div class="glass-card">
+          <div class="glass-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div class="glass-card-title">Intereses Personales</div>
             <div class="simple-counter-badge" title="Bolitas asignadas del total de 20">
               <span id="assigned-bolitas">11</span> / <span id="max-bolitas">20</span>
             </div>
@@ -1369,9 +1340,9 @@
           </div>
 
           <!-- Botón de Navegación: Siguiente -->
-          <button class="btn-step-next" style="width: 100%; margin-top: 16px;" onclick="goToAnchorsScreen()">
+          <button class="btn-step-next" style="width: 100%; margin-top: 10px; padding: 10px 14px;" onclick="goToAnchorsScreen()">
             <span>Siguiente (Decisiones iniciales)</span>
-            <span style="font-size: 1.05rem;">➔</span>
+            <span style="font-size: 0.95rem;">➔</span>
           </button>
         </div>
       </section>
@@ -1380,31 +1351,12 @@
            VISTA 2: ELECCIÓN DE DECISIONES INICIALES (VIVIENDA, TRABAJO, VEHÍCULO)
            ================================================================== -->
       <section id="view-anchors" class="step-view hidden">
-        <!-- Lengüetas Superiores: Paso 2 de 3 (Decisiones iniciales) -->
-        <div class="setup-tabs-bar">
-          <button class="setup-tab-btn" onclick="goToInterestsScreen()">
-            <span class="setup-tab-num">1</span>
-            <span>Intereses</span>
-          </button>
-          <button class="setup-tab-btn active" onclick="goToAnchorsScreen()">
-            <span class="setup-tab-num">2</span>
-            <span>Decisiones iniciales</span>
-          </button>
-          <button class="setup-tab-btn" onclick="goToSummaryScreen()">
-            <span class="setup-tab-num">3</span>
-            <span>Resumen</span>
-          </button>
-        </div>
-
-        <div class="glass-card setup-tab-card">
-          <div class="glass-card-title">🧭 Decisiones Iniciales</div>
-          <div class="glass-card-subtitle" style="margin-top: 4px; font-size: 0.8rem; color: #475569; line-height: 1.35;">
-            Define tus condiciones de vivienda, trabajo y transporte para la simulación:
-          </div>
+        <div class="glass-card">
+          <div class="glass-card-title" style="margin-bottom: 6px;">🧭 Decisiones Iniciales</div>
 
           <!-- 1. Vivienda (4 opciones) -->
-          <div style="margin-top: 14px;">
-            <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+          <div style="margin-top: 6px;">
+            <div style="font-size: 0.76rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 4px;">
               <span>🏠</span> <span>1. Vivienda:</span>
             </div>
             <div class="anchor-card-selector" id="anchor-home">
@@ -1432,8 +1384,8 @@
           </div>
 
           <!-- 2. Trabajo (4 opciones con 2 sueldos medios) -->
-          <div style="margin-top: 16px;">
-            <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+          <div style="margin-top: 8px;">
+            <div style="font-size: 0.76rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 4px;">
               <span>💼</span> <span>2. Trabajo:</span>
             </div>
             <div class="anchor-card-selector" id="anchor-job">
@@ -1461,8 +1413,8 @@
           </div>
 
           <!-- 3. Transporte (4 opciones con auto deportivo o de lujo) -->
-          <div style="margin-top: 16px;">
-            <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+          <div style="margin-top: 8px;">
+            <div style="font-size: 0.76rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 4px;">
               <span>🚌</span> <span>3. Transporte:</span>
             </div>
             <div class="anchor-card-selector" id="anchor-transport">
@@ -1490,7 +1442,7 @@
           </div>
 
           <!-- Botones de Navegación: Anterior / Siguiente -->
-          <div class="step-nav-buttons">
+          <div class="step-nav-buttons" style="margin-top: 10px;">
             <button class="btn-step-prev" onclick="goToInterestsScreen()">
               <span>◀</span>
               <span>Anterior</span>
@@ -1508,32 +1460,11 @@
            VISTA 3: RESUMEN DEL PERSONAJE CONSOLIDADO
            ================================================================== -->
       <section id="view-character-summary" class="step-view hidden">
-        <!-- Lengüetas Superiores: Paso 3 de 3 (Resumen) -->
-        <div class="setup-tabs-bar">
-          <button class="setup-tab-btn" onclick="goToInterestsScreen()">
-            <span class="setup-tab-num">1</span>
-            <span>Intereses</span>
-          </button>
-          <button class="setup-tab-btn" onclick="goToAnchorsScreen()">
-            <span class="setup-tab-num">2</span>
-            <span>Decisiones iniciales</span>
-          </button>
-          <button class="setup-tab-btn active" onclick="goToSummaryScreen()">
-            <span class="setup-tab-num">3</span>
-            <span>Resumen</span>
-          </button>
-        </div>
-
-        <div class="glass-card setup-tab-card">
-          <div class="glass-card-header" style="margin-bottom: 8px;">
-            <div>
-              <div class="glass-card-title">👤 Ficha de tu Personaje</div>
-              <div class="glass-card-subtitle" style="margin-top: 3px; font-size: 0.8rem; color: #475569;">
-                Perfil consolidado para la simulación del taller
-              </div>
-            </div>
-            <div style="background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #047857; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 9999px;">
-              ✨ Listo para jugar
+        <div class="glass-card">
+          <div class="glass-card-header" style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="glass-card-title">👤 Ficha de tu Personaje</div>
+            <div style="background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #047857; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 9999px;">
+              ✨ Listo
             </div>
           </div>
 
@@ -1803,10 +1734,10 @@
       <!-- Vista de Lugares de Oportunidades en la Zona Central -->
       <section id="view-hub-stage" class="step-view hidden">
         <div class="glass-card">
-          <!-- Cabecera del Lugar (Sin botón de diapo) -->
-          <div style="margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
-            <div class="glass-card-title" id="hub-stage-title">🏦 Banco</div>
-            <div class="glass-card-subtitle" id="hub-stage-subtitle">Secciones disponibles</div>
+          <!-- Cabecera del Lugar -->
+          <div style="margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="glass-card-title" id="hub-stage-title" style="font-size: 0.90rem;">🏦 Banco</div>
+            <button onclick="returnToSlideView()" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 7px; font-size: 0.68rem; font-weight: 700; color: #475569; cursor: pointer;">✕ Cerrar</button>
           </div>
 
           <!-- Listado de Secciones de este Lugar en 2 Columnas -->
@@ -1888,30 +1819,27 @@
        LÓGICA JAVASCRIPT: CARRUSEL DE DIAPOSITIVAS + SIMULADOR
        ====================================================================== -->
   <script>
-    // CATÁLOGO DE DIAPOSITIVAS DEL TALLER (100% ALINEADO AL PDF UAH / EXONDO CLARO)
+    // CATÁLOGO DE DIAPOSITIVAS DEL TALLER (CONTENIDO CONCEPTUAL DE LA PRESENTACIÓN)
     const slidesData = [
       {
         step: 1,
-        tag: "TALLER FINANZAS • UAH / EXPERIAN",
-        title: "1. Tus Intereses Personales",
-        desc: "Distribuye tus 20 bolitas en las áreas que más valoras. Las finanzas dependen de tus prioridades y el factor humano de tus elecciones.",
-        hint: "👉 Asigna tus 20 bolitas y pulsa Siguiente",
+        tag: "PRESENTACIÓN TALLER • UAH / EXPERIAN",
+        title: "Prioridades y Factores Humanos",
+        desc: "Las decisiones financieras reflejan directamente lo que más valoras en tu vida.",
         view: "view-step-4"
       },
       {
         step: 2,
-        tag: "DECISIONES INICIALES",
-        title: "2. Decisiones Iniciales: Vivienda, Trabajo y Transporte",
-        desc: "Marca una opción para cada ámbito. Estas decisiones definen tus ingresos y tus principales compromisos fijos mensuales.",
-        hint: "👉 Marca una opción en cada tema y continúa",
+        tag: "CONDICIONES DE PARTIDA",
+        title: "Estructura de Gastos Fijos e Ingresos",
+        desc: "Vivienda, empleo y transporte establecen el piso de tu presupuesto mensual.",
         view: "view-anchors"
       },
       {
         step: 3,
-        tag: "FICHA • PERSONAJE CREADO",
-        title: "3. Resumen de tu Personaje",
-        desc: "Revisa el perfil consolidado de tu personaje con sus mayores intereses, nivel de ingresos y compromisos antes de comenzar.",
-        hint: "👉 Revisa tu ficha y pulsa 'Comenzar Taller'",
+        tag: "IDENTIDAD FINANCIERA",
+        title: "Equilibrio Inicial y Paz Mental",
+        desc: "Consolidación de ingresos, compromisos y reservas antes de iniciar la simulación.",
         view: "view-character-summary"
       },
       {
@@ -2187,10 +2115,6 @@
           <div class="slide-category-tag">${slide.tag}</div>
           <div class="slide-card-title">${slide.title}</div>
           <div class="slide-card-desc">${slide.desc}</div>
-          <div class="slide-card-hint">
-            <span>${slide.hint}</span>
-            <span style="font-size: 0.85rem;">➔</span>
-          </div>
         `;
         track.appendChild(card);
       });
