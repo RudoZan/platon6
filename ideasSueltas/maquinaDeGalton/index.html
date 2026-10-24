@@ -195,8 +195,8 @@
 
         // Bins (compartimentos)
         const bins = [];
-        const binStartY = startY + numRows * rowSpacing + 23;
-        const binHeight = 188;
+        const binStartY = startY + numRows * rowSpacing + 30;
+        const binHeight = 250;
 
         const leftEndX = pegs[numRows - 1][0].x - pegRadius * 10;
         const rightEndX = pegs[numRows - 1][pegs[numRows - 1].length - 1].x + pegRadius * 10;
@@ -205,7 +205,7 @@
 
         for (let i = 0; i < numBins; i++) {
             bins[i] = {
-                x: 38 + i * binWidth,
+                x: 50 + i * binWidth,
                 width: binWidth - 10,
                 count: 0,
                 balls: []
@@ -255,7 +255,7 @@
         class Ball {
             constructor() {
                 this.x = startX;
-                this.y = startY - 23;
+                this.y = startY - 30;
                 this.vx = 0;
                 this.vy = 2;
                 this.radius = ballRadius;
@@ -305,8 +305,8 @@
                 }
 
                 let barHitThisFrame = false;
-                if (this.y >= startY - 23 && this.y <= binStartY) {
-                    const progress = (this.y - (startY - 23)) / (binStartY - (startY - 23));
+                if (this.y >= startY - 30 && this.y <= binStartY) {
+                    const progress = (this.y - (startY - 30)) / (binStartY - (startY - 30));
                     const leftBound = topLeftX + (leftEndX - topLeftX) * progress;
                     const rightBound = topRightX + (rightEndX - topRightX) * progress;
 
@@ -333,7 +333,7 @@
 
                 if (!barHitThisFrame) this.lastBarHit = null;
 
-                const stopY = binStartY - 23;
+                const stopY = binStartY - 30;
                 if (this.y >= stopY && this.active) {
                     let binIndex = Math.floor((this.x - 50) / binWidth);
                     binIndex = Math.max(0, Math.min(binIndex, numBins - 1));
@@ -388,12 +388,12 @@
             ctx.lineCap = 'round';
 
             ctx.beginPath();
-            ctx.moveTo(topLeftX, startY - 23);
+            ctx.moveTo(topLeftX, startY - 30);
             ctx.lineTo(leftEndX, binStartY);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(topRightX, startY - 23);
+            ctx.moveTo(topRightX, startY - 30);
             ctx.lineTo(rightEndX, binStartY);
             ctx.stroke();
 
@@ -436,8 +436,8 @@
             ctx.lineWidth = 1.5;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
-            ctx.moveTo(38, binStartY + binHeight);
-            ctx.lineTo(canvas.width - 38, binStartY + binHeight);
+            ctx.moveTo(50, binStartY + binHeight);
+            ctx.lineTo(canvas.width - 50, binStartY + binHeight);
             ctx.stroke();
             ctx.setLineDash([]);
 

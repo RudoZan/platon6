@@ -1,0 +1,2684 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Simulador Taller Finanzas Personales | Modo Vertical con Diapositivas PPT</title>
+  <meta name="description"
+    content="Simulador vivencial de finanzas personales integrado en tiempo real con la presentación del taller UAH/Experian. Modo vertical con carrusel de diapositivas horizontales superior.">
+
+  <!-- Google Fonts: Outfit (Titulares) & Inter (Lectura y datos) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       VARIABLES Y DESIGN TOKENS (LIGHT MODE / MODO CLARO MODERNO)
+       ========================================================================== */
+    :root {
+      --bg-dark: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-subtle: #f8fafc;
+      --border-color: #e2e8f0;
+      --border-glow: rgba(16, 185, 129, 0.2);
+
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+
+      --emerald: #059669;
+      --emerald-glow: rgba(16, 185, 129, 0.2);
+      --cyan: #0284c7;
+      --purple: #7c3aed;
+      --purple-glow: rgba(124, 58, 237, 0.2);
+      --amber: #d97706;
+      --rose: #e11d48;
+
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #e2e8f0;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      overflow-x: hidden;
+    }
+
+    /* Contenedor Vertical Simulado (Mobile-First Frame en Modo Claro) */
+    .mobile-frame {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 0 45px rgba(15, 23, 42, 0.12);
+      border-left: 1px solid #cbd5e1;
+      border-right: 1px solid #cbd5e1;
+    }
+
+    /* ==========================================================================
+       1. ZONA SUPERIOR: DIAPOSITIVAS PPT (MÁS GRANDE Y BARRA CON COLOR FUERTE)
+       ========================================================================== */
+    .top-slide-zone {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: #ffffff;
+      border-bottom: 2px solid #cbd5e1;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+      width: 100%;
+    }
+
+    /* Barra Superior con Color Fuerte (Executive Dark Navy & Alto Contraste) */
+    .slide-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border-bottom: 2px solid #334155;
+      width: 100%;
+      box-sizing: border-box;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .slide-nav-square {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.12);
+      color: #f8fafc;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      user-select: none;
+      padding: 0;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .slide-nav-square:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.45);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .slide-nav-square:active {
+      transform: translateY(0) scale(0.92);
+      background: #10b981;
+      color: #ffffff;
+      border-color: #10b981;
+    }
+
+    .slide-topic-label {
+      font-family: var(--font-title);
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: #ffffff;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      letter-spacing: -0.2px;
+      padding: 0 4px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Pista Deslizable Horizontalmente */
+    .slide-carousel-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      width: 100%;
+      background: #ffffff;
+    }
+
+    .slide-carousel-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Tarjeta Diapositiva Individual: Más Amplia (~170px altura) */
+    .slide-card {
+      flex: 0 0 100%;
+      width: 100%;
+      min-width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      scroll-snap-align: start;
+      background: #ffffff;
+      padding: 18px 20px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 170px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.15s ease;
+    }
+
+    .slide-card:hover {
+      background: #fafbfd;
+    }
+
+    .slide-category-tag {
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+
+    .slide-card-title {
+      font-family: var(--font-title);
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+
+    .slide-card-desc {
+      font-size: 0.86rem;
+      color: #334155;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .slide-card-hint {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #059669;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ==========================================================================
+       2. ZONA MEDIA: ÁREA INTERACTIVA DINÁMICA (~64% altura con scroll)
+       ========================================================================== */
+    .main-interactive-zone {
+      flex: 1;
+      padding: 12px 12px 90px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Tarjetas de Contenido en Modo Claro Mejorado */
+    .glass-card {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 15px;
+      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05);
+      position: relative;
+    }
+
+    .glass-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .glass-card-title {
+      font-family: var(--font-title);
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .glass-card-subtitle {
+      font-size: 0.77rem;
+      color: #64748b;
+      margin-top: 3px;
+      line-height: 1.38;
+    }
+
+    /* ==========================================================================
+       RESUMEN DEL PERSONAJE (FICHA CONSOLIDADA)
+       ========================================================================== */
+    .summary-section-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .summary-lifestyle-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .summary-item-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .summary-item-icon {
+      font-size: 1.4rem;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .summary-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .summary-item-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+
+    .summary-item-name {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .summary-item-sub {
+      font-size: 0.73rem;
+      color: #059669;
+      font-weight: 600;
+    }
+
+    .summary-interests-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .summary-interest-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 9999px;
+      padding: 5px 12px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #1e293b;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+
+    .summary-interest-badge {
+      background: #10b981;
+      color: #ffffff;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 9999px;
+    }
+
+    .summary-diagnosis-box {
+      margin-top: 14px;
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .summary-diagnosis-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      margin-bottom: 4px;
+    }
+
+    .summary-diagnosis-text {
+      font-size: 0.78rem;
+      color: #166534;
+      line-height: 1.48;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .btn-select-profile,
+    .btn-flow-continue {
+      width: 100%;
+      padding: 13px 18px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-title);
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s ease;
+      margin-top: 14px;
+    }
+
+    .btn-select-profile:hover,
+    .btn-flow-continue:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+    }
+
+    .btn-select-profile:active,
+    .btn-flow-continue:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    /* BOTONES DE NAVEGACIÓN ANTERIOR / SIGUIENTE */
+    .step-nav-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .btn-step-prev {
+      flex: 1;
+      padding: 12px 14px;
+      background: #ffffff;
+      color: #334155;
+      border: 1.5px solid #cbd5e1;
+      border-radius: var(--radius-md);
+      font-family: var(--font-title);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .btn-step-prev:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+
+    .btn-step-prev:active {
+      transform: scale(0.98);
+    }
+
+    .btn-step-next {
+      flex: 2;
+      padding: 12px 18px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-title);
+      font-size: 0.92rem;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .btn-step-next:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+    }
+
+    .btn-step-next:active {
+      transform: scale(0.98);
+    }
+
+    .btn-step-next:disabled,
+    .btn-step-next[disabled] {
+      opacity: 0.45;
+      background: #94a3b8 !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+      transform: none !important;
+      pointer-events: none;
+    }
+
+    /* MENSAJE DE ADVERTENCIA CUANDO FALTA SELECCIÓN */
+    .step-warning-msg {
+      margin-top: 10px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #dc2626;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    @keyframes shakeCard {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+
+    .shake-alert {
+      animation: shakeCard 0.4s ease-in-out;
+      border-color: #ef4444 !important;
+    }
+
+    /* ==========================================================================
+       LENGÜETAS DE ARCHIVADOR / CARPETA FÍSICA (PERFIL, INTERESES, ESTILO DE VIDA)
+       Diseño de pestañas reales físicamente unidas a la tarjeta inferior
+       ========================================================================== */
+    .setup-tabs-bar {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      padding: 0;
+      margin-top: 4px;
+      margin-bottom: -1.5px; /* Se solapa físicamente sobre el borde superior de la tarjeta */
+      position: relative;
+      z-index: 5;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      width: 100%;
+    }
+
+    /* Pestaña Inactiva: aspecto de lengüeta retraída detrás de la ficha activa */
+    .setup-tab-btn {
+      flex: 1;
+      min-width: 0;
+      height: 36px;
+      padding: 6px 8px;
+      background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+      border: 1.5px solid #cbd5e1;
+      border-bottom: 1.5px solid #cbd5e1;
+      border-radius: 9px 9px 0 0;
+      font-family: var(--font-title);
+      font-size: 0.77rem;
+      font-weight: 700;
+      color: #64748b;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      position: relative;
+      user-select: none;
+      white-space: nowrap;
+      transition: background 0.15s ease, color 0.15s ease, height 0.15s ease;
+      box-shadow: inset 0 -1px 2px rgba(15, 23, 42, 0.05);
+    }
+
+    .setup-tab-btn:hover:not(.active) {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: #94a3b8;
+    }
+
+    /* Pestaña Activa: lengüeta frontal en primer plano, fusionada sin costura a la tarjeta */
+    .setup-tab-btn.active {
+      height: 44px; /* Sobresale hacia arriba de las demás */
+      background: #ffffff !important; /* Mismo fondo blanco de la tarjeta */
+      border: 1.5px solid #cbd5e1;
+      border-top: 3.5px solid #10b981; /* Borde superior distintivo verde esmeralda */
+      border-bottom: 3.5px solid #ffffff !important; /* Borde inferior BLANCO que borra la línea de la tarjeta */
+      border-radius: 9px 9px 0 0;
+      color: #0f172a;
+      font-weight: 800;
+      font-size: 0.82rem;
+      margin-bottom: -1.5px;
+      z-index: 10;
+      box-shadow: 0 -3px 8px rgba(15, 23, 42, 0.05);
+      cursor: default;
+    }
+
+    /* Círculo indicador de número en la lengüeta */
+    .setup-tab-btn .setup-tab-num {
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      color: #475569;
+      font-size: 0.68rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .setup-tab-btn.active .setup-tab-num {
+      background: #10b981;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Tarjeta inmediatamente debajo de las lengüetas: esquinas superiores cuadradas para continuidad */
+    .setup-tab-card,
+    .setup-tabs-bar + .glass-card,
+    .setup-tabs-bar + div + .glass-card {
+      border: 1.5px solid #cbd5e1 !important;
+      border-top-left-radius: 0 !important;
+      border-top-right-radius: 0 !important;
+      border-bottom-left-radius: var(--radius-md) !important;
+      border-bottom-right-radius: var(--radius-md) !important;
+      position: relative;
+      z-index: 2;
+    }
+
+    @media (max-width: 375px) {
+      .setup-tab-btn {
+        font-size: 0.70rem;
+        gap: 3px;
+        padding: 5px 3px;
+      }
+      .setup-tab-btn .setup-tab-num {
+        width: 16px;
+        height: 16px;
+        font-size: 0.62rem;
+      }
+    }
+
+
+    /* ==========================================================================
+       1. BOLITAS DE INTERÉS (SISTEMA TÁCTIL DIRECTO Y TITILEO)
+       ========================================================================== */
+    /* ==========================================================================
+       1. BOLITAS DE INTERÉS (LISTADO SENCILLO DIRECTO Y TITILEO)
+       ========================================================================== */
+    .simple-counter-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #ecfdf5;
+      border: 1.5px solid #a7f3d0;
+      color: #047857;
+      font-family: var(--font-title);
+      font-size: 0.95rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1);
+      flex-shrink: 0;
+    }
+
+    .categories-single-list {
+      display: flex;
+      flex-direction: column;
+      margin-top: 10px;
+    }
+
+    .category-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 4px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .category-label {
+      font-size: 0.81rem;
+      color: #1e293b;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      padding-right: 8px;
+    }
+
+    .bolitas-control {
+      display: flex;
+      align-items: center;
+    }
+
+    .bolitas-slots {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+    }
+
+    /* SLOT INTERACTIVO DIRECTO (26px, ÁREA TÁCTIL CÓMODA PARA 3 NIVELES) */
+    .dot-slot {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: 1.5px dashed #cbd5e1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      user-select: none;
+    }
+
+    .dot-slot:hover {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+      transform: scale(1.12);
+    }
+
+    /* BOLITA LLENA / ACTIVA */
+    .dot-slot.filled {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: 1.5px solid #047857;
+      box-shadow: 0 2px 5px rgba(16, 185, 129, 0.45);
+    }
+
+    .dot-slot.filled::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.8);
+      position: absolute;
+      top: 4px;
+      left: 5px;
+    }
+
+    .dot-slot.filled:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+      filter: brightness(1.08);
+    }
+
+    /* ANIMACIÓN TITILAR CUANDO NO HAY BOLITAS EN EL POZO */
+    @keyframes dotBlinkAlert {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 5px rgba(16, 185, 129, 0.45);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-color: #047857;
+      }
+      25%, 75% {
+        transform: scale(1.35);
+        box-shadow: 0 0 14px rgba(239, 68, 68, 0.95), 0 0 20px rgba(245, 158, 11, 0.9);
+        background: linear-gradient(135deg, #ef4444 0%, #f59e0b 100%);
+        border-color: #dc2626;
+      }
+      50% {
+        transform: scale(0.92);
+        background: #f87171;
+        border-color: #b91c1c;
+      }
+    }
+
+    .dot-slot.filled.blink-alert {
+      animation: dotBlinkAlert 0.42s ease-in-out 3 !important;
+    }
+
+    /* 2. ELECCIÓN DE DECISIONES INICIALES (VIVIENDA, TRABAJO, VEHÍCULO - 4 OPCIONES C/U) */
+    .anchor-card-selector {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    @media (min-width: 640px) {
+      .anchor-card-selector {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .anchor-option {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 8px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 3px;
+      min-height: 90px;
+      position: relative;
+      user-select: none;
+    }
+
+    .anchor-option:hover {
+      border-color: #94a3b8;
+      background: #f8fafc;
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06);
+    }
+
+    .anchor-option.selected {
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+      border-color: #10b981;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22);
+    }
+
+    .anchor-option.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 0.62rem;
+      font-weight: 900;
+      color: #ffffff;
+      background: #10b981;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      box-shadow: 0 1px 3px rgba(16, 185, 129, 0.4);
+    }
+
+    .anchor-icon {
+      font-size: 1.45rem;
+      margin-bottom: 2px;
+      line-height: 1;
+    }
+
+    .anchor-name {
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+
+    .anchor-cost {
+      font-size: 0.65rem;
+      color: #047857;
+      font-weight: 600;
+      margin-top: auto;
+      line-height: 1.2;
+    }
+
+    /* 3. TRIÁNGULO DE INVERSIÓN (SVG INTERACTIVO) */
+    .triangle-container {
+      position: relative;
+      width: 100%;
+      height: 210px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    .triangle-svg {
+      width: 260px;
+      height: 200px;
+    }
+
+    .triangle-handle {
+      cursor: grab;
+      transition: transform 0.1s;
+    }
+
+    .triangle-vertex-label {
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-title);
+      text-anchor: middle;
+    }
+
+    .asset-card {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .asset-card:hover,
+    .asset-card.active {
+      border-color: var(--cyan);
+      background: #f0f9ff;
+      box-shadow: 0 3px 8px rgba(2, 132, 199, 0.12);
+    }
+
+    .asset-info h4 {
+      font-size: 0.85rem;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+
+    .asset-info p {
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+
+    .asset-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* 4. EVENTOS Y DILEMAS */
+    .dilemma-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .timer-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: #fee2e2;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin: 10px 0 14px 0;
+    }
+
+    .timer-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--emerald), var(--amber), var(--rose));
+      width: 100%;
+      transition: width 1s linear;
+    }
+
+    .decision-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1.5px solid #e2e8f0;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.15s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .decision-btn:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .decision-btn.primary {
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+      border-color: #34d399;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+    }
+
+    /* ==========================================================================
+       GRILLA DE 2 COLUMNAS Y TARJETAS DE OPCIONES DE LOS ÍCONOS
+       ========================================================================== */
+    .hub-grid-2col {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .hub-option-card {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 10px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      min-height: 56px;
+      text-align: left;
+    }
+
+    .hub-option-card:hover {
+      background: #ffffff;
+      border-color: #0284c7;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .hub-option-card:active {
+      transform: scale(0.97);
+      background: #f8fafc;
+    }
+
+    .hub-option-icon {
+      font-size: 1.3rem;
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .hub-option-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .hub-option-name {
+      font-size: 0.77rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .hub-option-desc {
+      font-size: 0.66rem;
+      color: #64748b;
+      line-height: 1.22;
+      margin-top: 3px;
+    }
+
+    /* ==========================================================================
+       3. ZONA INFERIOR: HUD DOCK BAR CON 7 ICONOS COLORIDOS EN MODO CLARO
+       ========================================================================== */
+    .bottom-hud-zone {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-top: 1.5px solid #cbd5e1;
+      box-shadow: 0 -4px 25px rgba(15, 23, 42, 0.08);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Barra Dock de 7 Lugares de Oportunidades */
+    .hud-dock-bar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      padding: 5px 2px 7px 2px;
+      align-items: center;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .hud-dock-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 3px 0;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      user-select: none;
+      color: #334155;
+      min-width: 0;
+    }
+
+    .hud-dock-tab:hover {
+      background: #f1f5f9;
+      transform: translateY(-2px);
+    }
+
+    .hud-dock-tab:active {
+      transform: scale(0.94);
+    }
+
+    .hud-dock-tab.active {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    /* Cajas de Íconos Coloridos en Modo Claro */
+    .dock-icon-box {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.18s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+    }
+
+    /* 1. Banco (Verde Esmeralda Vivo) */
+    .icon-banco {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: 1px solid #047857;
+    }
+
+    .hud-dock-tab.active .icon-banco,
+    .hud-dock-tab:hover .icon-banco {
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+      transform: scale(1.12);
+    }
+
+    /* 2. Inversiones (Azul Zafiro / Diamante) */
+    .icon-inversiones {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      border: 1px solid #1e40af;
+    }
+
+    .hud-dock-tab.active .icon-inversiones,
+    .hud-dock-tab:hover .icon-inversiones {
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+      transform: scale(1.12);
+    }
+
+    /* 3. Corredora (Cian / Turquesa Eléctrico) */
+    .icon-corredora {
+      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+      border: 1px solid #0e7490;
+    }
+
+    .hud-dock-tab.active .icon-corredora,
+    .hud-dock-tab:hover .icon-corredora {
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+      transform: scale(1.12);
+    }
+
+    /* 4. Comercio (Coral / Carmín) */
+    .icon-comercio {
+      background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+      border: 1px solid #be123c;
+    }
+
+    .hud-dock-tab.active .icon-comercio,
+    .hud-dock-tab:hover .icon-comercio {
+      box-shadow: 0 0 12px rgba(244, 63, 94, 0.6);
+      transform: scale(1.12);
+    }
+
+    /* 5. Actividades (Fucsia / Magenta Vibrante) */
+    .icon-actividades {
+      background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+      border: 1px solid #be185d;
+    }
+
+    .hud-dock-tab.active .icon-actividades,
+    .hud-dock-tab:hover .icon-actividades {
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.6);
+      transform: scale(1.12);
+    }
+
+    /* 6. Trabajo (Ámbar / Oro Cálido) */
+    .icon-trabajo {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      border: 1px solid #b45309;
+    }
+
+    .hud-dock-tab.active .icon-trabajo,
+    .hud-dock-tab:hover .icon-trabajo {
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+      transform: scale(1.12);
+    }
+
+    /* 7. Mi Estado (Púrpura / Amatista) */
+    .icon-estado {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      border: 1px solid #6d28d9;
+    }
+
+    .hud-dock-tab.active .icon-estado,
+    .hud-dock-tab:hover .icon-estado {
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+      transform: scale(1.12);
+    }
+
+    /* Tipografía de las pestañas */
+    .dock-tab-title {
+      font-size: 0.52rem;
+      font-weight: 700;
+      color: #475569;
+      text-align: center;
+      white-space: nowrap;
+      letter-spacing: -0.2px;
+      line-height: 1.1;
+      margin-top: 1px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hud-dock-tab.active .dock-tab-title {
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    @media (min-width: 400px) {
+      .dock-tab-title {
+        font-size: 0.55rem;
+      }
+    }
+
+    /* Clases de Utilidad */
+    .hidden {
+      display: none !important;
+    }
+
+    .text-emerald {
+      color: var(--emerald);
+    }
+
+    .text-cyan {
+      color: var(--cyan);
+    }
+
+    .text-purple {
+      color: var(--purple);
+    }
+
+    .text-amber {
+      color: var(--amber);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- CONTENEDOR VERTICAL MOBILE-FIRST -->
+  <div class="mobile-frame">
+
+    <!-- ======================================================================
+         1. ZONA SUPERIOR: DIAPOSITIVAS PPT FONDO CLARO (100% ANCHO) (~22% altura)
+         ====================================================================== -->
+    <header class="top-slide-zone">
+      <!-- Barra Superior: Cuadro Izquierdo con Triángulo + Título al Medio + Cuadro Derecho con Triángulo -->
+      <div class="slide-top-bar">
+        <button class="slide-nav-square prev-btn" onclick="scrollSlideBy(-1)" title="Diapositiva anterior"
+          aria-label="Anterior">
+          ◀
+        </button>
+        <div class="slide-topic-label" id="slide-topic-label">
+          Decisiones Informadas en Finanzas Personales
+        </div>
+        <button class="slide-nav-square next-btn" onclick="scrollSlideBy(1)" title="Siguiente diapositiva"
+          aria-label="Siguiente">
+          ▶
+        </button>
+      </div>
+
+      <!-- Pista Horizontal de Diapositivas Deslizables (Cada diapo ocupa el 100% del ancho) -->
+      <div class="slide-carousel-track" id="slide-track" onscroll="onTrackScroll()">
+        <!-- Las diapositivas se renderizan dinámicamente con JS -->
+      </div>
+    </header>
+
+
+    <!-- ======================================================================
+         2. ZONA MEDIA: ESCENARIO DINÁMICO INTERACTIVO (~64% altura)
+         ====================================================================== -->
+    <main class="main-interactive-zone" id="main-stage">
+
+      <!-- ==================================================================
+           VISTA 1: SETEO DE BOLITAS DE INTERÉS (PRIMER PASO DEL TALLER)
+           ================================================================== -->
+      <section id="view-step-4" class="step-view">
+        <!-- Lengüetas Superiores: Paso 1 de 3 (Intereses) -->
+        <div class="setup-tabs-bar">
+          <button class="setup-tab-btn active" onclick="goToInterestsScreen()">
+            <span class="setup-tab-num">1</span>
+            <span>Intereses</span>
+          </button>
+          <button class="setup-tab-btn" onclick="goToAnchorsScreen()">
+            <span class="setup-tab-num">2</span>
+            <span>Decisiones iniciales</span>
+          </button>
+          <button class="setup-tab-btn" onclick="goToSummaryScreen()">
+            <span class="setup-tab-num">3</span>
+            <span>Resumen</span>
+          </button>
+        </div>
+
+        <!-- Tarjeta de Intereses (Listado Sencillo de 11 Categorías y 20 Bolitas) -->
+        <div class="glass-card setup-tab-card">
+          <div class="glass-card-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+            <div>
+              <div class="glass-card-title">Intereses Personales</div>
+              <div class="glass-card-subtitle" style="margin-top: 4px; font-size: 0.8rem; color: #475569; line-height: 1.35;">
+                Asigna más bolitas para representar qué tanto valoras o te interesa cada tema
+              </div>
+            </div>
+            <div class="simple-counter-badge" title="Bolitas asignadas del total de 20">
+              <span id="assigned-bolitas">11</span> / <span id="max-bolitas">20</span>
+            </div>
+          </div>
+
+          <!-- Listado único de categorías -->
+          <div class="categories-single-list" id="cats-list">
+            <!-- Renderizado dinámico con JS -->
+          </div>
+
+          <!-- Botón de Navegación: Siguiente -->
+          <button class="btn-step-next" style="width: 100%; margin-top: 16px;" onclick="goToAnchorsScreen()">
+            <span>Siguiente (Decisiones iniciales)</span>
+            <span style="font-size: 1.05rem;">➔</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VISTA 2: ELECCIÓN DE DECISIONES INICIALES (VIVIENDA, TRABAJO, VEHÍCULO)
+           ================================================================== -->
+      <section id="view-anchors" class="step-view hidden">
+        <!-- Lengüetas Superiores: Paso 2 de 3 (Decisiones iniciales) -->
+        <div class="setup-tabs-bar">
+          <button class="setup-tab-btn" onclick="goToInterestsScreen()">
+            <span class="setup-tab-num">1</span>
+            <span>Intereses</span>
+          </button>
+          <button class="setup-tab-btn active" onclick="goToAnchorsScreen()">
+            <span class="setup-tab-num">2</span>
+            <span>Decisiones iniciales</span>
+          </button>
+          <button class="setup-tab-btn" onclick="goToSummaryScreen()">
+            <span class="setup-tab-num">3</span>
+            <span>Resumen</span>
+          </button>
+        </div>
+
+        <div class="glass-card setup-tab-card">
+          <div class="glass-card-title">🧭 Decisiones Iniciales</div>
+          <div class="glass-card-subtitle" style="margin-top: 4px; font-size: 0.8rem; color: #475569; line-height: 1.35;">
+            Define tus condiciones de vivienda, trabajo y transporte para la simulación:
+          </div>
+
+          <!-- 1. Vivienda (4 opciones) -->
+          <div style="margin-top: 14px;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+              <span>🏠</span> <span>1. Vivienda:</span>
+            </div>
+            <div class="anchor-card-selector" id="anchor-home">
+              <div class="anchor-option" onclick="selectAnchor('home', 0, this, 'Casa o Depto')">
+                <div class="anchor-icon">🏡</div>
+                <div class="anchor-name">Casa o Depto</div>
+                <div class="anchor-cost">En condominio</div>
+              </div>
+              <div class="anchor-option" onclick="selectAnchor('home', 1, this, 'Departamento centro')">
+                <div class="anchor-icon">🏢</div>
+                <div class="anchor-name">Departamento centro</div>
+                <div class="anchor-cost">Conectividad central</div>
+              </div>
+              <div class="anchor-option" onclick="selectAnchor('home', 2, this, 'Casa Barrio tradicional')">
+                <div class="anchor-icon">🏘️</div>
+                <div class="anchor-name">Casa Barrio tradicional</div>
+                <div class="anchor-cost">Tranquila y familiar</div>
+              </div>
+              <div class="anchor-option" onclick="selectAnchor('home', 3, this, 'Parcela de agrado')">
+                <div class="anchor-icon">🌲</div>
+                <div class="anchor-name">Parcela de agrado</div>
+                <div class="anchor-cost">Espacio y naturaleza</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Trabajo (4 opciones con 2 sueldos medios) -->
+          <div style="margin-top: 16px;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+              <span>💼</span> <span>2. Trabajo:</span>
+            </div>
+            <div class="anchor-card-selector" id="anchor-job">
+              <div class="anchor-option" onclick="selectAnchor('job', 0, this, 'Freelance sueldo medio')">
+                <div class="anchor-icon">⚡</div>
+                <div class="anchor-name">Freelance sueldo medio</div>
+                <div class="anchor-cost">Sueldo medio variable</div>
+              </div>
+              <div class="anchor-option" onclick="selectAnchor('job', 1, this, 'Trabajo dependiente sueldo medio')">
+                <div class="anchor-icon">💼</div>
+                <div class="anchor-name">Trabajo dependiente sueldo medio</div>
+                <div class="anchor-cost">Sueldo medio fijo</div>
+              </div>
+              <div class="anchor-option" onclick="selectAnchor('job', 2, this, 'Trabajo sueldo mínimo')">
+                <div class="anchor-icon">🛠️</div>
+                <div class="anchor-name">Trabajo sueldo mínimo</div>
+                <div class="anchor-cost">Sueldo mínimo regulado</div>
+              </div>
+              <div class="anchor-option" onclick="selectAnchor('job', 3, this, 'Trabajo administrativo sueldo alto')">
+                <div class="anchor-icon">🏛️</div>
+                <div class="anchor-name">Trabajo administrativo sueldo alto</div>
+                <div class="anchor-cost">Sueldo alto corporativo</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Transporte (4 opciones con auto deportivo o de lujo) -->
+          <div style="margin-top: 16px;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+              <span>🚌</span> <span>3. Transporte:</span>
+            </div>
+            <div class="anchor-card-selector" id="anchor-transport">
+              <div class="anchor-option" onclick="selectAnchor('transport', 0, this, 'SUV')">
+                <div class="anchor-icon">🚙</div>
+                <div class="anchor-name">SUV</div>
+                <div class="anchor-cost">Espaciosa y familiar</div>
+              </div>
+              <div class="anchor-option" onclick="selectAnchor('transport', 1, this, 'City Car')">
+                <div class="anchor-icon">🚗</div>
+                <div class="anchor-name">City Car</div>
+                <div class="anchor-cost">Ágil y muy económico</div>
+              </div>
+              <div class="anchor-option" onclick="selectAnchor('transport', 2, this, 'Locomoción colectiva')">
+                <div class="anchor-icon">🚌</div>
+                <div class="anchor-name">Locomoción colectiva</div>
+                <div class="anchor-cost">Micro y Metro • Económico</div>
+              </div>
+              <div class="anchor-option" onclick="selectAnchor('transport', 3, this, 'Auto deportivo o de lujo')">
+                <div class="anchor-icon">🏎️</div>
+                <div class="anchor-name">Auto deportivo o de lujo</div>
+                <div class="anchor-cost">Alta gama y exclusivo</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de Navegación: Anterior / Siguiente -->
+          <div class="step-nav-buttons">
+            <button class="btn-step-prev" onclick="goToInterestsScreen()">
+              <span>◀</span>
+              <span>Anterior</span>
+            </button>
+            <button id="btn-confirm-anchors" class="btn-step-next" onclick="confirmAnchorsAndContinue()" disabled>
+              <span>Siguiente</span>
+              <span>➔</span>
+            </button>
+          </div>
+          <div id="anchors-warning-msg" class="step-warning-msg hidden"></div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VISTA 3: RESUMEN DEL PERSONAJE CONSOLIDADO
+           ================================================================== -->
+      <section id="view-character-summary" class="step-view hidden">
+        <!-- Lengüetas Superiores: Paso 3 de 3 (Resumen) -->
+        <div class="setup-tabs-bar">
+          <button class="setup-tab-btn" onclick="goToInterestsScreen()">
+            <span class="setup-tab-num">1</span>
+            <span>Intereses</span>
+          </button>
+          <button class="setup-tab-btn" onclick="goToAnchorsScreen()">
+            <span class="setup-tab-num">2</span>
+            <span>Decisiones iniciales</span>
+          </button>
+          <button class="setup-tab-btn active" onclick="goToSummaryScreen()">
+            <span class="setup-tab-num">3</span>
+            <span>Resumen</span>
+          </button>
+        </div>
+
+        <div class="glass-card setup-tab-card">
+          <div class="glass-card-header" style="margin-bottom: 8px;">
+            <div>
+              <div class="glass-card-title">👤 Ficha de tu Personaje</div>
+              <div class="glass-card-subtitle" style="margin-top: 3px; font-size: 0.8rem; color: #475569;">
+                Perfil consolidado para la simulación del taller
+              </div>
+            </div>
+            <div style="background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #047857; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 9999px;">
+              ✨ Listo para jugar
+            </div>
+          </div>
+
+          <!-- Contenido dinámico del resumen -->
+          <div id="character-summary-content">
+            <!-- Inyectado por renderCharacterSummary() -->
+          </div>
+
+          <!-- Botones de navegación -->
+          <div class="step-nav-buttons" style="margin-top: 18px;">
+            <button class="btn-step-prev" onclick="goToAnchorsScreen()">
+              <span>◀</span>
+              <span>Ajustar estilo</span>
+            </button>
+            <button class="btn-step-next" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); font-size: 0.92rem; padding: 12px 20px;" onclick="startSimulationFromSummary()">
+              <span>Comenzar Taller</span>
+              <span>🚀</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VISTA PASO 9: EL TRIÁNGULO DE LA INVERSIÓN
+           ================================================================== -->
+      <section id="view-step-9" class="step-view hidden">
+        <div class="glass-card">
+          <div class="glass-card-title">🔺 El Triángulo de la Inversión</div>
+          <div class="glass-card-subtitle">
+            Toca o arrastra el selector central para ver cómo se equilibran los 3 vértices:
+          </div>
+
+          <!-- Canvas / SVG del Triángulo -->
+          <div class="triangle-container">
+            <svg class="triangle-svg" viewBox="0 0 260 200">
+              <!-- Triángulo de Fondo -->
+              <polygon points="130,20 25,180 235,180" fill="#f8fafc" stroke="#cbd5e1"
+                stroke-width="2" />
+              <!-- Líneas interiores -->
+              <line x1="130" y1="20" x2="130" y2="125" stroke="#e2e8f0" stroke-dasharray="3" />
+              <line x1="25" y1="180" x2="130" y2="125" stroke="#e2e8f0" stroke-dasharray="3" />
+              <line x1="235" y1="180" x2="130" y2="125" stroke="#e2e8f0" stroke-dasharray="3" />
+
+              <!-- Nodos de Vértices -->
+              <circle cx="130" cy="20" r="7" fill="#059669" />
+              <text x="130" y="12" class="triangle-vertex-label" fill="#059669">RENTABILIDAD</text>
+
+              <circle cx="25" cy="180" r="7" fill="#0284c7" />
+              <text x="35" y="196" class="triangle-vertex-label" fill="#0284c7">LIQUIDEZ</text>
+
+              <circle cx="235" cy="180" r="7" fill="#d97706" />
+              <text x="225" y="196" class="triangle-vertex-label" fill="#d97706">RIESGO</text>
+
+              <!-- Puntero móvil -->
+              <circle id="triangle-pointer" cx="130" cy="125" r="11" fill="#fff" stroke="#7c3aed" stroke-width="4"
+                class="triangle-handle" />
+            </svg>
+          </div>
+
+          <!-- Diagnóstico del Punto Seleccionado -->
+          <div
+            style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: var(--radius-sm); margin-bottom: 12px; font-size: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span>📈 Rentabilidad: <strong id="val-rent" class="text-emerald">60%</strong></span>
+              <span>💧 Liquidez: <strong id="val-liq" class="text-cyan">30%</strong></span>
+              <span>⚠️ Riesgo: <strong id="val-risk" class="text-amber">45%</strong></span>
+            </div>
+            <div id="triangle-verdict" style="color: #64748b; font-size: 0.72rem;">
+              "Estrategia balanceada de crecimiento a mediano plazo."
+            </div>
+          </div>
+
+          <div style="font-size: 0.75rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Toca un instrumento para
+            ubicarlo en el triángulo:</div>
+
+          <!-- Instrumento 1: DAP -->
+          <div class="asset-card" onclick="setTrianglePreset(130, 175, 'DAP')">
+            <div class="asset-info">
+              <h4>🏦 Depósito a Plazo (DAP 90d)</h4>
+              <p>Renta Fija • Capital 100% garantizado</p>
+            </div>
+            <span class="asset-tag" style="background: rgba(5,150,105,0.1); color: var(--emerald);">Bajo Riesgo</span>
+          </div>
+
+          <!-- Instrumento 2: Fondos Mutuos -->
+          <div class="asset-card" onclick="setTrianglePreset(130, 110, 'FFMM')">
+            <div class="asset-info">
+              <h4>📊 Fondos Mutuos / Cuenta 2</h4>
+              <p>Diversificación equilibrada • Retiro en 48h</p>
+            </div>
+            <span class="asset-tag" style="background: rgba(2,132,199,0.1); color: var(--cyan);">Medio Riesgo</span>
+          </div>
+
+          <!-- Instrumento 3: Acciones / Cripto -->
+          <div class="asset-card" onclick="setTrianglePreset(195, 115, 'ACCIONES')">
+            <div class="asset-info">
+              <h4>🚀 Acciones & Renta Variable</h4>
+              <p>Alto potencial de dividendo • Volátil</p>
+            </div>
+            <span class="asset-tag" style="background: rgba(217,119,6,0.1); color: var(--amber);">Alto Riesgo</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ==================================================================
+           VISTA PASO 11: EVENTO DE BIENESTAR (PASIONES)
+           ================================================================== -->
+      <section id="view-step-11" class="step-view hidden">
+        <div class="glass-card">
+          <div class="dilemma-badge">🌟 Evento de Estilo de Vida</div>
+          <div class="glass-card-title">🎾 Torneo Relámpago de Pádel & Asado de Fin de Semana</div>
+          <p class="glass-card-subtitle" style="margin-top: 6px;">
+            Tus amigos del club armaron un torneo de fin de semana con inscripción, canchas, polera oficial y asado de
+            cierre. Como le pusiste 4 bolitas a Deporte Activo, ¡te mueres de ganas de ir!
+          </p>
+
+          <div
+            style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: var(--radius-sm); margin: 12px 0;">
+            <div style="font-size: 0.72rem; color: #059669; font-weight: 600;">Costo Total del Plan:</div>
+            <div style="font-size: 1.2rem; font-weight: 800; font-family: var(--font-title); color: #0f172a;">$120.000 CLP
+            </div>
+          </div>
+
+          <div style="font-size: 0.75rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">¿Cómo vas a responder?
+          </div>
+
+          <button class="decision-btn primary" onclick="resolveDilemma('Pagar de Caja', -120000, 15)">
+            <div>
+              <strong>1. Pagar al Contado (Caja Inmediata)</strong>
+              <div style="font-size: 0.68rem; color: var(--emerald);">-$120.000 de saldo • +15% Felicidad</div>
+            </div>
+            <span>✓</span>
+          </button>
+
+          <button class="decision-btn" onclick="resolveDilemma('Pagar en Cuotas', 0, 10, 35000)">
+            <div>
+              <strong>2. Pagar en 4 Cuotas con Tarjeta</strong>
+              <div style="font-size: 0.68rem; color: var(--amber);">$0 hoy • -$35.000/mes por 4 meses</div>
+            </div>
+            <span>💳</span>
+          </button>
+
+          <button class="decision-btn" onclick="resolveDilemma('Rechazar', 0, -25)">
+            <div>
+              <strong>3. Rechazar invitación (Ahorrar dinero)</strong>
+              <div style="font-size: 0.68rem; color: var(--rose);">$0 costo • -25% Bienestar (FOMO/Aislamiento)</div>
+            </div>
+            <span>✕</span>
+          </button>
+        </div>
+      </section>
+
+
+      <!-- ==================================================================
+           VISTA PASO 18: TEST DE PERFIL DE RIESGO OFICIAL UAH
+           ================================================================== -->
+      <section id="view-step-18" class="step-view hidden">
+        <div class="glass-card">
+          <div class="glass-card-title">📝 Test Oficial de Perfil Inversor</div>
+          <div class="glass-card-subtitle">Pregunta 2 de 5 (Marco UAH / Experian):</div>
+
+          <div style="margin: 14px 0;">
+            <p style="font-size: 0.85rem; font-weight: 600; color: #0f172a; line-height: 1.35;">
+              "¿Qué harías si tu inversión pierde un 15% de su valor en un solo mes?"
+            </p>
+          </div>
+
+          <button class="decision-btn" onclick="selectRiskOption(1, this)">
+            <div>
+              <strong>A) Vendo inmediatamente todo</strong>
+              <div style="font-size: 0.68rem; color: var(--text-dim);">Para evitar seguir perdiendo capital (1 pto)
+              </div>
+            </div>
+          </button>
+
+          <button class="decision-btn primary" onclick="selectRiskOption(2, this)">
+            <div>
+              <strong>B) Espero pacientemente a que se recupere</strong>
+              <div style="font-size: 0.68rem; color: var(--emerald);">Entiendo que los mercados tienen ciclos (2 pts)
+              </div>
+            </div>
+          </button>
+
+          <button class="decision-btn" onclick="selectRiskOption(3, this)">
+            <div>
+              <strong>C) Aprovecho los precios bajos para invertir más</strong>
+              <div style="font-size: 0.68rem; color: var(--cyan);">Tolerancia alta a la volatilidad (3 pts)</div>
+            </div>
+          </button>
+
+          <div id="risk-score-box"
+            style="margin-top: 10px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-sm); font-size: 0.75rem; color: #0f172a;">
+            Tu perfil preliminar: <strong class="text-cyan">Moderado Balanceado (10 pts)</strong>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ==================================================================
+           VISTA PASO 26: URGENCIA / CISNE NEGRO (TEMPORIZADOR 15s)
+           ================================================================== -->
+      <section id="view-step-26" class="step-view hidden">
+        <div class="glass-card" style="border-color: #fca5a5; background: #fff1f2;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="dilemma-badge"
+              style="background: #fee2e2; color: var(--rose); border-color: #fca5a5;">
+              🚨 CRISIS SÚBITA
+            </span>
+            <span id="countdown-num"
+              style="font-weight: 800; font-family: var(--font-title); color: var(--rose);">15s</span>
+          </div>
+
+          <div class="glass-card-title" style="color: #be123c;">⚡ Desgarro de Meniscos y Kinesiólogo Urgente</div>
+          <p class="glass-card-subtitle" style="margin-top: 4px; color: #475569;">
+            En mitad de un partido pisaste mal. El traumatólogo exige resonancia magnética inmediata y 10 sesiones de
+            rehabilitación para no quedar con secuela.
+          </p>
+
+          <div class="timer-bar-wrap">
+            <div id="timer-bar" class="timer-bar-fill"></div>
+          </div>
+
+          <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Costo médico obligatorio:
+            $380.000 CLP</div>
+
+          <button class="decision-btn primary" onclick="resolveDilemma('Pagar con Reserva', -380000, 0)">
+            <div>
+              <strong>1. Usar Fondo de Emergencias</strong>
+              <div style="font-size: 0.68rem; color: var(--emerald);">-$380k de reservas • Cero deuda • Paz intacta
+              </div>
+            </div>
+            <span>🛡️</span>
+          </button>
+
+          <button class="decision-btn" onclick="resolveDilemma('Tarjeta de Crédito', 0, -20, 68000)">
+            <div>
+              <strong>2. Pagar en 6 cuotas con Tarjeta</strong>
+              <div style="font-size: 0.68rem; color: var(--amber);">Nueva cuota de -$68.000/mes • Intereses CAE 36%
+              </div>
+            </div>
+            <span>💳</span>
+          </button>
+
+          <button class="decision-btn" onclick="resolveDilemma('Postergar con calmantes', 0, -45)">
+            <div>
+              <strong>3. Postergar con analgésicos</strong>
+              <div style="font-size: 0.68rem; color: var(--rose);">$0 gasto hoy • -45% Salud y dolor crónico</div>
+            </div>
+            <span>⚠️</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Vistas complementarias para pasos restantes -->
+      <section id="view-generic" class="step-view hidden">
+        <div class="glass-card">
+          <div class="glass-card-title" id="generic-title">Paso Activo</div>
+          <p class="glass-card-subtitle" id="generic-desc">Contenido dinámico sincronizado con el facilitador.</p>
+          <div style="padding: 24px 10px; text-align: center; color: var(--text-dim);">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;" id="generic-icon">💡</div>
+            <div id="generic-msg">Desliza las diapositivas arriba para seguir el tema que expone el facilitador.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vista de Lugares de Oportunidades en la Zona Central -->
+      <section id="view-hub-stage" class="step-view hidden">
+        <div class="glass-card">
+          <!-- Cabecera del Lugar (Sin botón de diapo) -->
+          <div style="margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+            <div class="glass-card-title" id="hub-stage-title">🏦 Banco</div>
+            <div class="glass-card-subtitle" id="hub-stage-subtitle">Secciones disponibles</div>
+          </div>
+
+          <!-- Listado de Secciones de este Lugar en 2 Columnas -->
+          <div id="hub-stage-sections" class="hub-grid-2col"></div>
+        </div>
+      </section>
+
+    </main>
+
+
+    <!-- ======================================================================
+         3. ZONA INFERIOR: HUD FLOTANTE CON 6 LUGARES DE OPORTUNIDADES
+         ====================================================================== -->
+    <footer class="bottom-hud-zone">
+      <!-- Barra Dock con los 7 Lugares de Oportunidades (Solo íconos y texto, sin cifras) -->
+      <nav class="hud-dock-bar">
+        <!-- 1. Banco -->
+        <button class="hud-dock-tab tab-banco" onclick="selectHudTab('banco')" id="tab-banco" title="Banco">
+          <div class="dock-icon-box icon-banco">
+            <span>🏦</span>
+          </div>
+          <span class="dock-tab-title">Banco</span>
+        </button>
+
+        <!-- 2. Inversiones -->
+        <button class="hud-dock-tab tab-inversiones" onclick="selectHudTab('inversiones')" id="tab-inversiones" title="Inversiones">
+          <div class="dock-icon-box icon-inversiones">
+            <span>💎</span>
+          </div>
+          <span class="dock-tab-title">Inversiones</span>
+        </button>
+
+        <!-- 3. Corredora -->
+        <button class="hud-dock-tab tab-corredora" onclick="selectHudTab('corredora')" id="tab-corredora" title="Corredora">
+          <div class="dock-icon-box icon-corredora">
+            <span>📈</span>
+          </div>
+          <span class="dock-tab-title">Corredora</span>
+        </button>
+
+        <!-- 4. Comercio -->
+        <button class="hud-dock-tab tab-comercio" onclick="selectHudTab('comercio')" id="tab-comercio" title="Comercio">
+          <div class="dock-icon-box icon-comercio">
+            <span>🛍️</span>
+          </div>
+          <span class="dock-tab-title">Comercio</span>
+        </button>
+
+        <!-- 5. Actividades -->
+        <button class="hud-dock-tab tab-actividades" onclick="selectHudTab('actividades')" id="tab-actividades" title="Actividades">
+          <div class="dock-icon-box icon-actividades">
+            <span>🎟️</span>
+          </div>
+          <span class="dock-tab-title">Actividades</span>
+        </button>
+
+        <!-- 6. Trabajo -->
+        <button class="hud-dock-tab tab-trabajo" onclick="selectHudTab('trabajo')" id="tab-trabajo" title="Trabajo">
+          <div class="dock-icon-box icon-trabajo">
+            <span>💼</span>
+          </div>
+          <span class="dock-tab-title">Trabajo</span>
+        </button>
+
+        <!-- 7. Mi Estado -->
+        <button class="hud-dock-tab tab-estado" onclick="selectHudTab('estado')" id="tab-estado" title="Mi Estado">
+          <div class="dock-icon-box icon-estado">
+            <span>👤</span>
+          </div>
+          <span class="dock-tab-title">Mi Estado</span>
+        </button>
+      </nav>
+    </footer>
+
+  </div>
+
+
+  <!-- ======================================================================
+       LÓGICA JAVASCRIPT: CARRUSEL DE DIAPOSITIVAS + SIMULADOR
+       ====================================================================== -->
+  <script>
+    // CATÁLOGO DE DIAPOSITIVAS DEL TALLER (100% ALINEADO AL PDF UAH / EXONDO CLARO)
+    const slidesData = [
+      {
+        step: 1,
+        tag: "TALLER FINANZAS • UAH / EXPERIAN",
+        title: "1. Tus Intereses Personales",
+        desc: "Distribuye tus 20 bolitas en las áreas que más valoras. Las finanzas dependen de tus prioridades y el factor humano de tus elecciones.",
+        hint: "👉 Asigna tus 20 bolitas y pulsa Siguiente",
+        view: "view-step-4"
+      },
+      {
+        step: 2,
+        tag: "DECISIONES INICIALES",
+        title: "2. Decisiones Iniciales: Vivienda, Trabajo y Transporte",
+        desc: "Marca una opción para cada ámbito. Estas decisiones definen tus ingresos y tus principales compromisos fijos mensuales.",
+        hint: "👉 Marca una opción en cada tema y continúa",
+        view: "view-anchors"
+      },
+      {
+        step: 3,
+        tag: "FICHA • PERSONAJE CREADO",
+        title: "3. Resumen de tu Personaje",
+        desc: "Revisa el perfil consolidado de tu personaje con sus mayores intereses, nivel de ingresos y compromisos antes de comenzar.",
+        hint: "👉 Revisa tu ficha y pulsa 'Comenzar Taller'",
+        view: "view-character-summary"
+      },
+      {
+        step: 5,
+        tag: "PRESUPUESTO INTELIGENTE",
+        title: "Regla de Oro: \"Págate a ti primero\"",
+        desc: "No ahorres lo que sobra; gasta lo que queda después de separar tu ahorro. Estructura mensual sugerida: Fijos (50%), Estilo de Vida (30%) y Reservas (20%).",
+        hint: "👉 Organiza tu primer sueldo de $1.6M",
+        view: "view-generic",
+        genericTitle: "💵 Organización del 1er Sueldo Líquido ($1.600.000)",
+        genericDesc: "Mueve los porcentajes de asignación entre Gastos Fijos (45%), Estilo de Vida (35%) y Ahorro Primero (20%).",
+        genericIcon: "💰"
+      },
+      {
+        step: 9,
+        tag: "TRIÁNGULO DE LA INVERSIÓN",
+        title: "Rentabilidad, Liquidez y Nivel de Riesgo",
+        desc: "Principio rector: ninguna inversión maximiza las 3 variables simultáneamente. Mayor rentabilidad con poco riesgo exige renunciar a liquidez inmediata.",
+        hint: "👉 Mueve el puntero interactivo en el triángulo",
+        view: "view-step-9"
+      },
+      {
+        step: 11,
+        tag: "ESTILO DE VIDA Y BIENESTAR",
+        title: "Eventos y Pasiones: El Costo Real de tu Felicidad",
+        desc: "Tus aficiones (deporte, música, salidas) demandan presupuesto real. Decir sí a todo sobreendeuda; decir no a todo genera frustración y aislamiento.",
+        hint: "👉 Resuelve la invitación al torneo de pádel",
+        view: "view-step-11"
+      },
+      {
+        step: 12,
+        tag: "INSTRUMENTOS DE AHORRO • RENTA FIJA",
+        title: "Depósitos a Plazo (DAP 30 a 360 días)",
+        desc: "Renta fija con capital 100% garantizado por ley (garantía estatal CMF). Cero riesgo de mercado e ideal para gastos anuales como patentes y seguros.",
+        hint: "👉 Simula tu inversión en DAP",
+        view: "view-generic",
+        genericTitle: "🏦 Vitrina de Depósitos a Plazo (30 a 360 días)",
+        genericDesc: "Simula colocar $300.000 CLP a 90 días con tasa garantizada del 4.8% anual.",
+        genericIcon: "🏦"
+      },
+      {
+        step: 16,
+        tag: "GESTIÓN DE CARTERA",
+        title: "\"No poner todos los huevos en la misma canasta\"",
+        desc: "Diversifica por tipo de activo, horizonte de plazo, sector económico e institución. Concentrar todo en un solo activo destruye tu patrimonio en crisis.",
+        hint: "👉 Mira el impacto de diversificar ante caídas",
+        view: "view-generic",
+        genericTitle: "📉 Impacto de Choque de Mercado",
+        genericDesc: "El sector tecnológico cayó un 20%. Quien tenía DAP y Fondos Mutuos amortiguó el golpe; quien tenía 100% acciones sufrió pérdidas agudas.",
+        genericIcon: "🥚"
+      },
+      {
+        step: 18,
+        tag: "TEST OFICIAL UAH / EXPERIAN",
+        title: "Test de Perfil de Riesgo: Tolerancia y Paz Mental",
+        desc: "Conservador (5-8 pts), Moderado (9-11 pts) y Arriesgado (12-15 pts). La cartera correcta es siempre la que te permite dormir tranquilo en la noche.",
+        hint: "👉 Responde la pregunta oficial del test",
+        view: "view-step-18"
+      },
+      {
+        step: 21,
+        tag: "CRÉDITO ROTATIVO",
+        title: "Tarjetas de Crédito y la Trampa del Pago Mínimo",
+        desc: "Tasas entre 25% y 45% anual sobre saldo insoluto. El pago mínimo capitaliza intereses acumulados y multiplica los años necesarios para cancelar la deuda.",
+        hint: "👉 Simula pago mínimo vs total facturado",
+        view: "view-generic",
+        genericTitle: "💳 Simulador de Pago Mínimo vs Pago Total",
+        genericDesc: "Deuda actual en tarjeta: $450.000 CLP. Si pagas el total facturado terminas hoy. Si pagas el mínimo de $25.000, tardarás 4 años y pagarás $890.000.",
+        genericIcon: "💳"
+      },
+      {
+        step: 25,
+        tag: "COMPARACIÓN TRANSPARENTE",
+        title: "Crédito de Consumo y el CAE (Costo Anual Equivalente)",
+        desc: "La tasa de interés nominal no refleja el costo real. El CAE incluye comisiones, seguros obligatorios, gastos notariales e impuestos de timbres.",
+        hint: "👉 Compara las 3 ofertas por CAE",
+        view: "view-generic",
+        genericTitle: "⚖️ Comparador de 3 Ofertas de Crédito",
+        genericDesc: "Banco A (Tasa 1.2%, CAE 22%), Banco B (Tasa 1.0%, CAE 26%), Tienda C (CAE 39%). ¿Cuál eliges?",
+        genericIcon: "⚖️"
+      },
+      {
+        step: 26,
+        tag: "GESTIÓN DE CRISIS",
+        title: "El Cisne Negro: Imprevistos Mayores y Urgencias",
+        desc: "La vida no pide permiso: salud, fallas mecánicas o filtraciones de hogar. El Fondo de Emergencias es tu escudo protector para evitar deudas asfixiantes.",
+        hint: "👉 Tienes 15 segundos para decidir cómo pagar",
+        view: "view-step-26"
+      },
+      {
+        step: 30,
+        tag: "CASO PRÁCTICO REAL",
+        title: "Dilema Real: Renovar Computador de $600.000 CLP",
+        desc: "Opción Ahorro (guardar $50k/mes por 12 meses ganando intereses) vs Opción Crédito (12 cuotas de $56.250 pagando $675.000 CLP). ¿Qué eliges tú?",
+        hint: "👉 Vota qué harías tú en la encuesta",
+        view: "view-generic",
+        genericTitle: "💻 Votación y Elección: Computador $600.000 CLP",
+        genericDesc: "Elige tu camino: Opción A (Ahorro programado) vs Opción B (Comprar a crédito hoy mismo).",
+        genericIcon: "💻"
+      },
+      {
+        step: 33,
+        tag: "CIERRE Y REFLEXIÓN FINAL",
+        title: "Amortización, Interés Compuesto y Radiografía a 8 Años",
+        desc: "El interés compuesto es la fuerza más poderosa: trabaja a tu favor cuando ahorras, o en tu contra cuando te endeudas. Evalúa tu equilibrio vital final.",
+        hint: "👉 Revisa tu radiografía final de vida",
+        view: "view-generic",
+        genericTitle: "🏆 Tu Radiografía Final de Vida (8 Años)",
+        genericDesc: "Patrimonio Acumulado: $14.800.000 CLP • Intereses pagados a bancos: $2.100.000 • Paz Mental promedio: 82%.",
+        genericIcon: "🏆"
+      }
+    ];
+
+    // ESTADO GLOBAL DEL PERSONAJE
+    const state = {
+      currentSlideIdx: 0,
+      activeHudTab: null,
+      totalBolitas: 20,
+      assignedBolitas: 11, // 11 categorías x 1 bolita inicial
+      selectedHome: null,
+      selectedJob: null,
+      selectedTransport: null,
+      lifestyleChoices: {
+        home: null,
+        job: null,
+        transport: null
+      },
+      cash: 450000,
+      reserves: 600000,
+      invested: 500000,
+      monthlyDebt: 85000,
+      mentalPeace: 78,
+      categories: [
+        { id: 'vivienda', name: '🏠 Vivienda & Espacio Propio', dots: 1 },
+        { id: 'movilidad', name: '🚗 Movilidad & Transporte Comodo', dots: 1 },
+        { id: 'tech', name: '💻 Tecnología & Herramientas', dots: 1 },
+        { id: 'viajes', name: '✈️ Viajes & Vacaciones', dots: 1 },
+        { id: 'gastronomia', name: '🍽️ Gastronomía & Salidas', dots: 1 },
+        { id: 'conciertos', name: '🎸 Conciertos & Festivales', dots: 1 },
+        { id: 'aprendizaje', name: '📚 Aprendizaje & Pasatiempos', dots: 1 },
+        { id: 'deporte', name: '🏋️ Deporte & Salud Física', dots: 1 },
+        { id: 'moda', name: '👗 Moda, Imagen & Estilo', dots: 1 },
+        { id: 'gaming', name: '🎮 Gaming & Ocio Digital', dots: 1 },
+        { id: 'familia', name: '🤝 Familia & Amigos', dots: 1 }
+      ]
+    };
+
+    // INICIALIZACIÓN
+    window.addEventListener('DOMContentLoaded', () => {
+      renderSlideCarousel();
+      renderBolitas();
+      updateHUD();
+      selectSlide(0);
+    });
+
+    // RENDERIZAR FICHA DE RESUMEN DEL PERSONAJE
+    function renderCharacterSummary() {
+      const container = document.getElementById('character-summary-content');
+      if (!container) return;
+
+      const homeOptions = [
+        { icon: '🏡', name: 'Casa o Depto', tag: 'En condominio', cost: 'Costo fijo alto' },
+        { icon: '🏢', name: 'Departamento centro', tag: 'Conectividad urbana', cost: 'Costo fijo moderado' },
+        { icon: '🏘️', name: 'Casa Barrio tradicional', tag: 'Tranquila y familiar', cost: 'Costo fijo accesible' },
+        { icon: '🌲', name: 'Parcela de agrado', tag: 'Espacio y naturaleza', cost: 'Costo fijo alto / rural' }
+      ];
+
+      const jobOptions = [
+        { icon: '⚡', name: 'Freelance sueldo medio', tag: 'Sueldo medio variable', income: 'Ingreso Variable (~$1.4M)' },
+        { icon: '💼', name: 'Trabajo dependiente sueldo medio', tag: 'Sueldo medio fijo', income: 'Ingreso Fijo (~$1.4M)' },
+        { icon: '🛠️', name: 'Trabajo sueldo mínimo', tag: 'Sueldo mínimo regulado', income: 'Ingreso Base (~$500k)' },
+        { icon: '🏛️', name: 'Trabajo administrativo sueldo alto', tag: 'Sueldo alto corporativo', income: 'Ingreso Alto (~$2.2M)' }
+      ];
+
+      const transportOptions = [
+        { icon: '🚙', name: 'SUV', tag: 'Espaciosa y familiar', cost: 'Costo operacional alto' },
+        { icon: '🚗', name: 'City Car', tag: 'Ágil y muy económico', cost: 'Costo muy económico' },
+        { icon: '🚌', name: 'Locomoción colectiva', tag: 'Micro y Metro • Económico', cost: 'Costo mínimo mensual' },
+        { icon: '🏎️', name: 'Auto deportivo o de lujo', tag: 'Alta gama y exclusivo', cost: 'Costo mantención muy alto' }
+      ];
+
+      const home = homeOptions[state.selectedHome] || { icon: '🏠', name: 'No seleccionado', tag: 'Pendiente', cost: '-' };
+      const job = jobOptions[state.selectedJob] || { icon: '💼', name: 'No seleccionado', tag: 'Pendiente', income: '-' };
+      const transport = transportOptions[state.selectedTransport] || { icon: '🚗', name: 'No seleccionado', tag: 'Pendiente', cost: '-' };
+
+      // Top intereses asignados con más de 1 bolita (o top 4)
+      const sortedCats = [...state.categories].sort((a, b) => b.dots - a.dots);
+      const topCats = sortedCats.filter(c => c.dots > 1);
+      const displayedInterests = (topCats.length >= 2) ? topCats.slice(0, 4) : sortedCats.slice(0, 4);
+
+      // Diagnóstico personalizado pedagógico
+      let diagnosis = "";
+      if (state.selectedJob === 3) {
+        diagnosis = "Tu sueldo administrativo alto te entrega una gran capacidad de ahorro e inversión inicial. El principal desafío en el taller será evitar que los gastos fijos crezcan sin control.";
+      } else if (state.selectedJob === 0) {
+        diagnosis = "Como freelance con ingresos medios y variables, tu mayor fortaleza es la flexibilidad. Crear un Fondo de Emergencias robusto será tu prioridad #1 para amortiguar los meses bajos.";
+      } else if (state.selectedJob === 1) {
+        diagnosis = "Tu trabajo dependiente con sueldo medio te entrega estabilidad y predictibilidad mensual. La clave en el taller será aplicar la regla de ahorrar primero antes de comprometer cuotas.";
+      } else {
+        diagnosis = "Con un sueldo mínimo regulado, tu presupuesto requerirá máxima disciplina y priorización inteligente. Cuidar cada gasto hormiga y evitar el crédito de consumo rotativo será vital.";
+      }
+
+      if (state.selectedTransport === 2) {
+        diagnosis += " Tu elección de locomoción colectiva optimiza al máximo tus gastos de transporte, dejando más holgura mensual.";
+      } else if (state.selectedTransport === 3) {
+        diagnosis += " Tu auto deportivo o de lujo te entrega gran satisfacción pero demandará altos gastos en bencina, seguro y patentes; mantén un fondo específico para su mantención.";
+      } else if ((state.selectedHome === 0 || state.selectedHome === 3) && state.selectedTransport === 0) {
+        diagnosis += " Al combinar vivienda amplia con SUV, tus compromisos mensuales son exigentes; vigila que tus gastos fijos no superen el 50% de tus ingresos.";
+      }
+
+      container.innerHTML = `
+        <div class="summary-section-title">🧭 Decisiones Iniciales Elegidas</div>
+        <div class="summary-lifestyle-grid">
+          <div class="summary-item-card">
+            <div class="summary-item-icon">${home.icon}</div>
+            <div class="summary-item-info">
+              <div class="summary-item-label">Vivienda</div>
+              <div class="summary-item-name">${home.name}</div>
+              <div class="summary-item-sub">${home.tag} • ${home.cost}</div>
+            </div>
+          </div>
+          <div class="summary-item-card">
+            <div class="summary-item-icon">${job.icon}</div>
+            <div class="summary-item-info">
+              <div class="summary-item-label">Trabajo e Ingresos</div>
+              <div class="summary-item-name">${job.name}</div>
+              <div class="summary-item-sub">${job.income}</div>
+            </div>
+          </div>
+          <div class="summary-item-card">
+            <div class="summary-item-icon">${transport.icon}</div>
+            <div class="summary-item-info">
+              <div class="summary-item-label">Transporte Diario</div>
+              <div class="summary-item-name">${transport.name}</div>
+              <div class="summary-item-sub">${transport.tag} • ${transport.cost}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-section-title" style="margin-top: 14px;">🎯 Mayores Prioridades e Intereses</div>
+        <div class="summary-interests-container">
+          ${displayedInterests.map(c => `
+            <div class="summary-interest-pill">
+              <span>${c.name}</span>
+              <span class="summary-interest-badge">${c.dots} ${c.dots === 1 ? 'bolita' : 'bolitas'}</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="summary-diagnosis-box">
+          <div class="summary-diagnosis-header">
+            <span style="font-size: 1.05rem;">💡</span>
+            <span style="font-weight: 800; color: #065f46;">Diagnóstico Financiero de Partida:</span>
+          </div>
+          <p class="summary-diagnosis-text">${diagnosis}</p>
+        </div>
+      `;
+    }
+
+    // RENDERIZAR CARRUSEL DE DIAPOSITIVAS HORIZONTAL (100% ANCHO, FONDO CLARO, SIN PUNTOS)
+    function renderSlideCarousel() {
+      const track = document.getElementById('slide-track');
+      if (!track) return;
+      track.innerHTML = '';
+
+      slidesData.forEach((slide, idx) => {
+        const card = document.createElement('div');
+        card.className = `slide-card ${idx === 0 ? 'active' : ''}`;
+        card.id = `slide-card-${idx}`;
+        card.onclick = () => selectSlide(idx);
+
+        card.innerHTML = `
+          <div class="slide-category-tag">${slide.tag}</div>
+          <div class="slide-card-title">${slide.title}</div>
+          <div class="slide-card-desc">${slide.desc}</div>
+          <div class="slide-card-hint">
+            <span>${slide.hint}</span>
+            <span style="font-size: 0.85rem;">➔</span>
+          </div>
+        `;
+        track.appendChild(card);
+      });
+    }
+
+    // SELECCIONAR Y ACTIVAR UNA DIAPOSITIVA
+    function selectSlide(idx) {
+      state.currentSlideIdx = idx;
+      const slide = slidesData[idx];
+      if (!slide) return;
+
+      // Actualizar etiqueta del tema en la barra inferior
+      const topicLabel = document.getElementById('slide-topic-label');
+      if (topicLabel) {
+        topicLabel.innerText = slide.title;
+      }
+
+      // Actualizar clase activa en tarjetas
+      document.querySelectorAll('.slide-card').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+
+      // Hacer scroll suave para alinear exactamente la diapositiva en el track
+      const track = document.getElementById('slide-track');
+      const targetCard = document.getElementById(`slide-card-${idx}`);
+      if (track && targetCard) {
+        track.scrollTo({
+          left: targetCard.offsetLeft,
+          behavior: 'smooth'
+        });
+      }
+
+      // Sincronizar la zona media interactiva
+      activateInteractiveView(slide);
+    }
+
+    // AVANZAR O RETROCEDER CON BOTONES ◀ / ▶
+    function scrollSlideBy(dir) {
+      let newIdx = state.currentSlideIdx + dir;
+      if (newIdx < 0) newIdx = 0;
+      if (newIdx >= slidesData.length) newIdx = slidesData.length - 1;
+      selectSlide(newIdx);
+    }
+
+    // DETECCIÓN DE SCROLL / SWIPE MANUAL CON EL DEDO EN EL TRACK
+    let scrollTimeout;
+    function onTrackScroll() {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        const track = document.getElementById('slide-track');
+        if (!track) return;
+        const cardWidth = track.clientWidth || 1;
+        const closestIdx = Math.round(track.scrollLeft / cardWidth);
+        const validIdx = Math.max(0, Math.min(slidesData.length - 1, closestIdx));
+
+        if (validIdx !== state.currentSlideIdx) {
+          selectSlide(validIdx);
+        }
+      }, 100);
+    }
+
+    // ACTIVAR LA VISTA DE LA ZONA MEDIA
+    function activateInteractiveView(slide) {
+      // Ocultar todas las vistas
+      document.querySelectorAll('.step-view').forEach(view => view.classList.add('hidden'));
+
+      if (slide.view === 'view-generic') {
+        const genView = document.getElementById('view-generic');
+        document.getElementById('generic-title').innerText = slide.genericTitle || slide.title;
+        document.getElementById('generic-desc').innerText = slide.genericDesc || slide.hint;
+        document.getElementById('generic-icon').innerText = slide.genericIcon || '💡';
+        genView.classList.remove('hidden');
+      } else {
+        const targetView = document.getElementById(slide.view);
+        if (targetView) targetView.classList.remove('hidden');
+      }
+
+      if (slide.view === 'view-character-summary') {
+        renderCharacterSummary();
+      }
+
+      // Si entra a la crisis de 15 segundos (Paso 26)
+      if (slide.step === 26) {
+        startCrisisTimer();
+      }
+    }
+
+    // RENDERIZAR BOLITAS EN UN SOLO LISTADO SENCILLO (SIN BLOQUES)
+    function renderBolitas() {
+      const container = document.getElementById('cats-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      state.categories.forEach((cat, idx) => {
+        const row = document.createElement('div');
+        row.className = 'category-row';
+        row.innerHTML = `
+          <div class="category-label">${cat.name}</div>
+          <div class="bolitas-control">
+            <div class="bolitas-slots" title="Pincha una bolita para quitarla o un espacio vacío para agregar">
+              ${[1, 2, 3].map(slotNum => `
+                <span class="dot-slot ${slotNum <= cat.dots ? 'filled' : ''}"
+                      onclick="onDotClick(${idx}, ${slotNum})"
+                      title="${slotNum <= cat.dots ? 'Pincha para quitar bolita' : 'Pincha para agregar bolita'}"></span>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      calculateTotalBolitas();
+    }
+
+    // GESTIÓN DE TOQUE DIRECTO EN LAS BOLITAS
+    function onDotClick(catIdx, slotNum) {
+      const cat = state.categories[catIdx];
+      const currentAssigned = state.categories.reduce((acc, c) => acc + c.dots, 0);
+      const available = state.totalBolitas - currentAssigned;
+
+      // Caso 1: El usuario pincha una bolita ya activa (para quitarla o reducirla)
+      if (slotNum <= cat.dots) {
+        if (slotNum === cat.dots) {
+          // Pinchó la última bolita: la quita (reduce en 1)
+          cat.dots = Math.max(0, cat.dots - 1);
+        } else {
+          // Pinchó una bolita anterior: ajusta a esa posición
+          cat.dots = slotNum;
+        }
+        renderBolitas();
+        return;
+      }
+
+      // Caso 2: El usuario pincha un espacio vacío (para agregar)
+      const needed = slotNum - cat.dots;
+
+      if (available <= 0) {
+        // No quedan bolitas para agregar (llegó a 20): TITILAR BOLITAS ACTIVAS
+        triggerNoBallsAlert();
+        return;
+      }
+
+      // Si hay saldo disponible:
+      if (available >= needed) {
+        cat.dots = slotNum;
+      } else {
+        cat.dots += available;
+      }
+
+      renderBolitas();
+    }
+
+    // ANIMACIÓN DE TITILAR CUANDO NO HAY BOLITAS PARA AGREGAR
+    let alertTimeout;
+    function triggerNoBallsAlert() {
+      // Hacer titilar todas las bolitas llenas activas en la pantalla
+      const filledDots = document.querySelectorAll('#view-step-4 .dot-slot.filled');
+      filledDots.forEach(dot => {
+        dot.classList.remove('blink-alert');
+        void dot.offsetWidth; // Forzar reflow para reiniciar la animación
+        dot.classList.add('blink-alert');
+      });
+
+      clearTimeout(alertTimeout);
+      alertTimeout = setTimeout(() => {
+        filledDots.forEach(dot => dot.classList.remove('blink-alert'));
+      }, 1400);
+    }
+
+    function calculateTotalBolitas() {
+      const sum = state.categories.reduce((acc, c) => acc + c.dots, 0);
+      state.assignedBolitas = sum;
+
+      const assignedEl = document.getElementById('assigned-bolitas');
+      if (assignedEl) assignedEl.innerText = sum;
+
+      const maxEl = document.getElementById('max-bolitas');
+      if (maxEl) maxEl.innerText = state.totalBolitas;
+    }
+
+    // NAVEGACIÓN ENTRE PASOS DE CONFIGURACIÓN DEL PERSONAJE
+    function goToInterestsScreen() {
+      selectSlide(0);
+    }
+
+    function goToAnchorsScreen() {
+      selectSlide(1);
+    }
+
+    function goToSummaryScreen() {
+      const isComplete = (state.selectedHome !== null && state.selectedJob !== null && state.selectedTransport !== null);
+      if (!isComplete) {
+        goToAnchorsScreen();
+        flashMissingAnchors();
+        return;
+      }
+      renderCharacterSummary();
+      selectSlide(2);
+    }
+
+    // SELECCIÓN DE OPCIÓN EN ESTILO DE VIDA (VIVIENDA, TRABAJO, TRANSPORTE)
+    function selectAnchor(type, idx, elem, label) {
+      const parent = elem.parentElement;
+      parent.querySelectorAll('.anchor-option').forEach(el => el.classList.remove('selected'));
+      elem.classList.add('selected');
+      if (!state.lifestyleChoices) state.lifestyleChoices = {};
+      if (type === 'home') {
+        state.selectedHome = idx;
+        state.lifestyleChoices.home = label;
+      } else if (type === 'job') {
+        state.selectedJob = idx;
+        state.lifestyleChoices.job = label;
+      } else if (type === 'transport') {
+        state.selectedTransport = idx;
+        state.lifestyleChoices.transport = label;
+      }
+
+      // Habilitar botón Siguiente solo cuando la selección esté completa (las 3 categorías)
+      const isComplete = (state.selectedHome !== null && state.selectedJob !== null && state.selectedTransport !== null);
+      const btn = document.getElementById('btn-confirm-anchors');
+      if (btn) btn.disabled = !isComplete;
+
+      // Ocultar mensaje de advertencia si ya completó todas
+      const warningEl = document.getElementById('anchors-warning-msg');
+      if (warningEl && isComplete) {
+        warningEl.classList.add('hidden');
+      }
+    }
+
+    // CONFIRMAR ESTILO DE VIDA Y CONTINUAR A LA FICHA DE RESUMEN
+    function confirmAnchorsAndContinue() {
+      const missing = [];
+      if (state.selectedHome === null) missing.push('Vivienda');
+      if (state.selectedJob === null) missing.push('Trabajo');
+      if (state.selectedTransport === null) missing.push('Transporte');
+
+      if (missing.length > 0) {
+        flashMissingAnchors(missing);
+        return;
+      }
+
+      goToSummaryScreen();
+    }
+
+    // COMENZAR SIMULACIÓN / TALLER DESDE LA FICHA DEL PERSONAJE
+    function startSimulationFromSummary() {
+      selectSlide(3);
+    }
+
+    function flashMissingAnchors(missing) {
+      if (!missing || missing.length === 0) {
+        missing = [];
+        if (state.selectedHome === null) missing.push('Vivienda');
+        if (state.selectedJob === null) missing.push('Trabajo');
+        if (state.selectedTransport === null) missing.push('Transporte');
+      }
+      const warningEl = document.getElementById('anchors-warning-msg');
+      if (warningEl) {
+        warningEl.innerText = `⚠️ Por favor selecciona una opción en: ${missing.join(', ')}`;
+        warningEl.classList.remove('hidden');
+      }
+
+      missing.forEach(cat => {
+        let elId = '';
+        if (cat === 'Vivienda') elId = 'anchor-home';
+        else if (cat === 'Trabajo') elId = 'anchor-job';
+        else if (cat === 'Transporte') elId = 'anchor-transport';
+
+        const elem = document.getElementById(elId);
+        if (elem) {
+          elem.classList.remove('shake-alert');
+          void elem.offsetWidth;
+          elem.classList.add('shake-alert');
+          setTimeout(() => elem.classList.remove('shake-alert'), 600);
+        }
+      });
+    }
+
+    // TRIÁNGULO DE INVERSIÓN INTERACTIVO
+    function setTrianglePreset(cx, cy, type) {
+      const pointer = document.getElementById('triangle-pointer');
+      pointer.setAttribute('cx', cx);
+      pointer.setAttribute('cy', cy);
+
+      if (type === 'DAP') {
+        document.getElementById('val-rent').innerText = '25%';
+        document.getElementById('val-liq').innerText = '15%';
+        document.getElementById('val-risk').innerText = '0%';
+        document.getElementById('triangle-verdict').innerText = '"Cero riesgo, capital asegurado, pero ilíquido por el plazo elegido."';
+      } else if (type === 'FFMM') {
+        document.getElementById('val-rent').innerText = '60%';
+        document.getElementById('val-liq').innerText = '75%';
+        document.getElementById('val-risk').innerText = '40%';
+        document.getElementById('triangle-verdict').innerText = '"Equilibrio óptimo: diversificación profesional con disponibilidad en 48 horas."';
+      } else if (type === 'ACCIONES') {
+        document.getElementById('val-rent').innerText = '90%';
+        document.getElementById('val-liq').innerText = '80%';
+        document.getElementById('val-risk').innerText = '85%';
+        document.getElementById('triangle-verdict').innerText = '"Alto potencial de ganancias a largo plazo, pero con alta volatilidad."';
+      }
+    }
+
+    // RESOLUCIÓN DE DILEMAS
+    function resolveDilemma(actionName, cashDelta, mentalDelta, debtDelta = 0) {
+      state.cash += cashDelta;
+      state.mentalPeace = Math.max(10, Math.min(100, state.mentalPeace + mentalDelta));
+      state.monthlyDebt += debtDelta;
+
+      alert(`Decisión tomada: ${actionName}\nImpacto: ${cashDelta !== 0 ? cashDelta.toLocaleString('es-CL') + ' CLP' : ''} ${debtDelta !== 0 ? '+' + debtDelta.toLocaleString('es-CL') + ' en cuotas' : ''}`);
+      updateHUD();
+    }
+
+    // TEST DE RIESGO
+    function selectRiskOption(pts, btn) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.decision-btn').forEach(b => b.classList.remove('primary'));
+      btn.classList.add('primary');
+
+      const labels = { 1: "Conservador Protector", 2: "Moderado Balanceado", 3: "Arriesgado Proactivo" };
+      document.getElementById('risk-score-box').innerHTML = `Tu perfil preliminar: <strong class="text-cyan">${labels[pts]}</strong>`;
+    }
+
+    // TEMPORIZADOR DE CRISIS (PASO 26)
+    let countdownInterval;
+    function startCrisisTimer() {
+      clearInterval(countdownInterval);
+      let seconds = 15;
+      const numElem = document.getElementById('countdown-num');
+      const barElem = document.getElementById('timer-bar');
+
+      numElem.innerText = seconds + 's';
+      barElem.style.width = '100%';
+
+      countdownInterval = setInterval(() => {
+        seconds--;
+        numElem.innerText = seconds + 's';
+        barElem.style.width = (seconds / 15 * 100) + '%';
+
+        if (seconds <= 0) {
+          clearInterval(countdownInterval);
+          alert("¡Se acabó el tiempo! Se activó automáticamente el cobro en tarjeta de crédito por no decidir.");
+        }
+      }, 1000);
+    }
+
+    // CATÁLOGO DE SECCIONES POR LUGAR (100% ALINEADO A Opciones iconos.txt CON ÍCONOS CONTEXTUALES)
+    const hubsData = {
+      banco: {
+        title: "🏦 Banco",
+        subtitle: "Servicios financieros y cuentas bancarias",
+        sections: [
+          { name: "Cuenta Ahorro", icon: "🐖" },
+          { name: "Cuenta Vista", icon: "💳" },
+          { name: "Cuenta Corriente", icon: "🏦" },
+          { name: "Líneas de Crédito", icon: "⚡" },
+          { name: "Tarjeta de Crédito", icon: "💳" },
+          { name: "Fondos Mutuos", icon: "📊" },
+          { name: "Depósitos a Plazo (DAP)", icon: "⏳" },
+          { name: "Seguros", icon: "🛡️" }
+        ]
+      },
+      inversiones: {
+        title: "💎 Otras Inversiones",
+        subtitle: "Instrumentos y vehículos de inversión",
+        sections: [
+          { name: "Ahorro Previsional Voluntario (APV)", icon: "🧓" },
+          { name: "Ahorro Cuenta 2", icon: "📈" },
+          { name: "Inversión Fraccionada", icon: "🏢" },
+          { name: "Compra de Acciones", icon: "📉" },
+          { name: "Bonos Corporativos", icon: "📜" },
+          { name: "Bonos del Estado", icon: "🇨🇱" },
+          { name: "Fondos Indexados (ETF)", icon: "🌐" },
+          { name: "Compra/Venta Moneda Extranjera", icon: "💱" },
+          { name: "Compra/Venta Criptomonedas", icon: "🪙" },
+          { name: "Billeteras Electrónicas", icon: "📱" },
+          { name: "Participación en Startups", icon: "🚀" }
+        ]
+      },
+      corredora: {
+        title: "📈 Corredora",
+        subtitle: "Gestión inmobiliaria y corretaje de propiedades",
+        sections: [
+          { name: "Ventas Ofrecidas", icon: "🏷️", desc: "Vivienda, Bodega, Oficina, Local, Terreno, Estac." },
+          { name: "Arriendos Ofrecidos", icon: "🔑", desc: "Vivienda, Bodega, Oficina, Local, Terreno, Estac." },
+          { name: "Gestionar Venta", icon: "🤝", desc: "Poner propiedades o activos en venta" },
+          { name: "Gestionar Arriendo", icon: "📝", desc: "Poner propiedades o activos en arriendo" }
+        ]
+      },
+      comercio: {
+        title: "🛍️ Comercio",
+        subtitle: "Compras, consumo y retail",
+        sections: [
+          { name: "Comida", icon: "🛒" },
+          { name: "Farmacia", icon: "💊" },
+          { name: "Multitienda", icon: "🏬" },
+          { name: "Muebles y Electrónicos", icon: "🛋️" },
+          { name: "Automotora", icon: "🚗" },
+          { name: "Compra de Oro, Plata y Joyas", icon: "💍" }
+        ]
+      },
+      actividades: {
+        title: "🎟️ Actividades",
+        subtitle: "Recreación, eventos y vida social",
+        sections: [
+          { name: "Cine", icon: "🎬" },
+          { name: "Conciertos", icon: "🎸" },
+          { name: "Restaurant", icon: "🍽️" },
+          { name: "Deporte y Gimnasio", icon: "🏋️" },
+          { name: "Viajes y Turismo", icon: "✈️" },
+          { name: "Celebraciones", icon: "🎉" }
+        ]
+      },
+      trabajo: {
+        title: "💼 Trabajo",
+        subtitle: "Desarrollo profesional e ingresos laborales",
+        sections: [
+          { name: "Negociación Salarial y Ascensos", icon: "📈" },
+          { name: "Capacitaciones y Certificaciones", icon: "🎓" },
+          { name: "Búsqueda de Trabajo", icon: "🔍" }
+        ]
+      },
+      estado: {
+        title: "👤 Mi Estado",
+        subtitle: "Indicadores personales y salud patrimonial",
+        sections: [
+          { name: "Bienestar", icon: "😊" },
+          { name: "Salud", icon: "🩺" },
+          { name: "Intereses & Personalidad", icon: "🎭" },
+          { name: "Perfil de Inversionista", icon: "🎯" },
+          { name: "Liquidez", icon: "💧" },
+          { name: "Patrimonio Neto Consolidado", icon: "💰" }
+        ]
+      }
+    };
+
+    // RENDERIZAR EN LA ZONA CENTRAL AL PINCHAR UN ICONO (2 COLUMNAS EN MODO CLARO)
+    function renderHubCentralStage(tabName) {
+      const data = hubsData[tabName];
+      if (!data) return;
+
+      const titleElem = document.getElementById('hub-stage-title');
+      const subtitleElem = document.getElementById('hub-stage-subtitle');
+      const container = document.getElementById('hub-stage-sections');
+
+      if (titleElem) titleElem.innerText = data.title;
+      if (subtitleElem) subtitleElem.innerText = data.subtitle;
+
+      if (container) {
+        container.innerHTML = data.sections.map(sec => `
+          <div class="hub-option-card">
+            <div class="hub-option-icon">${sec.icon || '📌'}</div>
+            <div class="hub-option-text">
+              <div class="hub-option-name">${sec.name}</div>
+              ${sec.desc ? `<div class="hub-option-desc">${sec.desc}</div>` : ''}
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // ACCIÓN AL PINCHAR UN ICONO DE LA ZONA INFERIOR
+    function selectHudTab(tabName) {
+      state.activeHudTab = tabName;
+      document.querySelectorAll('.hud-dock-tab').forEach(t => t.classList.toggle('active', t.id === `tab-${tabName}`));
+
+      // Ocultar vistas de diapositivas en la zona central
+      document.querySelectorAll('.step-view').forEach(v => v.classList.add('hidden'));
+
+      // Renderizar y mostrar las secciones del lugar en la zona central
+      renderHubCentralStage(tabName);
+      const hubView = document.getElementById('view-hub-stage');
+      if (hubView) hubView.classList.remove('hidden');
+    }
+
+    // VOLVER A LA VISTA DE LA DIAPOSITIVA ACTIVA
+    function returnToSlideView() {
+      state.activeHudTab = null;
+      document.querySelectorAll('.hud-dock-tab').forEach(t => t.classList.remove('active'));
+      const currentSlide = slidesData[state.currentSlideIdx];
+      if (currentSlide) {
+        activateInteractiveView(currentSlide);
+      }
+    }
+
+    function updateHUD() {
+      // Estado de la barra inferior sincronizado
+    }
+  </script>
+</body>
+
+</html>
