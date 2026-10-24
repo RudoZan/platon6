@@ -176,7 +176,7 @@
       display: none;
     }
 
-    /* Tarjeta Diapositiva Individual: Ultra-Compacta (~42px altura) */
+    /* Tarjeta Diapositiva Individual: Proporción Equilibrada (~105px altura para soportar gráficos) */
     .slide-card {
       flex: 0 0 100%;
       width: 100%;
@@ -185,11 +185,11 @@
       box-sizing: border-box;
       scroll-snap-align: start;
       background: #ffffff;
-      padding: 5px 12px 4px 12px;
+      padding: 10px 14px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-height: 42px;
+      min-height: 105px;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.15s ease;
@@ -199,29 +199,59 @@
       background: #fafbfd;
     }
 
+    /* Layout Dividido para Diapositivas con Gráfico (ej. Triángulo) */
+    .slide-card.split-layout {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .slide-split-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .slide-split-visual {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .slide-mini-triangle {
+      width: 105px;
+      height: 85px;
+      display: block;
+    }
+
     .slide-category-tag {
-      font-size: 0.58rem;
+      font-size: 0.60rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: #0284c7;
-      margin-bottom: 1px;
+      margin-bottom: 2px;
       line-height: 1;
     }
 
     .slide-card-title {
       font-family: var(--font-title);
-      font-size: 0.84rem;
+      font-size: 0.90rem;
       font-weight: 800;
       color: #0f172a;
-      line-height: 1.2;
-      margin-bottom: 1px;
+      line-height: 1.25;
+      margin-bottom: 3px;
     }
 
     .slide-card-desc {
-      font-size: 0.70rem;
+      font-size: 0.74rem;
       color: #475569;
-      line-height: 1.2;
+      line-height: 1.3;
       margin-bottom: 0;
     }
 
@@ -1301,7 +1331,7 @@
           ◀
         </button>
         <div class="slide-topic-label" id="slide-topic-label">
-          Decisiones Informadas en Finanzas Personales
+          Diapositiva 1 de 13
         </div>
         <button class="slide-nav-square next-btn" onclick="scrollSlideBy(1)" title="Siguiente diapositiva"
           aria-label="Siguiente">
@@ -1856,9 +1886,9 @@
       {
         step: 9,
         tag: "TRIÁNGULO DE LA INVERSIÓN",
-        title: "Rentabilidad, Liquidez y Nivel de Riesgo",
-        desc: "Principio rector: ninguna inversión maximiza las 3 variables simultáneamente. Mayor rentabilidad con poco riesgo exige renunciar a liquidez inmediata.",
-        hint: "👉 Mueve el puntero interactivo en el triángulo",
+        title: "Rentabilidad, Liquidez y Riesgo",
+        desc: "Ninguna alternativa maximiza simultáneamente las tres variables del dinero.",
+        hasTriangle: true,
         view: "view-step-9"
       },
       {
@@ -2107,15 +2137,40 @@
 
       slidesData.forEach((slide, idx) => {
         const card = document.createElement('div');
-        card.className = `slide-card ${idx === 0 ? 'active' : ''}`;
+        card.className = `slide-card ${slide.hasTriangle ? 'split-layout' : ''} ${idx === 0 ? 'active' : ''}`;
         card.id = `slide-card-${idx}`;
         card.onclick = () => selectSlide(idx);
 
-        card.innerHTML = `
-          <div class="slide-category-tag">${slide.tag}</div>
-          <div class="slide-card-title">${slide.title}</div>
-          <div class="slide-card-desc">${slide.desc}</div>
-        `;
+        if (slide.hasTriangle) {
+          card.innerHTML = `
+            <div class="slide-split-text">
+              <div class="slide-category-tag">${slide.tag}</div>
+              <div class="slide-card-title">${slide.title}</div>
+              <div class="slide-card-desc">${slide.desc}</div>
+            </div>
+            <div class="slide-split-visual" title="Gráfico del Triángulo de la Inversión">
+              <svg viewBox="0 0 110 90" class="slide-mini-triangle">
+                <polygon points="55,14 14,78 96,78" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />
+                <line x1="55" y1="14" x2="55" y2="55" stroke="#e2e8f0" stroke-dasharray="2" />
+                <line x1="14" y1="78" x2="55" y2="55" stroke="#e2e8f0" stroke-dasharray="2" />
+                <line x1="96" y1="78" x2="55" y2="55" stroke="#e2e8f0" stroke-dasharray="2" />
+                <circle cx="55" cy="14" r="5" fill="#059669" />
+                <text x="55" y="8" font-size="7.5" font-weight="800" text-anchor="middle" fill="#059669">RENTABILIDAD</text>
+                <circle cx="14" cy="78" r="5" fill="#0284c7" />
+                <text x="6" y="88" font-size="7.5" font-weight="800" fill="#0284c7">LIQUIDEZ</text>
+                <circle cx="96" cy="78" r="5" fill="#d97706" />
+                <text x="104" y="88" font-size="7.5" font-weight="800" text-anchor="end" fill="#d97706">RIESGO</text>
+                <circle cx="55" cy="55" r="4.5" fill="#7c3aed" />
+              </svg>
+            </div>
+          `;
+        } else {
+          card.innerHTML = `
+            <div class="slide-category-tag">${slide.tag}</div>
+            <div class="slide-card-title">${slide.title}</div>
+            <div class="slide-card-desc">${slide.desc}</div>
+          `;
+        }
         track.appendChild(card);
       });
     }
@@ -2126,10 +2181,10 @@
       const slide = slidesData[idx];
       if (!slide) return;
 
-      // Actualizar etiqueta del tema en la barra inferior
+      // Actualizar contador en la barra superior (Cero duplicación de título)
       const topicLabel = document.getElementById('slide-topic-label');
       if (topicLabel) {
-        topicLabel.innerText = slide.title;
+        topicLabel.innerText = `Diapositiva ${idx + 1} de ${slidesData.length}`;
       }
 
       // Actualizar clase activa en tarjetas
