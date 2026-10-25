@@ -514,9 +514,21 @@
     }
 
     @keyframes shakeCard {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-4px); }
-      40%, 80% { transform: translateX(4px); }
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20%,
+      60% {
+        transform: translateX(-4px);
+      }
+
+      40%,
+      80% {
+        transform: translateX(4px);
+      }
     }
 
     .shake-alert {
@@ -534,7 +546,8 @@
       gap: 3px;
       padding: 0;
       margin-top: 4px;
-      margin-bottom: -1.5px; /* Se solapa físicamente sobre el borde superior de la tarjeta */
+      margin-bottom: -1.5px;
+      /* Se solapa físicamente sobre el borde superior de la tarjeta */
       position: relative;
       z-index: 5;
       background: transparent;
@@ -577,11 +590,15 @@
 
     /* Pestaña Activa: lengüeta frontal en primer plano, fusionada sin costura a la tarjeta */
     .setup-tab-btn.active {
-      height: 36px; /* Sobresale hacia arriba de las demás */
-      background: #ffffff !important; /* Mismo fondo blanco de la tarjeta */
+      height: 36px;
+      /* Sobresale hacia arriba de las demás */
+      background: #ffffff !important;
+      /* Mismo fondo blanco de la tarjeta */
       border: 1.5px solid #cbd5e1;
-      border-top: 3px solid #10b981; /* Borde superior distintivo verde esmeralda */
-      border-bottom: 3px solid #ffffff !important; /* Borde inferior BLANCO que borra la línea de la tarjeta */
+      border-top: 3px solid #10b981;
+      /* Borde superior distintivo verde esmeralda */
+      border-bottom: 3px solid #ffffff !important;
+      /* Borde inferior BLANCO que borra la línea de la tarjeta */
       border-radius: 7px 7px 0 0;
       color: #0f172a;
       font-weight: 800;
@@ -617,8 +634,8 @@
 
     /* Tarjeta inmediatamente debajo de las lengüetas: esquinas superiores cuadradas para continuidad */
     .setup-tab-card,
-    .setup-tabs-bar + .glass-card,
-    .setup-tabs-bar + div + .glass-card {
+    .setup-tabs-bar+.glass-card,
+    .setup-tabs-bar+div+.glass-card {
       border: 1.5px solid #cbd5e1 !important;
       border-top-left-radius: 0 !important;
       border-top-right-radius: 0 !important;
@@ -634,6 +651,7 @@
         gap: 3px;
         padding: 5px 3px;
       }
+
       .setup-tab-btn .setup-tab-num {
         width: 16px;
         height: 16px;
@@ -680,6 +698,14 @@
       min-height: 28px;
     }
 
+    .category-row:nth-child(even) {
+      background: #f5f5f5;
+    }
+
+    .category-row:nth-child(odd) {
+      background: #ffffff;
+    }
+
     .category-label {
       font-size: 0.79rem;
       color: #1e293b;
@@ -699,7 +725,7 @@
 
     .bolitas-slots {
       display: flex;
-      gap: 6px;
+      gap: 9px;
       align-items: center;
     }
 
@@ -744,17 +770,22 @@
 
     /* ANIMACIÓN TITILAR AL LLEGAR AL TOPE DE 25 ESTRELLAS */
     @keyframes starBlinkAlert {
-      0%, 100% {
+
+      0%,
+      100% {
         transform: scale(1);
         fill: #eab308;
         stroke: #ca8a04;
       }
-      25%, 75% {
+
+      25%,
+      75% {
         transform: scale(1.3);
         fill: #ef4444;
         stroke: #dc2626;
         filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.9));
       }
+
       50% {
         transform: scale(0.9);
         fill: #f59e0b;
@@ -1101,6 +1132,360 @@
     }
 
     /* ==========================================================================
+       CABECERA Y VISTA CENTRAL ESPECIALIZADA: PERSONAL Y HUBS
+       ========================================================================== */
+    .hub-stage-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+    }
+
+    .hub-stage-header-icon {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      flex-shrink: 0;
+    }
+
+    .hub-stage-header-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .hub-stage-header-title {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+
+    .hub-stage-header-subtitle {
+      font-size: 0.62rem;
+      color: #64748b;
+      line-height: 1.1;
+      margin-top: 1px;
+    }
+
+    /* KPIs DIRECTOS: BIENESTAR Y EFECTIVO */
+    .personal-kpis-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .personal-kpi-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 9px;
+      padding: 7px 9px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .personal-kpi-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .personal-kpi-label {
+      font-size: 0.60rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #64748b;
+    }
+
+    .personal-kpi-icon {
+      font-size: 0.92rem;
+      line-height: 1;
+    }
+
+    .personal-kpi-value {
+      font-size: 1.10rem;
+      font-weight: 800;
+      font-family: var(--font-title);
+      letter-spacing: -0.3px;
+      line-height: 1.1;
+    }
+
+    .kpi-bienestar .personal-kpi-value {
+      color: #059669;
+    }
+
+    .kpi-efectivo .personal-kpi-value {
+      color: #0284c7;
+    }
+
+    .personal-kpi-progress {
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 3px;
+    }
+
+    .personal-kpi-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+      border-radius: 999px;
+    }
+
+    /* 20 CORAZONES DE BIENESTAR (2 FILAS DE 10) */
+    .hearts-meter-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5px;
+      margin-top: 3px;
+    }
+
+    .hearts-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5px;
+      justify-content: flex-start;
+    }
+
+    .heart-svg {
+      width: 12.5px;
+      height: 12.5px;
+      display: block;
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
+
+    .heart-svg.filled path {
+      fill: #f43f5e;
+      stroke: #e11d48;
+      stroke-width: 0.8;
+      filter: drop-shadow(0 0.5px 1.5px rgba(244, 63, 94, 0.4));
+    }
+
+    .heart-svg.empty path {
+      fill: #f1f5f9;
+      stroke: #cbd5e1;
+      stroke-width: 1.2;
+    }
+
+    .hearts-subtext {
+      font-size: 0.58rem;
+      font-weight: 700;
+      color: #be123c;
+      line-height: 1.15;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .anchor-sub-hint {
+      font-size: 0.56rem;
+      font-weight: 700;
+      color: #0284c7;
+      margin-left: 6px;
+      background: #e0f2fe;
+      padding: 1px 6px;
+      border-radius: 999px;
+      letter-spacing: 0px;
+      text-transform: none;
+    }
+
+    /* TRABAJO Y BIENES MATERIALES */
+    .personal-assets-block {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 9px;
+      padding: 7px 9px;
+      margin-bottom: 8px;
+    }
+
+    .personal-assets-title {
+      font-size: 0.60rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #475569;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .personal-assets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .personal-asset-item {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      padding: 5px 3px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+    }
+
+    .personal-asset-icon {
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+
+    .personal-asset-type {
+      font-size: 0.54rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+
+    .personal-asset-name {
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.15;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    /* BOTONES DE ACCESO: PERFIL INVERSIONISTA, PRESUPUESTO, PATRIMONIO */
+    .personal-access-title {
+      font-size: 0.60rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #64748b;
+      margin-bottom: 5px;
+    }
+
+    .personal-access-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 5px;
+    }
+
+    .personal-access-btn {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+      width: 100%;
+      text-align: left;
+    }
+
+    .personal-access-btn:hover {
+      border-color: #8b5cf6;
+      background: #fbf9ff;
+      box-shadow: 0 2px 7px rgba(139, 92, 246, 0.14);
+      transform: translateY(-1px);
+    }
+
+    .personal-access-btn:active {
+      transform: scale(0.99);
+    }
+
+    .personal-access-left {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .personal-access-icon {
+      font-size: 1.0rem;
+      line-height: 1;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1f5f9;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .personal-access-texts {
+      min-width: 0;
+    }
+
+    .personal-access-name {
+      font-size: 0.70rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.15;
+    }
+
+    .personal-access-desc {
+      font-size: 0.57rem;
+      color: #64748b;
+      line-height: 1.1;
+      margin-top: 1px;
+    }
+
+    .personal-access-arrow {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+
+    /* SUB-VISTAS DE DETALLE (PRESUPUESTO, PATRIMONIO, INVERSIONISTA) */
+    .personal-subview-box {
+      animation: fadeIn 0.18s ease-in-out;
+    }
+
+    .personal-subview-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+      padding-bottom: 5px;
+      border-bottom: 1px dashed #cbd5e1;
+    }
+
+    .personal-subview-back-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .personal-subview-back-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    /* ==========================================================================
        3. ZONA INFERIOR: HUD DOCK BAR CON 7 ICONOS COLORIDOS EN MODO CLARO
        ========================================================================== */
     .bottom-hud-zone {
@@ -1356,7 +1741,7 @@
             <span>Intereses</span>
           </button>
           <button class="setup-tab-btn" onclick="goToAnchorsScreen()">
-            <span>Estilo</span>
+            <span>Estilo Vida</span>
           </button>
           <button class="setup-tab-btn" onclick="goToSummaryScreen()">
             <span>Resumen</span>
@@ -1372,11 +1757,13 @@
 
           <!-- Barra Inferior: Botón Siguiente a la izquierda y Cuadrito contador a la derecha -->
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px;">
-            <button id="btn-next-interests" class="btn-step-next" style="flex: 1; margin: 0; justify-content: center;" onclick="confirmInterestsAndContinue()" disabled>
+            <button id="btn-next-interests" class="btn-step-next" style="flex: 1; margin: 0; justify-content: center;"
+              onclick="confirmInterestsAndContinue()" disabled>
               <span>Siguiente</span>
               <span style="font-size: 0.90rem;">➔</span>
             </button>
-            <div class="simple-counter-badge" title="Estrellas asignadas del total de 25" style="padding: 5px 12px; font-size: 0.80rem; border-radius: 8px;">
+            <div class="simple-counter-badge" title="Estrellas asignadas del total de 25"
+              style="padding: 5px 12px; font-size: 0.80rem; border-radius: 8px;">
               <span id="assigned-bolitas">14</span> / <span id="max-bolitas">25</span> ⭐
             </div>
           </div>
@@ -1405,7 +1792,7 @@
           <!-- 1. Vivienda (4 opciones) -->
           <div class="anchor-block block-home" style="margin-top: 1px;">
             <div class="anchor-block-title">
-              <span>🏠</span> <span>1. Vivienda:</span>
+              <span>🏠</span> <span>1. Vivienda</span>
             </div>
             <div class="anchor-card-selector" id="anchor-home">
               <div class="anchor-option" onclick="selectAnchor('home', 0, this, 'Casa o Depto')">
@@ -1442,7 +1829,7 @@
           <!-- 2. Trabajo (4 opciones) -->
           <div class="anchor-block block-job">
             <div class="anchor-block-title">
-              <span>💼</span> <span>2. Trabajo:</span>
+              <span>💼</span> <span>2. Trabajo</span>
             </div>
             <div class="anchor-card-selector" id="anchor-job">
               <div class="anchor-option" onclick="selectAnchor('job', 0, this, 'Freelance')">
@@ -1479,7 +1866,7 @@
           <!-- 3. Transporte (4 opciones) -->
           <div class="anchor-block block-transport">
             <div class="anchor-block-title">
-              <span>🚌</span> <span>3. Transporte:</span>
+              <span>🚌</span> <span>3. Transporte</span>
             </div>
             <div class="anchor-card-selector" id="anchor-transport">
               <div class="anchor-option" onclick="selectAnchor('transport', 0, this, 'SUV o Camioneta')">
@@ -1579,8 +1966,7 @@
           <div class="triangle-container">
             <svg class="triangle-svg" viewBox="0 0 260 200">
               <!-- Triángulo de Fondo -->
-              <polygon points="130,20 25,180 235,180" fill="#f8fafc" stroke="#cbd5e1"
-                stroke-width="2" />
+              <polygon points="130,20 25,180 235,180" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />
               <!-- Líneas interiores -->
               <line x1="130" y1="20" x2="130" y2="125" stroke="#e2e8f0" stroke-dasharray="3" />
               <line x1="25" y1="180" x2="130" y2="125" stroke="#e2e8f0" stroke-dasharray="3" />
@@ -1615,7 +2001,8 @@
             </div>
           </div>
 
-          <div style="font-size: 0.75rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Toca un instrumento para
+          <div style="font-size: 0.75rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Toca un instrumento
+            para
             ubicarlo en el triángulo:</div>
 
           <!-- Instrumento 1: DAP -->
@@ -1663,7 +2050,8 @@
           <div
             style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: var(--radius-sm); margin: 12px 0;">
             <div style="font-size: 0.72rem; color: #059669; font-weight: 600;">Costo Total del Plan:</div>
-            <div style="font-size: 1.2rem; font-weight: 800; font-family: var(--font-title); color: #0f172a;">$120.000 CLP
+            <div style="font-size: 1.2rem; font-weight: 800; font-family: var(--font-title); color: #0f172a;">$120.000
+              CLP
             </div>
           </div>
 
@@ -1748,8 +2136,7 @@
       <section id="view-step-26" class="step-view hidden">
         <div class="glass-card" style="border-color: #fca5a5; background: #fff1f2;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span class="dilemma-badge"
-              style="background: #fee2e2; color: var(--rose); border-color: #fca5a5;">
+            <span class="dilemma-badge" style="background: #fee2e2; color: var(--rose); border-color: #fca5a5;">
               🚨 CRISIS SÚBITA
             </span>
             <span id="countdown-num"
@@ -1766,7 +2153,8 @@
             <div id="timer-bar" class="timer-bar-fill"></div>
           </div>
 
-          <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Costo médico obligatorio:
+          <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Costo médico
+            obligatorio:
             $380.000 CLP</div>
 
           <button class="decision-btn primary" onclick="resolveDilemma('Pagar con Reserva', -380000, 0)">
@@ -1812,14 +2200,19 @@
       <!-- Vista de Lugares de Oportunidades en la Zona Central -->
       <section id="view-hub-stage" class="step-view hidden">
         <div class="glass-card">
-          <!-- Cabecera del Lugar -->
-          <div style="margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
-            <div class="glass-card-title" id="hub-stage-title" style="font-size: 0.90rem;">🏦 Banco</div>
-            <button onclick="returnToSlideView()" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 7px; font-size: 0.68rem; font-weight: 700; color: #475569; cursor: pointer;">✕ Cerrar</button>
+          <!-- Cabecera del Lugar (Sin botón cerrar, ícono idéntico al del dock) -->
+          <div class="hub-stage-header">
+            <div id="hub-stage-icon-box" class="hub-stage-header-icon dock-icon-box icon-estado">
+              <!-- Inyectado dinámicamente -->
+            </div>
+            <div class="hub-stage-header-text">
+              <div class="glass-card-title hub-stage-header-title" id="hub-stage-title">Personal</div>
+              <div class="hub-stage-header-subtitle" id="hub-stage-subtitle">Vida personal, bienestar y finanzas</div>
+            </div>
           </div>
 
-          <!-- Listado de Secciones de este Lugar en 2 Columnas -->
-          <div id="hub-stage-sections" class="hub-grid-2col"></div>
+          <!-- Contenido del Lugar (Personal especializado o Listado en 2 Columnas) -->
+          <div id="hub-stage-sections"></div>
         </div>
       </section>
 
@@ -1841,7 +2234,8 @@
         </button>
 
         <!-- 2. Inversiones -->
-        <button class="hud-dock-tab tab-inversiones" onclick="selectHudTab('inversiones')" id="tab-inversiones" title="Inversiones">
+        <button class="hud-dock-tab tab-inversiones" onclick="selectHudTab('inversiones')" id="tab-inversiones"
+          title="Inversiones">
           <div class="dock-icon-box icon-inversiones">
             <span>💎</span>
           </div>
@@ -1849,7 +2243,8 @@
         </button>
 
         <!-- 3. Corredora -->
-        <button class="hud-dock-tab tab-corredora" onclick="selectHudTab('corredora')" id="tab-corredora" title="Corredora">
+        <button class="hud-dock-tab tab-corredora" onclick="selectHudTab('corredora')" id="tab-corredora"
+          title="Corredora">
           <div class="dock-icon-box icon-corredora">
             <span>📈</span>
           </div>
@@ -1865,7 +2260,8 @@
         </button>
 
         <!-- 5. Actividades -->
-        <button class="hud-dock-tab tab-actividades" onclick="selectHudTab('actividades')" id="tab-actividades" title="Actividades">
+        <button class="hud-dock-tab tab-actividades" onclick="selectHudTab('actividades')" id="tab-actividades"
+          title="Actividades">
           <div class="dock-icon-box icon-actividades">
             <span>🎟️</span>
           </div>
@@ -1880,12 +2276,16 @@
           <span class="dock-tab-title">Trabajo</span>
         </button>
 
-        <!-- 7. Mi Estado -->
-        <button class="hud-dock-tab tab-estado" onclick="selectHudTab('estado')" id="tab-estado" title="Mi Estado">
+        <!-- 7. Personal -->
+        <button class="hud-dock-tab tab-estado" onclick="selectHudTab('estado')" id="tab-estado" title="Personal">
           <div class="dock-icon-box icon-estado">
-            <span>👤</span>
+            <svg viewBox="0 0 52 52" style="width: 17px; height: 17px; display: block;" fill="none">
+              <circle cx="26" cy="14" r="8" fill="#ffffff" />
+              <path d="M10 40C10 31.5 17 25 26 25C35 25 42 31.5 42 40" fill="#ffffff" fill-opacity="0.45"
+                stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+            </svg>
           </div>
-          <span class="dock-tab-title">Mi Estado</span>
+          <span class="dock-tab-title">Personal</span>
         </button>
       </nav>
     </footer>
@@ -1923,8 +2323,8 @@
       {
         step: 3,
         tag: "Perfil del personaje",
-        title: "Estilo de vida",
-        desc: "Selecciona tu vivienda, trabajo y transporte.",
+        title: "Estilo de vida valorado",
+        desc: "<strong>Selecciona 2 en cada caso</strong> (vivienda, trabajo y transporte). No refleja la situación actual, sino lo que se valora más por sobre otras.",
         view: "view-anchors",
         figureIcon: "👤",
         figureSvg: `<svg viewBox="0 0 52 52" style="width: 40px; height: 40px; display: block;" fill="none"><circle cx="26" cy="14" r="8" fill="#0284c7" /><path d="M10 40C10 31.5 17 25 26 25C35 25 42 31.5 42 40" fill="#38bdf8" fill-opacity="0.35" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" /></svg>`
@@ -1933,7 +2333,7 @@
         step: 4,
         tag: "Perfil del personaje",
         title: "Resumen del perfil",
-        desc: "Ficha consolidada de tu personaje: revisa tus intereses y estilo de vida elegidos.",
+        desc: "Ficha consolidada de tu personaje: revisa sus intereses y los valores de estilo de vida.",
         view: "view-character-summary",
         figureIcon: "👤",
         figureSvg: `<svg viewBox="0 0 52 52" style="width: 40px; height: 40px; display: block;" fill="none"><circle cx="26" cy="14" r="8" fill="#0284c7" /><path d="M10 40C10 31.5 17 25 26 25C35 25 42 31.5 42 40" fill="#38bdf8" fill-opacity="0.35" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" /></svg>`
@@ -2207,19 +2607,45 @@
       }
     ];
 
-    // ESTADO GLOBAL DEL PERSONAJE
+    // OPCIONES GLOBALES DE ESTILO DE VIDA (CON ÍCONOS Y REFERENCIAS)
+    const homeOptions = [
+      { name: 'Casa o Depto', sub: 'En condominio elegante', icon: '🏡' },
+      { name: 'Departamento centro', sub: 'Conectividad central', icon: '🏢' },
+      { name: 'Casa o departamento', sub: 'Vida de barrio', icon: '🏘️' },
+      { name: 'Parcela de agrado', sub: 'Espacio y naturaleza', icon: '🌲' }
+    ];
+
+    const jobOptions = [
+      { name: 'Freelance', sub: 'Sueldo medio variable', icon: '⚡', salary: 1100000 },
+      { name: 'Trabajo dependiente', sub: 'Sueldo medio', icon: '💼', salary: 1200000 },
+      { name: 'Trabajo dependiente', sub: 'Sueldo mínimo', icon: '🏪', salary: 500000 },
+      { name: 'Trabajo administrativo', sub: 'Sueldo alto', icon: '🏛️', salary: 2400000 }
+    ];
+
+    const transportOptions = [
+      { name: 'SUV o Camioneta', sub: 'Espaciosa y familiar', icon: '🚙' },
+      { name: 'City Car', sub: 'Económico y rendidor', icon: '🚗' },
+      { name: 'Locomoción colectiva', sub: 'Micro, Metro, Taxi, Uber', icon: '🚌' },
+      { name: 'Deportivo o de lujo', sub: 'Alta gama y exclusivo', icon: '🏎️' }
+    ];
+
+    // ESTADO GLOBAL DEL PERSONAJE (CONFIGURACIÓN POR DEFECTO PARA DESARROLLO)
     const state = {
       currentSlideIdx: 0,
       activeHudTab: null,
+      profileCompleted: false,
       totalBolitas: 25,
-      assignedBolitas: 14, // 14 categorías x 1 estrella inicial
-      selectedHome: null,
-      selectedJob: null,
-      selectedTransport: null,
+      assignedBolitas: 21,
+      selectedHomes: [0, 1], // Casa o Depto y Departamento centro
+      selectedJobs: [0, 1],  // Freelance y Trabajo dependiente
+      selectedTransports: [1, 2], // City Car y Locomoción colectiva
+      selectedHome: 1, // Opción activa / primaria
+      selectedJob: 1,  // Opción activa / primaria
+      selectedTransport: 1, // Opción activa / primaria
       lifestyleChoices: {
-        home: null,
-        job: null,
-        transport: null
+        home: 'Casa o Depto / Departamento centro',
+        job: 'Freelance / Trabajo dependiente',
+        transport: 'City Car / Locomoción colectiva'
       },
       cash: 450000,
       reserves: 600000,
@@ -2227,14 +2653,15 @@
       monthlyDebt: 85000,
       mentalPeace: 78,
       categories: [
-        { id: 'vivienda', name: '🏠 Hogar & Decoración', dots: 1 },
+        { id: 'vivienda', name: '🏠 Hogar & Decoración', dots: 2 },
         { id: 'movilidad', name: '🚗 Comodidad al movilizarse', dots: 1 },
         { id: 'mascotas', name: '🐾 Mascotas & Animales', dots: 1 },
-        { id: 'tech', name: '💻 Tecnología & Herramientas', dots: 1 },
-        { id: 'viajes', name: '✈️ Viajes & Vacaciones', dots: 1 },
-        { id: 'gastronomia', name: '🍽️ Gastronomía & Salidas', dots: 1 },
+        { id: 'tech', name: '💻 Tecnología & Herramientas', dots: 2 },
+        { id: 'viajes', name: '✈️ Viajes & Vacaciones', dots: 2 },
+        { id: 'gastronomia', name: '🍽️ Gastronomía & Salidas', dots: 2 },
         { id: 'conciertos', name: '🎸 Conciertos & Festivales', dots: 1 },
-        { id: 'educacion', name: '📚 Educación & Aprendizaje', dots: 1 },
+        { id: 'educacion', name: '📚 Educación & Aprendizaje', dots: 2 },
+        { id: 'seguridad', name: '🛡️ Paz Financiera y Reservas', dots: 2 },
         { id: 'hobbies', name: '🎨 Hobbies & Pasatiempos', dots: 1 },
         { id: 'deporte', name: '🏋️ Deporte & Salud Física', dots: 1 },
         { id: 'naturaleza', name: '🏕️ Naturaleza & Vida al Aire Libre', dots: 1 },
@@ -2244,12 +2671,12 @@
       ]
     };
 
-    // COMPROBACIÓN DE PERFIL COMPLETO (INTERESES PRIORIZADOS + ESTILO DE VIDA)
+    // COMPROBACIÓN DE PERFIL COMPLETO (INTERESES PRIORIZADOS + ESTILO DE VIDA CON 2 OPCIONES C/U)
     function checkProfileCompletion() {
       const hasPrioritizedInterests = state.categories && state.categories.some(c => c.dots > 1);
-      const hasHome = state.selectedHome !== null;
-      const hasJob = state.selectedJob !== null;
-      const hasTransport = state.selectedTransport !== null;
+      const hasHome = Boolean(state.selectedHomes && state.selectedHomes.length === 2);
+      const hasJob = Boolean(state.selectedJobs && state.selectedJobs.length === 2);
+      const hasTransport = Boolean(state.selectedTransports && state.selectedTransports.length === 2);
       const isComplete = Boolean(hasPrioritizedInterests && hasHome && hasJob && hasTransport);
       return {
         isComplete,
@@ -2260,10 +2687,38 @@
       };
     }
 
+    // SINCRONIZAR SELECCIÓN VISUAL DE ESTILO DE VIDA EN EL DOM (2 OPCIONES LIBRES)
+    function syncDefaultAnchorsUI() {
+      const homeOptionsEls = document.querySelectorAll('#anchor-home .anchor-option');
+      homeOptionsEls.forEach((el, idx) => {
+        el.classList.toggle('selected', Boolean(state.selectedHomes && state.selectedHomes.includes(idx)));
+      });
+
+      const jobOptionsEls = document.querySelectorAll('#anchor-job .anchor-option');
+      jobOptionsEls.forEach((el, idx) => {
+        el.classList.toggle('selected', Boolean(state.selectedJobs && state.selectedJobs.includes(idx)));
+      });
+
+      const transOptionsEls = document.querySelectorAll('#anchor-transport .anchor-option');
+      transOptionsEls.forEach((el, idx) => {
+        el.classList.toggle('selected', Boolean(state.selectedTransports && state.selectedTransports.includes(idx)));
+      });
+
+      const isComplete = (
+        state.selectedHomes && state.selectedHomes.length === 2 &&
+        state.selectedJobs && state.selectedJobs.length === 2 &&
+        state.selectedTransports && state.selectedTransports.length === 2
+      );
+      const btn = document.getElementById('btn-confirm-anchors');
+      if (btn) btn.disabled = !isComplete;
+    }
+
     // INICIALIZACIÓN
     window.addEventListener('DOMContentLoaded', () => {
       renderSlideCarousel();
       renderBolitas();
+      calculateTotalBolitas();
+      syncDefaultAnchorsUI();
       updateHUD();
       updateInterestsValidation();
       selectSlide(0);
@@ -2283,9 +2738,9 @@
       // Si el perfil NO está completo, mostrar mensaje informativo y no dar el resumen
       if (!status.isComplete) {
         const missingAnchors = [];
-        if (!status.hasHome) missingAnchors.push('Vivienda');
-        if (!status.hasJob) missingAnchors.push('Trabajo');
-        if (!status.hasTransport) missingAnchors.push('Transporte');
+        if (!status.hasHome) missingAnchors.push('Vivienda (2 opciones)');
+        if (!status.hasJob) missingAnchors.push('Trabajo (2 opciones)');
+        if (!status.hasTransport) missingAnchors.push('Transporte (2 opciones)');
 
         container.innerHTML = `
           <div class="summary-incomplete-card">
@@ -2309,10 +2764,10 @@
               ${missingAnchors.length > 0 ? `
                 <div class="summary-missing-row">
                   <div style="flex: 1;">
-                    <strong>Estilo de vida:</strong>
-                    <span>Falta seleccionar ${missingAnchors.join(', ')}.</span>
+                    <strong>Valores de estilo de vida:</strong>
+                    <span>Falta seleccionar las 2 opciones que más valoras en ${missingAnchors.join(', ')}.</span>
                   </div>
-                  <button type="button" class="summary-missing-btn" onclick="goToAnchorsScreen()">Ir a Estilo ➔</button>
+                  <button type="button" class="summary-missing-btn" onclick="goToAnchorsScreen()">Ir a Valores ➔</button>
                 </div>
               ` : ''}
             </div>
@@ -2321,30 +2776,9 @@
         return;
       }
 
-      const homeOptions = [
-        { name: 'Casa o Depto', sub: 'En condominio elegante' },
-        { name: 'Departamento centro', sub: 'Conectividad central' },
-        { name: 'Casa o departamento', sub: 'Vida de barrio' },
-        { name: 'Parcela de agrado', sub: 'Espacio y naturaleza' }
-      ];
-
-      const jobOptions = [
-        { name: 'Freelance', sub: 'Sueldo medio variable' },
-        { name: 'Trabajo dependiente', sub: 'Sueldo medio' },
-        { name: 'Trabajo dependiente', sub: 'Sueldo mínimo' },
-        { name: 'Trabajo administrativo', sub: 'Sueldo alto' }
-      ];
-
-      const transportOptions = [
-        { name: 'SUV o Camioneta', sub: 'Espaciosa y familiar' },
-        { name: 'City Car', sub: 'Económico y rendidor' },
-        { name: 'Locomoción colectiva', sub: 'Micro, Metro, Taxi, Uber' },
-        { name: 'Deportivo o de lujo', sub: 'Alta gama y exclusivo' }
-      ];
-
-      const home = homeOptions[state.selectedHome] || { name: 'No seleccionado', sub: '-' };
-      const job = jobOptions[state.selectedJob] || { name: 'No seleccionado', sub: '-' };
-      const transport = transportOptions[state.selectedTransport] || { name: 'No seleccionado', sub: '-' };
+      const homes = (state.selectedHomes || [0, 1]).map(i => homeOptions[i] || homeOptions[0]);
+      const jobs = (state.selectedJobs || [0, 1]).map(i => jobOptions[i] || jobOptions[0]);
+      const transports = (state.selectedTransports || [1, 2]).map(i => transportOptions[i] || transportOptions[0]);
 
       // Lista de intereses prioritarios para el texto narrativo (los 4 más altos, sin íconos en el texto)
       const sortedCats = [...state.categories].sort((a, b) => b.dots - a.dots);
@@ -2358,11 +2792,14 @@
       container.innerHTML = `
         <div class="summary-narrative-box">
           <p class="summary-narrative-text">
-            Tu personaje se desempeña en <strong>${job.name}</strong> (<em>${job.sub}</em>), vive en <strong>${home.name}</strong> (<em>${home.sub}</em>) y se moviliza diariamente en <strong>${transport.name}</strong> (<em>${transport.sub}</em>).
+            En tu estilo de vida valoras <strong>Casa o Depto (en condominio elegante)</strong> y <strong>Departamento centro (conectividad central)</strong>; en lo laboral prefieres <strong>Freelance (sueldo medio variable)</strong> o <strong>Trabajo dependiente (sueldo medio)</strong>; y para movilizarte, <strong>City Car (económico y rendidor)</strong> y <strong>Locomoción colectiva (micro, metro, taxi o Uber)</strong>.
           </p>
           <p class="summary-narrative-text" style="margin-top: 8px;">
-            En su vida personal, prioriza especialmente dedicar sus recursos a ${interestsText}.
+            En tu vida personal, priorizas dedicar tiempo y recursos a <strong>Hogar & Decoración</strong>, <strong>Tecnología & Herramientas</strong>, <strong>Viajes & Vacaciones</strong>, <strong>Gastronomía & Salidas</strong>, entre otros.
           </p>
+          <div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed #cbd5e1; font-size: 0.65rem; color: #475569; line-height: 1.35;">
+
+          </div>
         </div>
       `;
     }
@@ -2447,6 +2884,13 @@
           left: targetCard.offsetLeft,
           behavior: 'smooth'
         });
+      }
+
+      // Independencia de las diapos superiores con la zona central:
+      // Luego de completado el perfil, las diapos de arriba son independientes del centro.
+      // El usuario manipula la zona central pinchando los íconos de abajo sin que las diapos de arriba la alteren.
+      if (state.profileCompleted && state.activeHudTab) {
+        return;
       }
 
       // Sincronizar la zona media interactiva
@@ -2643,25 +3087,52 @@
       selectSlide(3);
     }
 
-    // SELECCIÓN DE OPCIÓN EN ESTILO DE VIDA (VIVIENDA, TRABAJO, TRANSPORTE)
+    // SELECCIÓN DE 2 OPCIONES LIBRES EN ESTILO DE VIDA (VIVIENDA, TRABAJO, TRANSPORTE)
     function selectAnchor(type, idx, elem, label) {
-      const parent = elem.parentElement;
-      parent.querySelectorAll('.anchor-option').forEach(el => el.classList.remove('selected'));
-      elem.classList.add('selected');
-      if (!state.lifestyleChoices) state.lifestyleChoices = {};
-      if (type === 'home') {
-        state.selectedHome = idx;
-        state.lifestyleChoices.home = label;
-      } else if (type === 'job') {
-        state.selectedJob = idx;
-        state.lifestyleChoices.job = label;
-      } else if (type === 'transport') {
-        state.selectedTransport = idx;
-        state.lifestyleChoices.transport = label;
+      if (!state.selectedHomes) state.selectedHomes = [];
+      if (!state.selectedJobs) state.selectedJobs = [];
+      if (!state.selectedTransports) state.selectedTransports = [];
+
+      let list;
+      if (type === 'home') list = state.selectedHomes;
+      else if (type === 'job') list = state.selectedJobs;
+      else if (type === 'transport') list = state.selectedTransports;
+
+      const pos = list.indexOf(idx);
+      if (pos !== -1) {
+        // Si ya estaba seleccionada, la deselecciona
+        list.splice(pos, 1);
+        elem.classList.remove('selected');
+      } else {
+        // Si ya hay 2 seleccionadas, quita la primera y agrega la nueva
+        if (list.length >= 2) {
+          const removedIdx = list.shift();
+          const selectorId = (type === 'home') ? 'anchor-home' : (type === 'job') ? 'anchor-job' : 'anchor-transport';
+          const options = document.querySelectorAll(`#${selectorId} .anchor-option`);
+          if (options[removedIdx]) options[removedIdx].classList.remove('selected');
+        }
+        list.push(idx);
+        elem.classList.add('selected');
       }
 
-      // Habilitar botón Siguiente solo cuando la selección esté completa (las 3 categorías)
-      const isComplete = (state.selectedHome !== null && state.selectedJob !== null && state.selectedTransport !== null);
+      // Sincronizar compatibilidad con opción primaria (la primera de las 2)
+      if (type === 'home') {
+        state.selectedHome = list.length > 0 ? list[0] : null;
+        state.lifestyleChoices.home = list.map(i => homeOptions[i] ? homeOptions[i].name : '').filter(Boolean).join(' / ');
+      } else if (type === 'job') {
+        state.selectedJob = list.length > 0 ? list[0] : null;
+        state.lifestyleChoices.job = list.map(i => jobOptions[i] ? jobOptions[i].name : '').filter(Boolean).join(' / ');
+      } else if (type === 'transport') {
+        state.selectedTransport = list.length > 0 ? list[0] : null;
+        state.lifestyleChoices.transport = list.map(i => transportOptions[i] ? transportOptions[i].name : '').filter(Boolean).join(' / ');
+      }
+
+      // Habilitar botón Siguiente solo cuando las 3 categorías tengan exactamente 2 opciones
+      const isComplete = Boolean(
+        state.selectedHomes.length === 2 &&
+        state.selectedJobs.length === 2 &&
+        state.selectedTransports.length === 2
+      );
       const btn = document.getElementById('btn-confirm-anchors');
       if (btn) btn.disabled = !isComplete;
 
@@ -2675,9 +3146,9 @@
     // CONFIRMAR ESTILO DE VIDA Y CONTINUAR A LA FICHA DE RESUMEN
     function confirmAnchorsAndContinue() {
       const missing = [];
-      if (state.selectedHome === null) missing.push('Vivienda');
-      if (state.selectedJob === null) missing.push('Trabajo');
-      if (state.selectedTransport === null) missing.push('Transporte');
+      if (!state.selectedHomes || state.selectedHomes.length < 2) missing.push('Vivienda (2 opciones)');
+      if (!state.selectedJobs || state.selectedJobs.length < 2) missing.push('Trabajo (2 opciones)');
+      if (!state.selectedTransports || state.selectedTransports.length < 2) missing.push('Transporte (2 opciones)');
 
       if (missing.length > 0) {
         flashMissingAnchors(missing);
@@ -2694,27 +3165,51 @@
         renderCharacterSummary();
         return;
       }
-      selectSlide(4);
+      state.profileCompleted = true;
+
+      // Activar inmediatamente la vista central de Personal desde el dock
+      selectHudTab('estado');
+
+      // Avanzar el carrusel superior a la diapositiva 4 (Paso 5: Presupuesto)
+      state.currentSlideIdx = 4;
+      const slide = slidesData[4];
+      if (slide) {
+        const topModule = document.getElementById('slide-top-module');
+        if (topModule) topModule.innerText = slide.tag;
+
+        document.querySelectorAll('.slide-card').forEach((el, i) => {
+          el.classList.toggle('active', i === 4);
+        });
+
+        const track = document.getElementById('slide-track');
+        const targetCard = document.getElementById('slide-card-4');
+        if (track && targetCard) {
+          track.scrollTo({
+            left: targetCard.offsetLeft,
+            behavior: 'smooth'
+          });
+        }
+      }
     }
 
     function flashMissingAnchors(missing) {
       if (!missing || missing.length === 0) {
         missing = [];
-        if (state.selectedHome === null) missing.push('Vivienda');
-        if (state.selectedJob === null) missing.push('Trabajo');
-        if (state.selectedTransport === null) missing.push('Transporte');
+        if (!state.selectedHomes || state.selectedHomes.length < 2) missing.push('Vivienda (2 opciones)');
+        if (!state.selectedJobs || state.selectedJobs.length < 2) missing.push('Trabajo (2 opciones)');
+        if (!state.selectedTransports || state.selectedTransports.length < 2) missing.push('Transporte (2 opciones)');
       }
       const warningEl = document.getElementById('anchors-warning-msg');
       if (warningEl) {
-        warningEl.innerText = `⚠️ Por favor selecciona una opción en: ${missing.join(', ')}`;
+        warningEl.innerText = `⚠️ Por favor selecciona las 2 opciones que más valoras en: ${missing.join(', ')}`;
         warningEl.classList.remove('hidden');
       }
 
       missing.forEach(cat => {
         let elId = '';
-        if (cat === 'Vivienda') elId = 'anchor-home';
-        else if (cat === 'Trabajo') elId = 'anchor-job';
-        else if (cat === 'Transporte') elId = 'anchor-transport';
+        if (cat.includes('Vivienda')) elId = 'anchor-home';
+        else if (cat.includes('Trabajo')) elId = 'anchor-job';
+        else if (cat.includes('Transporte')) elId = 'anchor-transport';
 
         const elem = document.getElementById(elId);
         if (elem) {
@@ -2750,14 +3245,24 @@
       }
     }
 
-    // RESOLUCIÓN DE DILEMAS
+    // RESOLUCIÓN DE DILEMAS CON IMPACTO EN CORAZONES (5% POR CORAZÓN)
     function resolveDilemma(actionName, cashDelta, mentalDelta, debtDelta = 0) {
       state.cash += cashDelta;
+      const prevHearts = Math.min(20, Math.max(1, Math.round(state.mentalPeace / 5)));
       state.mentalPeace = Math.max(10, Math.min(100, state.mentalPeace + mentalDelta));
+      const newHearts = Math.min(20, Math.max(1, Math.round(state.mentalPeace / 5)));
+      const heartsDelta = newHearts - prevHearts;
       state.monthlyDebt += debtDelta;
 
-      alert(`Decisión tomada: ${actionName}\nImpacto: ${cashDelta !== 0 ? cashDelta.toLocaleString('es-CL') + ' CLP' : ''} ${debtDelta !== 0 ? '+' + debtDelta.toLocaleString('es-CL') + ' en cuotas' : ''}`);
+      let heartsMsg = '';
+      if (heartsDelta > 0) heartsMsg = `\nBienestar: +${heartsDelta} ❤️ (Tienes ${newHearts}/20)`;
+      else if (heartsDelta < 0) heartsMsg = `\nBienestar: ${heartsDelta} 💔 (Te quedan ${newHearts}/20)`;
+
+      alert(`Decisión tomada: ${actionName}\nImpacto: ${cashDelta !== 0 ? cashDelta.toLocaleString('es-CL') + ' CLP' : ''} ${debtDelta !== 0 ? '+' + debtDelta.toLocaleString('es-CL') + ' en cuotas' : ''}${heartsMsg}`);
       updateHUD();
+      if (state.activeHudTab === 'estado') {
+        renderPersonalStage('main');
+      }
     }
 
     // TEST DE RIESGO
@@ -2870,41 +3375,355 @@
         ]
       },
       estado: {
-        title: "👤 Mi Estado",
-        subtitle: "Indicadores personales y salud patrimonial",
+        title: "Personal",
+        subtitle: "Vida personal, bienestar y finanzas del personaje",
         sections: [
-          { name: "Bienestar", icon: "😊" },
-          { name: "Salud", icon: "🩺" },
-          { name: "Intereses & Personalidad", icon: "🎭" },
-          { name: "Perfil de Inversionista", icon: "🎯" },
-          { name: "Liquidez", icon: "💧" },
-          { name: "Patrimonio Neto Consolidado", icon: "💰" }
+          { name: "Grado de Bienestar & Paz Mental", icon: "🧘", desc: "Tranquilidad, calidad de vida y salud emocional" },
+          { name: "Perfil del Personaje", icon: "👤", desc: "Estilo de vida, vivienda, trabajo e intereses personales" },
+          { name: "Presupuesto de Gastos", icon: "📊", desc: "Distribución 50% fijos, 30% estilo de vida, 20% reservas" },
+          { name: "Patrimonio & Liquidez", icon: "💰", desc: "Efectivo disponible, reservas e inversiones totales" },
+          { name: "Perfil de Inversionista", icon: "🎯", desc: "Tolerancia al riesgo, liquidez y horizonte" }
         ]
       }
     };
 
-    // RENDERIZAR EN LA ZONA CENTRAL AL PINCHAR UN ICONO (2 COLUMNAS EN MODO CLARO)
+    // RENDERIZAR EN LA ZONA CENTRAL AL PINCHAR UN ICONO
     function renderHubCentralStage(tabName) {
       const data = hubsData[tabName];
       if (!data) return;
 
       const titleElem = document.getElementById('hub-stage-title');
       const subtitleElem = document.getElementById('hub-stage-subtitle');
+      const iconBox = document.getElementById('hub-stage-icon-box');
       const container = document.getElementById('hub-stage-sections');
 
+      if (tabName === 'estado') {
+        // Cabecera: Ícono idéntico al del dock inferior (Personal)
+        if (iconBox) {
+          iconBox.className = 'hub-stage-header-icon dock-icon-box icon-estado';
+          iconBox.innerHTML = `
+            <svg viewBox="0 0 52 52" style="width: 17px; height: 17px; display: block;" fill="none">
+              <circle cx="26" cy="14" r="8" fill="#ffffff" />
+              <path d="M10 40C10 31.5 17 25 26 25C35 25 42 31.5 42 40" fill="#ffffff" fill-opacity="0.45" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+            </svg>
+          `;
+        }
+        if (titleElem) titleElem.innerText = 'Personal';
+        if (subtitleElem) subtitleElem.innerText = 'Vida personal, bienestar y finanzas';
+        renderPersonalStage('main');
+        return;
+      }
+
+      // Otros hubs (Banco, Inversiones, Comercio, etc.)
+      if (iconBox) {
+        iconBox.className = `hub-stage-header-icon dock-icon-box icon-${tabName}`;
+        const iconsMap = { banco: '🏦', inversiones: '💎', corredora: '📈', comercio: '🛍️', actividades: '🎟️', trabajo: '💼' };
+        iconBox.innerHTML = `<span>${iconsMap[tabName] || '📌'}</span>`;
+      }
       if (titleElem) titleElem.innerText = data.title;
       if (subtitleElem) subtitleElem.innerText = data.subtitle;
 
       if (container) {
-        container.innerHTML = data.sections.map(sec => `
-          <div class="hub-option-card">
-            <div class="hub-option-icon">${sec.icon || '📌'}</div>
-            <div class="hub-option-text">
-              <div class="hub-option-name">${sec.name}</div>
-              ${sec.desc ? `<div class="hub-option-desc">${sec.desc}</div>` : ''}
+        container.innerHTML = `
+          <div class="hub-grid-2col">
+            ${data.sections.map(sec => `
+              <div class="hub-option-card">
+                <div class="hub-option-icon">${sec.icon || '📌'}</div>
+                <div class="hub-option-text">
+                  <div class="hub-option-name">${sec.name}</div>
+                  ${sec.desc ? `<div class="hub-option-desc">${sec.desc}</div>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
+
+    // GENERAR 20 CORAZONES DE BIENESTAR (2 FILAS DE 10, CADA UNO = 5%)
+    function renderHeartsMeter(peaceValue) {
+      const filledCount = Math.min(20, Math.max(1, Math.round(peaceValue / 5)));
+
+      const makeHeartSvg = (isFilled) => `
+        <svg class="heart-svg ${isFilled ? 'filled' : 'empty'}" viewBox="0 0 24 24">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      `;
+
+      let row1 = '';
+      for (let i = 1; i <= 10; i++) {
+        row1 += makeHeartSvg(i <= filledCount);
+      }
+
+      let row2 = '';
+      for (let i = 11; i <= 20; i++) {
+        row2 += makeHeartSvg(i <= filledCount);
+      }
+
+      let statusDesc = "Tranquilo y en paz";
+      if (filledCount >= 18) statusDesc = "Plenitud y serenidad";
+      else if (filledCount >= 14) statusDesc = "Tranquilo y en paz";
+      else if (filledCount >= 10) statusDesc = "Estable con alertas";
+      else if (filledCount >= 6) statusDesc = "Tensión y ajuste";
+      else statusDesc = "Crisis financiera";
+
+      return `
+        <div class="hearts-meter-wrap">
+          <div class="hearts-row">${row1}</div>
+          <div class="hearts-row">${row2}</div>
+          <div class="hearts-subtext">
+            <span>${statusDesc}</span>
+            <span style="font-weight: 800; color: #64748b; font-size: 0.54rem; margin-left: 3px;">${filledCount}/20</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // RENDERIZAR VISTA ESPECIALIZADA DE PERSONAL EN LA ZONA CENTRAL
+    function renderPersonalStage(subView = 'main') {
+      const container = document.getElementById('hub-stage-sections');
+      if (!container) return;
+
+      const homes = (state.selectedHomes && state.selectedHomes.length >= 2)
+        ? state.selectedHomes.map(i => homeOptions[i] || homeOptions[0])
+        : [homeOptions[1], homeOptions[0]];
+
+      const jobs = (state.selectedJobs && state.selectedJobs.length >= 2)
+        ? state.selectedJobs.map(i => jobOptions[i] || jobOptions[0])
+        : [jobOptions[1], jobOptions[0]];
+
+      const transports = (state.selectedTransports && state.selectedTransports.length >= 2)
+        ? state.selectedTransports.map(i => transportOptions[i] || transportOptions[0])
+        : [transportOptions[1], transportOptions[2]];
+
+      const salary = jobs[0].salary || 1200000;
+
+      if (subView === 'main') {
+        container.innerHTML = `
+          <!-- 1. INDICADORES DIRECTOS: BIENESTAR EN 20 CORAZONES Y DINERO EN EFECTIVO -->
+          <div class="personal-kpis-row">
+            <div class="personal-kpi-card kpi-bienestar">
+              <div class="personal-kpi-top">
+                <span class="personal-kpi-label">Bienestar</span>
+                <span class="personal-kpi-icon">❤️</span>
+              </div>
+              <div style="font-size: 0.95rem; font-weight: 800; font-family: var(--font-title); color: #e11d48; line-height: 1;">
+                ${state.mentalPeace}%
+              </div>
+              ${renderHeartsMeter(state.mentalPeace)}
+            </div>
+
+            <div class="personal-kpi-card kpi-efectivo">
+              <div class="personal-kpi-top">
+                <span class="personal-kpi-label">Dinero en Efectivo</span>
+                <span class="personal-kpi-icon">💵</span>
+              </div>
+              <div class="personal-kpi-value">$${state.cash.toLocaleString('es-CL')}</div>
+              <div style="font-size: 0.58rem; color: #64748b; margin-top: 2px;">Disponible</div>
             </div>
           </div>
-        `).join('');
+
+          <!-- 2. ESTILO DE VIDA VALORADO (LO QUE VALORA EL PERSONAJE) -->
+          <div class="personal-assets-block">
+            <div class="personal-assets-title">
+              <span>🌟</span> <span>Estilo de Vida Valorado</span>
+              <span style="font-size: 0.52rem; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 999px; margin-left: auto; font-weight: 700;">Lo que valora (2 opciones)</span>
+            </div>
+            <div class="personal-assets-grid">
+              <div class="personal-asset-item">
+                <div class="personal-asset-icon">${jobs[0].icon}</div>
+                <div class="personal-asset-type">Trabajo Valorado</div>
+                <div class="personal-asset-name">${jobs[0].name} <span style="color:#94a3b8; font-weight:400;">/</span> ${jobs[1].name}</div>
+              </div>
+              <div class="personal-asset-item">
+                <div class="personal-asset-icon">${homes[0].icon}</div>
+                <div class="personal-asset-type">Vivienda Valorada</div>
+                <div class="personal-asset-name">${homes[0].name} <span style="color:#94a3b8; font-weight:400;">/</span> ${homes[1].name}</div>
+              </div>
+              <div class="personal-asset-item">
+                <div class="personal-asset-icon">${transports[0].icon}</div>
+                <div class="personal-asset-type">Transporte Valorado</div>
+                <div class="personal-asset-name">${transports[0].name} <span style="color:#94a3b8; font-weight:400;">/</span> ${transports[1].name}</div>
+              </div>
+            </div>
+            <div style="font-size: 0.54rem; color: #64748b; margin-top: 5px; line-height: 1.3; font-style: italic;">
+              * Refleja lo que el personaje valora: su bienestar (corazones) responde al contraste entre su realidad cotidiana y estos valores.
+            </div>
+          </div>
+
+          <!-- 3. BOTONES DE ACCESO RÁPIDO -->
+          <div class="personal-access-title">Accesos Clave de Personal</div>
+          <div class="personal-access-grid">
+            <button type="button" class="personal-access-btn" onclick="renderPersonalStage('inversionista')">
+              <div class="personal-access-left">
+                <div class="personal-access-icon">🎯</div>
+                <div class="personal-access-texts">
+                  <div class="personal-access-name">Perfil de Inversionista</div>
+                  <div class="personal-access-desc">Tolerancia al riesgo, liquidez y horizonte</div>
+                </div>
+              </div>
+              <span class="personal-access-arrow">➔</span>
+            </button>
+
+            <button type="button" class="personal-access-btn" onclick="renderPersonalStage('presupuesto')">
+              <div class="personal-access-left">
+                <div class="personal-access-icon">📊</div>
+                <div class="personal-access-texts">
+                  <div class="personal-access-name">Presupuesto</div>
+                  <div class="personal-access-desc">Distribución 50% fijos, 30% estilo de vida, 20% reservas</div>
+                </div>
+              </div>
+              <span class="personal-access-arrow">➔</span>
+            </button>
+
+            <button type="button" class="personal-access-btn" onclick="renderPersonalStage('patrimonio')">
+              <div class="personal-access-left">
+                <div class="personal-access-icon">💰</div>
+                <div class="personal-access-texts">
+                  <div class="personal-access-name">Patrimonio & Liquidez</div>
+                  <div class="personal-access-desc">Efectivo disponible, reservas e inversiones totales</div>
+                </div>
+              </div>
+              <span class="personal-access-arrow">➔</span>
+            </button>
+          </div>
+        `;
+      } else if (subView === 'inversionista') {
+        container.innerHTML = `
+          <div class="personal-subview-box">
+            <div class="personal-subview-top">
+              <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('main')">
+                <span>◀</span> <span>Volver a Personal</span>
+              </button>
+              <span style="font-size: 0.65rem; font-weight: 700; color: #8b5cf6;">🎯 Perfil Inversionista</span>
+            </div>
+
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; margin-bottom: 7px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                <span style="font-size: 0.70rem; font-weight: 700; color: #0f172a;">Diagnóstico Actual:</span>
+                <span style="font-size: 0.62rem; font-weight: 800; background: #ede9fe; color: #6d28d9; padding: 2px 7px; border-radius: 999px;">Moderado Balanceado</span>
+              </div>
+              <p style="font-size: 0.64rem; color: #64748b; line-height: 1.25; margin: 0;">
+                Buscas rentabilidad por sobre la inflación aceptando volatilidad moderada a mediano plazo.
+              </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 7px;">
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px; text-align: center;">
+                <div style="font-size: 0.56rem; color: #64748b; text-transform: uppercase;">Riesgo</div>
+                <div style="font-size: 0.70rem; font-weight: 700; color: #d97706;">Medio</div>
+              </div>
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px; text-align: center;">
+                <div style="font-size: 0.56rem; color: #64748b; text-transform: uppercase;">Horizonte</div>
+                <div style="font-size: 0.70rem; font-weight: 700; color: #0284c7;">2 a 5 años</div>
+              </div>
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px; text-align: center;">
+                <div style="font-size: 0.56rem; color: #64748b; text-transform: uppercase;">Liquidez</div>
+                <div style="font-size: 0.70rem; font-weight: 700; color: #059669;">20% mínimo</div>
+              </div>
+            </div>
+
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 7px; padding: 7px 9px; font-size: 0.63rem; color: #166534; line-height: 1.3;">
+              💡 <strong>Regla UAH:</strong> No inviertas en instrumentos de alto riesgo el dinero que necesitarás dentro de los próximos 12 meses.
+            </div>
+          </div>
+        `;
+      } else if (subView === 'presupuesto') {
+        const fixedExpenses = Math.round(salary * 0.5);
+        const lifestyleExpenses = Math.round(salary * 0.3);
+        const savingsExpenses = Math.round(salary * 0.2);
+
+        container.innerHTML = `
+          <div class="personal-subview-box">
+            <div class="personal-subview-top">
+              <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('main')">
+                <span>◀</span> <span>Volver a Personal</span>
+              </button>
+              <span style="font-size: 0.65rem; font-weight: 700; color: #0284c7;">📊 Regla 50 / 30 / 20</span>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 7px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 0.56rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Ingreso Mensual Estimado</div>
+                <div style="font-size: 0.72rem; font-weight: 800; color: #0f172a;">${jobs[0].name}</div>
+              </div>
+              <div style="font-size: 1.0rem; font-weight: 800; color: #0284c7; font-family: var(--font-title);">$${salary.toLocaleString('es-CL')}</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #0284c7; border-radius: 6px; padding: 5px 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.66rem; font-weight: 700; color: #0f172a;">🏠 50% Gastos Fijos</span>
+                  <span style="font-size: 0.70rem; font-weight: 800; color: #0284c7;">$${fixedExpenses.toLocaleString('es-CL')}</span>
+                </div>
+                <div style="font-size: 0.57rem; color: #64748b; margin-top: 1px;">Vivienda (${homes[0].name}), transporte (${transports[0].name}) y servicios básicos.</div>
+              </div>
+
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #8b5cf6; border-radius: 6px; padding: 5px 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.66rem; font-weight: 700; color: #0f172a;">🎨 30% Estilo de Vida</span>
+                  <span style="font-size: 0.70rem; font-weight: 800; color: #8b5cf6;">$${lifestyleExpenses.toLocaleString('es-CL')}</span>
+                </div>
+                <div style="font-size: 0.57rem; color: #64748b; margin-top: 1px;">Salidas, ocio, hobbies y los intereses personales priorizados.</div>
+              </div>
+
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #10b981; border-radius: 6px; padding: 5px 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.66rem; font-weight: 700; color: #0f172a;">🛡️ 20% Reservas & Futuro</span>
+                  <span style="font-size: 0.70rem; font-weight: 800; color: #059669;">$${savingsExpenses.toLocaleString('es-CL')}</span>
+                </div>
+                <div style="font-size: 0.57rem; color: #64748b; margin-top: 1px;">Fondo de emergencia e inversiones para proyectos futuros.</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (subView === 'patrimonio') {
+        const netWorth = state.cash + state.reserves + state.invested;
+
+        container.innerHTML = `
+          <div class="personal-subview-box">
+            <div class="personal-subview-top">
+              <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('main')">
+                <span>◀</span> <span>Volver a Personal</span>
+              </button>
+              <span style="font-size: 0.65rem; font-weight: 700; color: #059669;">💰 Balance Financiero</span>
+            </div>
+
+            <!-- Patrimonio Total -->
+            <div style="background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); border: 1px solid #a7f3d0; border-radius: 8px; padding: 7px 9px; margin-bottom: 7px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 0.56rem; color: #047857; font-weight: 700; text-transform: uppercase;">Patrimonio Neto Total</div>
+                <div style="font-size: 0.62rem; color: #065f46;">Activos líquidos y de reserva</div>
+              </div>
+              <div style="font-size: 1.10rem; font-weight: 800; color: #047857; font-family: var(--font-title);">$${netWorth.toLocaleString('es-CL')}</div>
+            </div>
+
+            <!-- Desglose de Activos -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 7px;">
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px 7px;">
+                <div style="font-size: 0.56rem; color: #64748b;">💵 Efectivo Disponible</div>
+                <div style="font-size: 0.80rem; font-weight: 800; color: #0284c7;">$${state.cash.toLocaleString('es-CL')}</div>
+              </div>
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px 7px;">
+                <div style="font-size: 0.56rem; color: #64748b;">🛡️ Fondo Reservas</div>
+                <div style="font-size: 0.80rem; font-weight: 800; color: #059669;">$${state.reserves.toLocaleString('es-CL')}</div>
+              </div>
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px 7px;">
+                <div style="font-size: 0.56rem; color: #64748b;">📈 Inversiones Activas</div>
+                <div style="font-size: 0.80rem; font-weight: 800; color: #8b5cf6;">$${state.invested.toLocaleString('es-CL')}</div>
+              </div>
+              <div style="background: #ffffff; border: 1px solid #fee2e2; border-radius: 6px; padding: 5px 7px;">
+                <div style="font-size: 0.56rem; color: #b91c1c;">💳 Deuda Mensual</div>
+                <div style="font-size: 0.80rem; font-weight: 800; color: #b91c1c;">$${state.monthlyDebt.toLocaleString('es-CL')}/mes</div>
+              </div>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; font-size: 0.62rem; color: #475569; display: flex; align-items: center; justify-content: space-between;">
+              <span>🛡️ Cobertura Fondo de Emergencia:</span>
+              <strong style="color: #059669;">~3.5 Meses de gastos</strong>
+            </div>
+          </div>
+        `;
       }
     }
 
