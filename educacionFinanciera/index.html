@@ -174,19 +174,19 @@
       max-width: 100%;
       box-sizing: border-box;
       scroll-snap-align: start;
-      background: #ffffff;
-      padding: 8px 14px;
+      background: radial-gradient(circle at 0% 0%, #cbd5e1 0%, #f1f5f9 35%, #ffffff 72%);
+      padding: 6px 8px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-height: 88px;
+      min-height: 84px;
       cursor: pointer;
       user-select: none;
-      transition: background-color 0.15s ease;
+      transition: background 0.2s ease;
     }
 
     .slide-card:hover {
-      background: #fafbfd;
+      background: radial-gradient(circle at 0% 0%, #94a3b8 0%, #e2e8f0 40%, #ffffff 78%);
     }
 
     /* Layout Dividido para Diapositivas con Gráfico (ej. Triángulo) */
@@ -194,7 +194,7 @@
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 8px;
     }
 
     .slide-split-text {
@@ -1526,7 +1526,7 @@
       width: 100%;
       max-width: 480px;
       z-index: 50;
-      background: linear-gradient(180deg, rgba(56, 189, 248, 0.28) 0%, rgba(11, 19, 41, 0.65) 100%);
+      background: linear-gradient(180deg, rgba(2, 132, 199, 0.80) 0%, rgba(3, 7, 18, 0.80) 100%);
       border-top: 1.5px solid #38bdf8;
       border-left: 1px solid rgba(255, 255, 255, 0.15);
       border-right: 1px solid rgba(255, 255, 255, 0.15);
@@ -1575,19 +1575,25 @@
     }
 
     .hud-dock-tab.active {
-      background: rgba(2, 132, 199, 0.22);
-      border-color: rgba(56, 189, 248, 0.4);
+      background: transparent;
+      border-color: transparent;
+    }
+
+    .hud-dock-tab.active .dock-icon-box {
+      border: 2px solid #7dd3fc !important;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.9), inset 0 0 4px rgba(255, 255, 255, 0.4) !important;
+      transform: scale(1.14);
     }
 
     .hud-dock-tab.active::after {
       content: '';
       position: absolute;
-      bottom: -4px;
-      width: 14px;
-      height: 2px;
-      background: #38bdf8;
+      bottom: -3px;
+      width: 28px;
+      height: 2.5px;
+      background: #7dd3fc;
       border-radius: 2px;
-      box-shadow: 0 0 6px #38bdf8;
+      box-shadow: 0 0 8px #7dd3fc;
     }
 
     /* Cajas de Íconos con relieve y brillo */
@@ -1687,7 +1693,7 @@
       transform: scale(1.12);
     }
 
-    /* Tipografía de alto contraste */
+    /* Tipografía de alto contraste (blanco claro) */
     .dock-tab-title {
       font-size: 0.54rem;
       font-weight: 700;
@@ -1703,13 +1709,9 @@
     }
 
     .hud-dock-tab.active .dock-tab-title {
-      color: #38bdf8;
+      color: #7dd3fc !important;
       font-weight: 800;
-    }
-
-    .hud-dock-tab.active .dock-tab-title {
-      color: #0f172a;
-      font-weight: 800;
+      text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
     }
 
     @media (min-width: 400px) {
@@ -2352,13 +2354,29 @@
         step: 1,
         tag: "ACTUALÍZATE ONLINE • UAH • EXPERIAN",
         title: "Finanzas Personales y Bienestar",
-        desc: "El dinero como herramienta al servicio de tus proyectos de vida, tu seguridad y tu tranquilidad personal.",
+        desc: "La riqueza no es un fin en sí misma, sino un medio para tener la libertad de llevar el tipo de vida que valoramos (Amartya Sen, 2000).",
         view: "view-generic",
-        genericTitle: "🌱 Finanzas Personales y Bienestar",
-        genericDesc: "El dinero como herramienta al servicio de tus proyectos de vida, tu seguridad y tu tranquilidad personal.",
-        genericIcon: "🌱",
+        genericTitle: "Simulador de Decisiones Financieras",
+        genericDesc: "",
+        genericIcon: "",
         figureIcon: "🌱",
-        figureSvg: `<svg viewBox="0 0 52 52" style="width: 38px; height: 38px; display: block;" fill="none"><path d="M26 42V26" stroke="#059669" stroke-width="2.8" stroke-linecap="round" /><path d="M26 31C26 23 37 18 39 18C39 25 32 31 26 31Z" fill="#34d399" fill-opacity="0.35" stroke="#059669" stroke-width="2.2" stroke-linejoin="round" /><path d="M26 26C26 20 17 15 14 15C14 22 20 26 26 26Z" fill="#10b981" fill-opacity="0.45" stroke="#059669" stroke-width="2.2" stroke-linejoin="round" /><circle cx="26" cy="42" r="2.5" fill="#047857" /></svg>`
+        genericBodyHtml: `<div style="text-align: left; font-size: 0.82rem; color: #334155; line-height: 1.5; padding: 4px 6px;">
+          <p style="margin-bottom: 8px;">Esta aplicación permite simular cómo impactan tus decisiones cotidianas en el tiempo.</p>
+          <p style="margin-bottom: 16px;">Experimentarás en directo la interacción entre los componentes clave de tu economía: <strong>ahorro, inversión, endeudamiento y presupuesto</strong>, evaluando no solo tu dinero, sino el efecto en tu <strong>bienestar personal</strong>.</p>
+          <div style="border-top: 1px dashed #cbd5e1; padding-top: 14px; margin-top: 6px;">
+            <label style="display: block; font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+              Ingresa código de sesión
+            </label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="session-code-input" placeholder="Ej: UAH-2026" 
+                style="flex: 1; min-width: 0; padding: 8px 10px; font-size: 0.85rem; font-family: var(--font-title); font-weight: 700; color: #0f172a; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; outline: none; text-transform: uppercase;">
+              <button type="button" class="btn-step-next" style="margin: 0; padding: 8px 14px; font-size: 0.78rem; white-space: nowrap;" onclick="handleEnterSessionCode()">
+                Ingresar código
+              </button>
+            </div>
+            <div id="session-code-feedback" style="display: none; font-size: 0.70rem; margin-top: 5px; font-weight: 600;"></div>
+          </div>
+        </div>`
       },
       {
         step: 2,
@@ -2935,13 +2953,6 @@
         });
       }
 
-      // Independencia de las diapos superiores con la zona central:
-      // Luego de completado el perfil, las diapos de arriba son independientes del centro.
-      // El usuario manipula la zona central pinchando los íconos de abajo sin que las diapos de arriba la alteren.
-      if (state.profileCompleted && state.activeHudTab) {
-        return;
-      }
-
       // Sincronizar la zona media interactiva
       activateInteractiveView(slide);
     }
@@ -2973,14 +2984,35 @@
 
     // ACTIVAR LA VISTA DE LA ZONA MEDIA
     function activateInteractiveView(slide) {
+      // El icono del dock solo debe estar marcado cuando en el centro se muestra lo del icono.
+      // Al cambiar la diapositiva y modificarse el centro, se desmarca cualquier icono activo.
+      state.activeHudTab = null;
+      document.querySelectorAll('.hud-dock-tab').forEach(t => t.classList.remove('active'));
+
       // Ocultar todas las vistas
       document.querySelectorAll('.step-view').forEach(view => view.classList.add('hidden'));
 
       if (slide.view === 'view-generic') {
         const genView = document.getElementById('view-generic');
         document.getElementById('generic-title').innerText = slide.genericTitle || slide.title;
-        document.getElementById('generic-desc').innerText = slide.genericDesc || slide.hint;
-        document.getElementById('generic-icon').innerText = slide.genericIcon || '💡';
+        const descEl = document.getElementById('generic-desc');
+        if (descEl) {
+          descEl.innerText = slide.genericDesc || '';
+          descEl.style.display = slide.genericDesc ? 'block' : 'none';
+        }
+        const iconEl = document.getElementById('generic-icon');
+        if (iconEl) {
+          iconEl.innerText = slide.genericIcon || '';
+          iconEl.style.display = slide.genericIcon ? 'block' : 'none';
+        }
+        const msgEl = document.getElementById('generic-msg');
+        if (msgEl) {
+          if (slide.genericBodyHtml) {
+            msgEl.innerHTML = slide.genericBodyHtml;
+          } else {
+            msgEl.innerText = slide.genericMsg || 'Desliza las diapositivas arriba para seguir el tema que expone el facilitador.';
+          }
+        }
         genView.classList.remove('hidden');
       } else {
         const targetView = document.getElementById(slide.view);
@@ -2995,6 +3027,31 @@
       if (slide.step === 26) {
         startCrisisTimer();
       }
+    }
+
+    // GESTIÓN DEL CÓDIGO DE SESIÓN EN LA DIAPO 1
+    function handleEnterSessionCode() {
+      const input = document.getElementById('session-code-input');
+      const feedback = document.getElementById('session-code-feedback');
+      if (!input) return;
+      const code = input.value.trim().toUpperCase();
+      if (!code) {
+        if (feedback) {
+          feedback.style.display = 'block';
+          feedback.style.color = '#e11d48';
+          feedback.innerText = 'Por favor escribe un código antes de ingresar.';
+        }
+        return;
+      }
+      state.sessionCode = code;
+      if (feedback) {
+        feedback.style.display = 'block';
+        feedback.style.color = '#059669';
+        feedback.innerText = `✓ Código ${code} conectado con éxito. Avanzando...`;
+      }
+      setTimeout(() => {
+        selectSlide(1);
+      }, 700);
     }
 
     // RENDERIZAR ESTRELLAS EN UN SOLO LISTADO SENCILLO (SIN BLOQUES)
