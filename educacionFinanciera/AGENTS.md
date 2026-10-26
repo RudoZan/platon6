@@ -16,7 +16,9 @@ La pantalla se estructura en tres zonas principales sobre un contenedor vertical
 3. **Zona Media Interactiva (Escenario de Acción):**
    * Despliegue en 2 columnas para opciones de vida y catálogo de lugares.
    * **Onboarding (3 lengüetas):** `1 Intereses` (20 bolitas, 11 categorías, escala 1-3), `2 Decisiones iniciales` (Vivienda, Trabajo, Transporte con 4 opciones) y `3 Resumen` (redacción en 2da persona con títulos en negrita y diagnóstico de partida).
-   * **Sección Personal (Mi Estado):** Tarjeta de Bienestar minimalista (solo título *Bienestar*, carita dinámica en escala de 11 niveles de 2 en 2 corazones de 20 a 0 [`🤩`, `😁`, `😊`, `😐`, `🤨`, `😟`, `🥺`, `😰`, `😩`, `😱`, `😵`] y medidor de 20 corazones SVG que se llena por columnas de 2 en 2 de izquierda a derecha, sin porcentajes ni textos redundantes).
+   * **Sección Personal (Mi Estado):** Refleja la **realidad concreta** del personaje (el estilo valorado en el onboarding es solo una referencia). Contiene:
+     - Tarjeta de Bienestar minimalista (título *Bienestar*, carita en escala de 11 niveles de 2 en 2 corazones [`🤩`, `😁`, `😊`, `😐`, `🤨`, `😟`, `🥺`, `😰`, `😩`, `😱`, `😵`] y 20 corazones llenados por columnas) y Dinero en efectivo.
+     - **Situación Actual (Realidad):** Posesiones reales en 3 bloques: Trabajo, Propiedades y Vehículos. Al comenzar la simulación parte vacío (*Sin empleo*, *Sin propiedades*, *Sin vehículos*) y se van completando dinámicamente cuando el personaje consigue empleo o realiza compras.
 4. **Zona Inferior (HUD Dock Bar con 7 Lugares):**
    * Consola flotante fija al pie (`bottom: 0`, esquinas redondeadas 18px con borde superior cian `1.5px solid #38bdf8`).
    * **Opacidad Constante y Degradé de Color Puro:** Fondo con opacidad constante al 80% (`rgba(..., 0.80)` parejo) para evitar desniveles de transparencia. Degradé de color desde azul océano luminoso arriba (`rgba(2, 132, 199, 0.80)`) hasta azul noche profundo abajo (`rgba(3, 7, 18, 0.80)`).
