@@ -65,18 +65,38 @@
       overflow-x: hidden;
     }
 
-    /* Contenedor Vertical Simulado (Mobile-First Frame en Modo Claro) */
+    /* Contenedor Vertical Simulado (Mobile-First Frame con plano en perspectiva espacial 3D) */
     .mobile-frame {
       width: 100%;
       max-width: 480px;
       min-height: 100vh;
-      background: #f8fafc;
+      background-color: #0d1527;
+      background-image: 
+        /* Resplandor del horizonte espacial */
+        radial-gradient(ellipse at 50% 32%, rgba(56, 189, 248, 0.22) 0%, transparent 55%),
+        /* Líneas radiales de perspectiva (más claras y contrastadas) */
+        repeating-conic-gradient(from 180deg at 50% 30%, transparent 0deg, transparent 7deg, rgba(125, 211, 252, 0.40) 7.4deg, transparent 8deg),
+        /* Líneas horizontales originales sutiles */
+        linear-gradient(to bottom, 
+          transparent 0%, 
+          transparent 32%, 
+          rgba(148, 163, 184, 0.12) 35%, transparent 35.5%,
+          rgba(148, 163, 184, 0.14) 40%, transparent 40.6%,
+          rgba(148, 163, 184, 0.16) 47%, transparent 47.7%,
+          rgba(148, 163, 184, 0.18) 56%, transparent 56.8%,
+          rgba(148, 163, 184, 0.20) 67%, transparent 67.9%,
+          rgba(148, 163, 184, 0.22) 80%, transparent 81.0%,
+          rgba(148, 163, 184, 0.25) 95%, transparent 96.0%
+        ),
+        /* Degradado profundo de cielo espacial a plano base */
+        linear-gradient(180deg, #090e1a 0%, #0d1527 35%, #111e38 100%);
+      background-attachment: fixed;
       display: flex;
       flex-direction: column;
       position: relative;
       box-shadow: 0 0 45px rgba(15, 23, 42, 0.12);
-      border-left: 1px solid #cbd5e1;
-      border-right: 1px solid #cbd5e1;
+      border-left: 1px solid #1e293b;
+      border-right: 1px solid #1e293b;
     }
 
     /* ==========================================================================
@@ -98,11 +118,11 @@
     /* Barra Superior Ejecutiva: Aporta peso visual, equilibrio y contexto general */
     .slide-top-bar {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      padding: 5px 12px;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      border-bottom: 1px solid #334155;
+      padding: 6px 14px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      border-bottom: 1px solid #1e40af;
       width: 100%;
       box-sizing: border-box;
     }
@@ -110,15 +130,25 @@
     .slide-workshop-title {
       font-family: var(--font-title);
       font-size: 0.70rem;
-      font-weight: 800;
-      color: #38bdf8;
+      font-weight: 700;
+      color: #ffffff;
       text-transform: uppercase;
-      letter-spacing: 0.7px;
-      text-align: center;
+      letter-spacing: 0.8px;
+      text-align: left;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       transition: color 0.2s ease;
+    }
+
+    .slide-date-display {
+      font-family: var(--font-title);
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      letter-spacing: 0.6px;
+      text-align: right;
+      white-space: nowrap;
     }
 
     /* Pista Deslizable Horizontalmente */
@@ -1486,7 +1516,7 @@
     }
 
     /* ==========================================================================
-       3. ZONA INFERIOR: HUD DOCK BAR CON 7 ICONOS COLORIDOS EN MODO CLARO
+       3. ZONA INFERIOR: HUD DOCK BAR (CONSOLA EJECUTIVO-ESPACIAL)
        ========================================================================== */
     .bottom-hud-zone {
       position: fixed;
@@ -1496,11 +1526,13 @@
       width: 100%;
       max-width: 480px;
       z-index: 50;
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-top: 1.5px solid #cbd5e1;
-      box-shadow: 0 -4px 25px rgba(15, 23, 42, 0.08);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.28) 0%, rgba(11, 19, 41, 0.65) 100%);
+      border-top: 1.5px solid #38bdf8;
+      border-left: 1px solid rgba(255, 255, 255, 0.15);
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+      border-top-left-radius: 18px;
+      border-top-right-radius: 18px;
+      box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.35);
       display: flex;
       flex-direction: column;
     }
@@ -1510,7 +1542,7 @@
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 2px;
-      padding: 5px 2px 7px 2px;
+      padding: 6px 3px 7px 3px;
       align-items: center;
       width: 100%;
       box-sizing: border-box;
@@ -1524,30 +1556,41 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
+      gap: 3px;
       padding: 3px 0;
       cursor: pointer;
       transition: all 0.18s ease;
       user-select: none;
-      color: #334155;
       min-width: 0;
+      position: relative;
     }
 
     .hud-dock-tab:hover {
-      background: #f1f5f9;
+      background: rgba(255, 255, 255, 0.08);
       transform: translateY(-2px);
     }
 
     .hud-dock-tab:active {
-      transform: scale(0.94);
+      transform: scale(0.93);
     }
 
     .hud-dock-tab.active {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
+      background: rgba(2, 132, 199, 0.22);
+      border-color: rgba(56, 189, 248, 0.4);
     }
 
-    /* Cajas de Íconos Coloridos en Modo Claro */
+    .hud-dock-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      width: 14px;
+      height: 2px;
+      background: #38bdf8;
+      border-radius: 2px;
+      box-shadow: 0 0 6px #38bdf8;
+    }
+
+    /* Cajas de Íconos con relieve y brillo */
     .dock-icon-box {
       width: 30px;
       height: 30px;
@@ -1557,106 +1600,111 @@
       justify-content: center;
       font-size: 1rem;
       transition: all 0.18s ease;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
     }
 
-    /* 1. Banco (Verde Esmeralda Vivo) */
+    /* 1. Banco (Verde Esmeralda) */
     .icon-banco {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      border: 1px solid #047857;
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+      border: 1px solid #34d399;
     }
 
     .hud-dock-tab.active .icon-banco,
     .hud-dock-tab:hover .icon-banco {
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.7);
       transform: scale(1.12);
     }
 
-    /* 2. Inversiones (Azul Zafiro / Diamante) */
+    /* 2. Inversiones (Azul Zafiro) */
     .icon-inversiones {
       background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      border: 1px solid #1e40af;
+      border: 1px solid #60a5fa;
     }
 
     .hud-dock-tab.active .icon-inversiones,
     .hud-dock-tab:hover .icon-inversiones {
-      box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.7);
       transform: scale(1.12);
     }
 
-    /* 3. Corredora (Cian / Turquesa Eléctrico) */
+    /* 3. Corredora (Cian / Turquesa) */
     .icon-corredora {
-      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-      border: 1px solid #0e7490;
+      background: linear-gradient(135deg, #06b6d4 0%, #0e7490 100%);
+      border: 1px solid #38bdf8;
     }
 
     .hud-dock-tab.active .icon-corredora,
     .hud-dock-tab:hover .icon-corredora {
-      box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.7);
       transform: scale(1.12);
     }
 
     /* 4. Comercio (Coral / Carmín) */
     .icon-comercio {
-      background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
-      border: 1px solid #be123c;
+      background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
+      border: 1px solid #fb7185;
     }
 
     .hud-dock-tab.active .icon-comercio,
     .hud-dock-tab:hover .icon-comercio {
-      box-shadow: 0 0 12px rgba(244, 63, 94, 0.6);
+      box-shadow: 0 0 12px rgba(244, 63, 94, 0.7);
       transform: scale(1.12);
     }
 
-    /* 5. Actividades (Fucsia / Magenta Vibrante) */
+    /* 5. Actividades (Fucsia Vibrante) */
     .icon-actividades {
-      background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-      border: 1px solid #be185d;
+      background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+      border: 1px solid #f472b6;
     }
 
     .hud-dock-tab.active .icon-actividades,
     .hud-dock-tab:hover .icon-actividades {
-      box-shadow: 0 0 12px rgba(236, 72, 153, 0.6);
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.7);
       transform: scale(1.12);
     }
 
-    /* 6. Trabajo (Ámbar / Oro Cálido) */
+    /* 6. Trabajo (Ámbar / Oro) */
     .icon-trabajo {
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      border: 1px solid #b45309;
+      background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+      border: 1px solid #fbbf24;
     }
 
     .hud-dock-tab.active .icon-trabajo,
     .hud-dock-tab:hover .icon-trabajo {
-      box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.7);
       transform: scale(1.12);
     }
 
     /* 7. Mi Estado (Púrpura / Amatista) */
     .icon-estado {
-      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-      border: 1px solid #6d28d9;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+      border: 1px solid #a78bfa;
     }
 
     .hud-dock-tab.active .icon-estado,
     .hud-dock-tab:hover .icon-estado {
-      box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.7);
       transform: scale(1.12);
     }
 
-    /* Tipografía de las pestañas */
+    /* Tipografía de alto contraste */
     .dock-tab-title {
-      font-size: 0.52rem;
+      font-size: 0.54rem;
       font-weight: 700;
-      color: #475569;
+      color: #f1f5f9;
       text-align: center;
       white-space: nowrap;
-      letter-spacing: -0.2px;
+      letter-spacing: -0.1px;
       line-height: 1.1;
       margin-top: 1px;
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .hud-dock-tab.active .dock-tab-title {
+      color: #38bdf8;
+      font-weight: 800;
     }
 
     .hud-dock-tab.active .dock-tab-title {
@@ -1717,6 +1765,7 @@
       <!-- Barra Superior Institucional: Iniciativa Actualízate OnLine • UAH • Experian -->
       <div class="slide-top-bar">
         <div class="slide-workshop-title" id="slide-top-module">ACTUALÍZATE ONLINE • UAH • EXPERIAN</div>
+        <div class="slide-date-display" id="slide-top-date">01-Ene-Año01</div>
       </div>
 
       <!-- Pista Horizontal de Diapositivas (Navegación fluida por scroll / swipe) -->
