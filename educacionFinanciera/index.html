@@ -3573,13 +3573,12 @@
       `;
 
       let row1 = '';
-      for (let i = 1; i <= 10; i++) {
-        row1 += makeHeartSvg(i <= filledCount);
-      }
-
       let row2 = '';
-      for (let i = 11; i <= 20; i++) {
-        row2 += makeHeartSvg(i <= filledCount);
+      for (let c = 1; c <= 10; c++) {
+        const topHeartIndex = (c - 1) * 2 + 1;
+        const bottomHeartIndex = (c - 1) * 2 + 2;
+        row1 += makeHeartSvg(topHeartIndex <= filledCount);
+        row2 += makeHeartSvg(bottomHeartIndex <= filledCount);
       }
 
       return `
