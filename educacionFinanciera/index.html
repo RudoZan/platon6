@@ -3546,9 +3546,25 @@
       }
     }
 
+    // OBTENER CARITA SEGÚN NIVEL DE BIENESTAR (ESCALA DE 11 NIVELES, DE 2 EN 2 CORAZONES)
+    function getBienestarFace(peaceValue) {
+      const filledCount = Math.min(20, Math.max(0, Math.round(peaceValue / 5)));
+      if (filledCount >= 20) return '🤩'; // 1 (20 corazones: plenitud total)
+      if (filledCount >= 18) return '😁'; // 5 (18-19 corazones: radiante)
+      if (filledCount >= 16) return '😊'; // 7 (16-17 corazones: tranquilo y feliz)
+      if (filledCount >= 14) return '😐'; // 12 (14-15 corazones: neutro / estable)
+      if (filledCount >= 12) return '🤨'; // 14 (12-13 corazones: duda / ajuste)
+      if (filledCount >= 10) return '😟'; // 18 (10-11 corazones: preocupado)
+      if (filledCount >= 8)  return '🥺'; // 21 (8-9 corazones: apretado / suplicante)
+      if (filledCount >= 6)  return '😰'; // 24 (6-7 corazones: estrés con sudor frío)
+      if (filledCount >= 4)  return '😩'; // 27 (4-5 corazones: desesperado)
+      if (filledCount >= 2)  return '😱'; // 28 (2-3 corazones: pánico financiero)
+      return '😵';                        // 29 (0-1 corazones: colapso / quiebra)
+    }
+
     // GENERAR 20 CORAZONES DE BIENESTAR (2 FILAS DE 10, CADA UNO = 5%)
     function renderHeartsMeter(peaceValue) {
-      const filledCount = Math.min(20, Math.max(1, Math.round(peaceValue / 5)));
+      const filledCount = Math.min(20, Math.max(0, Math.round(peaceValue / 5)));
 
       const makeHeartSvg = (isFilled) => `
         <svg class="heart-svg ${isFilled ? 'filled' : 'empty'}" viewBox="0 0 24 24">
@@ -3566,21 +3582,10 @@
         row2 += makeHeartSvg(i <= filledCount);
       }
 
-      let statusDesc = "Tranquilo y en paz";
-      if (filledCount >= 18) statusDesc = "Plenitud y serenidad";
-      else if (filledCount >= 14) statusDesc = "Tranquilo y en paz";
-      else if (filledCount >= 10) statusDesc = "Estable con alertas";
-      else if (filledCount >= 6) statusDesc = "Tensión y ajuste";
-      else statusDesc = "Crisis financiera";
-
       return `
-        <div class="hearts-meter-wrap">
+        <div class="hearts-meter-wrap" style="margin-top: 6px;">
           <div class="hearts-row">${row1}</div>
           <div class="hearts-row">${row2}</div>
-          <div class="hearts-subtext">
-            <span>${statusDesc}</span>
-            <span style="font-weight: 800; color: #64748b; font-size: 0.54rem; margin-left: 3px;">${filledCount}/20</span>
-          </div>
         </div>
       `;
     }
@@ -3611,10 +3616,7 @@
             <div class="personal-kpi-card kpi-bienestar">
               <div class="personal-kpi-top">
                 <span class="personal-kpi-label">Bienestar</span>
-                <span class="personal-kpi-icon">❤️</span>
-              </div>
-              <div style="font-size: 0.95rem; font-weight: 800; font-family: var(--font-title); color: #e11d48; line-height: 1;">
-                ${state.mentalPeace}%
+                <span class="personal-kpi-icon" style="font-size: 1.15rem;">${getBienestarFace(state.mentalPeace)}</span>
               </div>
               ${renderHeartsMeter(state.mentalPeace)}
             </div>
