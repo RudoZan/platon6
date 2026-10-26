@@ -71,23 +71,22 @@
       max-width: 480px;
       min-height: 100vh;
       background-color: #0d1527;
-      background-image: 
+      background-image:
         /* Resplandor del horizonte espacial */
         radial-gradient(ellipse at 50% 32%, rgba(56, 189, 248, 0.22) 0%, transparent 55%),
         /* Líneas radiales de perspectiva (más claras y contrastadas) */
         repeating-conic-gradient(from 180deg at 50% 30%, transparent 0deg, transparent 7deg, rgba(125, 211, 252, 0.40) 7.4deg, transparent 8deg),
         /* Líneas horizontales originales sutiles */
-        linear-gradient(to bottom, 
-          transparent 0%, 
-          transparent 32%, 
+        linear-gradient(to bottom,
+          transparent 0%,
+          transparent 32%,
           rgba(148, 163, 184, 0.12) 35%, transparent 35.5%,
           rgba(148, 163, 184, 0.14) 40%, transparent 40.6%,
           rgba(148, 163, 184, 0.16) 47%, transparent 47.7%,
           rgba(148, 163, 184, 0.18) 56%, transparent 56.8%,
           rgba(148, 163, 184, 0.20) 67%, transparent 67.9%,
           rgba(148, 163, 184, 0.22) 80%, transparent 81.0%,
-          rgba(148, 163, 184, 0.25) 95%, transparent 96.0%
-        ),
+          rgba(148, 163, 184, 0.25) 95%, transparent 96.0%),
         /* Degradado profundo de cielo espacial a plano base */
         linear-gradient(180deg, #090e1a 0%, #0d1527 35%, #111e38 100%);
       background-attachment: fixed;
@@ -1355,7 +1354,7 @@
 
     .personal-assets-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
       gap: 5px;
     }
 
@@ -1513,6 +1512,52 @@
     .personal-subview-back-btn:hover {
       background: #e2e8f0;
       color: #0f172a;
+    }
+
+    /* Botones de navegación simétricos para el test de riesgo */
+    .risk-nav-btn {
+      width: 105px !important;
+      min-width: 105px !important;
+      max-width: 105px !important;
+      height: 33px !important;
+      min-height: 33px !important;
+      max-height: 33px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      font-family: inherit !important;
+      font-size: 0.70rem !important;
+      font-weight: 700 !important;
+      border-radius: 8px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      user-select: none !important;
+      flex: 0 0 105px !important;
+      transition: all 0.15s ease !important;
+      text-decoration: none !important;
+    }
+    .risk-nav-btn-prev {
+      background: #ffffff !important;
+      border: 1.5px solid #cbd5e1 !important;
+      color: #475569 !important;
+      box-shadow: none !important;
+    }
+    .risk-nav-btn-prev:hover {
+      background: #f8fafc !important;
+      border-color: #94a3b8 !important;
+      color: #0f172a !important;
+    }
+    .risk-nav-btn-next {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+      border: 1.5px solid transparent !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(139, 92, 246, 0.25) !important;
+    }
+    .risk-nav-btn-next:hover {
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+      box-shadow: 0 4px 10px rgba(139, 92, 246, 0.35) !important;
     }
 
     /* ==========================================================================
@@ -2718,10 +2763,11 @@
       reserves: 600000,
       invested: 500000,
       monthlyDebt: 85000,
-      mentalPeace: 78,
+      mentalPeace: 100,
       currentJob: null,    // Al partir no tiene empleo
       properties: [],      // Al partir no tiene propiedades
       vehicles: [],        // Al partir no tiene vehículos
+      riskTestResult: null, // Al partir no ha hecho el test de perfil de riesgo
       categories: [
         { id: 'vivienda', name: '🏠 Hogar & Decoración', dots: 2 },
         { id: 'movilidad', name: '🚗 Comodidad al movilizarse', dots: 1 },
@@ -3275,6 +3321,7 @@
         return;
       }
       state.profileCompleted = true;
+      state.mentalPeace = 100;
 
       // Activar inmediatamente la vista central de Personal desde el dock
       selectHudTab('estado');
@@ -3558,10 +3605,10 @@
       if (filledCount >= 14) return '😐'; // 12 (14-15 corazones: neutro / estable)
       if (filledCount >= 12) return '🤨'; // 14 (12-13 corazones: duda / ajuste)
       if (filledCount >= 10) return '😟'; // 18 (10-11 corazones: preocupado)
-      if (filledCount >= 8)  return '🥺'; // 21 (8-9 corazones: apretado / suplicante)
-      if (filledCount >= 6)  return '😰'; // 24 (6-7 corazones: estrés con sudor frío)
-      if (filledCount >= 4)  return '😩'; // 27 (4-5 corazones: desesperado)
-      if (filledCount >= 2)  return '😱'; // 28 (2-3 corazones: pánico financiero)
+      if (filledCount >= 8) return '🥺'; // 21 (8-9 corazones: apretado / suplicante)
+      if (filledCount >= 6) return '😰'; // 24 (6-7 corazones: estrés con sudor frío)
+      if (filledCount >= 4) return '😩'; // 27 (4-5 corazones: desesperado)
+      if (filledCount >= 2) return '😱'; // 28 (2-3 corazones: pánico financiero)
       return '😵';                        // 29 (0-1 corazones: colapso / quiebra)
     }
 
@@ -3609,23 +3656,60 @@
         ? state.selectedTransports.map(i => transportOptions[i] || transportOptions[0])
         : [transportOptions[1], transportOptions[2]];
 
-      // Realidad actual del personaje (al partir no tiene nada; aparecen al conseguir trabajo o comprar)
+      // Realidad actual del personaje:
+      // Máximo 1 trabajo, pero puede tener múltiples propiedades y múltiples vehículos.
+      // Al partir no tiene nada; si no tiene trabajo, propiedades o vehículos, simplemente no se muestra.
       const currentJob = state.currentJob;
-      const properties = state.properties || [];
-      const vehicles = state.vehicles || [];
+      const properties = Array.isArray(state.properties) ? state.properties : [];
+      const vehicles = Array.isArray(state.vehicles) ? state.vehicles : [];
 
-      const jobIcon = currentJob ? (currentJob.icon || '💼') : '💼';
-      const jobName = currentJob ? currentJob.name : '<span style="color: #94a3b8; font-weight: 500; font-style: italic;">Sin empleo</span>';
+      let assetItemsHtml = '';
 
-      const propIcon = (properties.length > 0) ? (properties[0].icon || '🏠') : '🏠';
-      const propName = (properties.length > 0)
-        ? properties.map(p => typeof p === 'string' ? p : p.name).join(', ')
-        : '<span style="color: #94a3b8; font-weight: 500; font-style: italic;">Sin propiedades</span>';
+      if (currentJob) {
+        assetItemsHtml += `
+          <div class="personal-asset-item">
+            <div class="personal-asset-icon">${currentJob.icon || '💼'}</div>
+            <div class="personal-asset-type">Trabajo</div>
+            <div class="personal-asset-name">${typeof currentJob === 'string' ? currentJob : currentJob.name}</div>
+          </div>
+        `;
+      }
 
-      const vehIcon = (vehicles.length > 0) ? (vehicles[0].icon || '🚗') : '🚗';
-      const vehName = (vehicles.length > 0)
-        ? vehicles.map(v => typeof v === 'string' ? v : v.name).join(', ')
-        : '<span style="color: #94a3b8; font-weight: 500; font-style: italic;">Sin vehículos</span>';
+      properties.forEach(p => {
+        const icon = typeof p === 'object' && p.icon ? p.icon : '🏠';
+        const name = typeof p === 'object' && p.name ? p.name : p;
+        assetItemsHtml += `
+          <div class="personal-asset-item">
+            <div class="personal-asset-icon">${icon}</div>
+            <div class="personal-asset-type">Propiedad</div>
+            <div class="personal-asset-name">${name}</div>
+          </div>
+        `;
+      });
+
+      vehicles.forEach(v => {
+        const icon = typeof v === 'object' && v.icon ? v.icon : '🚗';
+        const name = typeof v === 'object' && v.name ? v.name : v;
+        assetItemsHtml += `
+          <div class="personal-asset-item">
+            <div class="personal-asset-icon">${icon}</div>
+            <div class="personal-asset-type">Vehículo</div>
+            <div class="personal-asset-name">${name}</div>
+          </div>
+        `;
+      });
+
+      const actualSituationHtml = assetItemsHtml ? `
+        <!-- 3. POSESIONES ACTUALES DEBAJO DE PATRIMONIO (SOLO SI TIENE POSESIONES) -->
+        <div class="personal-assets-block" style="margin-top: 8px;">
+          <div class="personal-assets-title">
+            <span>📌</span> <span>Situación Actual</span>
+          </div>
+          <div class="personal-assets-grid">
+            ${assetItemsHtml}
+          </div>
+        </div>
+      ` : '';
 
       const salary = currentJob ? (currentJob.salary || 1200000) : (jobs[0] ? jobs[0].salary : 1200000);
 
@@ -3651,39 +3735,15 @@
             </div>
           </div>
 
-          <!-- 2. SITUACIÓN ACTUAL REAL (TRABAJO, PROPIEDADES Y VEHÍCULOS) -->
-          <div class="personal-assets-block">
-            <div class="personal-assets-title">
-              <span>📌</span> <span>Situación Actual</span>
-              <span style="font-size: 0.52rem; color: #475569; background: #f1f5f9; padding: 1px 6px; border-radius: 999px; margin-left: auto; font-weight: 700;">Realidad</span>
-            </div>
-            <div class="personal-assets-grid">
-              <div class="personal-asset-item">
-                <div class="personal-asset-icon">${jobIcon}</div>
-                <div class="personal-asset-type">Trabajo</div>
-                <div class="personal-asset-name">${jobName}</div>
-              </div>
-              <div class="personal-asset-item">
-                <div class="personal-asset-icon">${propIcon}</div>
-                <div class="personal-asset-type">Propiedades</div>
-                <div class="personal-asset-name">${propName}</div>
-              </div>
-              <div class="personal-asset-item">
-                <div class="personal-asset-icon">${vehIcon}</div>
-                <div class="personal-asset-type">Vehículos</div>
-                <div class="personal-asset-name">${vehName}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 3. BOTONES DE ACCESO RÁPIDO -->
-          <div class="personal-access-title">Accesos Clave de Personal</div>
+          <!-- 2. BOTONES DE ACCESO DIRECTO -->
           <div class="personal-access-grid">
             <button type="button" class="personal-access-btn" onclick="renderPersonalStage('inversionista')">
               <div class="personal-access-left">
                 <div class="personal-access-icon">🎯</div>
                 <div class="personal-access-texts">
-                  <div class="personal-access-name">Perfil de Inversionista</div>
+                  <div class="personal-access-name">
+                    Perfil de Inversionista${state.riskTestResult ? `: <span style="color: ${state.riskTestResult.color}; font-weight: 800;">${state.riskTestResult.label}</span>` : ''}
+                  </div>
                   <div class="personal-access-desc">Tolerancia al riesgo, liquidez y horizonte</div>
                 </div>
               </div>
@@ -3712,45 +3772,67 @@
               <span class="personal-access-arrow">➔</span>
             </button>
           </div>
+
+          <!-- 3. POSESIONES ACTUALES DEBAJO DE PATRIMONIO -->
+          ${actualSituationHtml}
         `;
       } else if (subView === 'inversionista') {
-        container.innerHTML = `
-          <div class="personal-subview-box">
-            <div class="personal-subview-top">
-              <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('main')">
-                <span>◀</span> <span>Volver a Personal</span>
-              </button>
-              <span style="font-size: 0.65rem; font-weight: 700; color: #8b5cf6;">🎯 Perfil Inversionista</span>
-            </div>
+        const result = state.riskTestResult;
 
-            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; margin-bottom: 7px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                <span style="font-size: 0.70rem; font-weight: 700; color: #0f172a;">Diagnóstico Actual:</span>
-                <span style="font-size: 0.62rem; font-weight: 800; background: #ede9fe; color: #6d28d9; padding: 2px 7px; border-radius: 999px;">Moderado Balanceado</span>
+        let statusBoxHtml = '';
+        if (!result) {
+          statusBoxHtml = `
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px 10px; text-align: center; margin-bottom: 9px;">
+              <div style="font-size: 1.25rem; margin-bottom: 4px;">📋</div>
+              <div style="font-size: 0.72rem; font-weight: 700; color: #1e293b;">Aún no has realizado el test de perfil de inversionista</div>
+              <div style="font-size: 0.60rem; color: #64748b; margin-top: 3px; line-height: 1.3;">
+                Responde 5 breves preguntas para identificar tu tolerancia a la volatilidad y los instrumentos recomendados.
               </div>
-              <p style="font-size: 0.64rem; color: #64748b; line-height: 1.25; margin: 0;">
-                Buscas rentabilidad por sobre la inflación aceptando volatilidad moderada a mediano plazo.
+            </div>
+            <button type="button" class="btn-step-next" style="width: 100%; margin: 0; padding: 9px; font-size: 0.78rem;" onclick="startRiskTest()">
+              Ir al test
+            </button>
+          `;
+        } else {
+          statusBoxHtml = `
+            <div style="background: #ffffff; border: 1.5px solid ${result.color}; border-radius: 8px; padding: 10px; margin-bottom: 8px; text-align: center;">
+              <div style="font-size: 0.60rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Tu Perfil Determinado</div>
+              <div style="font-size: 1.15rem; font-weight: 800; color: ${result.color}; margin: 3px 0;">
+                ${result.label}
+              </div>
+              <div style="font-size: 0.68rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+                Puntaje obtenido: ${result.score} de 15 puntos
+              </div>
+              <p style="font-size: 0.63rem; color: #475569; line-height: 1.35; margin: 0; text-align: left; background: #f8fafc; padding: 7px 9px; border-radius: 6px;">
+                ${result.desc}
               </p>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 7px;">
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px; text-align: center;">
-                <div style="font-size: 0.56rem; color: #64748b; text-transform: uppercase;">Riesgo</div>
-                <div style="font-size: 0.70rem; font-weight: 700; color: #d97706;">Medio</div>
-              </div>
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px; text-align: center;">
-                <div style="font-size: 0.56rem; color: #64748b; text-transform: uppercase;">Horizonte</div>
-                <div style="font-size: 0.70rem; font-weight: 700; color: #0284c7;">2 a 5 años</div>
-              </div>
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px; text-align: center;">
-                <div style="font-size: 0.56rem; color: #64748b; text-transform: uppercase;">Liquidez</div>
-                <div style="font-size: 0.70rem; font-weight: 700; color: #059669;">20% mínimo</div>
-              </div>
+            <button type="button" class="btn-step-next" style="width: 100%; margin: 0; padding: 9px; font-size: 0.78rem;" onclick="startRiskTest()">
+              Ir al test
+            </button>
+          `;
+        }
+
+        container.innerHTML = `
+          <div class="personal-subview-box">
+            <!-- CABECERA: TÍTULO A LA IZQUIERDA Y BOTÓN VOLVER A LA DERECHA -->
+            <div class="personal-subview-top">
+              <span style="font-size: 0.68rem; font-weight: 700; color: #8b5cf6;">🎯 Perfil de Inversionista</span>
+              <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('main')">
+                <span>◀ Volver</span>
+              </button>
             </div>
 
-            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 7px; padding: 7px 9px; font-size: 0.63rem; color: #166534; line-height: 1.3;">
-              💡 <strong>Regla UAH:</strong> No inviertas en instrumentos de alto riesgo el dinero que necesitarás dentro de los próximos 12 meses.
+            <!-- DESCRIPCIÓN DEL PERFIL DE INVERSIONISTA -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 7px;">
+              <p style="font-size: 0.64rem; color: #475569; line-height: 1.35; margin: 0;">
+                El perfil de inversionista evalúa tu tolerancia a las fluctuaciones del mercado y el plazo de tus inversiones. Con estas respuestas, clasifica tu perfil en tres categorías: Conservador, Moderado o Arriesgado.
+              </p>
             </div>
+
+            <!-- RESULTADO O INVITACIÓN A HACER TEST -->
+            ${statusBoxHtml}
           </div>
         `;
       } else if (subView === 'presupuesto') {
@@ -3850,6 +3932,274 @@
           </div>
         `;
       }
+    }
+
+    // ==========================================================================
+    // TEST OFICIAL DE PERFIL DE RIESGO (5 PREGUNTAS DEL PDF UAH / EXPERIAN)
+    // ==========================================================================
+    const officialRiskQuestions = [
+      {
+        question: "1. ¿Cuál es tu objetivo principal al momento de invertir?",
+        options: [
+          { text: "A) Proteger mi capital y evitar pérdidas a toda costa", points: 1 },
+          { text: "B) Rentabilidad moderada asumiendo algo de fluctuación y posibles pérdidas", points: 2 },
+          { text: "C) Maximizar ganancias asumiendo alta volatilidad y riesgos", points: 3 }
+        ]
+      },
+      {
+        question: "2. ¿Qué harías si tu inversión pierde un 15% de su valor en un solo mes?",
+        options: [
+          { text: "A) Vendo inmediatamente todo para no seguir perdiendo", points: 1 },
+          { text: "B) Espero unos meses para ver si mi inversión se recupera", points: 2 },
+          { text: "C) Aprovecho los precios bajos para invertir más", points: 3 }
+        ]
+      },
+      {
+        question: "3. ¿Por cuánto tiempo estás dispuesto a mantener tu inversión sin retirar el dinero?",
+        options: [
+          { text: "A) Menos de 1 año (necesito liquidez o acceso inmediato)", points: 1 },
+          { text: "B) Entre 1 y 5 años (mediano plazo)", points: 2 },
+          { text: "C) Más de 5 años (largo plazo)", points: 3 }
+        ]
+      },
+      {
+        question: "4. Si una inversión de alto riesgo cayera fuertemente, ¿cuál sería tu reacción emocional?",
+        options: [
+          { text: "A) Gran angustia; preferiría no volver a invertir en eso", points: 1 },
+          { text: "B) Preocupación, pero evaluaría la situación con calma", points: 2 },
+          { text: "C) Tranquilidad; entiendo que el riesgo es parte del retorno", points: 3 }
+        ]
+      },
+      {
+        question: "5. ¿Qué porcentaje de tus ingresos o ahorros mensuales estás dispuesto a destinar a inversión?",
+        options: [
+          { text: "A) Menos del 10% (solo pequeños excedentes)", points: 1 },
+          { text: "B) Entre 10% y 25% (ahorro e inversión sostenida)", points: 2 },
+          { text: "C) Más del 25% (apuesta fuerte al crecimiento)", points: 3 }
+        ]
+      }
+    ];
+
+    function startRiskTest() {
+      if (!state.riskTempAnswers) state.riskTempAnswers = [];
+      renderRiskTestQuestion(0);
+    }
+
+    function selectRiskAnswer(qIdx, points) {
+      if (!state.riskTempAnswers) state.riskTempAnswers = [];
+      state.riskTempAnswers[qIdx] = points;
+
+      // Actualizar visualmente las opciones en el DOM sin recargar la pantalla completa (evita parpadeo/saltos)
+      const optButtons = document.querySelectorAll('.risk-opt-btn');
+      optButtons.forEach(btn => {
+        const btnPoints = parseInt(btn.getAttribute('data-points'), 10);
+        const isSelected = (btnPoints === points);
+        btn.style.border = isSelected ? '1.5px solid #8b5cf6' : '1.5px solid #cbd5e1';
+        btn.style.background = isSelected ? '#f5f3ff' : '#ffffff';
+        const textSpan = btn.querySelector('.risk-opt-text');
+        if (textSpan) textSpan.style.color = isSelected ? '#5b21b6' : '#1e293b';
+        const badgeSpan = btn.querySelector('.risk-opt-badge');
+        if (badgeSpan) {
+          badgeSpan.style.color = isSelected ? '#6d28d9' : '#64748b';
+          badgeSpan.style.background = isSelected ? '#ede9fe' : '#f1f5f9';
+        }
+      });
+
+      // Actualizar contador de respondidas
+      const countEl = document.getElementById('risk-answered-count');
+      if (countEl) {
+        const answeredCount = state.riskTempAnswers.filter(v => v !== undefined && v !== null).length;
+        countEl.textContent = `${answeredCount} de 5 respondidas`;
+      }
+
+      // Ocultar mensaje de advertencia si existía
+      const errorBox = document.getElementById('risk-test-error-box');
+      if (errorBox) errorBox.style.display = 'none';
+    }
+
+    function renderRiskTestQuestion(qIdx, errorMsg = '') {
+      const container = document.getElementById('hub-stage-sections');
+      if (!container) return;
+
+      const q = officialRiskQuestions[qIdx];
+      if (!q) return;
+
+      if (!state.riskTempAnswers) state.riskTempAnswers = [];
+      const currentSelected = state.riskTempAnswers[qIdx];
+      const answeredCount = state.riskTempAnswers.filter(v => v !== undefined && v !== null).length;
+
+      container.innerHTML = `
+        <div class="personal-subview-box">
+          <div class="personal-subview-top">
+            <span style="font-size: 0.68rem; font-weight: 700; color: #8b5cf6;">📝 Test de Perfil de Inversionista</span>
+            <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('inversionista')">
+              <span>Salir del test</span>
+            </button>
+          </div>
+
+          <!-- Barra de Progreso del Test -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <span style="font-size: 0.64rem; font-weight: 700; color: #0f172a;">Pregunta ${qIdx + 1} de 5</span>
+            <span id="risk-answered-count" style="font-size: 0.60rem; color: #64748b;">${answeredCount} de 5 respondidas</span>
+          </div>
+          <div style="height: 4px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 8px;">
+            <div style="height: 100%; width: ${((qIdx + 1) / 5) * 100}%; background: linear-gradient(90deg, #8b5cf6 0%, #6d28d9 100%);"></div>
+          </div>
+
+          <!-- Enunciado de la Pregunta (sin recuadro, texto normal y con espacio previo) -->
+          <p style="font-size: 0.74rem; font-weight: 400; color: #0f172a; line-height: 1.35; margin: 11px 0 10px 0;">
+            ${q.question}
+          </p>
+
+          <!-- Opciones A, B, C -->
+          <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 9px;">
+            ${q.options.map((opt) => {
+        const isSelected = currentSelected === opt.points;
+        return `
+                <button type="button" class="decision-btn risk-opt-btn" data-points="${opt.points}" style="margin: 0; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; border: 1.5px solid ${isSelected ? '#8b5cf6' : '#cbd5e1'}; background: ${isSelected ? '#f5f3ff' : '#ffffff'}; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;" onclick="selectRiskAnswer(${qIdx}, ${opt.points})">
+                  <span class="risk-opt-text" style="font-size: 0.70rem; font-weight: 400; color: ${isSelected ? '#5b21b6' : '#1e293b'}; text-align: left; line-height: 1.3;">
+                    ${opt.text}
+                  </span>
+                  <span class="risk-opt-badge" style="font-size: 0.64rem; font-weight: 700; color: ${isSelected ? '#6d28d9' : '#64748b'}; background: ${isSelected ? '#ede9fe' : '#f1f5f9'}; padding: 3px 7px; border-radius: 6px; white-space: nowrap; margin-left: 8px;">
+                    ${opt.points} ${opt.points === 1 ? 'pto' : 'pts'}
+                  </span>
+                </button>
+              `;
+      }).join('')}
+          </div>
+
+          <div id="risk-test-error-box" style="${errorMsg ? 'display: flex;' : 'display: none;'} background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; font-size: 0.62rem; font-weight: 600; padding: 6px 9px; border-radius: 6px; margin-bottom: 8px; align-items: center; gap: 6px;">
+            <span>⚠️</span> <span>${errorMsg}</span>
+          </div>
+
+          <!-- Botones de Navegación: Anterior y Siguiente -->
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px;">
+            <button type="button" class="risk-nav-btn risk-nav-btn-prev" onclick="${qIdx > 0 ? `renderRiskTestQuestion(${qIdx - 1})` : `renderPersonalStage('inversionista')`}">
+              ◀ Anterior
+            </button>
+
+            <button type="button" class="risk-nav-btn risk-nav-btn-next" onclick="${qIdx < 4 ? `renderRiskTestQuestion(${qIdx + 1})` : `goToRiskFinalScreen()`}">
+              Siguiente ▶
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function goToRiskFinalScreen() {
+      if (!state.riskTempAnswers) state.riskTempAnswers = [];
+
+      const unanswered = [];
+      for (let i = 0; i < officialRiskQuestions.length; i++) {
+        if (state.riskTempAnswers[i] === undefined || state.riskTempAnswers[i] === null) {
+          unanswered.push(i + 1);
+        }
+      }
+
+      if (unanswered.length > 0) {
+        // Pantalla final cuando el test aún no se ha completado
+        renderRiskIncompleteScreen(unanswered);
+      } else {
+        // Pantalla final con resultado oficial
+        const totalScore = state.riskTempAnswers.reduce((a, b) => a + b, 0);
+        let result = {};
+
+        if (totalScore <= 8) {
+          result = {
+            score: totalScore,
+            label: "Conservador",
+            color: "#059669",
+            bg: "#ecfdf5",
+            desc: "Priorizas la seguridad y preservación de tu capital por sobre la rentabilidad. Prefieres retornos garantizados y estabilidad sin sobresaltos."
+          };
+        } else if (totalScore <= 11) {
+          result = {
+            score: totalScore,
+            label: "Moderado",
+            color: "#d97706",
+            bg: "#fef3c7",
+            desc: "Buscas rentabilidad por encima de la inflación aceptando oscilaciones moderadas a mediano plazo. Equilibras crecimiento y seguridad."
+          };
+        } else {
+          result = {
+            score: totalScore,
+            label: "Arriesgado",
+            color: "#8b5cf6",
+            bg: "#ede9fe",
+            desc: "Buscas maximizar el crecimiento de tu patrimonio a largo plazo y toleras caídas temporales sabiendo que el tiempo compensa la volatilidad."
+          };
+        }
+
+        state.riskTestResult = result;
+        renderRiskTestSummary(result);
+      }
+    }
+
+    function renderRiskIncompleteScreen(unanswered) {
+      const container = document.getElementById('hub-stage-sections');
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="personal-subview-box">
+          <div class="personal-subview-top">
+            <span style="font-size: 0.68rem; font-weight: 700; color: #8b5cf6;">📝 Test de Perfil de Inversionista</span>
+            <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('inversionista')">
+              <span>Salir del test</span>
+            </button>
+          </div>
+
+          <div style="background: #ffffff; border: 1.5px solid #f59e0b; border-radius: 8px; padding: 14px 10px; margin-bottom: 9px; text-align: center;">
+            <div style="font-size: 1.5rem; line-height: 1; margin-bottom: 6px;">📋</div>
+            <div style="font-size: 0.84rem; font-weight: 800; color: #b45309; margin-bottom: 7px;">
+              Aún no has completado el test
+            </div>
+            <div style="font-size: 0.64rem; color: #b45309; font-weight: 700; background: #fef3c7; padding: 7px 9px; border-radius: 6px; text-align: left;">
+              Preguntas pendientes: <strong>Pregunta ${unanswered.join(', Pregunta ')}</strong>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px;">
+            <button type="button" class="risk-nav-btn risk-nav-btn-prev" onclick="renderRiskTestQuestion(4)">
+              ◀ Anterior
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRiskTestSummary(result) {
+      const container = document.getElementById('hub-stage-sections');
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="personal-subview-box">
+          <div class="personal-subview-top">
+            <span style="font-size: 0.68rem; font-weight: 700; color: #8b5cf6;">📝 Test de Perfil de Inversionista</span>
+            <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('inversionista')">
+              <span>Salir del test</span>
+            </button>
+          </div>
+
+          <div style="background: #ffffff; border: 1.5px solid ${result.color}; border-radius: 8px; padding: 10px; margin-bottom: 8px; text-align: center;">
+            <div style="font-size: 0.60rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Tu Perfil Determinado</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: ${result.color}; margin: 3px 0;">
+              ${result.label}
+            </div>
+            <div style="font-size: 0.68rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+              Puntaje obtenido: ${result.score} de 15 puntos
+            </div>
+            <p style="font-size: 0.63rem; color: #475569; line-height: 1.35; margin: 0; text-align: left; background: #f8fafc; padding: 7px 9px; border-radius: 6px;">
+              ${result.desc}
+            </p>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px;">
+            <button type="button" class="risk-nav-btn risk-nav-btn-prev" onclick="renderRiskTestQuestion(4)">
+              ◀ Anterior
+            </button>
+          </div>
+        </div>
+      `;
     }
 
     // ACCIÓN AL PINCHAR UN ICONO DE LA ZONA INFERIOR
