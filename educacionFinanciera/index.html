@@ -2951,8 +2951,12 @@
       reserves: 0, // Al partir no tiene fondo de reserva acumulado
       invested: 0, // Al partir no tiene inversiones activas
       monthlyDebt: 0, // Al partir no tiene deudas contraídas
-      mentalPeace: 100,
+      healthPhysical: 20, // Salud Física: 20/20 pts (20% del bienestar total)
+      healthEmotional: 40, // Salud Emocional: 40/40 pts (40% del bienestar total)
+      healthMental: 40, // Salud Mental: 40/40 pts (40% del bienestar total)
+      mentalPeace: 100, // Bienestar Total (20 + 40 + 40 = 100)
       currentJob: null, // Al partir no tiene empleo
+      courses: [], // Al partir no tiene cursos o especializaciones cursadas
       properties: [],      // Al partir no tiene propiedades
       vehicles: [],        // Al partir no tiene vehículos
       riskTestResult: null, // Al partir no ha hecho el test de perfil de riesgo
@@ -3587,6 +3591,9 @@
         return;
       }
       state.profileCompleted = true;
+      state.healthPhysical = 20;
+      state.healthEmotional = 40;
+      state.healthMental = 40;
       state.mentalPeace = 100;
 
       // Activar inmediatamente la vista central de Personal desde el dock
@@ -3817,7 +3824,7 @@
         title: "Personal",
         subtitle: "Vida personal, bienestar y finanzas del personaje",
         sections: [
-          { name: "Grado de Bienestar & Paz Mental", icon: "🧘", desc: "Tranquilidad, calidad de vida y salud emocional" },
+          { name: "Grado de Bienestar", icon: "🧘", desc: "Tranquilidad, calidad de vida y salud integral" },
           { name: "Perfil del Personaje", icon: "👤", desc: "Estilo de vida, vivienda, trabajo e intereses personales" },
           { name: "Presupuesto de Gastos", icon: "📊", desc: "Distribución 50% fijos, 30% estilo de vida, 20% reservas" },
           { name: "Patrimonio & Liquidez", icon: "💰", desc: "Efectivo disponible, reservas e inversiones totales" },
@@ -4058,6 +4065,9 @@
         // Cabecera: Ícono idéntico al del dock inferior (Personal)
         if (iconBox) {
           iconBox.className = 'hub-stage-header-icon dock-icon-box icon-estado';
+          iconBox.style.cursor = 'pointer';
+          iconBox.title = 'Resumen de variables del personaje';
+          iconBox.onclick = () => renderPersonalStage('secret_summary');
           iconBox.innerHTML = `
             <svg viewBox="0 0 52 52" style="width: 17px; height: 17px; display: block;" fill="none">
               <circle cx="26" cy="14" r="8" fill="#ffffff" />
@@ -4073,6 +4083,9 @@
 
       // Otros hubs (Banco, Inversiones, Comercio, etc.)
       if (iconBox) {
+        iconBox.style.cursor = 'default';
+        iconBox.onclick = null;
+        iconBox.removeAttribute('title');
         iconBox.className = `hub-stage-header-icon dock-icon-box icon-${tabName}`;
         const iconsMap = { banco: '🏦', inversiones: '💎', corredora: '📈', comercio: '🛍️', actividades: '🎟️', trabajo: '💼' };
         iconBox.innerHTML = `<span>${iconsMap[tabName] || '📌'}</span>`;
@@ -4140,10 +4153,27 @@
       `;
     }
 
-    // RENDERIZAR VISTA ESPECIALIZADA DE PERSONAL EN LA ZONA CENTRAL
     function renderPersonalStage(subView = 'main') {
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
+
+      const titleElem = document.getElementById('hub-stage-title');
+      const subtitleElem = document.getElementById('hub-stage-subtitle');
+      const iconBox = document.getElementById('hub-stage-icon-box');
+
+      if (iconBox) {
+        iconBox.className = 'hub-stage-header-icon dock-icon-box icon-estado';
+        iconBox.style.cursor = 'pointer';
+        iconBox.title = 'Resumen de variables del personaje';
+        iconBox.onclick = () => renderPersonalStage('secret_summary');
+      }
+
+      if (titleElem) titleElem.innerText = 'Personal';
+      if (subtitleElem) {
+        subtitleElem.innerText = subView === 'secret_summary'
+          ? 'Resumen secreto de variables del personaje'
+          : 'Vida personal, bienestar y finanzas';
+      }
 
       const homes = (state.selectedHomes && state.selectedHomes.length >= 2)
         ? state.selectedHomes.map(i => homeOptions[i] || homeOptions[0])
@@ -4677,6 +4707,380 @@
                 <strong style="color: ${monthlyExpenses > 0 ? '#b91c1c' : '#64748b'};">${monthlyExpenses > 0 ? '0 meses (Sin fondo acumulado)' : '0 meses'}</strong>
               `}
             </div>
+          </div>
+        `;
+      } else if (subView === 'secret_summary') {
+        const hPhysical = state.healthPhysical !== undefined ? state.healthPhysical : 20;
+        const hEmotional = state.healthEmotional !== undefined ? state.healthEmotional : 40;
+        const hMental = state.healthMental !== undefined ? state.healthMental : 40;
+        const peace = Math.max(0, Math.min(100, hPhysical + hEmotional + hMental));
+        const peaceHearts = Math.min(20, Math.max(0, Math.round(peace / 5)));
+        const peaceFace = getBienestarFace(peace);
+
+        // Trabajo
+        const job = state.currentJob;
+        const jobName = job ? (typeof job === 'string' ? job : job.name) : null;
+        const jobSalaryGross = job && job.grossSalary ? job.grossSalary : null;
+        const jobSalaryNet = job && job.salary ? job.salary : (jobSalaryGross ? Math.round(jobSalaryGross * 0.81) : null);
+        const jobType = job && job.type ? job.type : (job ? 'Dependiente' : null);
+        const jobSchedule = job && job.schedule ? job.schedule : (job ? 'Jornada completa' : null);
+        const jobReq = job && job.requirements ? job.requirements : null;
+
+        // Cursos / Estudios cursados
+        const courses = Array.isArray(state.courses) ? state.courses : [];
+
+        // Dinero y Liquidez
+        const cashPhysical = state.cash || 0;
+        const reservesAmount = state.reserves || 0;
+        const investedAmount = state.invested || 0;
+        const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+        const debts = Array.isArray(state.debts) ? state.debts : [];
+
+        // Cuentas Bancarias específicas
+        const findAccount = (patterns) => bankAccounts.find(a => patterns.some(p => (a.id || '').toLowerCase().includes(p) || (a.name || '').toLowerCase().includes(p)));
+        const accRut = findAccount(['rut']);
+        const accCorriente = findAccount(['corriente']);
+        const accVista = findAccount(['vista']);
+        const accAhorro = findAccount(['ahorro']);
+        const otherAccounts = bankAccounts.filter(a => a !== accRut && a !== accCorriente && a !== accVista && a !== accAhorro);
+
+        // Créditos y Deudas específicos
+        const findDebt = (patterns) => debts.find(d => patterns.some(p => (d.id || '').toLowerCase().includes(p) || (d.name || '').toLowerCase().includes(p)));
+        const debtTarjeta = findDebt(['tarjeta', 'visa', 'mastercard']);
+        const debtLinea = findDebt(['linea', 'línea']);
+        const debtConsumo = findDebt(['consumo', 'personal']);
+        const debtAuto = findDebt(['auto', 'vehicular', 'automotriz']);
+        const debtHipotecario = findDebt(['hipotecario', 'vivienda']);
+        const otherDebts = debts.filter(d => d !== debtTarjeta && d !== debtLinea && d !== debtConsumo && d !== debtAuto && d !== debtHipotecario);
+
+        // Perfil de Inversionista
+        const risk = state.riskTestResult;
+
+        // Estilo de vida valorado
+        const homeValued = (state.selectedHomes && state.selectedHomes.length > 0)
+          ? state.selectedHomes.map(i => homeOptions[i] ? homeOptions[i].name : '').filter(Boolean).join(' / ')
+          : (state.lifestyleChoices?.home || 'No definido');
+        const jobValued = (state.selectedJobs && state.selectedJobs.length > 0)
+          ? state.selectedJobs.map(i => jobOptions[i] ? jobOptions[i].name : '').filter(Boolean).join(' / ')
+          : (state.lifestyleChoices?.job || 'No definido');
+        const transportValued = (state.selectedTransports && state.selectedTransports.length > 0)
+          ? state.selectedTransports.map(i => transportOptions[i] ? transportOptions[i].name : '').filter(Boolean).join(' / ')
+          : (state.lifestyleChoices?.transport || 'No definido');
+
+        // Intereses (15 categorías)
+        const categories = Array.isArray(state.categories) ? state.categories : [];
+
+        container.innerHTML = `
+          <div class="personal-subview-box" style="max-height: 480px; overflow-y: auto; padding-right: 2px;">
+            <!-- CABECERA: TÍTULO A LA IZQUIERDA Y BOTÓN VOLVER A LA DERECHA -->
+            <div class="personal-subview-top">
+              <div>
+                <span style="font-size: 0.88rem; font-weight: 800; color: #0284c7;">🔍 Variables del Personaje</span>
+                <div style="font-size: 0.58rem; color: #64748b;">Auditoría completa de variables de estado</div>
+              </div>
+              <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('main')">
+                <span>◀ Volver</span>
+              </button>
+            </div>
+
+            <!-- 1. BIENESTAR -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 0.70rem; font-weight: 800; color: #0f172a;">🧘 Bienestar</span>
+                <span style="font-size: 0.62rem; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px;">${peace}% (${peaceHearts}/20 corazones) ${peaceFace}</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <div style="flex: 1;">
+                  ${renderHeartsMeter(peace)}
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; font-size: 0.58rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 3px 6px; min-width: 108px; flex-shrink: 0;">
+                  <div style="display: flex; justify-content: space-between; gap: 4px;">
+                    <span style="color: #64748b;">Física:</span>
+                    <strong style="color: #0f172a; font-family: monospace;">${hPhysical}/20</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; gap: 4px;">
+                    <span style="color: #64748b;">Emocional:</span>
+                    <strong style="color: #0f172a; font-family: monospace;">${hEmotional}/40</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; gap: 4px;">
+                    <span style="color: #64748b;">Mental:</span>
+                    <strong style="color: #0f172a; font-family: monospace;">${hMental}/40</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. SITUACIÓN LABORAL Y ESTUDIOS -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
+              <div style="font-size: 0.70rem; font-weight: 800; color: #0f172a; margin-bottom: 5px;">💼 Situación Laboral & Estudios Cursados</div>
+
+              <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.65rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                  <span style="color: #475569;">• Empleo actual:</span>
+                  ${job ? `
+                    <span style="font-weight: 700; color: #0f172a;">${jobName} <span style="font-weight: 600; color: #64748b;">(${jobType})</span></span>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">Sin empleo actual ($0)</span>
+                  `}
+                </div>
+
+                ${job ? `
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                    <span style="color: #475569;">• Sueldo Bruto / Líquido:</span>
+                    <span style="font-weight: 700; color: #0284c7;">
+                      ${jobSalaryGross ? '$' + jobSalaryGross.toLocaleString('es-CL') : 'N/A'} bruto / 
+                      <strong style="color: #059669;">${jobSalaryNet ? '$' + jobSalaryNet.toLocaleString('es-CL') : '$0'}</strong> líq.
+                    </span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                    <span style="color: #475569;">• Horario / Jornada:</span>
+                    <span style="font-weight: 600; color: #334155;">${jobSchedule}</span>
+                  </div>
+                ` : ''}
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 2px;">
+                  <span style="color: #475569;">• Estudios / Cursos:</span>
+                  ${courses.length > 0 ? `
+                    <span style="font-weight: 700; color: #047857;">${courses.map(c => typeof c === 'object' ? c.name : c).join(', ')}</span>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">Sin cursos registrados</span>
+                  `}
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. DINERO, LIQUIDEZ Y PATRIMONIO -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span style="font-size: 0.70rem; font-weight: 800; color: #0f172a;">💵 Dinero, Liquidez & Ahorros</span>
+                <span style="font-size: 0.74rem; font-weight: 800; color: #0284c7;">$${totalLiquid.toLocaleString('es-CL')} disp.</span>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.65rem;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #475569;">• Dinero en efectivo físico:</span>
+                  <strong style="color: #0f172a;">$${cashPhysical.toLocaleString('es-CL')}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #475569;">• Fondo de Reserva:</span>
+                  <strong style="color: ${reservesAmount > 0 ? '#059669' : '#94a3b8'};">
+                    $${reservesAmount.toLocaleString('es-CL')} ${reservesAmount === 0 ? '(Sin fondo acumulado)' : ''}
+                  </strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #475569;">• Inversiones Activas:</span>
+                  <strong style="color: ${investedAmount > 0 ? '#8b5cf6' : '#94a3b8'};">
+                    $${investedAmount.toLocaleString('es-CL')} ${investedAmount === 0 ? '(Sin inversiones)' : ''}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. CUENTAS BANCARIAS ABIERTAS (TODAS LAS VARIABLES INCLUSO NULAS) -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
+              <div style="font-size: 0.70rem; font-weight: 800; color: #0f172a; margin-bottom: 5px;">🏦 Cuentas Bancarias (Todas las Variables)</div>
+
+              <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.65rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                  <span style="color: #334155; font-weight: 600;">• Cuenta RUT (BancoEstado):</span>
+                  ${accRut ? `
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 5px; border-radius: 4px;">Abierta ($${(accRut.balance || 0).toLocaleString('es-CL')})</span>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">No tiene</span>
+                  `}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                  <span style="color: #334155; font-weight: 600;">• Cuenta Corriente:</span>
+                  ${accCorriente ? `
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 5px; border-radius: 4px;">Abierta ($${(accCorriente.balance || 0).toLocaleString('es-CL')})</span>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">No tiene</span>
+                  `}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                  <span style="color: #334155; font-weight: 600;">• Cuenta Vista (Otras):</span>
+                  ${accVista ? `
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 5px; border-radius: 4px;">Abierta ($${(accVista.balance || 0).toLocaleString('es-CL')})</span>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">No tiene</span>
+                  `}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                  <span style="color: #334155; font-weight: 600;">• Cuenta de Ahorro:</span>
+                  ${accAhorro ? `
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 5px; border-radius: 4px;">Abierta ($${(accAhorro.balance || 0).toLocaleString('es-CL')})</span>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">No tiene</span>
+                  `}
+                </div>
+
+                ${otherAccounts.length > 0 ? otherAccounts.map(a => `
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #334155; font-weight: 600;">• ${a.name || 'Otra cuenta'}:</span>
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 5px; border-radius: 4px;">Abierta ($${(a.balance || 0).toLocaleString('es-CL')})</span>
+                  </div>
+                `).join('') : ''}
+              </div>
+            </div>
+
+            <!-- 5. CRÉDITOS Y PASIVOS (TODAS LAS VARIABLES INCLUSO NULAS) -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span style="font-size: 0.70rem; font-weight: 800; color: #0f172a;">💳 Créditos & Deudas (Todas las Variables)</span>
+                <span style="font-size: 0.64rem; font-weight: 800; color: ${state.monthlyDebt > 0 ? '#b91c1c' : '#059669'};">
+                  ${state.monthlyDebt > 0 ? `$${state.monthlyDebt.toLocaleString('es-CL')}/mes` : 'Sin deudas ($0)'}
+                </span>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.65rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                  <span style="color: #334155; font-weight: 600;">• Tarjeta de Crédito:</span>
+                  ${debtTarjeta ? `
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 1px 5px; border-radius: 4px;">Deuda: $${(debtTarjeta.monthlyPayment || 0).toLocaleString('es-CL')}/mes</span>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">No tiene ($0)</span>
+                  `}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                  <span style="color: #334155; font-weight: 600;">• Línea de Crédito:</span>
+                  ${debtLinea ? `
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 1px 5px; border-radius: 4px;">Uso: $${(debtLinea.monthlyPayment || 0).toLocaleString('es-CL')}/mes</span>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">No utilizada ($0)</span>
+                  `}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                  <span style="color: #334155; font-weight: 600;">• Crédito de Consumo:</span>
+                  ${debtConsumo ? `
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 1px 5px; border-radius: 4px;">Cuota: $${(debtConsumo.monthlyPayment || 0).toLocaleString('es-CL')}/mes</span>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">No tiene ($0)</span>
+                  `}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                  <span style="color: #334155; font-weight: 600;">• Crédito Automotriz:</span>
+                  ${debtAuto ? `
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 1px 5px; border-radius: 4px;">Cuota: $${(debtAuto.monthlyPayment || 0).toLocaleString('es-CL')}/mes</span>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">No tiene ($0)</span>
+                  `}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
+                  <span style="color: #334155; font-weight: 600;">• Crédito Hipotecario:</span>
+                  ${debtHipotecario ? `
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 1px 5px; border-radius: 4px;">Dividendo: $${(debtHipotecario.monthlyPayment || 0).toLocaleString('es-CL')}/mes</span>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">No tiene ($0)</span>
+                  `}
+                </div>
+
+                ${otherDebts.length > 0 ? otherDebts.map(d => `
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #334155; font-weight: 600;">• ${d.name || 'Otro crédito'}:</span>
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 1px 5px; border-radius: 4px;">Cuota: $${(d.monthlyPayment || 0).toLocaleString('es-CL')}/mes</span>
+                  </div>
+                `).join('') : ''}
+              </div>
+            </div>
+
+            <!-- 6. PERFIL DE INVERSIONISTA -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 0.70rem; font-weight: 800; color: #0f172a;">🎯 Perfil de Inversionista</span>
+                ${risk ? `
+                  <span style="font-size: 0.62rem; font-weight: 800; color: ${risk.color || '#8b5cf6'}; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 1px 6px; border-radius: 4px;">
+                    ${risk.label} (${risk.score}/15 pts)
+                  </span>
+                ` : `
+                  <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">
+                    No realizado
+                  </span>
+                `}
+              </div>
+              <div style="font-size: 0.64rem; color: #475569; line-height: 1.35;">
+                ${risk ? risk.desc : 'El personaje aún no realiza el test de tolerancia al riesgo (5 preguntas).'}
+              </div>
+            </div>
+
+            <!-- 7. ESTILO DE VIDA VALORADO -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
+              <div style="font-size: 0.70rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">🌟 Estilo de Vida Valorado (Onboarding)</div>
+
+              <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.65rem;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #475569;">• Vivienda valorada:</span>
+                  <strong style="color: #0f172a; text-align: right;">${homeValued}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #475569;">• Trabajo valorado:</span>
+                  <strong style="color: #0f172a; text-align: right;">${jobValued}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #475569;">• Transporte valorado:</span>
+                  <strong style="color: #0f172a; text-align: right;">${transportValued}</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- 8. INTERESES PERSONALES -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span style="font-size: 0.70rem; font-weight: 800; color: #0f172a;">🏷️ Intereses (${categories.length} categorías)</span>
+                <span style="font-size: 0.62rem; font-weight: 700; color: #0284c7;">${state.assignedBolitas || 21}/${state.totalBolitas || 25} bolitas</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.62rem;">
+                ${categories.map(c => {
+                  const dots = c.dots || 1;
+                  const dotsSymbols = dots === 3 ? '●●●' : (dots === 2 ? '●●○' : '●○○');
+                  const dotsColor = dots === 3 ? '#047857' : (dots === 2 ? '#0284c7' : '#94a3b8');
+                  return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 4px; padding: 2px 5px;">
+                      <span style="color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;" title="${c.name}">${c.name}</span>
+                      <strong style="color: ${dotsColor}; font-size: 0.60rem; margin-left: 4px;">${dotsSymbols} (${dots})</strong>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- 9. PROPIEDADES Y VEHÍCULOS -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
+              <div style="font-size: 0.70rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">🏠 Propiedades & Vehículos Registrados</div>
+
+              <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.65rem;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #475569;">• Bienes raíces:</span>
+                  ${properties.length > 0 ? `
+                    <strong style="color: #047857;">${properties.map(p => typeof p === 'object' ? p.name : p).join(', ')}</strong>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">Sin propiedades (0)</span>
+                  `}
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #475569;">• Vehículos:</span>
+                  ${vehicles.length > 0 ? `
+                    <strong style="color: #047857;">${vehicles.map(v => typeof v === 'object' ? v.name : v).join(', ')}</strong>
+                  ` : `
+                    <span style="font-size: 0.60rem; font-weight: 600; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px;">Sin vehículos (0)</span>
+                  `}
+                </div>
+              </div>
+            </div>
+
+            <!-- 10. SESIÓN Y AUDITORÍA -->
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 7px; padding: 6px 9px; font-size: 0.62rem; color: #64748b; display: flex; justify-content: space-between; align-items: center;">
+              <span>🏷️ Sesión Taller: <strong style="color: #0f172a;">${state.sessionCode || 'Sin código (Local)'}</strong></span>
+              <span>Diapositiva: <strong style="color: #0284c7;">N° ${state.currentSlideIdx + 1}</strong></span>
+            </div>
+
           </div>
         `;
       }
