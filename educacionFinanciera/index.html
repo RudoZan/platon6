@@ -119,11 +119,40 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 14px;
+      padding: 6px 12px;
       background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
       border-bottom: 1px solid #1e40af;
       width: 100%;
       box-sizing: border-box;
+      gap: 8px;
+    }
+
+    .slide-nav-square {
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 4px;
+      color: #ffffff;
+      font-size: 0.65rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .slide-nav-square:hover {
+      background: rgba(56, 189, 248, 0.35);
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+
+    .slide-nav-square:active {
+      transform: scale(0.92);
     }
 
     .slide-workshop-title {
@@ -159,6 +188,9 @@
       scrollbar-width: none;
       width: 100%;
       background: #ffffff;
+      position: relative;
+      cursor: grab;
+      user-select: none;
     }
 
     .slide-carousel-track::-webkit-scrollbar {
@@ -1811,8 +1843,14 @@
     <header class="top-slide-zone">
       <!-- Barra Superior Institucional: Iniciativa Actualízate OnLine • UAH • Experian -->
       <div class="slide-top-bar">
-        <div class="slide-workshop-title" id="slide-top-module">ACTUALÍZATE ONLINE • UAH • EXPERIAN</div>
-        <div class="slide-date-display" id="slide-top-date">01-Ene-Año01</div>
+        <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
+          <button type="button" class="slide-nav-square" onclick="scrollSlideBy(-1)" title="Diapositiva anterior" aria-label="Anterior">◀</button>
+          <div class="slide-workshop-title" id="slide-top-module">ACTUALÍZATE ONLINE • UAH • EXPERIAN</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+          <div class="slide-date-display" id="slide-top-date">01-Ene-Año01</div>
+          <button type="button" class="slide-nav-square" onclick="scrollSlideBy(1)" title="Siguiente diapositiva" aria-label="Siguiente">▶</button>
+        </div>
       </div>
 
       <!-- Pista Horizontal de Diapositivas (Navegación fluida por scroll / swipe) -->
@@ -2759,15 +2797,32 @@
         job: 'Freelance / Trabajo dependiente',
         transport: 'City Car / Locomoción colectiva'
       },
-      cash: 450000,
-      reserves: 600000,
-      invested: 500000,
-      monthlyDebt: 85000,
+      cash: 450000, // Dinero físico en efectivo inicial (siempre presente)
+      bankAccounts: [], // Al partir no tiene cuentas bancarias contratadas (solo figuran si han sido contratadas)
+      debts: [], // Al partir no tiene deudas contratadas (cada crédito aparecerá individualmente al contraerlo)
+      reserves: 0, // Al partir no tiene fondo de reserva acumulado
+      invested: 0, // Al partir no tiene inversiones activas
+      monthlyDebt: 0, // Al partir no tiene deudas contraídas
       mentalPeace: 100,
-      currentJob: null,    // Al partir no tiene empleo
+      currentJob: null, // Al partir no tiene empleo
       properties: [],      // Al partir no tiene propiedades
       vehicles: [],        // Al partir no tiene vehículos
       riskTestResult: null, // Al partir no ha hecho el test de perfil de riesgo
+      budgetItems: [
+        { id: 'vivienda', name: 'Vivienda', desc: 'Arriendo o dividendo + gastos comunes', icon: '🏠', budget: 0, real: 0 },
+        { id: 'servicios', name: 'Servicios', desc: 'Luz, agua, gas, internet y telefonía', icon: '💡', budget: 0, real: 0 },
+        { id: 'alimentacion', name: 'Alimentación', desc: 'Supermercado y despensa básica', icon: '🛒', budget: 0, real: 0 },
+        { id: 'bencina_tags', name: 'Bencina + Tags', desc: 'Combustible y peajes', icon: '⛽', budget: 0, real: 0 },
+        { id: 'tarjeta_bip', name: 'Tarjeta bip!', desc: 'Locomoción colectiva (metro/micro)', icon: '🚌', budget: 0, real: 0 },
+        { id: 'salidas_ocio', name: 'Salidas y Ocio', desc: 'Restaurantes, delivery, cafés y panoramas', icon: '🍽️', budget: 0, real: 0 },
+        { id: 'suscripciones', name: 'Suscripciones y Hobbies', desc: 'Streaming, gimnasio y recreación', icon: '🎮', budget: 0, real: 0 },
+        { id: 'vestuario', name: 'Vestuario y Cuidado Personal', desc: 'Ropa, peluquería y artículos personales', icon: '👕', budget: 0, real: 0 },
+        { id: 'reserva', name: 'Fondo de Reserva', desc: 'Ahorro para emergencias o proyectos', icon: '🛡️', budget: 0, real: 0 }
+      ],
+      customBudgetItems: [],
+      showAddBudgetForm: false,
+      newBudgetType: 'free',
+      newBudgetInvestType: 'alcancia',
       categories: [
         { id: 'vivienda', name: '🏠 Hogar & Decoración', dots: 2 },
         { id: 'movilidad', name: '🚗 Comodidad al movilizarse', dots: 1 },
@@ -2832,6 +2887,7 @@
     // INICIALIZACIÓN
     window.addEventListener('DOMContentLoaded', () => {
       renderSlideCarousel();
+      initSlideTrackInteractions();
       renderBolitas();
       calculateTotalBolitas();
       syncDefaultAnchorsUI();
@@ -2931,7 +2987,10 @@
         const isSplit = slide.hasTriangle || slide.figureIcon;
         card.className = `slide-card ${isSplit ? 'split-layout' : ''} ${idx === 0 ? 'active' : ''}`;
         card.id = `slide-card-${idx}`;
-        card.onclick = () => selectSlide(idx);
+        card.onclick = () => {
+          if (track.dataset.isDragging === 'true') return;
+          selectSlide(idx);
+        };
 
         if (slide.hasTriangle) {
           card.innerHTML = `
@@ -2975,8 +3034,12 @@
       });
     }
 
+    // CONTROL DE SCROLL PROGRAMÁTICO Y NAVEGACIÓN
+    let isProgrammaticScroll = false;
+    let programmaticScrollTimer = null;
+
     // SELECCIONAR Y ACTIVAR UNA DIAPOSITIVA
-    function selectSlide(idx) {
+    function selectSlide(idx, triggerScroll = true) {
       state.currentSlideIdx = idx;
       const slide = slidesData[idx];
       if (!slide) return;
@@ -2994,10 +3057,16 @@
 
       // Hacer scroll suave para alinear exactamente la diapositiva en el track
       const track = document.getElementById('slide-track');
-      const targetCard = document.getElementById(`slide-card-${idx}`);
-      if (track && targetCard) {
+      if (track && triggerScroll) {
+        isProgrammaticScroll = true;
+        clearTimeout(programmaticScrollTimer);
+        programmaticScrollTimer = setTimeout(() => {
+          isProgrammaticScroll = false;
+        }, 450);
+
+        const targetLeft = idx * track.clientWidth;
         track.scrollTo({
-          left: targetCard.offsetLeft,
+          left: targetLeft,
           behavior: 'smooth'
         });
       }
@@ -3017,8 +3086,10 @@
     // DETECCIÓN DE SCROLL / SWIPE MANUAL CON EL DEDO EN EL TRACK
     let scrollTimeout;
     function onTrackScroll() {
+      if (isProgrammaticScroll) return;
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
+        if (isProgrammaticScroll) return;
         const track = document.getElementById('slide-track');
         if (!track) return;
         const cardWidth = track.clientWidth || 1;
@@ -3026,9 +3097,56 @@
         const validIdx = Math.max(0, Math.min(slidesData.length - 1, closestIdx));
 
         if (validIdx !== state.currentSlideIdx) {
-          selectSlide(validIdx);
+          selectSlide(validIdx, false);
         }
-      }, 100);
+      }, 120);
+    }
+
+    // SOPORTE DE RUEDA DE RATÓN Y ARRASTRE (DRAG) EN ESCRITORIO
+    function initSlideTrackInteractions() {
+      const track = document.getElementById('slide-track');
+      if (!track || track.dataset.interactionsInit) return;
+      track.dataset.interactionsInit = 'true';
+
+      // Rueda vertical convertida a desplazamiento horizontal en track
+      track.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          e.preventDefault();
+          track.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
+
+      // Arrastre con clic de ratón (Drag to scroll)
+      let isDown = false;
+      let startX = 0;
+      let scrollLeft = 0;
+
+      track.addEventListener('mousedown', (e) => {
+        isDown = true;
+        track.dataset.isDragging = 'false';
+        track.style.cursor = 'grabbing';
+        startX = e.pageX - track.offsetLeft;
+        scrollLeft = track.scrollLeft;
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (!isDown) return;
+        isDown = false;
+        track.style.cursor = 'grab';
+        setTimeout(() => {
+          track.dataset.isDragging = 'false';
+        }, 80);
+      });
+
+      track.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        const x = e.pageX - track.offsetLeft;
+        const walk = x - startX;
+        if (Math.abs(walk) > 6) {
+          track.dataset.isDragging = 'true';
+          track.scrollLeft = scrollLeft - walk;
+        }
+      });
     }
 
     // ACTIVAR LA VISTA DE LA ZONA MEDIA
@@ -3338,10 +3456,14 @@
         });
 
         const track = document.getElementById('slide-track');
-        const targetCard = document.getElementById('slide-card-4');
-        if (track && targetCard) {
+        if (track) {
+          isProgrammaticScroll = true;
+          clearTimeout(programmaticScrollTimer);
+          programmaticScrollTimer = setTimeout(() => {
+            isProgrammaticScroll = false;
+          }, 450);
           track.scrollTo({
-            left: targetCard.offsetLeft,
+            left: 4 * track.clientWidth,
             behavior: 'smooth'
           });
         }
@@ -3408,7 +3530,20 @@
       state.mentalPeace = Math.max(10, Math.min(100, state.mentalPeace + mentalDelta));
       const newHearts = Math.min(20, Math.max(1, Math.round(state.mentalPeace / 5)));
       const heartsDelta = newHearts - prevHearts;
-      state.monthlyDebt += debtDelta;
+      if (debtDelta !== 0) {
+        if (!state.debts) state.debts = [];
+        state.debts.push({
+          id: 'debt_' + Date.now(),
+          name: actionName || 'Crédito / Deuda',
+          desc: 'Cuota mensual de deuda',
+          icon: '💳',
+          monthlyPayment: debtDelta,
+          budget: debtDelta,
+          real: debtDelta,
+          isDebt: true
+        });
+        state.monthlyDebt = state.debts.reduce((acc, d) => acc + (d.monthlyPayment || 0), 0);
+      }
 
       let heartsMsg = '';
       if (heartsDelta > 0) heartsMsg = `\nBienestar: +${heartsDelta} ❤️ (Tienes ${newHearts}/20)`;
@@ -3711,7 +3846,14 @@
         </div>
       ` : '';
 
-      const salary = currentJob ? (currentJob.salary || 1200000) : (jobs[0] ? jobs[0].salary : 1200000);
+      // Cuentas líquidas contratadas (solo las que existen en state.bankAccounts)
+      const liquidAccounts = (state.bankAccounts || []).filter(acc =>
+        acc.isLiquid || ['corriente', 'vista', 'rut'].some(k => (acc.id || '').toLowerCase().includes(k) || (acc.name || '').toLowerCase().includes(k))
+      );
+      const totalLiquid = (state.cash || 0) + liquidAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
+
+      // Si no tiene empleo, el sueldo refleja estrictamente 0
+      const salary = currentJob ? (currentJob.salary || 0) : 0;
 
       if (subView === 'main') {
         container.innerHTML = `
@@ -3727,11 +3869,11 @@
 
             <div class="personal-kpi-card kpi-efectivo">
               <div class="personal-kpi-top">
-                <span class="personal-kpi-label">Dinero en Efectivo</span>
+                <span class="personal-kpi-label">Dinero Disponible</span>
                 <span class="personal-kpi-icon">💵</span>
               </div>
-              <div class="personal-kpi-value">$${state.cash.toLocaleString('es-CL')}</div>
-              <div style="font-size: 0.58rem; color: #64748b; margin-top: 2px;">Disponible</div>
+              <div class="personal-kpi-value">$${totalLiquid.toLocaleString('es-CL')}</div>
+              <div style="font-size: 0.58rem; color: #64748b; margin-top: 2px;">Liquidez Total</div>
             </div>
           </div>
 
@@ -3754,8 +3896,8 @@
               <div class="personal-access-left">
                 <div class="personal-access-icon">📊</div>
                 <div class="personal-access-texts">
-                  <div class="personal-access-name">Presupuesto</div>
-                  <div class="personal-access-desc">Distribución 50% fijos, 30% estilo de vida, 20% reservas</div>
+                  <div class="personal-access-name">Presupuesto Mensual</div>
+                  <div class="personal-access-desc">Dinero disponible, ingresos y regla 50/30/20</div>
                 </div>
               </div>
               <span class="personal-access-arrow">➔</span>
@@ -3818,7 +3960,7 @@
           <div class="personal-subview-box">
             <!-- CABECERA: TÍTULO A LA IZQUIERDA Y BOTÓN VOLVER A LA DERECHA -->
             <div class="personal-subview-top">
-              <span style="font-size: 0.68rem; font-weight: 700; color: #8b5cf6;">🎯 Perfil de Inversionista</span>
+              <span style="font-size: 0.85rem; font-weight: 800; color: #8b5cf6;">🎯 Perfil de Inversionista</span>
               <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('main')">
                 <span>◀ Volver</span>
               </button>
@@ -3836,101 +3978,443 @@
           </div>
         `;
       } else if (subView === 'presupuesto') {
-        const fixedExpenses = Math.round(salary * 0.5);
-        const lifestyleExpenses = Math.round(salary * 0.3);
-        const savingsExpenses = Math.round(salary * 0.2);
+        const baseItems = Array.isArray(state.budgetItems) ? state.budgetItems : [];
+        const debtItems = (Array.isArray(state.debts) && state.debts.length > 0) ? state.debts.map(d => ({
+          id: d.id,
+          name: d.name,
+          desc: d.desc || 'Cuota mensual de deuda',
+          icon: d.icon || '💳',
+          budget: d.monthlyPayment || d.budget || 0,
+          real: d.real !== undefined ? d.real : (d.monthlyPayment || d.budget || 0),
+          isDebt: true
+        })) : [];
+        const customItems = Array.isArray(state.customBudgetItems) ? state.customBudgetItems : [];
+        const allBudgetItems = [...baseItems, ...debtItems, ...customItems];
+
+        const totalBudget = allBudgetItems.reduce((acc, i) => acc + (i.budget || 0), 0);
+        const totalReal = allBudgetItems.reduce((acc, i) => acc + (i.real !== undefined ? i.real : (i.budget || 0)), 0);
+        const netBudgetDifference = salary - totalBudget;
+
+        const accountsRowsHtml = liquidAccounts.map(acc => `
+          <tr style="border-top: 1px solid #f1f5f9;">
+            <td style="padding: 4px 2px; color: #334155; font-size: 0.70rem;">
+              <span style="margin-right: 4px;">${acc.icon || '💳'}</span> ${acc.name}
+            </td>
+            <td style="padding: 4px 2px; text-align: right; font-weight: 700; color: #0f172a; font-size: 0.70rem; white-space: nowrap;">
+              $${(acc.balance || 0).toLocaleString('es-CL')}
+            </td>
+          </tr>
+        `).join('');
 
         container.innerHTML = `
           <div class="personal-subview-box">
+            <!-- CABECERA: TÍTULO A LA IZQUIERDA Y BOTÓN VOLVER A LA DERECHA -->
             <div class="personal-subview-top">
+              <span style="font-size: 0.88rem; font-weight: 800; color: #0284c7;">📊 Presupuesto Mensual</span>
               <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('main')">
-                <span>◀</span> <span>Volver a Personal</span>
+                <span>◀ Volver</span>
               </button>
-              <span style="font-size: 0.65rem; font-weight: 700; color: #0284c7;">📊 Regla 50 / 30 / 20</span>
             </div>
 
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 7px; display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <div style="font-size: 0.56rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Ingreso Mensual Estimado</div>
-                <div style="font-size: 0.72rem; font-weight: 800; color: #0f172a;">${jobs[0].name}</div>
+            <!-- FILA 2 COLUMNAS: DINERO DISPONIBLE (IZQ) E INGRESO ESTIMADO (DER - ANGOSTO) -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 6px; margin-bottom: 7px; align-items: stretch;">
+
+              <!-- 1. COLUMNA IZQUIERDA: DINERO DISPONIBLE -->
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 8px; display: flex; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px;">
+                  <div>
+                    <div style="font-size: 0.65rem; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.3px;">Dinero Disponible</div>
+                    <div style="font-size: 0.56rem; color: #64748b;">Liquidez inmediata</div>
+                  </div>
+                  <div style="font-size: 0.95rem; font-weight: 800; color: #0284c7; font-family: var(--font-title); white-space: nowrap;">
+                    $${totalLiquid.toLocaleString('es-CL')}
+                  </div>
+                </div>
+
+                <!-- TABLA CUENTAS LÍQUIDAS -->
+                <table style="width: 100%; border-collapse: collapse; margin-top: auto;">
+                  <tbody>
+                    <tr style="border-top: 1px solid #f1f5f9;">
+                      <td style="padding: 4px 2px; color: #334155; font-size: 0.70rem;">
+                        <span style="margin-right: 2px;">💵</span> Efectivo
+                      </td>
+                      <td style="padding: 4px 2px; text-align: right; font-weight: 700; color: #0f172a; font-size: 0.70rem; white-space: nowrap;">
+                        $${(state.cash || 0).toLocaleString('es-CL')}
+                      </td>
+                    </tr>
+                    ${accountsRowsHtml}
+                  </tbody>
+                </table>
               </div>
-              <div style="font-size: 1.0rem; font-weight: 800; color: #0284c7; font-family: var(--font-title);">$${salary.toLocaleString('es-CL')}</div>
+
+              <!-- 2. COLUMNA DERECHA: INGRESO ESTIMADO -->
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 8px; display: flex; flex-direction: column;">
+                <div style="margin-bottom: 5px;">
+                  <div style="font-size: 0.65rem; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.3px;">Ingreso estimado</div>
+                </div>
+
+                <!-- LÍNEA ÚNICA DE EMPLEO Y MONTO -->
+                <table style="width: 100%; border-collapse: collapse; margin-top: auto;">
+                  <tbody>
+                    <tr style="border-top: 1px solid #f1f5f9;">
+                      <td style="padding: 4px 2px; color: #334155; font-size: 0.70rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 105px;" title="${currentJob ? (typeof currentJob === 'string' ? currentJob : currentJob.name) : 'Sin empleo'}">
+                        <span style="margin-right: 2px;">💼</span> ${currentJob ? (typeof currentJob === 'string' ? currentJob : currentJob.name) : 'Sin empleo'}
+                      </td>
+                      <td style="padding: 4px 2px; text-align: right; font-weight: 700; color: ${salary > 0 ? '#0f172a' : '#64748b'}; font-size: 0.70rem; white-space: nowrap;">
+                        $${salary.toLocaleString('es-CL')}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #0284c7; border-radius: 6px; padding: 5px 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="font-size: 0.66rem; font-weight: 700; color: #0f172a;">🏠 50% Gastos Fijos</span>
-                  <span style="font-size: 0.70rem; font-weight: 800; color: #0284c7;">$${fixedExpenses.toLocaleString('es-CL')}</span>
-                </div>
-                <div style="font-size: 0.57rem; color: #64748b; margin-top: 1px;">Vivienda (${homes[0].name}), transporte (${transports[0].name}) y servicios básicos.</div>
-              </div>
+            <!-- TABLA DE PRESUPUESTO MENSUAL (3 COLUMNAS: ITEM / PRESUPUESTO / GASTO REAL) -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 7px;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: #f1f5f9; border-bottom: 1.5px solid #cbd5e1; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.3px;">
+                    <th style="padding: 6px 8px; text-align: left;">Ítem</th>
+                    <th style="padding: 6px 8px; text-align: right; width: 105px;">Presupuesto</th>
+                    <th style="padding: 6px 8px; text-align: right; width: 90px;">Gasto Real</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${allBudgetItems.map((item) => `
+                    <tr style="border-bottom: 1px solid #f1f5f9; background: ${item.isDebt ? '#fffbeb' : '#ffffff'};">
+                      <td style="padding: 6px 8px;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                          <span style="font-size: 0.90rem;">${item.icon || '📌'}</span>
+                          <div style="line-height: 1.25;">
+                            <div style="font-weight: 700; color: #0f172a; font-size: 0.75rem;">${item.name}</div>
+                            <div style="font-size: 0.62rem; color: #64748b;">${item.desc || ''}</div>
+                          </div>
+                          ${item.id && item.id.startsWith('custom_') ? `
+                            <button type="button" onclick="deleteCustomBudgetItem('${item.id}')" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 0.68rem; margin-left: auto; padding: 0 4px;" title="Eliminar ítem">✖</button>
+                          ` : ''}
+                        </div>
+                      </td>
+                      <td style="padding: 6px 8px; text-align: right;">
+                        ${item.isDebt ? `
+                          <span style="font-weight: 700; color: #b45309; font-size: 0.74rem;">$${item.budget.toLocaleString('es-CL')}</span>
+                        ` : `
+                          <div style="display: inline-flex; align-items: center; gap: 3px;">
+                            <span style="color: #64748b; font-size: 0.68rem;">$</span>
+                            <input type="number" min="0" step="5000" value="${item.budget || 0}"
+                              onchange="updateBudgetItem('${item.id}', this.value)"
+                              style="width: 72px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 5px; font-size: 0.74rem; text-align: right; font-weight: 700; color: #0284c7; background: #ffffff;" />
+                          </div>
+                        `}
+                      </td>
+                      <td style="padding: 6px 8px; text-align: right; font-weight: 700; color: #334155; font-size: 0.74rem;">
+                        $${(item.real !== undefined ? item.real : (item.budget || 0)).toLocaleString('es-CL')}
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+                <tfoot>
+                  <tr style="border-top: 1.5px solid #cbd5e1; background: #f8fafc; font-weight: 800;">
+                    <td style="padding: 6px 8px; color: #0f172a; font-size: 0.74rem;">Total Gastos</td>
+                    <td style="padding: 6px 8px; text-align: right; color: #0284c7; font-size: 0.76rem;">$${totalBudget.toLocaleString('es-CL')}</td>
+                    <td style="padding: 6px 8px; text-align: right; color: #0f172a; font-size: 0.76rem;">$${totalReal.toLocaleString('es-CL')}</td>
+                  </tr>
+                  ${salary > 0 ? `
+                    <tr style="background: ${netBudgetDifference >= 0 ? '#f0fdf4' : '#fef2f2'}; font-size: 0.68rem;">
+                      <td style="padding: 5px 8px; color: ${netBudgetDifference >= 0 ? '#166534' : '#991b1b'}; font-weight: 700;">
+                        ${netBudgetDifference >= 0 ? '✅ Superávit Presupuestado' : '⚠️ Déficit Presupuestado'}
+                      </td>
+                      <td colspan="2" style="padding: 5px 8px; text-align: right; font-weight: 800; color: ${netBudgetDifference >= 0 ? '#15803d' : '#b91c1c'}; font-size: 0.74rem;">
+                        ${netBudgetDifference >= 0 ? `+$${netBudgetDifference.toLocaleString('es-CL')}` : `-$${Math.abs(netBudgetDifference).toLocaleString('es-CL')}`}
+                      </td>
+                    </tr>
+                  ` : ''}
+                </tfoot>
+              </table>
+            </div>
 
-              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #8b5cf6; border-radius: 6px; padding: 5px 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="font-size: 0.66rem; font-weight: 700; color: #0f172a;">🎨 30% Estilo de Vida</span>
-                  <span style="font-size: 0.70rem; font-weight: 800; color: #8b5cf6;">$${lifestyleExpenses.toLocaleString('es-CL')}</span>
-                </div>
-                <div style="font-size: 0.57rem; color: #64748b; margin-top: 1px;">Salidas, ocio, hobbies y los intereses personales priorizados.</div>
-              </div>
+            <!-- BOTÓN Y FORMULARIO PARA AGREGAR ÍTEMS -->
+            <div style="margin-bottom: 7px;">
+              ${!state.showAddBudgetForm ? `
+                <button type="button" onclick="toggleAddBudgetForm(true)" style="width: 100%; padding: 7px; border: 1.5px dashed #cbd5e1; background: #ffffff; border-radius: 6px; font-size: 0.72rem; font-weight: 700; color: #0284c7; cursor: pointer;">
+                  + Agregar ítem
+                </button>
+              ` : `
+                <div style="background: #ffffff; border: 1px solid #38bdf8; border-radius: 8px; padding: 9px 11px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                  <div style="font-size: 0.74rem; font-weight: 800; color: #0284c7; margin-bottom: 7px;">➕ Nuevo Ítem de Presupuesto</div>
+                  
+                  <!-- Selector Tipo Libre vs Ahorro/Inversión -->
+                  <div style="display: flex; gap: 6px; margin-bottom: 7px;">
+                    <button type="button" onclick="changeNewBudgetType('free')" style="flex: 1; padding: 5px; border-radius: 5px; border: 1px solid ${state.newBudgetType === 'free' ? '#0284c7' : '#cbd5e1'}; background: ${state.newBudgetType === 'free' ? '#e0f2fe' : '#f8fafc'}; font-size: 0.68rem; font-weight: 700; color: ${state.newBudgetType === 'free' ? '#0369a1' : '#64748b'}; cursor: pointer;">
+                      🏷️ Tipo Libre
+                    </button>
+                    <button type="button" onclick="changeNewBudgetType('invest')" style="flex: 1; padding: 5px; border-radius: 5px; border: 1px solid ${state.newBudgetType === 'invest' ? '#8b5cf6' : '#cbd5e1'}; background: ${state.newBudgetType === 'invest' ? '#ede9fe' : '#f8fafc'}; font-size: 0.68rem; font-weight: 700; color: ${state.newBudgetType === 'invest' ? '#6d28d9' : '#64748b'}; cursor: pointer;">
+                      💎 Ahorro / Inversión
+                    </button>
+                  </div>
 
-              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #10b981; border-radius: 6px; padding: 5px 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="font-size: 0.66rem; font-weight: 700; color: #0f172a;">🛡️ 20% Reservas & Futuro</span>
-                  <span style="font-size: 0.70rem; font-weight: 800; color: #059669;">$${savingsExpenses.toLocaleString('es-CL')}</span>
+                  <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <div>
+                      <label style="font-size: 0.62rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px;">Nombre del Ítem</label>
+                      <input type="text" id="new-budget-name" placeholder="Ej: Fondo vacaciones / Ahorro auto" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 5px; padding: 5px 7px; font-size: 0.70rem;" />
+                    </div>
+
+                    ${state.newBudgetType === 'invest' ? `
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                        <div>
+                          <label style="font-size: 0.62rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px;">Instrumento</label>
+                          <select id="new-budget-invest-type" onchange="changeInvestInstrument(this.value)" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 5px; padding: 4px 6px; font-size: 0.68rem; background: #ffffff;">
+                            <option value="alcancia" ${state.newBudgetInvestType === 'alcancia' ? 'selected' : ''}>1. Alcancía / Colchón</option>
+                            <option value="dap" ${state.newBudgetInvestType === 'dap' ? 'selected' : ''}>2. Depósito a Plazo (DAP)</option>
+                            <option value="dolares" ${state.newBudgetInvestType === 'dolares' ? 'selected' : ''}>3. Compra de Dólares</option>
+                            <option value="fondos" ${state.newBudgetInvestType === 'fondos' ? 'selected' : ''}>4. Fondo Mutuo</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style="font-size: 0.62rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px;">Origen del Dinero</label>
+                          <select id="new-budget-source" ${state.newBudgetInvestType === 'alcancia' ? 'disabled' : ''} style="width: 100%; border: 1px solid #cbd5e1; border-radius: 5px; padding: 4px 6px; font-size: 0.68rem; background: ${state.newBudgetInvestType === 'alcancia' ? '#f1f5f9' : '#ffffff'};">
+                            <option value="Efectivo">💵 Dinero en Efectivo</option>
+                            ${state.newBudgetInvestType !== 'alcancia' ? (state.bankAccounts || []).map(acc => `<option value="${acc.name}">${acc.icon || '💳'} ${acc.name}</option>`).join('') : ''}
+                          </select>
+                        </div>
+                      </div>
+                    ` : ''}
+
+                    <div>
+                      <label style="font-size: 0.62rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px;">Monto Presupuestado ($)</label>
+                      <input type="number" id="new-budget-amount" placeholder="Ej: 50000" min="0" step="5000" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 5px; padding: 5px 7px; font-size: 0.70rem;" />
+                    </div>
+
+                    <div style="display: flex; gap: 6px; margin-top: 4px;">
+                      <button type="button" onclick="saveNewBudgetItem()" style="flex: 1; padding: 6px 12px; background: #0284c7; color: #ffffff; border: none; border-radius: 5px; font-size: 0.70rem; font-weight: 700; cursor: pointer;">Guardar ítem</button>
+                      <button type="button" onclick="toggleAddBudgetForm(false)" style="padding: 6px 12px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 0.70rem; font-weight: 600; cursor: pointer;">Cancelar</button>
+                    </div>
+                  </div>
                 </div>
-                <div style="font-size: 0.57rem; color: #64748b; margin-top: 1px;">Fondo de emergencia e inversiones para proyectos futuros.</div>
-              </div>
+              `}
             </div>
           </div>
         `;
       } else if (subView === 'patrimonio') {
-        const netWorth = state.cash + state.reserves + state.invested;
+        const liquidAccounts = (state.bankAccounts || []).filter(a => a.type !== 'credit');
+        const reservesAmount = state.reserves || 0;
+        const investedAmount = state.invested || 0;
+        const propertiesValue = (state.properties || []).reduce((acc, p) => acc + (p.value || 0), 0);
+        const vehiclesValue = (state.vehicles || []).reduce((acc, v) => acc + (v.value || 0), 0);
+        const totalAssets = totalLiquid + reservesAmount + investedAmount + propertiesValue + vehiclesValue;
+        const totalDebtBalance = (state.debts || []).reduce((acc, d) => acc + (d.totalDebt || d.monthlyPayment || 0), 0);
+        const netWorth = totalAssets - totalDebtBalance;
+
+        const monthlyExpenses = (state.budgetItems || []).reduce((acc, i) => acc + (i.real !== undefined ? i.real : (i.budget || 0)), 0);
+        const emergencyMonths = (monthlyExpenses > 0 && reservesAmount > 0) ? (reservesAmount / monthlyExpenses).toFixed(1) : 0;
 
         container.innerHTML = `
           <div class="personal-subview-box">
+            <!-- CABECERA: TÍTULO A LA IZQUIERDA Y BOTÓN VOLVER A LA DERECHA -->
             <div class="personal-subview-top">
+              <span style="font-size: 0.88rem; font-weight: 800; color: #059669;">💰 Patrimonio & Liquidez</span>
               <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('main')">
-                <span>◀</span> <span>Volver a Personal</span>
+                <span>◀ Volver</span>
               </button>
-              <span style="font-size: 0.65rem; font-weight: 700; color: #059669;">💰 Balance Financiero</span>
             </div>
 
-            <!-- Patrimonio Total -->
-            <div style="background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); border: 1px solid #a7f3d0; border-radius: 8px; padding: 7px 9px; margin-bottom: 7px; display: flex; justify-content: space-between; align-items: center;">
+            <!-- PATRIMONIO NETO TOTAL -->
+            <div style="background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); border: 1px solid #a7f3d0; border-radius: 8px; padding: 8px 10px; margin-bottom: 7px; display: flex; justify-content: space-between; align-items: center;">
               <div>
-                <div style="font-size: 0.56rem; color: #047857; font-weight: 700; text-transform: uppercase;">Patrimonio Neto Total</div>
-                <div style="font-size: 0.62rem; color: #065f46;">Activos líquidos y de reserva</div>
+                <div style="font-size: 0.65rem; color: #047857; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Patrimonio Neto Total</div>
+                <div style="font-size: 0.58rem; color: #065f46;">Activos ($${totalAssets.toLocaleString('es-CL')}) - Pasivos ($${totalDebtBalance.toLocaleString('es-CL')})</div>
               </div>
-              <div style="font-size: 1.10rem; font-weight: 800; color: #047857; font-family: var(--font-title);">$${netWorth.toLocaleString('es-CL')}</div>
+              <div style="font-size: 1.15rem; font-weight: 800; color: #047857; font-family: var(--font-title);">$${netWorth.toLocaleString('es-CL')}</div>
             </div>
 
-            <!-- Desglose de Activos -->
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 7px;">
-              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px 7px;">
-                <div style="font-size: 0.56rem; color: #64748b;">💵 Efectivo Disponible</div>
-                <div style="font-size: 0.80rem; font-weight: 800; color: #0284c7;">$${state.cash.toLocaleString('es-CL')}</div>
+            <!-- DESGLOSE DE ACTIVOS REALES -->
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 7px;">
+
+              <!-- 1. LIQUIDEZ Y CUENTAS -->
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 7px; padding: 7px 9px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span style="font-size: 0.65rem; font-weight: 700; color: #1e293b;">💵 Dinero Disponible (Liquidez)</span>
+                  <strong style="font-size: 0.82rem; font-weight: 800; color: #0284c7;">$${totalLiquid.toLocaleString('es-CL')}</strong>
+                </div>
+                <div style="font-size: 0.68rem; color: #334155; display: flex; flex-direction: column; gap: 3px;">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>• Efectivo físico:</span>
+                    <strong>$${(state.cash || 0).toLocaleString('es-CL')}</strong>
+                  </div>
+                  ${liquidAccounts.length > 0 ? liquidAccounts.map(a => `
+                    <div style="display: flex; justify-content: space-between;">
+                      <span>• ${a.icon || '💳'} ${a.name}:</span>
+                      <strong>$${(a.balance || 0).toLocaleString('es-CL')}</strong>
+                    </div>
+                  `).join('') : `
+                    <div style="font-size: 0.62rem; color: #94a3b8; font-style: italic;">• Sin cuentas bancarias contratadas</div>
+                  `}
+                </div>
               </div>
-              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px 7px;">
-                <div style="font-size: 0.56rem; color: #64748b;">🛡️ Fondo Reservas</div>
-                <div style="font-size: 0.80rem; font-weight: 800; color: #059669;">$${state.reserves.toLocaleString('es-CL')}</div>
+
+              <!-- 2. RESERVAS E INVERSIONES -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 7px; padding: 7px 9px;">
+                  <div style="font-size: 0.62rem; font-weight: 700; color: #1e293b; margin-bottom: 2px;">🛡️ Fondo Reservas</div>
+                  <div style="font-size: 0.82rem; font-weight: 800; color: ${reservesAmount > 0 ? '#059669' : '#64748b'};">$${reservesAmount.toLocaleString('es-CL')}</div>
+                  <div style="font-size: 0.58rem; color: #94a3b8; margin-top: 2px;">${reservesAmount > 0 ? 'Fondo para imprevistos' : 'Sin fondo acumulado'}</div>
+                </div>
+
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 7px; padding: 7px 9px;">
+                  <div style="font-size: 0.62rem; font-weight: 700; color: #1e293b; margin-bottom: 2px;">📈 Inversiones Activas</div>
+                  <div style="font-size: 0.82rem; font-weight: 800; color: ${investedAmount > 0 ? '#8b5cf6' : '#64748b'};">$${investedAmount.toLocaleString('es-CL')}</div>
+                  <div style="font-size: 0.58rem; color: #94a3b8; margin-top: 2px;">${investedAmount > 0 ? 'Rentabilizando' : 'Sin inversiones activas'}</div>
+                </div>
               </div>
-              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px 7px;">
-                <div style="font-size: 0.56rem; color: #64748b;">📈 Inversiones Activas</div>
-                <div style="font-size: 0.80rem; font-weight: 800; color: #8b5cf6;">$${state.invested.toLocaleString('es-CL')}</div>
+
+              <!-- 3. DEUDAS Y COMPROMISOS -->
+              <div style="background: #ffffff; border: 1px solid ${state.debts && state.debts.length > 0 ? '#fecaca' : '#e2e8f0'}; border-radius: 7px; padding: 7px 9px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span style="font-size: 0.65rem; font-weight: 700; color: ${state.debts && state.debts.length > 0 ? '#b91c1c' : '#1e293b'};">💳 Deudas y Créditos</span>
+                  <strong style="font-size: 0.82rem; font-weight: 800; color: ${state.debts && state.debts.length > 0 ? '#b91c1c' : '#059669'};">
+                    ${state.debts && state.debts.length > 0 ? `$${state.monthlyDebt.toLocaleString('es-CL')}/mes` : '$0'}
+                  </strong>
+                </div>
+                ${state.debts && state.debts.length > 0 ? `
+                  <div style="font-size: 0.68rem; color: #334155; display: flex; flex-direction: column; gap: 3px;">
+                    ${state.debts.map(d => `
+                      <div style="display: flex; justify-content: space-between;">
+                        <span>• ${d.name}:</span>
+                        <strong style="color: #b91c1c;">$${(d.monthlyPayment || 0).toLocaleString('es-CL')}/mes</strong>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : `
+                  <div style="font-size: 0.62rem; color: #059669; font-weight: 600;">✅ Cero deudas: sin créditos contraídos</div>
+                `}
               </div>
-              <div style="background: #ffffff; border: 1px solid #fee2e2; border-radius: 6px; padding: 5px 7px;">
-                <div style="font-size: 0.56rem; color: #b91c1c;">💳 Deuda Mensual</div>
-                <div style="font-size: 0.80rem; font-weight: 800; color: #b91c1c;">$${state.monthlyDebt.toLocaleString('es-CL')}/mes</div>
+
+              <!-- 4. BIENES RAÍCES Y VEHÍCULOS -->
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 7px; padding: 7px 9px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                  <span style="font-size: 0.65rem; font-weight: 700; color: #1e293b;">🏠 Propiedades y Vehículos</span>
+                  <strong style="font-size: 0.78rem; font-weight: 800; color: #475569;">$${(propertiesValue + vehiclesValue).toLocaleString('es-CL')}</strong>
+                </div>
+                <div style="font-size: 0.62rem; color: #94a3b8; font-style: italic;">
+                  ${(propertiesValue + vehiclesValue) > 0 ? 'Bienes inscritos a tu nombre' : 'Sin bienes raíces ni vehículos registrados ($0)'}
+                </div>
               </div>
+
             </div>
 
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; font-size: 0.62rem; color: #475569; display: flex; align-items: center; justify-content: space-between;">
-              <span>🛡️ Cobertura Fondo de Emergencia:</span>
-              <strong style="color: #059669;">~3.5 Meses de gastos</strong>
+            <!-- COBERTURA REAL DE EMERGENCIA -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 7px; padding: 7px 9px; font-size: 0.68rem; color: #475569; display: flex; align-items: center; justify-content: space-between;">
+              <span>🛡️ Cobertura Fondo Emergencia:</span>
+              ${emergencyMonths > 0 ? `
+                <strong style="color: #059669;">~${emergencyMonths} meses de gastos</strong>
+              ` : `
+                <strong style="color: ${monthlyExpenses > 0 ? '#b91c1c' : '#64748b'};">${monthlyExpenses > 0 ? '0 meses (Sin fondo acumulado)' : '0 meses'}</strong>
+              `}
             </div>
           </div>
         `;
+      }
+    }
+
+    // GESTIÓN INTERACTIVA DE ÍTEMS DE PRESUPUESTO
+    function updateBudgetItem(itemId, val) {
+      const num = Math.max(0, parseInt(val, 10) || 0);
+      if (state.debts) {
+        const dItem = state.debts.find(d => d.id === itemId);
+        if (dItem) {
+          dItem.budget = num;
+          dItem.real = num;
+          dItem.monthlyPayment = num;
+          state.monthlyDebt = state.debts.reduce((acc, d) => acc + (d.monthlyPayment || 0), 0);
+          renderPersonalStage('presupuesto');
+          return;
+        }
+      }
+      if (state.budgetItems) {
+        const item = state.budgetItems.find(i => i.id === itemId);
+        if (item) {
+          item.budget = num;
+          item.real = num;
+        }
+      }
+      if (state.customBudgetItems) {
+        const cItem = state.customBudgetItems.find(i => i.id === itemId);
+        if (cItem) {
+          cItem.budget = num;
+          cItem.real = num;
+        }
+      }
+      renderPersonalStage('presupuesto');
+    }
+
+    function toggleAddBudgetForm(show) {
+      state.showAddBudgetForm = show;
+      renderPersonalStage('presupuesto');
+    }
+
+    function changeNewBudgetType(type) {
+      state.newBudgetType = type;
+      renderPersonalStage('presupuesto');
+    }
+
+    function changeInvestInstrument(val) {
+      state.newBudgetInvestType = val;
+      renderPersonalStage('presupuesto');
+    }
+
+    function saveNewBudgetItem() {
+      const nameInput = document.getElementById('new-budget-name');
+      const amountInput = document.getElementById('new-budget-amount');
+      const investSelect = document.getElementById('new-budget-invest-type');
+      const sourceSelect = document.getElementById('new-budget-source');
+
+      const name = nameInput ? nameInput.value.trim() : '';
+      const amount = amountInput ? Math.max(0, parseInt(amountInput.value, 10) || 0) : 0;
+      const isInvest = state.newBudgetType === 'invest';
+      const investType = investSelect ? investSelect.value : (state.newBudgetInvestType || 'alcancia');
+      const source = (isInvest && investType === 'alcancia') ? 'Efectivo' : (sourceSelect ? sourceSelect.value : 'Efectivo');
+
+      if (!name) {
+        alert('Por favor escribe un nombre para el ítem.');
+        return;
+      }
+
+      if (!state.customBudgetItems) state.customBudgetItems = [];
+
+      const investIcons = {
+        alcancia: '🐖',
+        dap: '⏳',
+        dolares: '💵',
+        fondos: '📊'
+      };
+
+      const investLabels = {
+        alcancia: 'Alcancía / Colchón',
+        dap: 'Depósito a Plazo',
+        dolares: 'Compra de Dólares',
+        fondos: 'Fondo Mutuo'
+      };
+
+      state.customBudgetItems.push({
+        id: 'custom_' + Date.now(),
+        name,
+        desc: isInvest ? `${investLabels[investType] || 'Inversión'} (Origen: ${source})` : 'Gasto libre',
+        icon: isInvest ? (investIcons[investType] || '💎') : '🏷️',
+        budget: amount,
+        real: amount,
+        isInvest,
+        investType,
+        source
+      });
+
+      state.showAddBudgetForm = false;
+      renderPersonalStage('presupuesto');
+    }
+
+    function deleteCustomBudgetItem(itemId) {
+      if (state.customBudgetItems) {
+        state.customBudgetItems = state.customBudgetItems.filter(i => i.id !== itemId);
+        renderPersonalStage('presupuesto');
       }
     }
 
@@ -4031,7 +4515,7 @@
       container.innerHTML = `
         <div class="personal-subview-box">
           <div class="personal-subview-top">
-            <span style="font-size: 0.68rem; font-weight: 700; color: #8b5cf6;">📝 Test de Perfil de Inversionista</span>
+            <span style="font-size: 0.85rem; font-weight: 800; color: #8b5cf6;">📝 Test de Perfil de Inversionista</span>
             <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('inversionista')">
               <span>Salir del test</span>
             </button>
@@ -4142,7 +4626,7 @@
       container.innerHTML = `
         <div class="personal-subview-box">
           <div class="personal-subview-top">
-            <span style="font-size: 0.68rem; font-weight: 700; color: #8b5cf6;">📝 Test de Perfil de Inversionista</span>
+            <span style="font-size: 0.85rem; font-weight: 800; color: #8b5cf6;">📝 Test de Perfil de Inversionista</span>
             <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('inversionista')">
               <span>Salir del test</span>
             </button>
@@ -4174,7 +4658,7 @@
       container.innerHTML = `
         <div class="personal-subview-box">
           <div class="personal-subview-top">
-            <span style="font-size: 0.68rem; font-weight: 700; color: #8b5cf6;">📝 Test de Perfil de Inversionista</span>
+            <span style="font-size: 0.85rem; font-weight: 800; color: #8b5cf6;">📝 Test de Perfil de Inversionista</span>
             <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('inversionista')">
               <span>Salir del test</span>
             </button>
