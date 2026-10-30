@@ -1512,9 +1512,157 @@
       font-weight: 700;
     }
 
-    /* SUB-VISTAS DE DETALLE (PRESUPUESTO, PATRIMONIO, INVERSIONISTA) */
+    /* SUB-VISTAS DE DETALLE (PRESUPUESTO, PATRIMONIO, INVERSIONISTA, TRABAJO) */
     .personal-subview-box {
       animation: fadeIn 0.18s ease-in-out;
+    }
+
+    .jobs-grid-2col {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-top: 5px;
+    }
+
+    .job-offer-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 7px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+
+    .job-offer-card:hover {
+      border-color: #0284c7;
+      box-shadow: 0 2px 7px rgba(2, 132, 199, 0.12);
+    }
+
+    .job-offer-card.active-job {
+      border: 1.5px solid #059669;
+      background: #f0fdf4;
+    }
+
+    .job-offer-badge {
+      font-size: 0.52rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 3px;
+      width: fit-content;
+    }
+
+    .job-badge-directiva { background: #fef3c7; color: #b45309; }
+    .job-badge-especializado { background: #ede9fe; color: #6d28d9; }
+    .job-badge-operativo { background: #e0f2fe; color: #0369a1; }
+    .job-badge-comercial { background: #fce7f3; color: #be185d; }
+    .job-badge-freelance { background: #dcfce7; color: #15803d; }
+    .job-badge-apoyo { background: #f1f5f9; color: #475569; }
+
+    .job-offer-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .job-offer-salaries {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 4px 6px;
+      margin-bottom: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .job-salary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.60rem;
+    }
+
+    .job-salary-row.liquid {
+      font-weight: 800;
+      color: #0284c7;
+      font-size: 0.68rem;
+      border-top: 1px dashed #cbd5e1;
+      padding-top: 2px;
+      margin-top: 1px;
+    }
+
+    .job-offer-info {
+      font-size: 0.58rem;
+      color: #475569;
+      line-height: 1.2;
+      margin-bottom: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .job-req-tag {
+      font-size: 0.54rem;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 2px 4px;
+      border-radius: 4px;
+      border-left: 2px solid #cbd5e1;
+    }
+
+    .job-req-tag.has-req {
+      border-left-color: #d97706;
+      background: #fffbeb;
+      color: #92400e;
+    }
+
+    .job-apply-btn {
+      width: 100%;
+      padding: 5px;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.64rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      margin-top: auto;
+      text-align: center;
+    }
+
+    .job-apply-btn.btn-postular {
+      background: #0284c7;
+      color: #ffffff;
+    }
+
+    .job-apply-btn.btn-postular:hover {
+      background: #0369a1;
+    }
+
+    .job-apply-btn.btn-actual {
+      background: #059669;
+      color: #ffffff;
+      cursor: default;
+    }
+
+    .job-apply-btn.btn-renunciar {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+      margin-top: 4px;
+    }
+
+    .job-apply-btn.btn-renunciar:hover {
+      background: #fecaca;
     }
 
     .personal-subview-top {
@@ -3660,9 +3808,9 @@
         title: "💼 Trabajo",
         subtitle: "Desarrollo profesional e ingresos laborales",
         sections: [
-          { name: "Negociación Salarial y Ascensos", icon: "📈" },
-          { name: "Capacitaciones y Certificaciones", icon: "🎓" },
-          { name: "Búsqueda de Trabajo", icon: "🔍" }
+          { name: "Negociación Salarial y Ascensos", icon: "📈", action: "alert('Próximamente disponible')" },
+          { name: "Capacitaciones y Certificaciones", icon: "🎓", action: "alert('Próximamente disponible')" },
+          { name: "Búsqueda de Trabajo", icon: "🔍", action: "renderTrabajoStage('busqueda')" }
         ]
       },
       estado: {
@@ -3677,6 +3825,224 @@
         ]
       }
     };
+
+    // CATÁLOGO DE OFERTAS DE TRABAJO (6 OPCIONES EN 2 COLUMNAS)
+    const jobOffersData = [
+      {
+        id: "job_op1",
+        code: "Opción 1",
+        name: "Responsabilidad Directiva",
+        badge: "Directivo",
+        badgeClass: "job-badge-directiva",
+        icon: "🏛️",
+        grossSalary: 3125000,
+        salary: 2500000,
+        conditions: "Contrato formal, gestión estratégica y toma de decisiones, sin horario fijo.",
+        requirements: "Requiere experiencia laboral previa y curso de especialización.",
+        hasExpReq: true,
+        hasCourseReq: true
+      },
+      {
+        id: "job_op2",
+        code: "Opción 2",
+        name: "Profesional Especializado",
+        badge: "Especializado",
+        badgeClass: "job-badge-especializado",
+        icon: "🔬",
+        grossSalary: 2625000,
+        salary: 2100000,
+        conditions: "Contrato formal, funciones técnicas avanzadas, horario flexible.",
+        requirements: "Requiere cursos de especialización técnica.",
+        hasExpReq: false,
+        hasCourseReq: true
+      },
+      {
+        id: "job_op3",
+        code: "Opción 3",
+        name: "Gestión Operativa / Administrativa",
+        badge: "Operativo",
+        badgeClass: "job-badge-operativo",
+        icon: "📋",
+        grossSalary: 1185000,
+        salary: 950000,
+        conditions: "Contrato formal, jornada fija regular, funciones operativas continuas.",
+        requirements: "Requiere curso de especialización administrativa.",
+        hasExpReq: false,
+        hasCourseReq: true
+      },
+      {
+        id: "job_op4",
+        code: "Opción 4",
+        name: "Gestión Comercial & Servicios",
+        badge: "Comercial",
+        badgeClass: "job-badge-comercial",
+        icon: "🤝",
+        grossSalary: 812000,
+        salary: 650000,
+        isCommercial: true,
+        conditions: "Contrato formal, gestión comercial con metas variables de desempeño.",
+        requirements: "No requiere experiencia previa ni cursos de especialización.",
+        hasExpReq: false,
+        hasCourseReq: false
+      },
+      {
+        id: "job_op5",
+        code: "Opción 5",
+        name: "Independiente / Freelance",
+        badge: "Freelance",
+        badgeClass: "job-badge-freelance",
+        icon: "⚡",
+        grossSalary: 1100000,
+        salary: 950000,
+        isFreelance: true,
+        conditions: "Emisión de boletas de honorarios, flexibilidad y gestión autónoma del tiempo.",
+        requirements: "No requiere experiencia previa ni cursos de especialización.",
+        hasExpReq: false,
+        hasCourseReq: false
+      },
+      {
+        id: "job_op6",
+        code: "Opción 6",
+        name: "Apoyo Operativo",
+        badge: "Apoyo",
+        badgeClass: "job-badge-apoyo",
+        icon: "📦",
+        grossSalary: 556000,
+        salary: 450000,
+        conditions: "Contrato formal con cotizaciones al día, jornada laboral completa estándar.",
+        requirements: "No requiere experiencia previa ni cursos de especialización.",
+        hasExpReq: false,
+        hasCourseReq: false
+      }
+    ];
+
+    // RENDERIZAR SUB-VISTAS DEL MÓDULO TRABAJO
+    function renderTrabajoStage(subView = 'main') {
+      const container = document.getElementById('hub-stage-sections');
+      if (!container) return;
+
+      if (subView === 'busqueda') {
+        const curJob = state.currentJob;
+        const curJobId = curJob ? curJob.id : null;
+
+        container.innerHTML = `
+          <div class="personal-subview-box">
+            <!-- CABECERA: TÍTULO Y BOTÓN VOLVER -->
+            <div class="personal-subview-top">
+              <span style="font-size: 0.88rem; font-weight: 800; color: #0284c7;">🔍 Búsqueda de Trabajo</span>
+              <button type="button" class="personal-subview-back-btn" onclick="renderTrabajoStage('main')">
+                <span>◀ Volver</span>
+              </button>
+            </div>
+
+            <!-- SITUACIÓN LABORAL ACTUAL DEL PERSONAJE -->
+            <div style="background: ${curJob ? '#f0fdf4' : '#f8fafc'}; border: 1px solid ${curJob ? '#a7f3d0' : '#e2e8f0'}; border-radius: 8px; padding: 7px 9px; margin-bottom: 7px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 0.58rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Estado Laboral Actual</div>
+                <div style="font-size: 0.78rem; font-weight: 800; color: ${curJob ? '#15803d' : '#0f172a'};">
+                  ${curJob ? `${curJob.icon || '💼'} ${curJob.name}` : '💼 Sin empleo activo ($0)'}
+                </div>
+              </div>
+              ${curJob ? `
+                <div style="text-align: right;">
+                  <div style="font-size: 0.82rem; font-weight: 800; color: #059669;">$${(curJob.salary || 0).toLocaleString('es-CL')} líquido</div>
+                  <button type="button" onclick="resignCurrentJob()" style="background: none; border: none; font-size: 0.58rem; color: #b91c1c; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 0;">Renunciar al empleo</button>
+                </div>
+              ` : `
+                <div style="font-size: 0.65rem; color: #94a3b8; font-style: italic;">Disponible para contratación</div>
+              `}
+            </div>
+
+            <!-- LISTADO EN 2 COLUMNAS DE OFERTAS DE TRABAJO -->
+            <div class="jobs-grid-2col">
+              ${jobOffersData.map(job => {
+                const isCurrent = curJobId === job.id;
+                return `
+                  <div class="job-offer-card ${isCurrent ? 'active-job' : ''}">
+                    <div>
+                      <div class="job-offer-title">${job.icon} ${job.name}</div>
+                      
+                      <!-- SUELDO BRUTO Y LÍQUIDO -->
+                      <div class="job-offer-salaries">
+                        ${job.isFreelance ? `
+                          <div class="job-salary-row liquid" style="border-top: none; padding-top: 0; margin-top: 0;">
+                            <span>Sueldo variable estimado:</span>
+                            <span>$${job.salary.toLocaleString('es-CL')} Aprox.</span>
+                          </div>
+                        ` : job.isCommercial ? `
+                          <div class="job-salary-row">
+                            <span style="color: #64748b;">Sueldo Bruto base:</span>
+                            <strong>$${job.grossSalary.toLocaleString('es-CL')}</strong>
+                          </div>
+                          <div class="job-salary-row liquid">
+                            <span>Sueldo Líquido base:</span>
+                            <span>$${job.salary.toLocaleString('es-CL')} + Comisiones</span>
+                          </div>
+                        ` : `
+                          <div class="job-salary-row">
+                            <span style="color: #64748b;">Sueldo Bruto:</span>
+                            <strong>$${job.grossSalary.toLocaleString('es-CL')}</strong>
+                          </div>
+                          <div class="job-salary-row liquid">
+                            <span>Sueldo Líquido:</span>
+                            <span>$${job.salary.toLocaleString('es-CL')}</span>
+                          </div>
+                        `}
+                      </div>
+
+                      <!-- CONDICIONES Y REQUISITOS -->
+                      <div class="job-offer-info">
+                        <div><strong>Condiciones:</strong> ${job.conditions}</div>
+                        <div class="job-req-tag ${job.hasCourseReq || job.hasExpReq ? 'has-req' : ''}">
+                          <strong>Requisitos:</strong> ${job.requirements}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- BOTÓN DE ACCIÓN / CONTRATACIÓN -->
+                    ${isCurrent ? `
+                      <button type="button" class="job-apply-btn btn-actual" disabled>
+                        ✓ Empleo actual
+                      </button>
+                    ` : `
+                      <button type="button" class="job-apply-btn btn-postular" onclick="applyToJob('${job.id}')">
+                        Postular
+                      </button>
+                    `}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        renderHubCentralStage('trabajo');
+      }
+    }
+
+    // APLICAR A UN EMPLEO
+    function applyToJob(jobId) {
+      const job = jobOffersData.find(j => j.id === jobId);
+      if (!job) return;
+
+      state.currentJob = {
+        id: job.id,
+        name: job.name,
+        salary: job.salary,
+        grossSalary: job.grossSalary,
+        icon: job.icon,
+        code: job.code,
+        badge: job.badge
+      };
+
+      renderTrabajoStage('busqueda');
+    }
+
+    // RENUNCIAR AL EMPLEO ACTUAL
+    function resignCurrentJob() {
+      state.currentJob = null;
+      renderTrabajoStage('busqueda');
+    }
 
     // RENDERIZAR EN LA ZONA CENTRAL AL PINCHAR UN ICONO
     function renderHubCentralStage(tabName) {
@@ -3718,7 +4084,7 @@
         container.innerHTML = `
           <div class="hub-grid-2col">
             ${data.sections.map(sec => `
-              <div class="hub-option-card">
+              <div class="hub-option-card" ${sec.action ? `onclick="${sec.action}"` : ''}>
                 <div class="hub-option-icon">${sec.icon || '📌'}</div>
                 <div class="hub-option-text">
                   <div class="hub-option-name">${sec.name}</div>
