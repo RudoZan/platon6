@@ -1,13 +1,8 @@
-# Platon6
+# Platón 6
 
-Portal personal de proyectos.
+Portal web interactivo que reúne aplicaciones educativas, herramientas didácticas, simuladores y recursos digitales.
 
-## Estructura
+## Características principales
 
-- `sitio-web/` — el sitio publicable. `index.html` es la portada del portal, con tarjetas hacia cada proyecto. Los proyectos diversos que se vayan agregando viven en sus propias carpetas dentro de `sitio-web/` (ej. `sitio-web/mi-proyecto/`), y pueden tener su propia portada si lo necesitan.
-- `documentacion/` — notas y documentación del portal y de los proyectos que contiene.
-
-## Agregar un proyecto nuevo
-
-1. Crear la carpeta del proyecto dentro de `sitio-web/`.
-2. Sumar una tarjeta enlazándolo en `sitio-web/index.html` (hay un ejemplo comentado ahí mismo).
+- Ejecución directa en el navegador mediante estándares web modernos (HTML5, CSS3 y JavaScript ES6+).
+- Ecosistema modular donde cada taller, curso o simulador funciona de manera autónoma dentro del portal.
