@@ -5,7 +5,7 @@
 ---
 
 ## 1. Ambiente Local (Desarrollo)
-- **Ruta local:** `/Users/rudozan/MisDocumentos/IA Proyectos/platon6/sitio-web/`
+- **Ruta local:** `/Users/rudozan/MisDocumentos/IA_Proyectos/platon6/sitio-web/`
 - **Ejecución:** Apertura directa de archivos `.html` en el navegador o mediante un servidor estático local (ej. Live Server / `python3 -m http.server`).
 - **Requisitos:** No requiere compilación, variables de entorno locales ni instalación de paquetes (`npm`).
 
@@ -15,7 +15,7 @@
 - **Plataforma:** GitHub Pages (publicado desde el repositorio Git ubicado en `sitio-web/`).
 - **Consideraciones de Peso y Seguridad:**
   - Solo el contenido dentro de `sitio-web/` se versiona y publica en GitHub Pages.
-  - Archivos pesados de trabajo (PDFs de referencia, documentos `.docx`, respaldos e históricos) viven fuera de `sitio-web/` (en `../documentacion/`) para mantener el repositorio ligero.
+  - Archivos pesados de trabajo (PDFs de referencia, documentos `.docx`, respaldos e históricos) viven fuera de `sitio-web/` (en `../docs/`) para mantener el repositorio ligero.
 
 ---
 

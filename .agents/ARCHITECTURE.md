@@ -9,7 +9,7 @@
 Platón 6 opera bajo una arquitectura de **portal contenedor desacoplado**:
 
 1. **El Portal (`sitio-web/`):** Provee la portada de acceso (`index.html`), el catálogo general (`listado.html`), activos compartidos (`imagenes/`) y el conector singleton a Supabase (`js/supabaseClient.js`).
-2. **Los Sub-Sitios (Carpetas hijas):** Cada proyecto dentro de `sitio-web/` (como `educacionFinanciera/`, `englishCalen/`, `tallerRecursosEducativos/`, `ajedrez/`, `dactilografia/`, `trabajosUsach/`, `pruebas/`) es **independiente**:
+2. **Los Sub-Sitios (Carpetas hijas):** Cada proyecto dentro de `sitio-web/` (como `educacionFinanciera/`, `englishCalen2026/`, `tallerRecursosEducativos/`, `ajedrez/`, `dactilografia/`, `trabajosUsach/`, `pruebas/`) es **independiente**:
    - Puede abrirse directamente desde su propio `index.html`.
    - Define su propia estética, lógica y documentación sin depender del diseño del portal principal.
 

@@ -41,4 +41,4 @@ La pantalla se estructura en tres zonas principales sobre un contenedor vertical
 
 ## 📚 Documentación de Referencia
 La documentación completa (19 documentos de diseño pedagógico, guion de 90 min y PDF de referencia) se encuentra archivada fuera del sitio web en:
-`platon6/documentacion/educacionFinanciera/`
+`platon6/docs/educacionFinanciera/`

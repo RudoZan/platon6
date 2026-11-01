@@ -33,4 +33,4 @@
   1. Crear la carpeta del nuevo proyecto dentro de `sitio-web/<nombre-proyecto>/` con su propio `index.html`.
   2. Agregar la tarjeta de acceso correspondiente en `sitio-web/listado.html`.
   3. *(Opcional)* Si requiere acceso directo por código desde la portada, registrar el código en `sitio-web/index.html` o en la tabla `codigos` de Supabase.
-  4. *(Opcional)* Si el sub-proyecto requiere su propia documentación, crear su carpeta `.agents/` interna y su carpeta externa en `documentacion/<nombre-proyecto>/`.
+  4. *(Opcional)* Si el sub-proyecto requiere su propia documentación, crear su carpeta `.agents/` interna y su carpeta externa en `docs/<nombre-proyecto>/`.

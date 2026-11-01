@@ -12,10 +12,10 @@ No escanees todo el repositorio. Lee únicamente el documento que necesites seg�
   - [USE_CASES.md](../USE_CASES.md): Casos de uso del portal y procedimiento para registrar un nuevo sub-proyecto.
   - [ENVIRONMENTS.md](../ENVIRONMENTS.md): Ambientes de ejecución local, GitHub Pages y Supabase.
 - **Modificaciones e Historial (Grupo 2 — fuera del repo):**
-  - `../../documentacion/platon6/CHANGELOG.md`: Histórico de cambios del portal.
-  - `../../documentacion/platon6/`: Documentos temporales de requerimientos o diseños en curso (`PRD.md`, `SOLUTION_DESIGN.md`).
+  - `../../docs/platon6/CHANGELOG.md`: Histórico de cambios del portal.
+  - `../../docs/platon6/`: Documentos temporales de requerimientos o diseños en curso (`PRD.md`, `SOLUTION_DESIGN.md`).
 
 ## 3. Reglas Estrictas para Agentes de IA
 1. **Cero frameworks pesados:** Usar exclusivamente Vanilla HTML5, CSS3 y JavaScript ES6+ sin bundlers ni dependencias de Node.js, salvo solicitud explícita del usuario.
-2. **Aislamiento de sub-sitios:** Cuando trabajes en el portal general (`platon6`), **NO** escanees ni modifiques las carpetas internas de los sub-sitios (`educacionFinanciera/`, `englishCalen/`, `ajedrez/`, `dactilografia/`, `tallerRecursosEducativos/`, etc.) a menos que el usuario lo pida. Cada sub-sitio es autónomo.
-3. **Documentación fuera del código público:** Todo documento de análisis, PDF, histórico o requerimiento temporal debe guardarse en `../../documentacion/platon6/`.
+2. **Aislamiento de sub-sitios:** Cuando trabajes en el portal general (`platon6`), **NO** escanees ni modifiques las carpetas internas de los sub-sitios (`educacionFinanciera/`, `englishCalen2026/`, `ajedrez/`, `dactilografia/`, `tallerRecursosEducativos/`, etc.) a menos que el usuario lo pida. Cada sub-sitio es autónomo.
+3. **Documentación fuera del código público:** Todo documento de análisis, PDF, histórico o requerimiento temporal debe guardarse en `../../docs/platon6/`.
