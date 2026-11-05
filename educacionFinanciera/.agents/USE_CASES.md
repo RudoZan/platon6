@@ -1,0 +1,35 @@
+# Active Use Cases — `educacionFinanciera` (`platon6/sitio-web/educacionFinanciera/index.html`)
+
+## UC-01: Session Entry & Top PPT Carousel Navigation
+- **Slide 1:** Displays Amartya Sen (2000) quote + session code input (`YYYYMM` + 4 digits `1000-9999`).
+- **Navigation:** Top `[ ◀ ]` / `[ ▶ ]` buttons, mouse wheel, or drag-to-scroll across 42 numbered slides (`N° 1`–`N° 42`). Only slides 1–4 and 7, 22, 36, 37, 38 define a central onboarding/summary view; slides 5–6, 8–21, 23–35, and 39–42 have no central placeholder card.
+
+## UC-02: Character Onboarding (3 Tabs)
+1. **`Intereses`:** Allocate 20 marbles across 14 categories (1–3 scale).
+2. **`Preferencias`:** Pick 2 of 4 options each in `"Vivienda"`, `"Trabajo"`, and `"Transporte"`.
+3. **`Resumen`:** 2nd-person profile summary + starting financial diagnosis.
+
+## UC-03: `"Mi Estado"` (`Personal` Hub)
+1. **Wellbeing & Cash Card:** Displays `"Bienestar"` (starts at 100%, 20 SVG hearts filled vertically 2 per column + 11-level dynamic emoji) and physical `"Efectivo"`.
+2. **`"Presupuesto Mensual"` (3-Column Table):** Headers for `"Dinero disponible"` and `"Ingreso estimado"`. Columns: `Ítem / Presupuesto / Gasto Real` (9 base items at `$0` + contracted debts) + **`+ Agregar ítem`** button (`Libre` or `Ahorro / Inversión` linked to `"Alcancía"`, `"DAP"`, `"Dólares"`, `"Fondo Mutuo"`).
+3. **`"Patrimonio & Liquidez"`:** Real breakdown of physical cash + active bank accounts, debts, and emergency coverage in months.
+4. **`"Test de Perfil de Inversionista"`:** 5-question flow with manual navigation (`◀ Anterior` / `Siguiente ▶`), answer persistence, and official diagnosis (`"Conservador"`, `"Moderado"`, `"Arriesgado"`, 5–15 pts).
+5. **Secret Subview `"Variables del Personaje"` (`secret_summary`):** Clicking top-left icon (`#hub-stage-icon-box`) opens full state audit (`Física: 20/20`, `Emocional: 40/40`, `Mental: 40/40`, accounts, debts, owned assets).
+
+## UC-04: `"Trabajo"` Hub (Job Search, Training & Salary Negotiation)
+1. **`"Búsqueda de Trabajo"`:** 2-col catalog of 6 jobs (gross/net salary, experience/course requirements). Supports immediate hire (`"Postular"`) or resignation (`"Renunciar"`).
+2. **`"Capacitaciones y Certificaciones"`:** 8 courses across 4 areas (`"Nivel Intermedio"` required before `"Nivel Avanzado"`). Related courses grant +10% (Intermedio) or +15% + promotion eligibility (Avanzado).
+3. **`"Negociación Salarial y Ascensos"` (Chat Simulator):**
+   - If `"Independiente / Freelance"`, informs user has no boss.
+   - If employed, opens gender-neutral boss chat (3 random reply variants) to greet, request raise, or request promotion, validating mental/emotional health ($\ge 20$) and completed courses. Blocks repeat requests in same session; resets on exit (`initNegChat()`).
+
+## UC-05: `"Banco"` Hub (Accounts, Checking Bundle, Cards & Term Deposits)
+1. **Account Operations (`"Cuenta Ahorro"`, `"Cuenta RUT / Vista"`, `"Cuenta Corriente"`):** Open at `$0` (`"Abrir cuenta"`), modal actions: `"Depositar"`, `"Girar / Transferir"` (with `"Todo el saldo"` button), and `"Cerrar cuenta"` (transfers balance to `"Efectivo"`).
+2. **`"Cuenta Corriente"` Multi-Step Salesperson Flow:** Base monthly fee `$14.000/mes` (`$7.000/mes` with 1 add-on; `$0/mes` with both credit line and credit card). Offers `"Línea de Crédito"` (`$500.000` + mandatory `"Seguro de Desgravamen"` `$1.900/mes`) and `"Tarjeta de Crédito"` (`$950.000`) via individual detail/cost confirmation modals, followed by an optional `"Seguro de Fraude"` (`$1.150/mes`, Ley 21.234) offer window. Closing `"Cuenta Corriente"`, `"Línea de Crédito"`, or `"Tarjeta de Crédito"` requires paying off 100% of outstanding debt.
+3. **`"Tarjeta de Crédito"` (Single Unified Card):** Free standalone or bundled contracting per Ley 20.555 (SERNAC Financiero), `$950.000` limit, `$6.900/mes` fee (`$0` if zero purchases/balance); links automatically if `"Cuenta Corriente"` is opened before or after.
+4. **`"Depósitos a Plazo (DAP)"`:** Supports multiple simultaneous deposits (`30 días`, `90 días`, `360 días UF`). Locked until maturity with no mid-term switching between *Plazo Fijo* and *Plazo Renovable*. Simulating maturity auto-pays *Plazo Fijo* deposits or opens the legal 3-business-day grace period modal for *Plazo Renovable* deposits (collect vs. auto-renew with compounded interest).
+
+## UC-06: `"Seguros"` Module (Single & Multi-Asset Policies)
+1. **Multi-Asset (`"Seguro Automotriz"` & `"Seguro de Vivienda"`):** Insures multiple vehicles/properties individually (`ins_automotriz_${assetId}`, `ins_vivienda_${assetId}`), validating real asset ownership and asset-tier pricing.
+2. **Single Policies:** `"Seguro de Fraude"` ($1.150/mo; applies to `"Cuenta RUT / Vista"`, `"Cuenta Corriente"`, and `"Tarjeta de Crédito"`, excluding `"Cuenta de Ahorro"`), `"Desgravamen"` ($1.900/mo), `"Cesantía"` ($4.500/mo), `"Vida"` ($9.500/mo for $20M), `"Salud Complementario"` ($14.000/mo).
+3. **Modal Confirmation:** Every hire or cancellation (`"Terminar seguro"`) requires modal confirmation showing insured asset, monthly fee, and coverage.
