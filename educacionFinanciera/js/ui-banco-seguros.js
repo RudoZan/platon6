@@ -81,6 +81,10 @@
         renderTarjetaCreditoView();
         return;
       }
+      if (subView === 'fondos') {
+        renderFondosMutuosView();
+        return;
+      }
       if (subView === 'depositos' || subView === 'dap') {
         renderDepositosPlazoView();
         return;
@@ -107,6 +111,8 @@
                 clickAction = "renderBancoStage('linea')";
               } else if (sec.id === 'tarjeta') {
                 clickAction = "renderBancoStage('tarjeta')";
+              } else if (sec.id === 'fondos') {
+                clickAction = "renderBancoStage('fondos')";
               } else if (sec.id === 'dap' || sec.id === 'depositos') {
                 clickAction = "renderBancoStage('depositos')";
               } else if (sec.id === 'seguros') {
@@ -1531,7 +1537,739 @@
 
     function syncInvestedTotal() {
       const dapSum = (state.termDeposits || []).reduce((acc, d) => acc + (Number(d.principal) || 0), 0);
-      state.invested = dapSum;
+      const ffmmSum = (state.mutualFunds || []).reduce((acc, f) => acc + (Number(f.currentBalance) || 0), 0);
+      state.invested = dapSum + ffmmSum;
+    }
+
+    // ==========================================================================
+    // FONDOS MUTUOS (FFMM): LEY ÚNICA DE FONDOS N° 20.712 Y NORMATIVA CMF
+    // ==========================================================================
+
+    const fondosMutuosCatalog = [
+      {
+        id: 'ffmm_conservador',
+        name: 'Fondo Mutuo Conservador (Money Market)',
+        shortName: 'FFMM Conservador',
+        icon: '🛡️',
+        riskLevel: 1,
+        riskLabel: 'Conservador',
+        riskColor: '#059669',
+        riskBg: '#ecfdf5',
+        expectedMonthlyRate: 0.0040, // ~0,40% mensual (~4,9% anual neto de TAC)
+        monthlyVolatility: 0.0015,   // ±0,15% mensual
+        rateDisplay: '~0,40% mensual esp. (~4,9% anual)',
+        volatilityDisplay: '±0,15%/mes (Muy baja)',
+        tacDisplay: '0,90% anual',
+        rescueDays: 1,
+        minAmount: 5000,
+        initialSharePrice: 1250,
+        desc: 'Invierte en depósitos a plazo y pagarés del Banco Central (< 90 días). Alta liquidez con rescate en 1 día hábil y fluctuación mínima.'
+      },
+      {
+        id: 'ffmm_moderado',
+        name: 'Fondo Mutuo Moderado (Balanceado UF + Acciones)',
+        shortName: 'FFMM Moderado',
+        icon: '⚖️',
+        riskLevel: 2,
+        riskLabel: 'Moderado',
+        riskColor: '#d97706',
+        riskBg: '#fef3c7',
+        expectedMonthlyRate: 0.0065, // ~0,65% mensual (~8,1% anual neto de TAC)
+        monthlyVolatility: 0.0120,   // ±1,20% mensual
+        rateDisplay: '~0,65% mensual esp. (~8,1% anual)',
+        volatilityDisplay: '±1,20%/mes (Media)',
+        tacDisplay: '1,80% anual',
+        rescueDays: 3,
+        minAmount: 10000,
+        initialSharePrice: 2400,
+        desc: 'Combina 70% bonos en UF y 30% acciones. Busca superar la inflación a mediano plazo asumiendo variaciones mensuales moderadas (rescate en 3 días hábiles).'
+      },
+      {
+        id: 'ffmm_arriesgado',
+        name: 'Fondo Mutuo Arriesgado (Accionario Global)',
+        shortName: 'FFMM Arriesgado',
+        icon: '🚀',
+        riskLevel: 3,
+        riskLabel: 'Arriesgado',
+        riskColor: '#8b5cf6',
+        riskBg: '#ede9fe',
+        expectedMonthlyRate: 0.0095, // ~0,95% mensual (~12,0% anual neto de TAC)
+        monthlyVolatility: 0.0350,   // ±3,50% mensual
+        rateDisplay: '~0,95% mensual esp. (~12,0% anual)',
+        volatilityDisplay: '±3,50%/mes (Alta)',
+        tacDisplay: '2,80% anual',
+        rescueDays: 5,
+        minAmount: 20000,
+        initialSharePrice: 4100,
+        desc: 'Invierte más del 90% en acciones internacionales y mercados emergentes. Mayor potencial de crecimiento a largo plazo con alta volatilidad de corto plazo (rescate en 5 días hábiles).'
+      }
+    ];
+
+    function getUserRiskLevelNumber() {
+      if (!state.riskTestResult || !state.riskTestResult.label) return 0;
+      const lbl = state.riskTestResult.label.toLowerCase();
+      if (lbl.includes('conservador')) return 1;
+      if (lbl.includes('moderado')) return 2;
+      if (lbl.includes('arriesgado')) return 3;
+      return 1;
+    }
+
+    function goToRiskTestFromBanco() {
+      if (typeof selectHudTab === 'function') {
+        selectHudTab('estado');
+      }
+      if (typeof startRiskTest === 'function') {
+        startRiskTest();
+      } else if (typeof renderPersonalStage === 'function') {
+        renderPersonalStage('inversionista');
+      }
+    }
+
+    function renderFondosMutuosView() {
+      const container = document.getElementById('hub-stage-sections');
+      if (!container) return;
+
+      if (!Array.isArray(state.mutualFunds)) state.mutualFunds = [];
+      syncInvestedTotal();
+
+      const activeFunds = state.mutualFunds;
+      const totalContributed = activeFunds.reduce((sum, f) => sum + (Number(f.contributedCapital) || 0), 0);
+      const totalCurrentBalance = activeFunds.reduce((sum, f) => sum + (Number(f.currentBalance) || 0), 0);
+      const netGainLoss = totalCurrentBalance - totalContributed;
+      const userRiskLevel = getUserRiskLevelNumber();
+
+      container.innerHTML = `
+        <div class="personal-subview-box">
+          <div class="personal-subview-top">
+            <span style="font-size: 0.88rem; font-weight: 800; color: #0284c7;">📊 Fondos Mutuos (AGF)</span>
+            <button type="button" class="personal-subview-back-btn" onclick="renderBancoStage('main')">
+              <span>◀ Volver</span>
+            </button>
+          </div>
+
+          <!-- RESUMEN DE CARTERA FFMM -->
+          <div style="background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%); border: 1.5px solid #93c5fd; border-radius: 9px; padding: 10px 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 0.58rem; font-weight: 700; color: #1e40af; text-transform: uppercase;">Saldo Valorizado (${activeFunds.length} ${activeFunds.length === 1 ? 'fondo activo' : 'fondos activos'})</div>
+              <div style="font-size: 1.20rem; font-weight: 800; color: #0284c7; font-family: var(--font-title);">
+                $${totalCurrentBalance.toLocaleString('es-CL')}
+              </div>
+              <div style="font-size: 0.56rem; color: #64748b;">Capital aportado: $${totalContributed.toLocaleString('es-CL')}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.58rem; color: #64748b;">Rentabilidad acumulada</div>
+              <div style="font-size: 0.92rem; font-weight: 800; color: ${netGainLoss >= 0 ? '#047857' : '#b91c1c'};">
+                ${netGainLoss >= 0 ? `+$${netGainLoss.toLocaleString('es-CL')}` : `-$${Math.abs(netGainLoss).toLocaleString('es-CL')}`}
+              </div>
+            </div>
+          </div>
+
+          <!-- CATÁLOGO DE LOS 3 FONDOS MUTUOS -->
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px;">
+            ${fondosMutuosCatalog.map(fund => {
+              return `
+                <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <div>
+                      <div style="font-size: 0.72rem; font-weight: 800; color: #0f172a;">${fund.icon} ${fund.name}</div>
+                      <div style="font-size: 0.60rem; font-weight: 700; color: #047857; margin-top: 2px;">
+                        Retorno esp.: ${fund.rateDisplay} · Volatilidad: ${fund.volatilityDisplay} · TAC: ${fund.tacDisplay}
+                      </div>
+                    </div>
+                    <button type="button" onclick="openInvestFFMMModal('${fund.id}')" style="padding: 5px 11px; font-size: 0.64rem; font-weight: 800; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+                      Invertir
+                    </button>
+                  </div>
+                  <div style="font-size: 0.60rem; color: #64748b; line-height: 1.3;">
+                    ${fund.desc} (Mínimo $${fund.minAmount.toLocaleString('es-CL')}).
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- LISTADO DE FONDOS MUTUOS VIGENTES DEL PERSONAJE -->
+          <div style="font-size: 0.72rem; font-weight: 800; color: #0f172a; margin-bottom: 5px;">
+            📋 Mis Fondos Mutuos vigentes (${activeFunds.length}):
+          </div>
+          ${activeFunds.length === 0 ? `
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px; text-align: center; font-size: 0.64rem; color: #64748b;">
+              No tienes inversiones activas en Fondos Mutuos.
+            </div>
+          ` : `
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              ${activeFunds.map((pos, idx) => {
+                const diff = pos.currentBalance - pos.contributedCapital;
+                const pct = pos.contributedCapital > 0 ? ((diff / pos.contributedCapital) * 100).toFixed(2) : '0.00';
+                const isPositive = diff >= 0;
+                return `
+                  <div style="background: #ffffff; border: 1.5px solid ${isPositive ? '#86efac' : '#fca5a5'}; border-radius: 8px; padding: 9px 11px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 4px;">
+                      <div>
+                        <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+                          <strong style="font-size: 0.72rem; color: #0f172a;">#${idx + 1} · ${pos.icon} ${pos.name}</strong>
+                        </div>
+                        <div style="font-size: 0.60rem; color: #334155; margin-top: 2px;">
+                          Aportado: <strong>$${pos.contributedCapital.toLocaleString('es-CL')}</strong> · Saldo actual: <strong style="color: #0284c7;">$${pos.currentBalance.toLocaleString('es-CL')}</strong>
+                          (<strong style="color: ${isPositive ? '#047857' : '#b91c1c'};">${isPositive ? '+' : '-'}$${Math.abs(diff).toLocaleString('es-CL')} / ${isPositive ? '+' : ''}${pct}%</strong>)
+                        </div>
+                        <div style="font-size: 0.58rem; color: #64748b; margin-top: 1px;">
+                          Cuotas: <strong>${pos.shares.toFixed(4)}</strong> · Valor cuota: $${pos.currentSharePrice.toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · Meses transcurridos: ${pos.monthsSimulated || 0} · Pago rescate: <strong>${pos.rescueDays} ${pos.rescueDays === 1 ? 'día hábil' : 'días hábiles'}</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #cbd5e1;">
+                      <button type="button" onclick="simulateMonthFFMM('${pos.id}')" style="padding: 4px 9px; font-size: 0.58rem; font-weight: 800; background: #0284c7; color: #ffffff; border: none; border-radius: 5px; cursor: pointer;" title="Simular la variación del valor cuota durante 1 mes de mercado">
+                        📈 Simular 1 Mes
+                      </button>
+                      <button type="button" onclick="openRedeemFFMMModal('${pos.id}')" style="padding: 4px 9px; font-size: 0.58rem; font-weight: 800; background: #047857; color: #ffffff; border: none; border-radius: 5px; cursor: pointer;" title="Rescatar total o parcialmente tus cuotas sin castigo">
+                        💸 Rescatar (Total o Parcial)
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    function openInvestFFMMModal(fundId) {
+      const modalRoot = document.getElementById('banco-modal-root');
+      if (!modalRoot) return;
+
+      // Exigencia normativa CMF: contar con Test de Perfil de Inversionista antes de invertir
+      if (!state.riskTestResult) {
+        modalRoot.innerHTML = `
+          <div class="job-modal-backdrop" onclick="if(event.target === this) closeBancoModal()">
+            <div class="job-modal-card" style="border-color: #8b5cf6; max-width: 400px;">
+              <div class="job-modal-header" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: #ffffff; padding: 12px 14px;">
+                <div class="job-modal-icon-badge" style="background: rgba(255, 255, 255, 0.2); color: #ffffff; border: 1.5px solid rgba(255, 255, 255, 0.4); font-size: 1.2rem; width: 36px; height: 36px;">
+                  📝
+                </div>
+                <div>
+                  <div class="job-modal-title" style="color: #ffffff; font-size: 0.92rem;">
+                    Perfil de Inversionista Requerido (CMF)
+                  </div>
+                </div>
+              </div>
+              <div class="job-modal-body" style="padding: 13px 15px;">
+                <div style="font-size: 0.68rem; color: #334155; line-height: 1.45; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+                  Por normativa de la <strong>Comisión para el Mercado Financiero (NCG N° 380 / N° 365)</strong>, antes de invertir por primera vez en Fondos Mutuos en un banco debes completar tu <strong>Encuesta de Perfil de Inversionista</strong>.
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" onclick="closeBancoModal()" style="flex: 1; padding: 8px; font-size: 0.72rem; font-weight: 700; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                  <button type="button" onclick="closeBancoModal(); goToRiskTestFromBanco();" style="flex: 1.4; padding: 8px; font-size: 0.72rem; font-weight: 800; background: #8b5cf6; color: #ffffff; border: none; border-radius: 6px; cursor: pointer;">
+                    Ir al Test de Perfil
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const fund = fondosMutuosCatalog.find(f => f.id === fundId);
+      if (!fund) return;
+
+      const userRiskLevel = getUserRiskLevelNumber();
+      const exceedsProfile = userRiskLevel > 0 && fund.riskLevel > userRiskLevel;
+
+      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const cash = Number(state.cash) || 0;
+
+      const fundingOptions = [
+        { id: 'cash', label: `💵 Dinero en Efectivo (Disponible: $${cash.toLocaleString('es-CL')})`, balance: cash, name: 'Dinero en Efectivo' },
+        ...bankAccounts.map(a => ({
+          id: a.id,
+          label: `${a.icon || '🏦'} ${a.name} (Disponible: $${(a.balance || 0).toLocaleString('es-CL')})`,
+          balance: Number(a.balance) || 0,
+          name: a.name
+        }))
+      ];
+
+      const defaultSource = fundingOptions.find(o => o.balance >= fund.minAmount) || fundingOptions[0];
+      const defaultAmount = Math.max(fund.minAmount, Math.min(100000, defaultSource ? defaultSource.balance : fund.minAmount));
+      const estimatedShares = (defaultAmount / fund.initialSharePrice).toFixed(4);
+
+      modalRoot.innerHTML = `
+        <div class="job-modal-backdrop" onclick="if(event.target === this) closeBancoModal()">
+          <div class="job-modal-card" style="border-color: #0284c7; max-width: 435px;">
+            <div class="job-modal-header" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; padding: 12px 14px;">
+              <div class="job-modal-icon-badge" style="background: rgba(255, 255, 255, 0.2); color: #ffffff; border: 1.5px solid rgba(255, 255, 255, 0.4); font-size: 1.2rem; width: 36px; height: 36px;">
+                ${fund.icon}
+              </div>
+              <div>
+                <div class="job-modal-title" style="color: #ffffff; font-size: 0.94rem;">
+                  Aportar a ${fund.shortName}
+                </div>
+                <div class="job-modal-subtitle" style="font-size: 0.66rem; color: #e0f2fe; margin-top: 2px;">
+                  TAC ${fund.tacDisplay} · Rescate en ${fund.rescueDays} ${fund.rescueDays === 1 ? 'día hábil' : 'días hábiles'}
+                </div>
+              </div>
+            </div>
+
+            <div class="job-modal-body" style="padding: 13px 15px;">
+              ${exceedsProfile ? `
+                <div style="background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 7px; padding: 8px 10px; margin-bottom: 9px; font-size: 0.61rem; color: #991b1b; line-height: 1.35;">
+                  <strong>⚠️ Advertencia de Idoneidad CMF:</strong> Tu perfil registrado es <strong>${state.riskTestResult.label}</strong> y este fondo es de nivel <strong>${fund.riskLabel}</strong> (volatilidad ${fund.volatilityDisplay}). Para invertir debes declarar expresamente que comprendes y aceptas asumir un riesgo superior a tu perfil.
+                  <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-weight: 800; color: #7f1d1d; cursor: pointer;">
+                    <input type="checkbox" id="ffmm-risk-override-chk" />
+                    <span>Acepto invertir bajo mi responsabilidad en un fondo de mayor riesgo.</span>
+                  </label>
+                </div>
+              ` : ''}
+
+              <!-- 1. ORIGEN DE LOS FONDOS -->
+              <div style="margin-bottom: 8px;">
+                <label style="display: block; font-size: 0.64rem; font-weight: 700; color: #334155; margin-bottom: 3px;">
+                  1. Origen del dinero para comprar cuotas:
+                </label>
+                <select id="ffmm-source-select" onchange="updateFFMMInvestPreview('${fund.id}')" style="width: 100%; padding: 7px 8px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.68rem; font-weight: 700; color: #0f172a; background: #ffffff;">
+                  ${fundingOptions.map(opt => `
+                    <option value="${opt.id}" ${defaultSource && defaultSource.id === opt.id ? 'selected' : ''}>${opt.label}</option>
+                  `).join('')}
+                </select>
+              </div>
+
+              <!-- 2. MONTO A INVERTIR -->
+              <div style="margin-bottom: 8px;">
+                <label style="display: block; font-size: 0.64rem; font-weight: 700; color: #334155; margin-bottom: 3px;">
+                  2. Monto a aportar (Mínimo $${fund.minAmount.toLocaleString('es-CL')}):
+                </label>
+                <input id="ffmm-amount-input" type="number" min="${fund.minAmount}" step="5000" value="${defaultAmount}" oninput="updateFFMMInvestPreview('${fund.id}')" style="width: 100%; padding: 7px 9px; border: 1.5px solid #0284c7; border-radius: 6px; font-size: 0.80rem; font-weight: 800; color: #0f172a; box-sizing: border-box;" />
+              </div>
+
+              <!-- SIMULACIÓN DE COMPRA DE CUOTAS -->
+              <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; margin-bottom: 9px; font-size: 0.62rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                  <span style="color: #475569;">Valor cuota vigente hoy:</span>
+                  <strong style="color: #0f172a;">$${fund.initialSharePrice.toLocaleString('es-CL', { minimumFractionDigits: 2 })}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                  <span style="color: #475569;">Cuotas aproximadas a adquirir:</span>
+                  <strong id="ffmm-preview-shares" style="color: #0284c7;">${estimatedShares} cuotas</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-top: 4px; border-top: 1px dashed #cbd5e1;">
+                  <span style="color: #475569;">Rentabilidad mensual esperada / Volatilidad:</span>
+                  <strong style="color: #047857;">${fund.rateDisplay} (${fund.volatilityDisplay})</strong>
+                </div>
+              </div>
+
+              <!-- ADVERTENCIA LEGAL CMF DE RENTABILIDAD VARIABLE -->
+              <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 6px 8px; margin-bottom: 9px; font-size: 0.58rem; color: #92400e; line-height: 1.32;">
+                <strong>ℹ️ Advertencia CMF:</strong> Los valores de las cuotas de los fondos mutuos son variables y las rentabilidades pasadas no garantizan que se repitan en el futuro, pudiendo fluctuar al alza o a la baja.
+              </div>
+
+              <div id="ffmm-modal-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; font-size: 0.62rem; font-weight: 700; padding: 6px 8px; border-radius: 6px; margin-bottom: 8px;"></div>
+
+              <div style="display: flex; gap: 8px;">
+                <button type="button" onclick="closeBancoModal()" style="flex: 1; padding: 8px; font-size: 0.72rem; font-weight: 700; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                <button type="button" onclick="executeInvestFFMM('${fund.id}')" style="flex: 1.3; padding: 8px; font-size: 0.72rem; font-weight: 800; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border: none; border-radius: 6px; cursor: pointer;">
+                  Confirmar Aporte
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateFFMMInvestPreview(fundId) {
+      const fund = fondosMutuosCatalog.find(f => f.id === fundId);
+      if (!fund) return;
+      const inputEl = document.getElementById('ffmm-amount-input');
+      const amount = Math.max(0, Math.round(Number(inputEl ? inputEl.value : 0)));
+      const shares = amount / fund.initialSharePrice;
+      const sharesEl = document.getElementById('ffmm-preview-shares');
+      if (sharesEl) sharesEl.textContent = `${shares.toFixed(4)} cuotas`;
+    }
+
+    function executeInvestFFMM(fundId) {
+      const fund = fondosMutuosCatalog.find(f => f.id === fundId);
+      if (!fund) return;
+
+      const errorEl = document.getElementById('ffmm-modal-error');
+      const userRiskLevel = getUserRiskLevelNumber();
+      if (userRiskLevel > 0 && fund.riskLevel > userRiskLevel) {
+        const overrideChk = document.getElementById('ffmm-risk-override-chk');
+        if (!overrideChk || !overrideChk.checked) {
+          if (errorEl) {
+            errorEl.style.display = 'block';
+            errorEl.textContent = '⚠️ Debes marcar la casilla declarando que aceptas invertir en un fondo de mayor riesgo que tu perfil CMF.';
+          }
+          return;
+        }
+      }
+
+      const sourceSelect = document.getElementById('ffmm-source-select');
+      const amountInput = document.getElementById('ffmm-amount-input');
+      const sourceId = sourceSelect ? sourceSelect.value : 'cash';
+      const amount = Math.round(Number(amountInput ? amountInput.value : 0));
+
+      if (!amount || amount < fund.minAmount) {
+        if (errorEl) {
+          errorEl.style.display = 'block';
+          errorEl.textContent = `⚠️ El aporte mínimo para este fondo es de $${fund.minAmount.toLocaleString('es-CL')}.`;
+        }
+        return;
+      }
+
+      if (sourceId === 'cash') {
+        const available = Number(state.cash) || 0;
+        if (amount > available) {
+          if (errorEl) {
+            errorEl.style.display = 'block';
+            errorEl.textContent = `⚠️ Saldo insuficiente en Efectivo ($${available.toLocaleString('es-CL')} disponibles).`;
+          }
+          return;
+        }
+        state.cash = available - amount;
+      } else {
+        const acc = (state.bankAccounts || []).find(a => a.id === sourceId);
+        if (!acc || (Number(acc.balance) || 0) < amount) {
+          if (errorEl) {
+            errorEl.style.display = 'block';
+            errorEl.textContent = '⚠️ Saldo insuficiente en la cuenta bancaria seleccionada.';
+          }
+          return;
+        }
+        acc.balance = (Number(acc.balance) || 0) - amount;
+      }
+
+      if (!Array.isArray(state.mutualFunds)) state.mutualFunds = [];
+      const sharesBought = amount / fund.initialSharePrice;
+
+      state.mutualFunds.push({
+        id: 'ffmm_pos_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        fundTypeId: fund.id,
+        name: fund.shortName,
+        fullName: fund.name,
+        icon: fund.icon,
+        riskLabel: fund.riskLabel,
+        riskColor: fund.riskColor,
+        riskBg: fund.riskBg,
+        expectedMonthlyRate: fund.expectedMonthlyRate,
+        monthlyVolatility: fund.monthlyVolatility,
+        rescueDays: fund.rescueDays,
+        minAmount: fund.minAmount,
+        shares: sharesBought,
+        initialSharePrice: fund.initialSharePrice,
+        currentSharePrice: fund.initialSharePrice,
+        contributedCapital: amount,
+        currentBalance: amount,
+        monthsSimulated: 0
+      });
+
+      syncInvestedTotal();
+      closeBancoModal();
+      renderBancoStage('fondos');
+      if (typeof updateHUD === 'function') updateHUD();
+    }
+
+    function simulateMonthFFMM(posId) {
+      if (!Array.isArray(state.mutualFunds)) return;
+      const pos = state.mutualFunds.find(f => f.id === posId);
+      if (!pos) return;
+
+      // Generador normal estándar aproximado (Box-Muller) para volatilidad realista
+      const u1 = Math.max(1e-7, Math.random());
+      const u2 = Math.random();
+      const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+
+      const monthlyReturn = pos.expectedMonthlyRate + (z * pos.monthlyVolatility);
+      const prevBalance = pos.currentBalance;
+
+      pos.currentSharePrice = Math.max(10, pos.currentSharePrice * (1 + monthlyReturn));
+      pos.currentBalance = Math.round(pos.shares * pos.currentSharePrice);
+      pos.monthsSimulated = (pos.monthsSimulated || 0) + 1;
+
+      const delta = pos.currentBalance - prevBalance;
+      const pctMonth = (monthlyReturn * 100).toFixed(2);
+
+      syncInvestedTotal();
+      renderBancoStage('fondos');
+      if (typeof updateHUD === 'function') updateHUD();
+
+      alertUpcomingBankFeature(
+        delta >= 0 ? '📈 Variación Mensual Positiva (Valor Cuota)' : '📉 Variación Mensual Negativa (Valor Cuota)',
+        `En el mes #${pos.monthsSimulated}, el valor cuota de ${pos.name} varió un ${delta >= 0 ? '+' : ''}${pctMonth}% (${delta >= 0 ? '+$' : '-$'}${Math.abs(delta).toLocaleString('es-CL')}). Nuevo saldo valorizado: $${pos.currentBalance.toLocaleString('es-CL')}.`
+      );
+    }
+
+    function openRedeemFFMMModal(posId, presetAmount = null, presetDestId = null) {
+      const modalRoot = document.getElementById('banco-modal-root');
+      if (!modalRoot || !Array.isArray(state.mutualFunds)) return;
+
+      const pos = state.mutualFunds.find(f => f.id === posId);
+      if (!pos) return;
+
+      const catalogFund = fondosMutuosCatalog.find(f => f.id === pos.fundTypeId);
+      const minStayBalance = pos.minAmount || (catalogFund ? catalogFund.minAmount : 5000);
+      const minPartialRedeem = 5000;
+
+      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const destOptions = [
+        { id: 'cash', label: '💵 Dinero en Efectivo' },
+        ...bankAccounts.map(a => ({
+          id: a.id,
+          label: `${a.icon || '🏦'} ${a.name} (Saldo: $${(a.balance || 0).toLocaleString('es-CL')})`
+        }))
+      ];
+
+      const defaultDest = presetDestId || (bankAccounts.length > 0 ? bankAccounts[0].id : 'cash');
+      const initialAmount = presetAmount !== null ? presetAmount : pos.currentBalance;
+      const diff = pos.currentBalance - pos.contributedCapital;
+
+      modalRoot.innerHTML = `
+        <div class="job-modal-backdrop" onclick="if(event.target === this) closeBancoModal()">
+          <div class="job-modal-card" style="border-color: #047857; max-width: 425px;">
+            <div class="job-modal-header" style="background: linear-gradient(135deg, #047857 0%, #065f46 100%); color: #ffffff; padding: 12px 14px;">
+              <div class="job-modal-icon-badge" style="background: rgba(255, 255, 255, 0.2); color: #ffffff; border: 1.5px solid rgba(255, 255, 255, 0.4); font-size: 1.2rem; width: 36px; height: 36px;">
+                💸
+              </div>
+              <div>
+                <div class="job-modal-title" style="color: #ffffff; font-size: 0.92rem;">
+                  Rescatar Fondos: ${pos.name}
+                </div>
+                <div class="job-modal-subtitle" style="font-size: 0.66rem; color: #d1fae5; margin-top: 2px;">
+                  Pago en ${pos.rescueDays} ${pos.rescueDays === 1 ? 'día hábil' : 'días hábiles'} · Sin comisión de salida
+                </div>
+              </div>
+            </div>
+
+            <div class="job-modal-body" style="padding: 13px 15px;">
+              <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; margin-bottom: 9px; font-size: 0.62rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                  <span style="color: #475569;">Saldo estimado actual:</span>
+                  <strong style="color: #0284c7;">$${pos.currentBalance.toLocaleString('es-CL')} (${pos.shares.toFixed(4)} cuotas)</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                  <span style="color: #475569;">Resultado acumulado a hoy:</span>
+                  <strong style="color: ${diff >= 0 ? '#047857' : '#b91c1c'};">${diff >= 0 ? '+$' : '-$'}${Math.abs(diff).toLocaleString('es-CL')}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-top: 3px; border-top: 1px dashed #cbd5e1;">
+                  <span style="color: #64748b;">Mínimo rescate parcial / Saldo mín. permanencia:</span>
+                  <strong style="color: #334155;">$${minPartialRedeem.toLocaleString('es-CL')} / $${minStayBalance.toLocaleString('es-CL')}</strong>
+                </div>
+              </div>
+
+              <!-- 1. MONTO A RESCATAR (PARCIAL O TOTAL) -->
+              <div style="margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                  <label style="font-size: 0.64rem; font-weight: 700; color: #334155;">
+                    1. Monto a rescatar (Parcial o Total):
+                  </label>
+                  <button type="button" onclick="setRedeemFFMMFullAmount(${pos.currentBalance})" style="padding: 2px 7px; font-size: 0.58rem; font-weight: 800; background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; border-radius: 4px; cursor: pointer;">
+                    Rescatar 100% ($${pos.currentBalance.toLocaleString('es-CL')})
+                  </button>
+                </div>
+                <input id="ffmm-redeem-amount" type="number" min="${minPartialRedeem}" max="${pos.currentBalance}" step="1000" value="${initialAmount}" style="width: 100%; padding: 7px 9px; border: 1.5px solid #047857; border-radius: 6px; font-size: 0.80rem; font-weight: 800; color: #0f172a; box-sizing: border-box;" />
+              </div>
+
+              <!-- 2. CUENTA DE DESTINO -->
+              <div style="margin-bottom: 9px;">
+                <label style="display: block; font-size: 0.64rem; font-weight: 700; color: #334155; margin-bottom: 3px;">
+                  2. Dónde abonar el dinero rescatado:
+                </label>
+                <select id="ffmm-redeem-dest" style="width: 100%; padding: 7px 8px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.68rem; font-weight: 700; color: #0f172a; background: #ffffff;">
+                  ${destOptions.map(opt => `
+                    <option value="${opt.id}" ${opt.id === defaultDest ? 'selected' : ''}>${opt.label}</option>
+                  `).join('')}
+                </select>
+              </div>
+
+              <!-- ADVERTENCIA DE VARIACIÓN DE VALOR CUOTA DE CIERRE -->
+              <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 6px 8px; margin-bottom: 9px; font-size: 0.58rem; color: #92400e; line-height: 1.32;">
+                <strong>⚠️ Aviso de Valor Cuota Variable:</strong> El rescate se procesa con el <strong>valor cuota de cierre</strong> del día hábil de liquidación (según horario de corte / <em>cut-off</em>), por lo que el monto final abonado o las cuotas rebajadas pueden variar respecto al estimado actual.
+              </div>
+
+              <div id="ffmm-redeem-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; font-size: 0.62rem; font-weight: 700; padding: 6px 8px; border-radius: 6px; margin-bottom: 8px;"></div>
+
+              <div style="display: flex; gap: 8px;">
+                <button type="button" onclick="closeBancoModal()" style="flex: 1; padding: 8px; font-size: 0.72rem; font-weight: 700; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                <button type="button" onclick="promptConfirmRedeemFFMM('${pos.id}')" style="flex: 1.4; padding: 8px; font-size: 0.72rem; font-weight: 800; background: #047857; color: #ffffff; border: none; border-radius: 6px; cursor: pointer;">
+                  Continuar a Confirmación ▶
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function setRedeemFFMMFullAmount(fullBalance) {
+      const inputEl = document.getElementById('ffmm-redeem-amount');
+      if (inputEl) inputEl.value = fullBalance;
+      const errorEl = document.getElementById('ffmm-redeem-error');
+      if (errorEl) errorEl.style.display = 'none';
+    }
+
+    function promptConfirmRedeemFFMM(posId) {
+      if (!Array.isArray(state.mutualFunds)) return;
+      const pos = state.mutualFunds.find(f => f.id === posId);
+      if (!pos) return;
+
+      const amountInput = document.getElementById('ffmm-redeem-amount');
+      const destSelect = document.getElementById('ffmm-redeem-dest');
+      const errorEl = document.getElementById('ffmm-redeem-error');
+
+      const redeemAmount = Math.round(Number(amountInput ? amountInput.value : 0));
+      const destId = destSelect ? destSelect.value : 'cash';
+
+      const catalogFund = fondosMutuosCatalog.find(f => f.id === pos.fundTypeId);
+      const minStayBalance = pos.minAmount || (catalogFund ? catalogFund.minAmount : 5000);
+      const minPartialRedeem = 5000;
+
+      if (!redeemAmount || redeemAmount <= 0 || redeemAmount > pos.currentBalance) {
+        if (errorEl) {
+          errorEl.style.display = 'block';
+          errorEl.textContent = `⚠️ Ingresa un monto válido de hasta $${pos.currentBalance.toLocaleString('es-CL')}.`;
+        }
+        return;
+      }
+
+      const isFullRedeem = redeemAmount >= pos.currentBalance;
+      const remainingBalance = pos.currentBalance - redeemAmount;
+
+      if (!isFullRedeem) {
+        if (redeemAmount < minPartialRedeem) {
+          if (errorEl) {
+            errorEl.style.display = 'block';
+            errorEl.textContent = `⚠️ El monto mínimo para un rescate parcial es de $${minPartialRedeem.toLocaleString('es-CL')}.`;
+          }
+          return;
+        }
+        if (remainingBalance < minStayBalance) {
+          if (errorEl) {
+            errorEl.style.display = 'block';
+            errorEl.textContent = `⚠️ El saldo restante ($${remainingBalance.toLocaleString('es-CL')}) quedaría bajo el mínimo de permanencia del fondo ($${minStayBalance.toLocaleString('es-CL')}). Realiza un rescate menor o selecciona "Rescatar 100%".`;
+          }
+          return;
+        }
+      }
+
+      let destName = '💵 Dinero en Efectivo';
+      if (destId !== 'cash') {
+        const acc = (state.bankAccounts || []).find(a => a.id === destId);
+        if (acc) destName = `${acc.icon || '🏦'} ${acc.name}`;
+      }
+
+      const sharesToRedeem = isFullRedeem ? pos.shares : (pos.shares * (redeemAmount / pos.currentBalance));
+      const modalRoot = document.getElementById('banco-modal-root');
+      if (!modalRoot) return;
+
+      modalRoot.innerHTML = `
+        <div class="job-modal-backdrop" onclick="if(event.target === this) closeBancoModal()">
+          <div class="job-modal-card" style="border-color: #047857; max-width: 425px;">
+            <div class="job-modal-header" style="background: linear-gradient(135deg, #047857 0%, #065f46 100%); color: #ffffff; padding: 12px 14px;">
+              <div class="job-modal-icon-badge" style="background: rgba(255, 255, 255, 0.2); color: #ffffff; border: 1.5px solid rgba(255, 255, 255, 0.4); font-size: 1.2rem; width: 36px; height: 36px;">
+                ✅
+              </div>
+              <div>
+                <div class="job-modal-title" style="color: #ffffff; font-size: 0.92rem;">
+                  Confirmar Solicitud de Rescate
+                </div>
+                <div class="job-modal-subtitle" style="font-size: 0.66rem; color: #d1fae5; margin-top: 2px;">
+                  ${pos.icon} ${pos.fullName || pos.name}
+                </div>
+              </div>
+            </div>
+
+            <div class="job-modal-body" style="padding: 13px 15px;">
+              <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 9px 11px; margin-bottom: 9px; font-size: 0.64rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="color: #166534;">Tipo de operación:</span>
+                  <strong style="color: #14532d;">${isFullRedeem ? 'Rescate Total (100% de las cuotas)' : 'Rescate Parcial'}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="color: #166534;">Monto estimado a rescatar:</span>
+                  <strong style="color: #047857; font-size: 0.74rem;">$${redeemAmount.toLocaleString('es-CL')}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="color: #166534;">Cuotas aproximadas a liquidar:</span>
+                  <strong style="color: #14532d;">${sharesToRedeem.toFixed(4)} cuotas</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="color: #166534;">Saldo remanente en el fondo:</span>
+                  <strong style="color: #14532d;">$${remainingBalance.toLocaleString('es-CL')}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px; padding-top: 4px; border-top: 1px dashed #86efac;">
+                  <span style="color: #166534;">Destino del abono:</span>
+                  <strong style="color: #14532d;">${destName}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #166534;">Plazo reglamentario de pago:</span>
+                  <strong style="color: #14532d;">${pos.rescueDays} ${pos.rescueDays === 1 ? 'día hábil' : 'días hábiles'}</strong>
+                </div>
+              </div>
+
+              <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px; padding: 7px 9px; margin-bottom: 11px; font-size: 0.59rem; color: #92400e; line-height: 1.35;">
+                <strong>📌 Declaración de liquidación:</strong> Entiendo que la solicitud de rescate es irrevocable una vez procesada y que el monto definitivo se calculará según el <strong>valor cuota de cierre</strong> del día hábil correspondiente, pudiendo presentar variaciones respecto al monto estimado hoy.
+              </div>
+
+              <div style="display: flex; gap: 8px;">
+                <button type="button" onclick="openRedeemFFMMModal('${pos.id}', ${redeemAmount}, '${destId}')" style="flex: 1; padding: 8px; font-size: 0.72rem; font-weight: 700; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">
+                  ◀ Volver
+                </button>
+                <button type="button" onclick="executeRedeemFFMM('${pos.id}', ${redeemAmount}, '${destId}')" style="flex: 1.4; padding: 8px; font-size: 0.72rem; font-weight: 800; background: #047857; color: #ffffff; border: none; border-radius: 6px; cursor: pointer;">
+                  ✅ Confirmar Rescate
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function executeRedeemFFMM(posId, confirmedAmount, confirmedDestId) {
+      if (!Array.isArray(state.mutualFunds)) return;
+      const idx = state.mutualFunds.findIndex(f => f.id === posId);
+      if (idx === -1) return;
+
+      const pos = state.mutualFunds[idx];
+      const redeemAmount = Math.round(Number(confirmedAmount || 0));
+      const destId = confirmedDestId || 'cash';
+
+      if (!redeemAmount || redeemAmount <= 0 || redeemAmount > pos.currentBalance) {
+        return;
+      }
+
+      let destName = 'Dinero en Efectivo';
+      if (destId === 'cash') {
+        state.cash = (Number(state.cash) || 0) + redeemAmount;
+      } else {
+        const acc = (state.bankAccounts || []).find(a => a.id === destId);
+        if (acc) {
+          acc.balance = (Number(acc.balance) || 0) + redeemAmount;
+          destName = acc.name;
+        } else {
+          state.cash = (Number(state.cash) || 0) + redeemAmount;
+        }
+      }
+
+      const isFullRedeem = redeemAmount >= pos.currentBalance;
+      if (isFullRedeem) {
+        state.mutualFunds.splice(idx, 1);
+      } else {
+        const fractionRedeemed = redeemAmount / pos.currentBalance;
+        pos.shares = pos.shares * (1 - fractionRedeemed);
+        pos.contributedCapital = Math.round(pos.contributedCapital * (1 - fractionRedeemed));
+        pos.currentBalance = pos.currentBalance - redeemAmount;
+      }
+
+      syncInvestedTotal();
+      closeBancoModal();
+      renderBancoStage('fondos');
+      if (typeof updateHUD === 'function') updateHUD();
+
+      alertUpcomingBankFeature(
+        isFullRedeem ? '✅ Rescate Total de Fondo Mutuo' : '✅ Rescate Parcial de Fondo Mutuo',
+        `Se liquidaron cuotas por $${redeemAmount.toLocaleString('es-CL')} de tu ${pos.name} (plazo reglamentario: ${pos.rescueDays} ${pos.rescueDays === 1 ? 'día hábil' : 'días hábiles'}) y el dinero fue abonado en tu ${destName}.`
+      );
     }
 
     function renderDepositosPlazoView() {

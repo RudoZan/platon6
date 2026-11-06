@@ -8,10 +8,10 @@
   - `index.html` (`400 lines`): Clean HTML shell (3 zones, onboarding containers, modals, HUD Dock).
   - `css/styles.css` (`2,390 lines`): Design tokens, 3D perspective background, and component styles.
   - `data/catalogs.js` (`924 lines`): Static templates/JSON catalogs (`slidesData`, `homeOptions`, `jobOptions`, `transportOptions`, `hubsData`, `coursesCatalogData`, `jobOffersData`, `segurosCatalog`, `getInsuranceCoverages`, `officialRiskQuestions`).
-  - `js/state.js` (`348 lines`): Shared global `state` in memory + cross-module helpers (`checkProfileCompletion`, `syncDefaultAnchorsUI`, `getAssetInsurancePricing`, `getUserInsuranceAssets`, `getBienestarFace`, `renderHeartsMeter`, `renderHubCentralStage`, `selectHudTab`, `updateHUD`).
+  - `js/state.js` (`349 lines`): Shared global `state` in memory + cross-module helpers (`checkProfileCompletion`, `syncDefaultAnchorsUI`, `getAssetInsurancePricing`, `getUserInsuranceAssets`, `getBienestarFace`, `renderHeartsMeter`, `renderHubCentralStage`, `selectHudTab`, `updateHUD`).
   - `js/ui-carousel-onboarding.js` (`607 lines`): Top PPT carousel (with `N° 1`–`N° 42` badges) and 3-step Onboarding (`#view-step-4`, `#view-anchors`, `#view-character-summary`).
   - `js/ui-trabajo.js` (`1,183 lines`): `"Trabajo"` hub (`renderTrabajoStage`, courses, boss negotiation chat `initNegChat`/`handleNegChatOption`, job hire/resignation).
-  - `js/ui-banco-seguros.js` (`2,643 lines`): `"Banco"` & `"Seguros"` hub (`renderBancoStage`, accounts, `"Cuenta Corriente"` multi-step bundle, credit line/card, `"Depósitos a Plazo (DAP)"`, multi-asset insurance).
+  - `js/ui-banco-seguros.js` (`3,381 lines`): `"Banco"` & `"Seguros"` hub (`renderBancoStage`, accounts, `"Cuenta Corriente"` multi-step bundle, credit line/card, `"Fondos Mutuos (FFMM)"`, `"Depósitos a Plazo (DAP)"`, multi-asset insurance).
   - `js/ui-personal.js` (`1,308 lines`): `"Mi Estado"` (`Personal`) hub (`"Bienestar"`, 3-col budget, net worth & liquidity, 5-Q Investor Test, secret audit `secret_summary`).
 
 ## 2. State Model (`state`) & Character Variables
@@ -52,9 +52,10 @@
 - **Salary & promotion impact:** Matching Intermedio (⭐) = **+10%**; Matching Avanzado (🌟) = **+15% + unlocks 1 promotion**. Non-matching = +2% to +5%, no promotion.
 - **Job affinities:** Directiva (`c, e, g, f🌟`) · Especializado (`a, g, b🌟, h🌟`) · Operativa (`a, e, b🌟, f🌟`) · Comercial (`a, c, g, d🌟`) · Independiente (`a, c, e, g`) · Apoyo Operativo (`a, e, g, b🌟`).
 
-### 2.6. Bank Products, Bundle Fees & Term Deposits (`DAP`)
-- **8 Bank Sections:** `"Cuenta Ahorro"` (`🐖`, UF + 1.0%/yr), `"Cuenta RUT / Vista"` (`💳`, \$0 fee), `"Cuenta Corriente"` (`🏦`), `"Líneas de Crédito"` (`⚡`), `"Tarjeta de Crédito"` (`💳`), `"Fondos Mutuos"` (`📊`), `"Depósitos a Plazo"` (`⏳`), `"Seguros"` (`🛡️`).
+### 2.6. Bank Products, Bundle Fees, Mutual Funds (`FFMM`) & Term Deposits (`DAP`)
+- **8 Bank Sections (100% Built):** `"Cuenta Ahorro"` (`🐖`, UF + 1.0%/yr), `"Cuenta RUT / Vista"` (`💳`, \$0 fee), `"Cuenta Corriente"` (`🏦`), `"Líneas de Crédito"` (`⚡`), `"Tarjeta de Crédito"` (`💳`), `"Fondos Mutuos"` (`📊`), `"Depósitos a Plazo"` (`⏳`), `"Seguros"` (`🛡️`).
 - **`"Cuenta Corriente"` Multi-Step Bundle:** Base fee **\$14.000/mo** (**\$7.000/mo** with 1 add-on; **\$0/mo** with both `"Línea de Crédito"` + `"Tarjeta de Crédito"`). `"Línea de Crédito"` (**\$500.000**) requires active `"Cuenta Corriente"` + mandatory `"Seguro de Desgravamen"` (**\$1.900/mo**). `"Tarjeta de Crédito"` (**\$950.000**, single unified card per Ley 20.555) costs **\$6.900/mo** (\$0 if zero balance/activity) and links automatically to `"Cuenta Corriente"`. Closing `"Cuenta Corriente"`, `"Línea de Crédito"`, or `"Tarjeta de Crédito"` enforces 100% debt liquidation from cash/liquid accounts.
+- **`"Fondos Mutuos (FFMM)"` (`state.mutualFunds`):** Requires active CMF Investor Profile (`state.riskTestResult`, NCG N° 380 / N° 365; requires explicit suitability override checkbox if investing above profile risk). Catalog of 3 funds: `"FFMM Conservador"` (`~0.40%/mo`, `±0.15%` vol, TAC `0.90%`, `1 día hábil`, min `\$5.000`), `"FFMM Moderado"` (`~0.65%/mo`, `±1.20%` vol, TAC `1.80%`, `3 días hábiles`, min `\$10.000`), and `"FFMM Arriesgado"` (`~0.95%/mo`, `±3.50%` vol, TAC `2.80%`, `5 días hábiles`, min `\$20.000`). Supports multiple contributions, Box-Muller monthly share-price simulation (`simulateMonthFFMM`), and partial (`\ge \$5.000` with minimum stay balance) or full (`100%`) redemptions via a 2-step confirmation modal (`promptConfirmRedeemFFMM` → `executeRedeemFFMM`) with closing share-price variation disclaimers.
 - **`"Depósitos a Plazo (DAP)"` (`state.termDeposits`):** Supports multiple simultaneous deposits (`30 días` 0.39%, `90 días` 1.15%, `360 días UF` 5.20% nominal). Strictly locked until maturity (no mid-term switch between *Plazo Fijo* and *Plazo Renovable* per CMF / Banco Central Cap. III.B.1). *Plazo Fijo* auto-pays to destination account at maturity; *Plazo Renovable* opens a 3-business-day grace window modal at maturity to collect or auto-renew with compounded interest on day 4.
 
 ### 2.7. Insurance Pricing (`"Seguros"`)

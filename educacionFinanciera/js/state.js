@@ -24,6 +24,7 @@
       creditLine: null, // Al partir no tiene línea de crédito contratada
       insurances: [], // Al partir no tiene seguros contratados
       termDeposits: [], // Al partir no tiene depósitos a plazo contratados
+      mutualFunds: [], // Al partir no tiene fondos mutuos contratados
       debts: [], // Al partir no tiene deudas contratadas (cada crédito aparecerá individualmente al contraerlo)
       reserves: 0, // Al partir no tiene fondo de reserva acumulado
       invested: 0, // Al partir no tiene inversiones activas

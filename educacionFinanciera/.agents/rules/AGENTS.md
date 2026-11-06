@@ -7,10 +7,10 @@
 - `index.html` (`400L`): HTML shell (3 zones, onboarding containers, modals, HUD Dock).
 - `css/styles.css` (`2390L`): Styles, tokens & 3D perspective background.
 - `data/catalogs.js` (`924L`): Static templates/catalogs (`slidesData`, `homeOptions`, `jobOptions`, `transportOptions`, `hubsData`, `coursesCatalogData`, `jobOffersData`, `segurosCatalog`, `getInsuranceCoverages`, `officialRiskQuestions`).
-- `js/state.js` (`348L`): Shared in-memory `state` + cross-module helpers (`checkProfileCompletion`, `syncDefaultAnchorsUI`, `getAssetInsurancePricing`, `getUserInsuranceAssets`, `getBienestarFace`, `renderHeartsMeter`, `renderHubCentralStage`, `selectHudTab`, `updateHUD`).
+- `js/state.js` (`349L`): Shared in-memory `state` + cross-module helpers (`checkProfileCompletion`, `syncDefaultAnchorsUI`, `getAssetInsurancePricing`, `getUserInsuranceAssets`, `getBienestarFace`, `renderHeartsMeter`, `renderHubCentralStage`, `selectHudTab`, `updateHUD`).
 - `js/ui-carousel-onboarding.js` (`607L`): Top PPT carousel (`N° 1`–`N° 42`) and 3-step Onboarding (`#view-step-4`, `#view-anchors`, `#view-character-summary`).
 - `js/ui-trabajo.js` (`1183L`): `"Trabajo"` hub (`renderTrabajoStage`, courses, boss negotiation chat `initNegChat`/`handleNegChatOption`, job hire/resignation).
-- `js/ui-banco-seguros.js` (`2643L`): `"Banco"` & `"Seguros"` hub (`renderBancoStage`, accounts, `"Cuenta Corriente"` multi-step bundle, credit line/card, `"Depósitos a Plazo (DAP)"`, multi-asset insurance).
+- `js/ui-banco-seguros.js` (`3381L`): `"Banco"` & `"Seguros"` hub (`renderBancoStage`, accounts, `"Cuenta Corriente"` multi-step bundle, credit line/card, `"Fondos Mutuos (FFMM)"`, `"Depósitos a Plazo (DAP)"`, multi-asset insurance).
 - `js/ui-personal.js` (`1308L`): `"Mi Estado"` (`Personal`) hub (`"Bienestar"`, 3-col budget, net worth & liquidity, 5-Q Investor Test, secret audit `secret_summary`).
 
 ## Doc Index (Read only required file/line range)
