@@ -1,25 +1,19 @@
-# Casos de Uso — Calen English Class (`englishCalen2026`)
+# Use Cases — Calen English Class (`platon6/sitio-web/englishCalen2026/`)
 
-## CU-01: Gestión de Clase desde el Panel de Control (`index.html` — PC)
-- **Actor:** Docente.
-- **Descripción:** Permite abrir la Ventana de Presentación (`presentation.html`), registrar y seleccionar alumnos participantes (en duplas o individual), elegir el curso activo (`5° & 6°` o `7° & 8°`) y disparar actividades interactivas en tiempo real hacia la pantalla proyectada.
+## UC-01: Teacher Control Panel (`index.html` — `PC`)
+- Launches Projection Window (`presentation.html`), manages participating students (pairs/individuals), selects active grade (`5° & 6°` or `7° & 8°`), and dispatches real-time activities to `VP`.
 
-## CU-02: Proyección Sincronizada para Estudiantes (`presentation.html` — VP)
-- **Actor:** Estudiantes (visualización en proyector / segunda pantalla).
-- **Descripción:** Recibe eventos en tiempo real desde el PC y muestra los nombres de los estudiantes seleccionados, preguntas, respuestas, banderas, fotos de países, vocabulario ilustrado, cámara del docente con segmentación de fondo (MediaPipe) y el mapa del juego interactivo.
+## UC-02: Synchronized Student Projection (`presentation.html` — `VP`)
+- Receives live events from `PC` and displays active student names, questions/answers, flags, country photos, illustrated vocabulary, MediaPipe background-segmented teacher webcam, and interactive game map.
 
-## CU-03: Actividad de Fotos de Calen y Vocabulario (`photo-word`)
-- **Actor:** Docente y Estudiantes.
-- **Descripción:** El docente selecciona fotografías locales (`photosCalen/`) y activa una o más palabras de vocabulario asociadas. Las palabras seleccionadas se envían con salto de línea (`shown.join('\n')`) y se proyectan apiladas verticalmente en el panel lateral de la VP.
+## UC-03: Calen Photos & Vocabulary (`photo-word`)
+- Teacher selects local photos (`photosCalen/`) and toggles vocabulary words. Selected words are sent newline-separated (`shown.join('\n')`) and rendered stacked vertically in `VP`.
 
-## CU-04: Exploración de Países e Idiomas (`country-panel`)
-- **Actor:** Docente y Estudiantes.
-- **Descripción:** Muestra mapas, banderas, fotos históricas y lugares icónicos de distintos países (`curso-fotos-paises/`) con animaciones de transición y saludos en cada idioma.
+## UC-04: Countries & Languages (`country-panel`)
+- Displays maps, flags, historical photos, and landmarks (`curso-fotos-paises/`) with greetings per language.
 
-## CU-05: Juego Interactivo de Exploración (`game1`)
-- **Actor:** Docente y Estudiantes.
-- **Descripción:** Recorrido interactivo por escenas e interiores/exteriores (`house-map.js`, `game-data.js` y `StoryImages/`) controlado desde el PC y proyectado en la VP.
+## UC-05: Interactive Scene Exploration Game (`game1`)
+- First-person navigation across indoor/outdoor scenes (`house-map.js`, `game-data.js`, `StoryImages/`) controlled from `PC` and projected in `VP`.
 
-## CU-06: Consulta de Referencias Docentes (`Reference/`)
-- **Actor:** Docente.
-- **Descripción:** Apertura rápida en ventanas emergentes de las guías docentes por curso (`5to -6to.html`, `7mo y 8vo unit3_sports_teacher_reference.html`), bases curriculares (`bases-curriculares.html`) y guía de pronunciación Mineduc (`pronunciacion-mineduc.html`).
+## UC-06: Teacher References (`Reference/`)
+- Popup access from `PC` to grade guides (`5to -6to.html`, `7mo y 8vo unit3_sports_teacher_reference.html`), curriculum (`bases-curriculares.html`), and Mineduc pronunciation (`pronunciacion-mineduc.html`).

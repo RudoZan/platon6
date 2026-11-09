@@ -13,6 +13,7 @@
   - `js/ui-trabajo.js` (`1,183 lines`): `"Trabajo"` hub (`renderTrabajoStage`, courses, boss negotiation chat `initNegChat`/`handleNegChatOption`, job hire/resignation).
   - `js/ui-banco-seguros.js` (`3,381 lines`): `"Banco"` & `"Seguros"` hub (`renderBancoStage`, accounts, `"Cuenta Corriente"` multi-step bundle, credit line/card, `"Fondos Mutuos (FFMM)"`, `"Depósitos a Plazo (DAP)"`, multi-asset insurance).
   - `js/ui-personal.js` (`1,308 lines`): `"Mi Estado"` (`Personal`) hub (`"Bienestar"`, 3-col budget, net worth & liquidity, 5-Q Investor Test, secret audit `secret_summary`).
+  - `js/ui-inversiones.js` (`renderInversionesStage`, `renderOtherInvestmentCategoryView`, `openContractOtherInvModal`, `openRedeemOtherInvModal`, `executeRedeemOtherInv`).
 
 ## 2. State Model (`state`) & Character Variables
 ### 2.1. Unified `"Bienestar"` Breakdown (100 Points)
@@ -62,6 +63,21 @@
 - **Multi-Vehicle (`ins_automotriz_${assetId}`):** `"City Car"` **\$28.000/mo**, `"SUV"` **\$38.000/mo**, `"Deportivo"` **\$65.000/mo** (generic base: \$32.000/mo).
 - **Multi-Property (`ins_vivienda_${assetId}`, quake/fire only, no theft):** `"Depto en el centro"` **\$11.000/mo**, `"Casa en barrio"` **\$13.500/mo**, `"Casa en condominio"` **\$15.500/mo**, `"Parcela"` **\$22.000/mo** (generic base: \$12.000/mo).
 - **Single Policies:** `"Fraude"` **\$1.150/mo** (Ley 21.234; requires `"Cuenta RUT / Vista"`, `"Cuenta Corriente"`, or `"Tarjeta de Crédito"` — excludes `"Cuenta de Ahorro"`), `"Desgravamen"` **\$1.900/mo**, `"Cesantía"` **\$4.500/mo**, `"Vida"` **\$9.500/mo** (\$20M / ~525 UF cover), `"Salud Complementario"` **\$14.000/mo**.
+
+### Other Investments — Cryptocurrencies
+- UI implementation: `js/ui-inversiones.js` (`renderInversionesStage`, `renderOtherInvestmentCategoryView`, `openContractOtherInvModal`, `openRedeemOtherInvModal`, `executeRedeemOtherInv`).
+- Catalog: `otrasInversionesCatalog.cripto` contains BTC, ETH, SOL, and XRP. Each item stores commission, minimum, expected monthly rate, volatility, redemption days, and icon HTML.
+- State: positions remain in `state.otherInvestments` with `categoryId`, `itemTypeId`, current balance, contributed capital, exit penalty, and monthly simulation fields.
+- Crypto UI: 2-column cards; right-aligned icon; in-card balance; `"Comprar"` above `"Vender"`; seller disabled when the corresponding position has no balance.
+- Redemption: editable CLP amount bounded by `currentBalance`, optional full redemption, exit fee calculation, net payout, destination account/cash, and remaining balance. Confirmation updates `state.cash`, bank accounts, and/or removes/reduces the investment position.
+
+### Other Investments — APV & AFP Cuenta 2
+- UI implementation: `js/ui-inversiones.js`; category summaries, radio selection, individual contributions, monthly contribution settings, stop/cancel actions, and HUD totals.
+- State: `state.apvAccount` stores regime, multifund, balance, contributed capital, and monthly debit settings. `state.cuenta2Account` stores the same fields except APV regime.
+- Contracting starts each account at zero balance. APV defaults to regime A and Fondo C; Cuenta 2 defaults to Fondo C.
+- APV contributions use a `$10.000` minimum; Cuenta 2 contributions use `$5.000`. Individual contributions may use cash or a bank account.
+- Monthly contribution activation/updates require a valid bank account and respect each product's minimum. Monthly settings can be stopped separately.
+- `syncInvestedTotal()` and the Other Investments summary include APV and Cuenta 2 balances.
 
 ## 3. Session Room ID & Supabase Tables
 - **Room ID:** `YYYYMM` + 4-digit code (`1000`–`9999`), e.g. `2026101042`.

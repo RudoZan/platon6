@@ -1,43 +1,27 @@
-# Especificación Técnica — Ajedrez
+# Technical Specification — Chess (`platon6/sitio-web/ajedrez/`)
+> **Target App Language:** Spanish.
 
-*¿Con qué está hecho y qué datos guarda?*
+## 1. Tech Stack & Visual Identity
+- **Frontend:** Pure Vanilla HTML5, CSS3 (native variables), ES6+ JS.
+- **TTS Audio:** Web Speech API (`window.speechSynthesis`) for `"🔊 Escuchar explicación"`.
+- **Visuals:** Gold-on-dark-wood palette, `Georgia` serif font, `ajedrezFondo.png` background, `images/` assets.
 
-## 1. Stack Tecnológico
-- **Frontend:** HTML5, CSS3 (variables CSS nativas) y JavaScript Vanilla (ES6+) embebido/modular por página.
-- **Audio / TTS:** Web Speech API (`window.speechSynthesis`) para la lectura en voz alta de explicaciones pedagógicas (`🔊 Escuchar explicación`).
-- **Dependencias externas:** Ninguna librería pesada ni framework de UI.
+## 2. Files (`platon6/sitio-web/ajedrez/`)
+- `index.html`: Classical Chess board + 4-tab Training Mode.
+- `variantes.html`: Recognized chess variants.
+- `variantes-rudo.html`: Experimental custom variants.
+- `curso.html`: Leveled course interface.
 
-## 2. Identidad Visual y Recursos
-- **Estética:** Paleta dorada sobre madera oscura, tipografía serif (`Georgia`), definida mediante variables CSS en cada archivo HTML.
-- **Recursos gráficos:**
-  - `ajedrezFondo.png`: Imagen de fondo compartida por las páginas del módulo.
-  - `images/`: Recursos gráficos e íconos de apoyo del sub-sitio.
-
-## 3. Estructura de Archivos (`sitio-web/ajedrez/`)
-| Archivo | Rol técnico |
-|---|---|
-| `index.html` | Tablero de Ajedrez Clásico jugable + Modo Entrenamiento con 4 pestañas. |
-| `variantes.html` | Tablero y reglas para variantes reconocidas del ajedrez. |
-| `variantes-rudo.html` | Tablero y reglas para variantes experimentales / propias. |
-| `curso.html` | Interfaz del curso estructurado de ajedrez. |
-
-## 4. Modelo de Datos en `index.html` (Modo Entrenamiento)
-Las cuatro pestañas del modo Entrenamiento se alimentan de arreglos de objetos en JavaScript dentro de `index.html`:
-
-| Pestaña | Array JS | Contenido actual |
+## 3. Training Data Model (`platon6/sitio-web/ajedrez/index.html`)
+| Tab | JS Array | Current Content |
 |---|---|---|
-| **Piezas** | `NIVELES_MATERIAL` | 5 pasos progresivos: peones → caballos → alfiles → reina → torres. |
-| **Aperturas** | `APERTURAS` | 19 aperturas clasificadas en 3 niveles (Principiante, Intermedio, Avanzado). |
-| **Tácticas** | `TACTICAS_ESTRATEGIAS` | Tenedor, clavada, descubierta, enfilada, desviación, finales de peones 2v2 y 3v3. |
-| **Mates** | `MATES` | Mate del loco, pastor, pasillo, escalera, dama y rey. |
+| `"Piezas"` | `NIVELES_MATERIAL` | 5 progressive steps: pawns → knights → bishops → queen → rooks |
+| `"Aperturas"` | `APERTURAS` | 19 openings across 3 levels (`"Principiante"`, `"Intermedio"`, `"Avanzado"`) |
+| `"Tácticas"` | `TACTICAS_ESTRATEGIAS` | Fork, pin, discovered attack, skewer, deflection, 2v2 & 3v3 pawn endgames |
+| `"Mates"` | `MATES` | Fool's, Scholar's, Back-rank, Ladder, Queen + King mates |
 
-### Esquema de cada elemento de entrenamiento
-- `nombre` (`string`): Título de la apertura, táctica o mate.
-- `nivel` (`string`): Nivel pedagógico (`Principiante`, `Intermedio`, `Avanzado`).
-- `movidas` (`string[]` / notación algebraica): Secuencia de jugadas reproducibles por el control paso a paso (`⏮ ‹ ▶ › ⏭`).
-- `descripcion` (`string`): Explicación conceptual mostrada en pantalla y leída en voz alta por el sintetizador de voz.
-
-### Aperturas registradas actualmente en `APERTURAS` (`index.html`, línea ~552)
-- **Principiante (4):** Sistema Londres · Apertura Italiana · Sistema Colle · Defensa Escandinava.
-- **Intermedio (8):** Ruy López · Defensa Siciliana · Defensa Francesa · Defensa Caro-Kann · Gambito de Dama · Defensa India de Rey · Apertura Inglesa · Gambito de Rey.
-- **Avanzado (6):** Defensa Pirc · Defensa Alekhine · Defensa Nimzo-India · Apertura Catalana · Apertura Réti · Apertura Bird.
+- **Item Schema:** `{ nombre: string, nivel: 'Principiante'|'Intermedio'|'Avanzado', movidas: string[], descripcion: string }`.
+- **Current `APERTURAS` (`index.html`, ~L552):**
+  - `"Principiante"` (4): Sistema Londres · Apertura Italiana · Sistema Colle · Defensa Escandinava.
+  - `"Intermedio"` (8): Ruy López · Defensa Siciliana · Defensa Francesa · Defensa Caro-Kann · Gambito de Dama · Defensa India de Rey · Apertura Inglesa · Gambito de Rey.
+  - `"Avanzado"` (6): Defensa Pirc · Defensa Alekhine · Defensa Nimzo-India · Apertura Catalana · Apertura Réti · Apertura Bird.

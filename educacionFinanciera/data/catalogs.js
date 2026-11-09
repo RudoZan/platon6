@@ -384,17 +384,17 @@
         title: "💎 Otras Inversiones",
         subtitle: "Instrumentos y vehículos de inversión",
         sections: [
-          { name: "Ahorro Previsional Voluntario (APV)", icon: "🧓" },
-          { name: "Ahorro Cuenta 2", icon: "📈" },
-          { name: "Inversión Fraccionada", icon: "🏢" },
-          { name: "Compra de Acciones", icon: "📉" },
-          { name: "Bonos Corporativos", icon: "📜" },
-          { name: "Bonos del Estado", icon: "🇨🇱" },
-          { name: "Fondos Indexados (ETF)", icon: "🌐" },
-          { name: "Compra/Venta Moneda Extranjera", icon: "💱" },
-          { name: "Compra/Venta Criptomonedas", icon: "🪙" },
-          { name: "Billeteras Electrónicas", icon: "📱" },
-          { name: "Participación en Startups", icon: "🚀" }
+          { id: "apv", name: "Ahorro Previsional Voluntario (APV)", icon: "🧓", desc: "Ahorro para pensión con beneficio estatal (15% Régimen A o tributario B)." },
+          { id: "cuenta2", name: "Ahorro Cuenta 2", icon: "📈", desc: "Inversión libre en multifondos AFP con bajas comisiones y hasta 24 giros/año." },
+          { id: "fraccionada", name: "Inversión Fraccionada", icon: "🏢", desc: "Compra fracciones de propiedades en renta desde montos accesibles." },
+          { id: "acciones", name: "Compra de Acciones", icon: "📉", desc: "Renta variable en Bolsa con dividendos, corretaje y alta volatilidad." },
+          { id: "bonos_corp", name: "Bonos Corporativos", icon: "📜", desc: "Deuda emitida por empresas en UF con pago de interés periódico." },
+          { id: "bonos_estado", name: "Bonos del Estado", icon: "🇨🇱", desc: "Instrumentos soberanos de Tesorería / Banco Central de mínimo riesgo." },
+          { id: "etf", name: "Fondos Indexados (ETF)", icon: "🌐", desc: "Fondos cotizados en bolsa que replican índices globales a bajo costo." },
+          { id: "moneda_ext", name: "Compra/Venta Moneda Extranjera", icon: "💱", desc: "Dólares y Euros con tipo de cambio variable y diferencial (spread) cambiario." },
+          { id: "cripto", name: "Compra/Venta Criptomonedas", icon: "🪙", desc: "Activos digitales descentralizados de extrema volatilidad y sin garantía CMF." },
+          { id: "billeteras", name: "Billeteras Electrónicas", icon: "📱", desc: "Cuentas digitales con rentabilidad diaria automática y liquidez inmediata." },
+          { id: "startups", name: "Participación en Startups", icon: "🚀", desc: "Capital de riesgo en empresas emergentes: alto potencial e iliquidez inicial." }
         ]
       },
       corredora: {

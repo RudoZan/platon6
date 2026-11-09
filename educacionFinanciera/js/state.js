@@ -25,6 +25,8 @@
       insurances: [], // Al partir no tiene seguros contratados
       termDeposits: [], // Al partir no tiene depósitos a plazo contratados
       mutualFunds: [], // Al partir no tiene fondos mutuos contratados
+      otherInvestments: [], // Al partir no tiene instrumentos en Otras Inversiones
+      foreignCurrencies: {}, // Saldos en moneda extranjera (USD, EUR, JPY, PEN, ARS, BRL)
       debts: [], // Al partir no tiene deudas contratadas (cada crédito aparecerá individualmente al contraerlo)
       reserves: 0, // Al partir no tiene fondo de reserva acumulado
       invested: 0, // Al partir no tiene inversiones activas
@@ -70,7 +72,9 @@
         { id: 'moda', name: '👗 Moda, Imagen & Estilo', dots: 1 },
         { id: 'gaming', name: '🎮 Gaming & Ocio Digital', dots: 1 },
         { id: 'familia', name: '🤝 Familia & Amigos', dots: 1 }
-      ]
+      ],
+      apvAccount: null, // Cuenta APV contratada (régimen, multifondo, saldo y aporte mensual)
+      cuenta2Account: null, // Cuenta 2 AFP contratada (multifondo, saldo y aporte mensual)
     };
 
     // COMPROBACIÓN DE PERFIL COMPLETO (INTERESES PRIORIZADOS + ESTILO DE VIDA CON 2 OPCIONES C/U)
@@ -172,7 +176,7 @@
             const name = typeof p === 'object' ? (p.name || 'Inmueble propio') : p;
             const sub = typeof p === 'object' ? (p.sub || p.desc || 'Inmueble propio') : 'Inmueble registrado';
             const icon = typeof p === 'object' && p.icon ? p.icon : '🏠';
-            const price = typeof p === 'object' && p.price ? p.price : getAssetInsurancePricing('vivienda', id, { name, sub });
+            const price = typeof p === 'object' && p.price ? v.price : getAssetInsurancePricing('vivienda', id, { name, sub });
             list.push({ id, name, sub, icon, price });
           });
         }
@@ -241,6 +245,11 @@
 
       if (tabName === 'banco') {
         renderBancoStage('main');
+        return;
+      }
+
+      if (tabName === 'inversiones') {
+        renderInversionesStage('main');
         return;
       }
 

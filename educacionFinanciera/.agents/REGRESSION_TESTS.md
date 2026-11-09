@@ -17,3 +17,17 @@ Mandatory checks before closing any change in `platon6/sitio-web/educacionFinanc
    - [ ] Accounts support `"Depositar"`, `"Girar / Transferir"` (`"Todo el saldo"`), and `"Cerrar cuenta"` (transfers balance to `"Efectivo"`).
    - [ ] Closing `"Cuenta Corriente"` auto-cancels linked `"Línea de Crédito"` and `"Seguro de Desgravamen"`.
    - [ ] `"Seguro Automotriz"` and `"Seguro de Vivienda"` require real asset ownership, support multiple vehicles/properties with tiered pricing, and require modal confirmation on hire and cancellation (`"Terminar seguro"`).
+5. **`"Criptomonedas"` in `"Otras Inversiones"`:**
+   - [ ] `"Criptomonedas"` opens the complete 2-column category view without JavaScript/template errors.
+   - [ ] BTC, ETH, SOL, and XRP remain in individual cards with icons aligned right and balances shown inside each card.
+   - [ ] Each crypto card shows `"Comprar"` above `"Vender"`; `"Vender"` is disabled when no matching position exists.
+   - [ ] Clicking `"Vender"` opens the redemption modal for the matching position.
+   - [ ] Entering a partial amount recalculates gross amount, exit fee, net payout, and remaining balance; `"Vender todo"` selects the full balance.
+   - [ ] Confirming partial or total redemption updates the selected destination account/cash and refreshes the crypto card balance.
+6. **APV & AFP Cuenta 2 in `"Otras Inversiones"`:**
+   - [ ] APV contracting shows regime and multifund radio groups, defaults to Fondo C, and creates a zero-balance account.
+   - [ ] Cuenta 2 contracting shows a multifund radio group, defaults to Fondo C, and creates a zero-balance account.
+   - [ ] Regime/multifund changes persist and refresh the account summary.
+   - [ ] Individual contributions enforce APV `$10.000` and Cuenta 2 `$5.000` minimums, debit the selected source, and update the invested total.
+   - [ ] Monthly contribution cannot be saved without a bank account; active amount can be edited and the separate stop action clears the monthly settings.
+   - [ ] Canceling either account stops its monthly contribution and removes its balance from the invested total.

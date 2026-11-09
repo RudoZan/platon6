@@ -1,21 +1,11 @@
-# Arquitectura — Ajedrez
+# Architecture — Chess (`platon6/sitio-web/ajedrez/`)
 
-*¿Cómo se comunica y fluye?*
+## 1. Multi-Page Client Architecture (MPA)
+Standalone 100% client-side sub-site in `platon6/sitio-web/ajedrez/`. Pages (`index.html`, `variantes.html`, `variantes-rudo.html`, `curso.html`) link via a shared top navigation bar.
 
-## 1. Arquitectura General
-El módulo **Ajedrez** es una aplicación web multipágina (MPA) 100% cliente alojada en `sitio-web/ajedrez/`, independiente de otros módulos de Platón 6. Sus páginas (`index.html`, `variantes.html`, `variantes-rudo.html`, `curso.html`) se enlazan entre sí mediante una barra de navegación superior compartida.
-
-```mermaid
-flowchart LR
-    Portal["Platón 6 (listado.html)"] --> Index["index.html (Clásico + Entrenamiento)"]
-    Index <--> Variantes["variantes.html (Variantes Reconocidas)"]
-    Index <--> Rudo["variantes-rudo.html (Variantes Rudo)"]
-    Index <--> Curso["curso.html (Curso Estructurado)"]
-```
-
-## 2. Flujo Interno en `index.html`
-1. **Motor de Tablero y Reglas:** Gestiona el estado de las 64 casillas en memoria, valida los movimientos legales por pieza y actualiza el DOM del tablero tras cada jugada.
-2. **Subsistema de Entrenamiento:**
-   - Lee los arreglos estáticos (`NIVELES_MATERIAL`, `APERTURAS`, `TACTICAS_ESTRATEGIAS`, `MATES`).
-   - Al seleccionar un ítem, inicializa la posición en el tablero y habilita los controles del reproductor (`⏮ ‹ ▶ › ⏭`) para avanzar o retroceder jugada por jugada aplicando la notación algebraica de `movidas`.
-   - Sincroniza el panel lateral de texto con el botón **🔊 Escuchar explicación**, que invoca `window.speechSynthesis` con el contenido de `descripcion`.
+## 2. Internal Flow (`platon6/sitio-web/ajedrez/index.html`)
+1. **Board & Rule Engine:** Maintains 64-square state in memory, validates legal moves per piece, and updates board DOM on each move.
+2. **Training Subsystem:**
+   - Reads static arrays (`NIVELES_MATERIAL`, `APERTURAS`, `TACTICAS_ESTRATEGIAS`, `MATES`).
+   - Selecting an item resets the board and enables step player controls (`⏮ ‹ ▶ › ⏭`) to apply/revert algebraic `movidas`.
+   - Syncs side text panel with `"🔊 Escuchar explicación"` (`window.speechSynthesis` speaking `descripcion`).

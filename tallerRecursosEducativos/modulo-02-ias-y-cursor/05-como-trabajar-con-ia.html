@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cómo trabajar bien con la IA — Taller de Recursos Digitales Interactivos</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body class="tiene-sidebar" data-module="02" data-page="05" data-root="../">
+
+  <div id="site-header"></div>
+  <div id="site-modulebar"></div>
+  <div id="site-sidebar"></div>
+
+  <main class="contenido">
+    <h1>Cómo trabajar bien con la IA</h1>
+    <p>Instalar la herramienta es lo fácil. Lo que realmente marca la
+    diferencia entre un buen resultado y una sesión frustrante es <strong>cómo
+    la usas</strong>: cómo le hablas, cuánto contexto le das, y cómo
+    reaccionas cuando algo no sale como esperabas. Esta página es tu
+    referencia práctica para todo eso — vuelve a ella cada vez que la
+    necesites.</p>
+
+    <section class="objetivo-modulo">
+      <div class="objetivo-modulo__tag">Qué vas a aprender aquí</div>
+      <p>Al terminar esta página vas a poder:</p>
+      <ul class="objetivo-lista">
+        <li>Distinguir cuándo la IA solo está <em>conversando</em> y cuándo está <em>actuando</em> sobre tus archivos.</li>
+        <li>Usar el Modo Planificar para revisar los cambios antes de que ocurran.</li>
+        <li>Escribir prompts (instrucciones) claros que den mejores resultados a la primera.</li>
+        <li>Entender qué "recuerda" la IA entre una conversación y otra — y qué no.</li>
+        <li>Reconocer los problemas más comunes que vas a encontrar y cómo resolverlos.</li>
+        <li>Guiar a la IA en varios pasos en vez de esperar la solución perfecta de una vez.</li>
+      </ul>
+    </section>
+
+    <h2>1. Modo Preguntar vs. Modo Agente: dos formas muy distintas de trabajar</h2>
+    <p>La mayoría de las herramientas de IA para programar (Cursor incluido)
+    ofrecen más de un "modo" de trabajo. Los nombres cambian de una
+    herramienta a otra, pero la idea de fondo es siempre la misma: hay una
+    diferencia enorme entre una IA que <strong>solo responde</strong> y una
+    que <strong>puede actuar</strong>.</p>
+
+    <div class="comparacion-modos">
+      <div class="modo-card">
+        <div class="modo-card__titulo">💬 Modo Preguntar / Chat</div>
+        <p>La IA conversa contigo, explica, sugiere código o texto — pero no
+        toca tus archivos. Vos decidís qué copiar y dónde pegarlo. Es ideal
+        para entender un concepto, pedir ideas, o revisar algo sin riesgo de
+        que se modifique nada.</p>
+      </div>
+      <div class="modo-card modo-card--agente">
+        <div class="modo-card__titulo">🤖 Modo Agente</div>
+        <p>La IA puede crear y editar archivos, ejecutar comandos y hacer
+        cambios reales en tu proyecto por sí misma. Es mucho más potente y
+        rápido — pero justamente por eso hay que supervisarlo de cerca:
+        revisa siempre qué cambió antes de aceptarlo.</p>
+      </div>
+    </div>
+
+    <div class="consejo">
+      <span class="consejo__icono">💡</span>
+      <p>Regla simple: si solo quieres una opinión o una explicación, usa
+      modo Preguntar. Si quieres que algo se construya o se modifique de
+      verdad en tu proyecto, usa modo Agente — pero con atención.</p>
+    </div>
+
+    <h2>2. El Modo Planificar: pide un plan antes de que actúe</h2>
+    <p>Cuando le pides algo un poco más grande al modo Agente (no un cambio
+    de una línea, sino "agrega esta sección" o "cambia cómo funciona esto
+    otro"), muchas herramientas ofrecen un <strong>Modo Planificar</strong>
+    (Plan Mode). En vez de lanzarse a modificar archivos de inmediato, la IA
+    primero te muestra un plan por escrito de lo que va a hacer, paso a
+    paso, y espera tu aprobación.</p>
+    <p>Es como pedirle a alguien que te muestre el plano antes de empezar a
+    construir. Te da la oportunidad de decir "espera, eso no era lo que
+    quería" <strong>antes</strong> de que se hagan cambios, en vez de tener
+    que deshacerlos después.</p>
+
+    <div class="consejo">
+      <span class="consejo__icono">🧭</span>
+      <p>Úsalo siempre que el pedido sea grande, ambiguo, o toque varias
+      partes de tu recurso a la vez. Para cambios chiquitos y obvios (cambiar
+      un color, corregir una palabra) no hace falta — pedirlo directo está
+      bien.</p>
+    </div>
+
+    <h2>3. Cómo escribir mejores prompts</h2>
+    <p>Un "prompt" es simplemente la instrucción que le escribes a la IA.
+    Escribir mejores prompts no es un talento especial — es un hábito que se
+    arma siguiendo unas pocas ideas:</p>
+
+    <ol class="pasos-numerados">
+      <li><strong>Dile el objetivo, no solo la tarea.</strong> En vez de "agrega un botón", prueba "agrega un botón que reinicie el cuestionario, porque los estudiantes me piden repetirlo sin recargar la página".</li>
+      <li><strong>Dale contexto del archivo o recurso.</strong> Si ya tienes algo construido, dile qué archivo es, o simplemente déjala revisarlo antes de pedirle el cambio.</li>
+      <li><strong>Sé específico con lo que NO debe tocar.</strong> "Cambia solo los colores del encabezado, no muevas nada más" evita sorpresas.</li>
+      <li><strong>Da un ejemplo cuando puedas.</strong> Mostrar "quiero algo parecido a esto" (una imagen, un enlace, otro recurso) suele funcionar mejor que describirlo con palabras.</li>
+      <li><strong>Pide de a un cambio grande por vez.</strong> Varios pedidos mezclados en un mismo mensaje son más difíciles de revisar después.</li>
+    </ol>
+
+    <h2>4. La memoria de la IA: qué recuerda y qué no</h2>
+    <p>Dentro de una misma conversación, la IA recuerda todo lo que han
+    hablado. Pero apenas abres una <strong>conversación nueva</strong>, esa
+    memoria se pierde por completo — es como si conocieras a alguien por
+    primera vez otra vez.</p>
+    <p>Muchas herramientas (Cursor entre ellas) permiten guardar
+    instrucciones permanentes en un archivo del proyecto (por ejemplo
+    <code>.cursorrules</code> o un archivo de reglas) que la IA vuelve a leer
+    en cada conversación nueva. Ahí puedes anotar cosas como "este sitio usa
+    colores azul y dorado" o "no borres la carpeta de imágenes" para no
+    tener que repetirlo cada vez.</p>
+
+    <div class="consejo">
+      <span class="consejo__icono">🧠</span>
+      <p>Si notas que la IA "olvidó" algo que le dijiste ayer, no es un
+      error — es normal. Empieza la conversación recordándole lo esencial, o
+      mejor aún, déjalo anotado en un archivo de instrucciones del proyecto.</p>
+    </div>
+
+    <h2>5. Cosas que suelen pasar (y qué hacer)</h2>
+    <div class="situaciones-lista">
+      <div class="situacion">
+        <div class="situacion__titulo">🎭 La IA "inventa" algo que no existe</div>
+        <p>A veces menciona una función, un botón o un dato que en realidad
+        no está ahí (a esto se le llama "alucinación"). Solución: prueba tú
+        mismo lo que dice antes de confiar en ello — sobre todo si suena
+        demasiado conveniente.</p>
+      </div>
+      <div class="situacion">
+        <div class="situacion__titulo">🔀 Cambió algo que no le pediste</div>
+        <p>Es común en modo Agente. Revisa siempre qué archivos tocó antes de
+        aceptar, y si algo se movió de más, pídele explícitamente que lo
+        revierta.</p>
+      </div>
+      <div class="situacion">
+        <div class="situacion__titulo">🔁 Se queda dando vueltas con el mismo error</div>
+        <p>Si después de dos o tres intentos sigue sin resolverlo, no
+        insistas con el mismo mensaje. Corta, explícale con más detalle qué
+        está fallando (o pega el mensaje de error exacto), o empieza una
+        conversación nueva con ese contexto.</p>
+      </div>
+      <div class="situacion">
+        <div class="situacion__titulo">🧵 La conversación se vuelve larga y pierde el hilo</div>
+        <p>Con conversaciones muy largas, la IA a veces "olvida" cosas que se
+        dijeron al principio. Si notas respuestas raras o repetidas, es buen
+        momento para resumir dónde quedaron y abrir una conversación nueva.</p>
+      </div>
+      <div class="situacion">
+        <div class="situacion__titulo">💥 Rompió algo que antes funcionaba</div>
+        <p>Pasa, especialmente en cambios grandes. Por eso conviene probar tu
+        recurso después de cada cambio importante, e ir guardando versiones
+        que funcionan (lo verás en el Módulo 7, al subir tu sitio a GitHub).</p>
+      </div>
+    </div>
+
+    <h2>6. Cómo ir guiando a la IA paso a paso</h2>
+    <p>No esperes la solución perfecta al primer intento — trabajar con IA
+    se parece más a dirigir a un ayudante que a usar una máquina expendedora.
+    La forma más efectiva de avanzar es de a poco:</p>
+    <ol class="pasos-numerados">
+      <li><strong>Pide un primer resultado simple</strong> y revísalo antes de seguir agregando cosas encima.</li>
+      <li><strong>Da retroalimentación concreta.</strong> En vez de "no me gusta", prueba "el texto queda muy pequeño en el celular, hazlo más grande".</li>
+      <li><strong>Corrige de a un aspecto por mensaje</strong> cuando algo salió mal, así es más fácil verificar que se arregló bien.</li>
+      <li><strong>Aprueba explícitamente</strong> lo que sí te gustó, para que no se pierda en el siguiente cambio ("eso quedó bien, no lo toques").</li>
+      <li><strong>Guarda tu avance seguido</strong>, para poder volver atrás si un cambio posterior arruina algo que ya tenías listo.</li>
+    </ol>
+
+    <div class="consejo">
+      <span class="consejo__icono">✅</span>
+      <p>En resumen: usa el modo correcto para cada tarea, pide un plan
+      cuando el cambio es grande, sé específico al pedir, no confíes
+      ciegamente en lo que dice, y avanza de a pasos revisando en el camino.
+      Con esos cinco hábitos vas a evitarte la mayoría de los dolores de
+      cabeza.</p>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../js/nav-data.js"></script>
+  <script src="../js/nav.js"></script>
+</body>
+</html>

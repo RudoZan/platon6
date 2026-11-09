@@ -1538,7 +1538,10 @@
     function syncInvestedTotal() {
       const dapSum = (state.termDeposits || []).reduce((acc, d) => acc + (Number(d.principal) || 0), 0);
       const ffmmSum = (state.mutualFunds || []).reduce((acc, f) => acc + (Number(f.currentBalance) || 0), 0);
-      state.invested = dapSum + ffmmSum;
+      const otherSum = (state.otherInvestments || []).reduce((acc, inv) => acc + (Number(inv.currentBalance) || 0), 0);
+      const retirementAccountsSum = (Number(state.apvAccount?.balance) || 0) + (Number(state.cuenta2Account?.balance) || 0);
+      const fxSum = typeof getForeignCurrenciesTotalCLP === 'function' ? getForeignCurrenciesTotalCLP() : 0;
+      state.invested = dapSum + ffmmSum + otherSum + retirementAccountsSum + fxSum;
     }
 
     // ==========================================================================
@@ -1740,43 +1743,8 @@
       const modalRoot = document.getElementById('banco-modal-root');
       if (!modalRoot) return;
 
-      // Exigencia normativa CMF: contar con Test de Perfil de Inversionista antes de invertir
-      if (!state.riskTestResult) {
-        modalRoot.innerHTML = `
-          <div class="job-modal-backdrop" onclick="if(event.target === this) closeBancoModal()">
-            <div class="job-modal-card" style="border-color: #8b5cf6; max-width: 400px;">
-              <div class="job-modal-header" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: #ffffff; padding: 12px 14px;">
-                <div class="job-modal-icon-badge" style="background: rgba(255, 255, 255, 0.2); color: #ffffff; border: 1.5px solid rgba(255, 255, 255, 0.4); font-size: 1.2rem; width: 36px; height: 36px;">
-                  📝
-                </div>
-                <div>
-                  <div class="job-modal-title" style="color: #ffffff; font-size: 0.92rem;">
-                    Perfil de Inversionista Requerido (CMF)
-                  </div>
-                </div>
-              </div>
-              <div class="job-modal-body" style="padding: 13px 15px;">
-                <div style="font-size: 0.68rem; color: #334155; line-height: 1.45; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
-                  Por normativa de la <strong>Comisión para el Mercado Financiero (NCG N° 380 / N° 365)</strong>, antes de invertir por primera vez en Fondos Mutuos en un banco debes completar tu <strong>Encuesta de Perfil de Inversionista</strong>.
-                </div>
-                <div style="display: flex; gap: 8px;">
-                  <button type="button" onclick="closeBancoModal()" style="flex: 1; padding: 8px; font-size: 0.72rem; font-weight: 700; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">Cancelar</button>
-                  <button type="button" onclick="closeBancoModal(); goToRiskTestFromBanco();" style="flex: 1.4; padding: 8px; font-size: 0.72rem; font-weight: 800; background: #8b5cf6; color: #ffffff; border: none; border-radius: 6px; cursor: pointer;">
-                    Ir al Test de Perfil
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-        return;
-      }
-
       const fund = fondosMutuosCatalog.find(f => f.id === fundId);
       if (!fund) return;
-
-      const userRiskLevel = getUserRiskLevelNumber();
-      const exceedsProfile = userRiskLevel > 0 && fund.riskLevel > userRiskLevel;
 
       const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
       const cash = Number(state.cash) || 0;
@@ -1813,16 +1781,6 @@
             </div>
 
             <div class="job-modal-body" style="padding: 13px 15px;">
-              ${exceedsProfile ? `
-                <div style="background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 7px; padding: 8px 10px; margin-bottom: 9px; font-size: 0.61rem; color: #991b1b; line-height: 1.35;">
-                  <strong>⚠️ Advertencia de Idoneidad CMF:</strong> Tu perfil registrado es <strong>${state.riskTestResult.label}</strong> y este fondo es de nivel <strong>${fund.riskLabel}</strong> (volatilidad ${fund.volatilityDisplay}). Para invertir debes declarar expresamente que comprendes y aceptas asumir un riesgo superior a tu perfil.
-                  <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-weight: 800; color: #7f1d1d; cursor: pointer;">
-                    <input type="checkbox" id="ffmm-risk-override-chk" />
-                    <span>Acepto invertir bajo mi responsabilidad en un fondo de mayor riesgo.</span>
-                  </label>
-                </div>
-              ` : ''}
-
               <!-- 1. ORIGEN DE LOS FONDOS -->
               <div style="margin-bottom: 8px;">
                 <label style="display: block; font-size: 0.64rem; font-weight: 700; color: #334155; margin-bottom: 3px;">
@@ -1859,9 +1817,9 @@
                 </div>
               </div>
 
-              <!-- ADVERTENCIA LEGAL CMF DE RENTABILIDAD VARIABLE -->
+              <!-- ADVERTENCIA LEGAL CMF Y MENCIÓN DE PERFIL DE INVERSIONISTA -->
               <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 6px 8px; margin-bottom: 9px; font-size: 0.58rem; color: #92400e; line-height: 1.32;">
-                <strong>ℹ️ Advertencia CMF:</strong> Los valores de las cuotas de los fondos mutuos son variables y las rentabilidades pasadas no garantizan que se repitan en el futuro, pudiendo fluctuar al alza o a la baja.
+                <strong>ℹ️ Perfil de Inversionista y Valor Cuota (CMF):</strong> Este fondo está orientado a un perfil <strong>${fund.riskLabel}</strong>. Los valores de las cuotas son variables y las rentabilidades pasadas no garantizan que se repitan en el futuro.
               </div>
 
               <div id="ffmm-modal-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; font-size: 0.62rem; font-weight: 700; padding: 6px 8px; border-radius: 6px; margin-bottom: 8px;"></div>
@@ -1893,17 +1851,6 @@
       if (!fund) return;
 
       const errorEl = document.getElementById('ffmm-modal-error');
-      const userRiskLevel = getUserRiskLevelNumber();
-      if (userRiskLevel > 0 && fund.riskLevel > userRiskLevel) {
-        const overrideChk = document.getElementById('ffmm-risk-override-chk');
-        if (!overrideChk || !overrideChk.checked) {
-          if (errorEl) {
-            errorEl.style.display = 'block';
-            errorEl.textContent = '⚠️ Debes marcar la casilla declarando que aceptas invertir en un fondo de mayor riesgo que tu perfil CMF.';
-          }
-          return;
-        }
-      }
 
       const sourceSelect = document.getElementById('ffmm-source-select');
       const amountInput = document.getElementById('ffmm-amount-input');

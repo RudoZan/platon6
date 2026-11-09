@@ -1,28 +1,20 @@
-# Especificación Técnica — Calen English Class (`englishCalen2026`)
+# Technical Specification — Calen English Class (`platon6/sitio-web/englishCalen2026/`)
+> **Target App Language:** Bilingual (English learning content + Spanish teacher controls).
 
-*¿Con qué está hecho y qué datos guarda?*
+## 1. Tech Stack & UI Glossary
+- **Frontend:** Pure Vanilla HTML5, CSS3, ES6+ JS; Google Fonts (`Outfit`, `Satisfy`).
+- **Local Computer Vision:** MediaPipe Vision (`vendor/mediapipe/vision_bundle.mjs`, `selfie_segmenter.tflite`, `vendor/mediapipe/wasm/`) for live webcam background segmentation.
+- **Window Sync:** Native `BroadcastChannel` API + optional Supabase (`../js/supabaseClient.js`).
+- **UI Glossary:** **`PC`** = Teacher Control Panel (`index.html`); **`VP`** = Student Projection Window (`presentation.html`); **`PS`** = Top-left VP panel (webcam/side game); **`PI`** = Bottom main VP container (`.content-box`, `#names`, `#middle`, `#bottom`).
 
-## 1. Stack Tecnológico
-- **Frontend:** HTML5, CSS3 y JavaScript Vanilla (ES6+).
-- **Visión por Computador (Local):** MediaPipe Vision (`vendor/mediapipe/vision_bundle.mjs`, `selfie_segmenter.tflite` y binarios WASM en `vendor/mediapipe/wasm/`) para segmentación de persona/fondo en la cámara en vivo.
-- **Comunicación entre ventanas:** API nativa `BroadcastChannel` y sincronización opcional con Supabase (`../js/supabaseClient.js`).
-- **Tipografías:** Google Fonts (`Outfit` y `Satisfy`).
-
-## 2. Nomenclatura de Interfaces
-- **PC (Panel de Control):** `index.html` (interfaz del profesor).
-- **VP (Ventana de Presentación):** `presentation.html` (pantalla proyectada a la clase).
-- **PS (Panel Superior):** Cuadrante superior izquierdo de la VP (webcam y vista lateral).
-- **PI (Panel Inferior):** Contenedor principal inferior de la VP (`.content-box`, `#names`, `#middle`, `#bottom`).
-
-## 3. Estructura de Archivos del Sub-sitio (`sitio-web/englishCalen2026/`)
-| Ruta | Contenido y rol técnico |
+## 2. File Map (`platon6/sitio-web/englishCalen2026/`)
+| Path | Technical Role |
 |---|---|
-| `index.html` | Aplicación del Panel de Control (PC). |
-| `presentation.html` | Aplicación de la Ventana de Presentación (VP). |
-| `activities/shared.js` | Constantes de rutas (`IMG`, `FLAG`, `DIBUJOS`, `PHOTOS`, `CPHOTOS`) y bancos de datos compartidos (`CALEN_PHOTOS`, `ALREADY_KNOW_ENGLISH`, `COUNTRY_FLAG_CODE`). |
-| `courses/5to-6to.js` | Definición de unidades y actividades para 5° y 6° Básico (`COURSES['5to-6to']`). |
-| `courses/7mo-8vo.js` | Definición de unidades y actividades para 7° y 8° Básico (`COURSES['7mo-8vo']`). |
-| `game1/game-data.js` y `house-map.js` | Datos y mapa de navegación del juego interactivo por escenas. |
-| `Reference/*.html` | 4 documentos HTML de referencia docente invocados mediante `window.open()` desde `index.html`. |
-| `Images/`, `photosCalen/`, `curso-fotos-paises/`, `dibujos/`, `StoryImages/` | Bancos de imágenes optimizadas (`.webp`, `.jpg`, `.png`, `.svg`) para banderas, fotos locales de Calen, países, vocabulario e ilustraciones de escenas. |
-| `vendor/mediapipe/` | Modelos y runtime WASM locales de MediaPipe Selfie Segmenter. |
+| `index.html` | Teacher Control Panel (`PC`). |
+| `presentation.html` | Student Projection Window (`VP`). |
+| `activities/shared.js` | Asset path constants (`IMG`, `FLAG`, `DIBUJOS`, `PHOTOS`, `CPHOTOS`) and shared datasets (`CALEN_PHOTOS`, `ALREADY_KNOW_ENGLISH`, `COUNTRY_FLAG_CODE`). |
+| `courses/5to-6to.js` & `courses/7mo-8vo.js` | Units and activities (`COURSES['5to-6to']`, `COURSES['7mo-8vo']`). |
+| `game1/game-data.js` & `game1/house-map.js` | Scene exploration game data and navigation map. |
+| `Reference/*.html` | 4 teacher reference HTML docs opened via `window.open()`. |
+| `Images/`, `photosCalen/`, `curso-fotos-paises/`, `dibujos/`, `StoryImages/` | Image banks (`.webp`, `.jpg`, `.png`, `.svg`). |
+| `vendor/mediapipe/` | Local MediaPipe Selfie Segmenter model and WASM runtime. |

@@ -34,3 +34,18 @@
 1. **Multi-Asset (`"Seguro Automotriz"` & `"Seguro de Vivienda"`):** Insures multiple vehicles/properties individually (`ins_automotriz_${assetId}`, `ins_vivienda_${assetId}`), validating real asset ownership and asset-tier pricing.
 2. **Single Policies:** `"Seguro de Fraude"` ($1.150/mo; applies to `"Cuenta RUT / Vista"`, `"Cuenta Corriente"`, and `"Tarjeta de Crédito"`, excluding `"Cuenta de Ahorro"`), `"Desgravamen"` ($1.900/mo), `"Cesantía"` ($4.500/mo), `"Vida"` ($9.500/mo for $20M), `"Salud Complementario"` ($14.000/mo).
 3. **Modal Confirmation:** Every hire or cancellation (`"Terminar seguro"`) requires modal confirmation showing insured asset, monthly fee, and coverage.
+
+## UC-07: Criptomonedas in Other Investments
+1. The user opens `"Otras Inversiones"` → `"Criptomonedas"` and sees Bitcoin (BTC), Ethereum (ETH), Solana (SOL), and XRP (Ripple) in two columns.
+2. Each card shows name, icon, description, exchange commission, minimum amount, current valued balance, `"Comprar"`, and enabled/disabled `"Vender"`.
+3. `"Comprar"` opens the investment contract modal and creates an investment position using the selected funding source.
+4. `"Vender"` opens the redemption modal for that cryptocurrency. The user may enter a partial amount or select `"Vender todo"`; the modal recalculates fees, net proceeds, and remaining balance.
+5. Confirmation transfers the net proceeds to cash or the selected bank account, reduces or removes the corresponding position, and refreshes the crypto cards and HUD.
+
+## UC-08: APV & AFP Cuenta 2 in Other Investments
+1. APV contracting selects one tax regime and one AFP multifund using single-choice radio options; Fondo C is selected by default. The account starts with a zero balance.
+2. APV account actions separately change regime, change multifund, make an individual contribution, manage the monthly contribution, and cancel the account.
+3. AFP Cuenta 2 contracting selects one multifund using radio options; Fondo C is selected by default. The account starts with a zero balance and does not request an APV tax regime.
+4. Cuenta 2 account actions separately change multifund, make an individual contribution, manage the monthly contribution, and cancel the account.
+5. Individual APV contributions require at least `$10.000`; Cuenta 2 contributions require at least `$5.000`. Both accept cash or an eligible bank account and update balances, contributed capital, and invested totals.
+6. Monthly contributions require a valid bank account and minimum monthly amount. Users can update an active amount or stop the monthly contribution using a separate action.
