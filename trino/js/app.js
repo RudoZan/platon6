@@ -1,0 +1,3473 @@
+/**
+ * app.js — Navegación móvil, Configuración de mínimo diario (10..100),
+ * Módulo 1: Reconocer Intervalos y Módulo 2: Cantar Notas (Gran Pentagrama Sol/Fa de 2 compases).
+ */
+
+/** Versión de la aplicación — incrementar con cada release. */
+const APP_VERSION = 'v1.0.0027';
+
+const VIEWS = {
+  home: { id: 'view-home', badge: 'Inicio' },
+  intervals: { id: 'view-intervals', badge: 'Intervalos' },
+  'interval-exercise': { id: 'view-interval-exercise', badge: 'Intervalos' },
+  singing: { id: 'view-singing', badge: 'Cantar' },
+  'singing-exercise': { id: 'view-singing-exercise', badge: 'Cantar' },
+  settings: { id: 'view-settings', badge: 'Ajustes' },
+};
+
+const NOTE_NAMES_ES = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
+
+/**
+ * Catálogo de intervalos en semitonos y su etiqueta en español.
+ */
+const INTERVAL_CATALOG = {
+  '1J': { label: 'Unísono', semitones: 0 },
+  '2m': { label: '2ª Menor', semitones: 1 },
+  '2M': { label: '2ª Mayor', semitones: 2 },
+  '3m': { label: '3ª Menor', semitones: 3 },
+  '3M': { label: '3ª Mayor', semitones: 4 },
+  '4J': { label: '4ª Justa', semitones: 5 },
+  '4A': { label: 'Tritono', semitones: 6 },
+  '5J': { label: '5ª Justa', semitones: 7 },
+  '6m': { label: '6ª Menor', semitones: 8 },
+  '6M': { label: '6ª Mayor', semitones: 9 },
+  '7m': { label: '7ª Menor', semitones: 10 },
+  '7M': { label: '7ª Mayor', semitones: 11 },
+  '8J': { label: '8ª Justa', semitones: 12 },
+};
+
+const ALL_OCTAVE_INTERVALS = [
+  '1J', '2m', '2M', '3m', '3M', '4J', '4A', '5J', '6m', '6M', '7m', '7M', '8J',
+];
+
+// Notas naturales de inicio para los Bloques 2 y 3 (Do3 a Mi4: Do, Re, Mi, Fa, Sol, La, Si)
+const NATURAL_TONIC_MIDIS = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64];
+
+// Bloque 1 — Nivel 1: Tónicas Do, Re, Sol (Octavas 3 y 4) -> 100% notas naturales
+const LEVEL_1_RESTRICTED_PAIRS = {
+  '1J': [
+    [48, 48], [50, 50], [55, 55], // Do3-Do3, Re3-Re3, Sol3-Sol3
+    [60, 60], [62, 62], [67, 67], // Do4-Do4, Re4-Re4, Sol4-Sol4
+  ],
+  '2M': [
+    [48, 50], [50, 52], [55, 57], // Do3-Re3, Re3-Mi3, Sol3-La3
+    [60, 62], [62, 64], [67, 69], // Do4-Re4, Re4-Mi4, Sol4-La4
+  ],
+};
+
+// Bloque 1 — Niveles 2 y 3: Tónicas Do, Re, Fa, Sol (Octavas 3 y 4) -> 100% notas naturales
+const LEVEL_2_3_RESTRICTED_PAIRS = {
+  '1J': [
+    [48, 48], [50, 50], [53, 53], [55, 55],
+    [60, 60], [62, 62], [65, 65], [67, 67],
+  ],
+  '2M': [
+    [48, 50], [50, 52], [53, 55], [55, 57], // Do-Re, Re-Mi, Fa-Sol, Sol-La
+    [60, 62], [62, 64], [65, 67], [67, 69],
+  ],
+  '3M': [
+    [48, 52], [53, 57], [55, 59], // Do-Mi, Fa-La, Sol-Si
+    [60, 64], [65, 69], [67, 71],
+  ],
+  '5J': [
+    [48, 55], [50, 57], [53, 60], [55, 62], // Do-Sol, Re-La, Fa-Do, Sol-Re
+    [60, 67], [62, 69], [65, 72], [67, 74],
+  ],
+};
+
+// Bloque 1 — Nivel 4: Tónicas Do, Re, Mi, Fa, Sol, La (Octavas 3 y 4) -> 100% notas naturales
+const LEVEL_4_RESTRICTED_PAIRS = {
+  '1J': [
+    [48, 48], [50, 50], [52, 52], [53, 53], [55, 55], [57, 57],
+    [60, 60], [62, 62], [64, 64], [65, 65], [67, 67], [69, 69],
+  ],
+  '2M': [
+    [48, 50], [50, 52], [53, 55], [55, 57], [57, 59], // Do-Re, Re-Mi, Fa-Sol, Sol-La, La-Si
+    [60, 62], [62, 64], [65, 67], [67, 69], [69, 71],
+  ],
+  '3M': [
+    [48, 52], [53, 57], [55, 59], // Do-Mi, Fa-La, Sol-Si
+    [60, 64], [65, 69], [67, 71],
+  ],
+  '4J': [
+    [48, 53], [50, 55], [52, 57], [55, 60], [57, 62], // Do-Fa, Re-Sol, Mi-La, Sol-Do, La-Re
+    [60, 65], [62, 67], [64, 69], [67, 72], [69, 74],
+  ],
+  '5J': [
+    [48, 55], [50, 57], [52, 59], [53, 60], [55, 62], [57, 64], // Do-Sol, Re-La, Mi-Si, Fa-Do, Sol-Re, La-Mi
+    [60, 67], [62, 69], [64, 71], [65, 72], [67, 74],
+  ],
+  '8J': [
+    [48, 60], [50, 62], [52, 64], [53, 65], [55, 67], [57, 69], [60, 72],
+  ],
+};
+
+/**
+ * Progresión pedagógica de 14 niveles en 4 bloques:
+ * - Bloque 1 (Niveles 1–4): Pilares Mayores y Justos (100% notas naturales en ambas notas)
+ * - Bloque 2 (Niveles 5–7): Contraste Menor vs. Mayor (Tónicas naturales Do..Si, 2ª nota libre)
+ * - Bloque 3 (Niveles 8–11): Intervalos Confusos y Amplios (Tónicas naturales Do..Si, 2ª nota libre)
+ * - Bloque 4 (Niveles 12–14): Integración Total (Las 12 notas cromáticas en tónica y 2ª nota)
+ */
+const INTERVAL_LEVELS = [
+  // Bloque 1: Pilares Mayores y Justos (ambas notas naturales)
+  {
+    id: 1,
+    block: 1,
+    title: 'Nivel 1 · Unísono y 2ª Mayor',
+    desc: 'Base inicial: Unísono y 2ª Mayor con tónicas Do, Re y Sol (sin sostenidos).',
+    options: ['1J', '2M'],
+    restrictedPairs: LEVEL_1_RESTRICTED_PAIRS,
+  },
+  {
+    id: 2,
+    block: 1,
+    title: 'Nivel 2 · Unísono, 2ª y 3ª Mayor',
+    desc: 'Pilares mayores cortos con tónicas Do, Re, Fa y Sol (sin sostenidos).',
+    options: ['1J', '2M', '3M'],
+    restrictedPairs: LEVEL_2_3_RESTRICTED_PAIRS,
+  },
+  {
+    id: 3,
+    block: 1,
+    title: 'Nivel 3 · Unísono, 2ª M, 3ª M y 5ª Justa',
+    desc: 'Incorpora la 5ª Justa con tónicas Do, Re, Fa y Sol (sin sostenidos).',
+    options: ['1J', '2M', '3M', '5J'],
+    restrictedPairs: LEVEL_2_3_RESTRICTED_PAIRS,
+  },
+  {
+    id: 4,
+    block: 1,
+    title: 'Nivel 4 · Pilares Mayores y Justos',
+    desc: 'Suma 4ª Justa y 8ª Justa con tónicas Do, Re, Mi, Fa, Sol y La (sin sostenidos).',
+    options: ['1J', '2M', '3M', '4J', '5J', '8J'],
+    restrictedPairs: LEVEL_4_RESTRICTED_PAIRS,
+  },
+
+  // Bloque 2: Contraste Menor vs. Mayor (Tónicas naturales Do..Si, 2ª nota libre)
+  {
+    id: 5,
+    block: 2,
+    title: 'Nivel 5 · Unísono, 2ª Menor y 2ª Mayor',
+    desc: 'Semitono vs. tono partiendo de cualquier nota natural de la escala de Do.',
+    options: ['1J', '2m', '2M'],
+    naturalTonicsOnly: true,
+  },
+  {
+    id: 6,
+    block: 2,
+    title: 'Nivel 6 · Segundas y Terceras Completas',
+    desc: 'Unísono, 2ªm, 2ªM, 3ªm y 3ªM partiendo de tónicas naturales (Do a Si).',
+    options: ['1J', '2m', '2M', '3m', '3M'],
+    naturalTonicsOnly: true,
+  },
+  {
+    id: 7,
+    block: 2,
+    title: 'Nivel 7 · Primera Mitad de la Octava',
+    desc: 'Desde Unísono hasta 5ª Justa partiendo de tónicas naturales (Do a Si).',
+    options: ['1J', '2m', '2M', '3m', '3M', '4J', '5J'],
+    naturalTonicsOnly: true,
+  },
+
+  // Bloque 3: Intervalos que se confunden e intervalos amplios (Tónicas naturales Do..Si, 2ª nota libre)
+  {
+    id: 8,
+    block: 3,
+    title: 'Nivel 8 · 4ª Justa, Tritono y 5ª Justa',
+    desc: 'Foco en los 3 intervalos centrales partiendo de tónicas naturales (Do a Si).',
+    options: ['4J', '4A', '5J'],
+    naturalTonicsOnly: true,
+  },
+  {
+    id: 9,
+    block: 3,
+    title: 'Nivel 9 · Quinta y Sextas (6ª m y 6ª M)',
+    desc: 'Distingue 6ª Menor y 6ª Mayor desde tónicas naturales (Do a Si).',
+    options: ['5J', '6m', '6M'],
+    naturalTonicsOnly: true,
+  },
+  {
+    id: 10,
+    block: 3,
+    title: 'Nivel 10 · Séptimas y Octava (7ª m, 7ª M y 8ª J)',
+    desc: 'Reconoce 7ª Menor, 7ª Mayor y 8ª Justa desde tónicas naturales (Do a Si).',
+    options: ['7m', '7M', '8J'],
+    naturalTonicsOnly: true,
+  },
+  {
+    id: 11,
+    block: 3,
+    title: 'Nivel 11 · Intervalos Amplios (5ª a 8ª)',
+    desc: 'Saltos amplios (5ªJ, 6ªm, 6ªM, 7ªm, 7ªM y 8ªJ) desde tónicas naturales.',
+    options: ['5J', '6m', '6M', '7m', '7M', '8J'],
+    naturalTonicsOnly: true,
+  },
+
+  // Bloque 4: Integración Total (Las 12 notas cromáticas en tónica y 2ª nota)
+  {
+    id: 12,
+    block: 4,
+    title: 'Nivel 12 · Escala Mayor / Justos (1 Octava)',
+    desc: 'Intervalos mayores y justos usando las 12 notas cromáticas en 1 octava (Do4–Do5).',
+    options: ['1J', '2M', '3M', '4J', '5J', '6M', '7M', '8J'],
+    midiRange: { minStart: 60, maxEnd: 72, label: '1 Octava (Do4 a Do5)' },
+  },
+  {
+    id: 13,
+    block: 4,
+    title: 'Nivel 13 · Todos los Intervalos (1 Octava)',
+    desc: 'Los 13 intervalos con las 12 notas cromáticas dentro de 1 octava (Do4–Do5).',
+    options: ALL_OCTAVE_INTERVALS,
+    midiRange: { minStart: 60, maxEnd: 72, label: '1 Octava (Do4 a Do5)' },
+  },
+  {
+    id: 14,
+    block: 4,
+    title: 'Nivel 14 · Todos los Intervalos (2 Octavas)',
+    desc: 'Los 13 intervalos con las 12 notas cromáticas a lo largo de 2 octavas (Do3–Do5).',
+    options: ALL_OCTAVE_INTERVALS,
+    midiRange: { minStart: 48, maxEnd: 72, label: '2 Octavas (Do3 a Do5)' },
+  },
+];
+
+const SINGING_LEVELS = INTERVAL_LEVELS.map((lvl) => ({
+  ...lvl,
+  title: lvl.title.replace(' · ', ' · Cantar '),
+  bpm: 72,
+}));
+
+const STORAGE_KEY_SETTINGS = 'trino_settings_v2';
+const STORAGE_KEY_PROGRESS = 'trino_interval_progress_v1';
+const STORAGE_KEY_SING_PROGRESS = 'trino_singing_progress_v1';
+
+class TrinoShell {
+  constructor() {
+    this.currentView = 'home';
+    this.audioCtx = null;
+
+    // Configuración (mínimo diario, rango vocal y volúmenes)
+    this.dailyMin = this.loadDailyMin();
+    const vocalRange = this.loadVocalRange();
+    this.vocalMinMidi = vocalRange.min;
+    this.vocalMaxMidi = vocalRange.max;
+    const vols = this.loadVolumes();
+    this.noteVolume = vols.note;
+    this.clickVolume = vols.click;
+    this.progress = this.loadProgress(STORAGE_KEY_PROGRESS);
+    this.singProgress = this.loadProgress(STORAGE_KEY_SING_PROGRESS);
+
+    // Estado de ejercicio activo
+    this.activeModule = null; // 'intervals' | 'singing'
+    this.activeLevel = null;
+    this.currentQuestion = null;
+    this.delayedPlayTimer = null;
+    this.autoNextTimer = null;
+    this.noteAnimTimers = [];
+    this.sessionLog = [];
+    this.singSessionLog = [];
+
+    // Secuencia y grabación para Cantar Notas
+    this.singBpm = this.loadSingBpm();
+    this.singRafId = null;
+    this.singTimers = [];
+    this.isRecording = false;
+    this.mediaStream = null;
+    this.processorNode = null;
+    this.sourceNode = null;
+    this.lastVoiceFrames = [];
+    this.lastNoteGrades = null;
+    this.lastNoteDetails = null;
+    this.lastDebugData = null;
+
+    this.cacheDom();
+    this.bindEvents();
+    this.syncSettingsUi();
+    this.renderIntervalLevels();
+    this.renderSingingLevels();
+    this.syncVersionBadge();
+    this.navigateTo('home');
+  }
+
+  cacheDom() {
+    this.brandBtn = document.getElementById('brand-home-btn');
+    this.sectionBadge = document.getElementById('top-section-badge');
+    this.versionBadge = document.getElementById('app-version-badge');
+    this.menuBtn = document.getElementById('menu-toggle-btn');
+    this.menuDrawer = document.getElementById('menu-drawer');
+    this.bottomZone = document.getElementById('bottom-commands');
+
+    this.intervalsLevelsList = document.getElementById('intervals-levels-list');
+    this.dailyGoalText = document.getElementById('intervals-daily-goal-text');
+    this.singingLevelsList = document.getElementById('singing-levels-list');
+    this.singingDailyGoalText = document.getElementById('singing-daily-goal-text');
+    this.dailyMinSelect = document.getElementById('daily-min-select');
+    this.vocalPresetSelect = document.getElementById('vocal-preset-select');
+    this.vocalMinSelect = document.getElementById('vocal-min-select');
+    this.vocalMaxSelect = document.getElementById('vocal-max-select');
+    this.btnTestVocalMin = document.getElementById('btn-test-vocal-min');
+    this.btnTestVocalMax = document.getElementById('btn-test-vocal-max');
+    this.btnDetectVocalMin = document.getElementById('btn-detect-vocal-min');
+    this.btnDetectVocalMax = document.getElementById('btn-detect-vocal-max');
+    this.vocalDetectStatus = document.getElementById('vocal-detect-status');
+    this.btnMicTester = document.getElementById('btn-mic-tester');
+    this.micMeterFill = document.getElementById('mic-meter-fill');
+    this.micLiveNote = document.getElementById('mic-live-note');
+    this.micLiveDetail = document.getElementById('mic-live-detail');
+    this.isMicTesting = false;
+    this.isDetectingVocalLimit = false;
+    this.noteVolumeInput = document.getElementById('note-volume-input');
+    this.noteVolumeVal = document.getElementById('note-volume-val');
+    this.btnTestNoteVol = document.getElementById('btn-test-note-vol');
+    this.clickVolumeInput = document.getElementById('click-volume-input');
+    this.clickVolumeVal = document.getElementById('click-volume-val');
+    this.btnTestClickVol = document.getElementById('btn-test-click-vol');
+
+    // Elementos de ejercicio de Reconocer Intervalos
+    this.exLevelTitle = document.getElementById('ex-level-title');
+    this.exDateLabel = document.getElementById('ex-date-label');
+    this.exGoodCount = document.getElementById('ex-good-count');
+    this.exBadCount = document.getElementById('ex-bad-count');
+    this.exDoneCount = document.getElementById('ex-done-count');
+    this.exAnswersContainer = document.getElementById('ex-answers-container');
+    this.mysteryNote1 = document.getElementById('mystery-note-1');
+    this.mysteryNote2 = document.getElementById('mystery-note-2');
+    this.sessionLogWrapper = document.getElementById('session-log-wrapper');
+    this.sessionLogTbody = document.getElementById('session-log-tbody');
+
+    // Elementos de ejercicio de Cantar Notas
+    this.singLevelTitle = document.getElementById('sing-level-title');
+    this.singDateLabel = document.getElementById('sing-date-label');
+    this.singGoodCount = document.getElementById('sing-good-count');
+    this.singBadCount = document.getElementById('sing-bad-count');
+    this.singDoneCount = document.getElementById('sing-done-count');
+    this.singIntervalName = document.getElementById('sing-interval-name');
+    this.singBpmLabel = document.getElementById('sing-bpm-label');
+    this.singPhaseBadge = document.getElementById('sing-phase-badge');
+    this.singStaffCanvas = document.getElementById('sing-staff-canvas');
+    this.singFeedbackText = document.getElementById('sing-feedback-text');
+    this.singSessionLogWrapper = document.getElementById('sing-session-log-wrapper');
+    this.singSessionLogTbody = document.getElementById('sing-session-log-tbody');
+    this.singDebugPanel = document.getElementById('sing-debug-panel');
+    this.singDebugBody  = document.getElementById('sing-debug-body');
+    this.btnDebugModal  = document.getElementById('btn-debug-modal');
+    this.btnDebugPopup  = document.getElementById('btn-debug-popup');
+    this.debugLargeModal = document.getElementById('debug-large-modal');
+    this.debugLargeBody  = document.getElementById('debug-large-body');
+    this.btnDebugModalClose = document.getElementById('btn-debug-modal-close');
+    this.btnDebugPopupFromModal = document.getElementById('btn-debug-popup-from-modal');
+    this.debugPopupWin = null;
+
+    // Botones en línea "Comenzar" (donde luego va la tabla de sesión)
+    this.exInlineStartBox = document.getElementById('ex-inline-start-box');
+    this.btnStartIntervals = document.getElementById('btn-start-intervals');
+    this.singInlineStartBox = document.getElementById('sing-inline-start-box');
+    this.btnStartSinging = document.getElementById('btn-start-singing');
+
+    // Modal BPM
+    this.bpmModal = document.getElementById('bpm-modal');
+    this.bpmModalValue = document.getElementById('bpm-modal-value');
+    this.bpmRangeInput = document.getElementById('bpm-range-input');
+    this.bpmMinusBtn = document.getElementById('bpm-minus-btn');
+    this.bpmPlusBtn = document.getElementById('bpm-plus-btn');
+    this.btnBpmConfirm = document.getElementById('btn-bpm-confirm');
+
+    // Modal Info de Nivel
+    this.levelInfoModal = document.getElementById('level-info-modal');
+    this.levelInfoModalModule = document.getElementById('level-info-modal-module');
+    this.levelInfoModalTitle = document.getElementById('level-info-modal-title');
+    this.levelInfoModalBody = document.getElementById('level-info-modal-body');
+    this.btnLevelInfoClose = document.getElementById('btn-level-info-close');
+  }
+
+  syncVersionBadge() {
+    if (this.versionBadge) {
+      this.versionBadge.textContent = APP_VERSION;
+    }
+  }
+
+  getFormattedSpanishDate() {
+    const days = [
+      'Domingo',
+      'Lunes',
+      'Martes',
+      'Miércoles',
+      'Jueves',
+      'Viernes',
+      'Sábado',
+    ];
+    const now = new Date();
+    const dayName = days[now.getDay()];
+    return `${dayName} ${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
+  }
+
+  getTodayKey() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  loadDailyMin() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const val = parseInt(parsed.dailyMin, 10);
+        if (val >= 10 && val <= 100 && val % 10 === 0) return val;
+      }
+    } catch (_) {}
+    return 100;
+  }
+
+  saveAllSettings() {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY_SETTINGS,
+        JSON.stringify({
+          dailyMin: this.dailyMin,
+          singBpm: this.singBpm,
+          vocalMinMidi: this.vocalMinMidi,
+          vocalMaxMidi: this.vocalMaxMidi,
+          noteVolume: this.noteVolume,
+          clickVolume: this.clickVolume,
+        })
+      );
+    } catch (_) {}
+  }
+
+  saveDailyMin(val) {
+    this.dailyMin = val;
+    this.saveAllSettings();
+  }
+
+  loadVocalRange() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const min = parseInt(parsed.vocalMinMidi, 10);
+        const max = parseInt(parsed.vocalMaxMidi, 10);
+        if (min >= 36 && max <= 84 && max - min >= 12) {
+          return { min, max };
+        }
+      }
+    } catch (_) {}
+    return { min: 48, max: 72 }; // Do3 a Do5 por defecto
+  }
+
+  loadVolumes() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const note = parseInt(parsed.noteVolume, 10);
+        const click = parseInt(parsed.clickVolume, 10);
+        return {
+          note: note >= 10 && note <= 100 ? note : 80,
+          click: click >= 10 && click <= 100 ? click : 90,
+        };
+      }
+    } catch (_) {}
+    return { note: 80, click: 90 };
+  }
+
+  loadSingBpm() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const val = parseInt(parsed.singBpm, 10);
+        if (val >= 40 && val <= 140) return val;
+      }
+    } catch (_) {}
+    return 72;
+  }
+
+  saveSingBpm(val) {
+    this.singBpm = Math.max(40, Math.min(140, val));
+    this.saveAllSettings();
+  }
+
+  loadProgress(storageKey) {
+    const today = this.getTodayKey();
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.date !== today) {
+          const resetLevels = {};
+          Object.keys(parsed.levels || {}).forEach((id) => {
+            resetLevels[id] = {
+              good: 0,
+              bad: 0,
+              stars: parsed.levels[id].stars || 0,
+            };
+          });
+          return { date: today, levels: resetLevels };
+        }
+        return parsed;
+      }
+    } catch (_) {}
+    return { date: today, levels: {} };
+  }
+
+  saveProgress() {
+    try {
+      localStorage.setItem(STORAGE_KEY_PROGRESS, JSON.stringify(this.progress));
+      localStorage.setItem(STORAGE_KEY_SING_PROGRESS, JSON.stringify(this.singProgress));
+    } catch (_) {}
+  }
+
+  getLevelStats(levelId, moduleType = 'intervals') {
+    const store = moduleType === 'singing' ? this.singProgress : this.progress;
+    if (!store.levels[levelId]) {
+      store.levels[levelId] = { good: 0, bad: 0, stars: 0 };
+    }
+    return store.levels[levelId];
+  }
+
+  syncSettingsUi() {
+    if (this.dailyMinSelect) {
+      this.dailyMinSelect.value = String(this.dailyMin);
+    }
+    if (this.dailyGoalText) {
+      this.dailyGoalText.textContent = `Meta diaria por nivel: ${this.dailyMin} ejercicios.`;
+    }
+    if (this.singingDailyGoalText) {
+      this.singingDailyGoalText.textContent = `Meta diaria por nivel: ${this.dailyMin} ejercicios.`;
+    }
+
+    // Poblar selectores de nota mínima y máxima si aún están vacíos (Do2=36 a Do6=84)
+    if (this.vocalMinSelect && this.vocalMinSelect.options.length === 0) {
+      let optsMin = '';
+      let optsMax = '';
+      for (let m = 36; m <= 72; m++) {
+        optsMin += `<option value="${m}">${this.midiToNoteWithOctaveEs(m)}</option>`;
+      }
+      for (let m = 48; m <= 84; m++) {
+        optsMax += `<option value="${m}">${this.midiToNoteWithOctaveEs(m)}</option>`;
+      }
+      this.vocalMinSelect.innerHTML = optsMin;
+      if (this.vocalMaxSelect) this.vocalMaxSelect.innerHTML = optsMax;
+    }
+
+    if (this.vocalMinSelect) this.vocalMinSelect.value = String(this.vocalMinMidi);
+    if (this.vocalMaxSelect) this.vocalMaxSelect.value = String(this.vocalMaxMidi);
+
+    if (this.vocalPresetSelect) {
+      const pairKey = `${this.vocalMinMidi}-${this.vocalMaxMidi}`;
+      const hasPreset = Array.from(this.vocalPresetSelect.options).some((o) => o.value === pairKey);
+      this.vocalPresetSelect.value = hasPreset ? pairKey : 'custom';
+    }
+
+    if (this.noteVolumeInput) this.noteVolumeInput.value = String(this.noteVolume);
+    if (this.noteVolumeVal) this.noteVolumeVal.textContent = `${this.noteVolume}%`;
+    if (this.clickVolumeInput) this.clickVolumeInput.value = String(this.clickVolume);
+    if (this.clickVolumeVal) this.clickVolumeVal.textContent = `${this.clickVolume}%`;
+  }
+
+  bindEvents() {
+    this.menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.menuDrawer.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', () => {
+      this.menuDrawer.classList.add('hidden');
+    });
+
+    this.brandBtn.addEventListener('click', () => {
+      this.navigateTo('home');
+    });
+
+    document.querySelectorAll('[data-target]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-target');
+        this.navigateTo(target);
+      });
+    });
+
+    document.querySelectorAll('[data-open-module]').forEach((card) => {
+      card.addEventListener('click', () => {
+        const target = card.getAttribute('data-open-module');
+        this.navigateTo(target);
+      });
+    });
+
+    if (this.dailyMinSelect) {
+      this.dailyMinSelect.addEventListener('change', () => {
+        const val = parseInt(this.dailyMinSelect.value, 10);
+        this.saveDailyMin(val);
+        this.syncSettingsUi();
+        this.renderIntervalLevels();
+        this.renderSingingLevels();
+      });
+    }
+
+    // Eventos de rango vocal y volúmenes en Configuración
+    if (this.vocalPresetSelect) {
+      this.vocalPresetSelect.addEventListener('change', () => {
+        const val = this.vocalPresetSelect.value;
+        if (val !== 'custom') {
+          const [minStr, maxStr] = val.split('-');
+          this.vocalMinMidi = parseInt(minStr, 10);
+          this.vocalMaxMidi = parseInt(maxStr, 10);
+          this.saveAllSettings();
+          this.syncSettingsUi();
+        }
+      });
+    }
+
+    if (this.vocalMinSelect) {
+      this.vocalMinSelect.addEventListener('change', () => {
+        const minVal = parseInt(this.vocalMinSelect.value, 10);
+        this.vocalMinMidi = minVal;
+        if (this.vocalMaxMidi < minVal + 12) {
+          this.vocalMaxMidi = Math.min(84, minVal + 12);
+        }
+        this.saveAllSettings();
+        this.syncSettingsUi();
+      });
+    }
+
+    if (this.vocalMaxSelect) {
+      this.vocalMaxSelect.addEventListener('change', () => {
+        const maxVal = parseInt(this.vocalMaxSelect.value, 10);
+        this.vocalMaxMidi = maxVal;
+        if (this.vocalMinMidi > maxVal - 12) {
+          this.vocalMinMidi = Math.max(36, maxVal - 12);
+        }
+        this.saveAllSettings();
+        this.syncSettingsUi();
+      });
+    }
+
+    if (this.btnTestVocalMin) {
+      this.btnTestVocalMin.addEventListener('click', async () => {
+        await this.ensureAudioReady();
+        const hz = 440 * Math.pow(2, (this.vocalMinMidi - 69) / 12);
+        this.playTone(hz, this.audioCtx.currentTime, 0.7);
+      });
+    }
+
+    if (this.btnTestVocalMax) {
+      this.btnTestVocalMax.addEventListener('click', async () => {
+        await this.ensureAudioReady();
+        const hz = 440 * Math.pow(2, (this.vocalMaxMidi - 69) / 12);
+        this.playTone(hz, this.audioCtx.currentTime, 0.7);
+      });
+    }
+
+    if (this.btnDetectVocalMin) {
+      this.btnDetectVocalMin.addEventListener('click', () => {
+        this.detectVocalLimitByVoice('min');
+      });
+    }
+
+    if (this.btnDetectVocalMax) {
+      this.btnDetectVocalMax.addEventListener('click', () => {
+        this.detectVocalLimitByVoice('max');
+      });
+    }
+
+    if (this.btnMicTester) {
+      this.btnMicTester.addEventListener('click', () => {
+        this.toggleMicTester();
+      });
+    }
+
+    if (this.noteVolumeInput) {
+      this.noteVolumeInput.addEventListener('input', () => {
+        this.noteVolume = parseInt(this.noteVolumeInput.value, 10) || 80;
+        if (this.noteVolumeVal) this.noteVolumeVal.textContent = `${this.noteVolume}%`;
+        this.saveAllSettings();
+      });
+    }
+
+    if (this.btnTestNoteVol) {
+      this.btnTestNoteVol.addEventListener('click', async () => {
+        await this.ensureAudioReady();
+        this.playTone(440, this.audioCtx.currentTime, 0.55);
+      });
+    }
+
+    if (this.clickVolumeInput) {
+      this.clickVolumeInput.addEventListener('input', () => {
+        this.clickVolume = parseInt(this.clickVolumeInput.value, 10) || 90;
+        if (this.clickVolumeVal) this.clickVolumeVal.textContent = `${this.clickVolume}%`;
+        this.saveAllSettings();
+      });
+    }
+
+    if (this.btnTestClickVol) {
+      this.btnTestClickVol.addEventListener('click', async () => {
+        await this.ensureAudioReady();
+        this.playMetronomeClick(this.audioCtx.currentTime, true);
+      });
+    }
+
+    if (this.btnStartIntervals) {
+      this.btnStartIntervals.addEventListener('click', () => {
+        if (this.exInlineStartBox) this.exInlineStartBox.classList.add('hidden');
+        this.schedulePlayAfterOneSecond();
+      });
+    }
+
+    if (this.btnStartSinging) {
+      this.btnStartSinging.addEventListener('click', async () => {
+        if (this.singInlineStartBox) this.singInlineStartBox.classList.add('hidden');
+        await this.ensureMicStreamReady();
+        this.schedulePlayAfterOneSecond();
+      });
+    }
+
+    // Abrir y controlar el Pop-up de BPM
+    if (this.singBpmLabel) {
+      this.singBpmLabel.addEventListener('click', () => {
+        this.openBpmModal();
+      });
+    }
+
+    if (this.singStaffCanvas) {
+      this.singStaffCanvas.addEventListener('click', (e) => {
+        const rect = this.singStaffCanvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        // Si toca arriba a la izquierda sobre "♩ = BPM" en el canvas
+        if (x <= 75 && y <= 24) {
+          this.openBpmModal();
+        }
+      });
+    }
+
+    if (this.bpmRangeInput) {
+      this.bpmRangeInput.addEventListener('input', () => {
+        this.bpmModalValue.textContent = this.bpmRangeInput.value;
+      });
+    }
+
+    if (this.bpmMinusBtn) {
+      this.bpmMinusBtn.addEventListener('click', () => {
+        const nextVal = Math.max(40, parseInt(this.bpmRangeInput.value, 10) - 2);
+        this.bpmRangeInput.value = String(nextVal);
+        this.bpmModalValue.textContent = String(nextVal);
+      });
+    }
+
+    if (this.bpmPlusBtn) {
+      this.bpmPlusBtn.addEventListener('click', () => {
+        const nextVal = Math.min(140, parseInt(this.bpmRangeInput.value, 10) + 2);
+        this.bpmRangeInput.value = String(nextVal);
+        this.bpmModalValue.textContent = String(nextVal);
+      });
+    }
+
+    if (this.btnBpmConfirm) {
+      this.btnBpmConfirm.addEventListener('click', () => {
+        const chosenBpm = parseInt(this.bpmRangeInput.value, 10) || 72;
+        this.saveSingBpm(chosenBpm);
+        if (this.singBpmLabel) {
+          this.singBpmLabel.textContent = `♩ = ${this.singBpm} BPM`;
+        }
+        this.bpmModal.classList.add('hidden');
+        this.drawGrandStaff(null, this.lastVoiceFrames);
+      });
+    }
+
+    // Ventana grande flotante y ventana aparte para el Debug
+    if (this.btnDebugModal) {
+      this.btnDebugModal.addEventListener('click', () => {
+        if (this.debugLargeModal) this.debugLargeModal.classList.remove('hidden');
+      });
+    }
+    if (this.btnDebugModalClose) {
+      this.btnDebugModalClose.addEventListener('click', () => {
+        if (this.debugLargeModal) this.debugLargeModal.classList.add('hidden');
+      });
+    }
+    if (this.debugLargeModal) {
+      this.debugLargeModal.addEventListener('click', (e) => {
+        if (e.target === this.debugLargeModal) {
+          this.debugLargeModal.classList.add('hidden');
+        }
+      });
+    }
+    if (this.btnDebugPopup) {
+      this.btnDebugPopup.addEventListener('click', () => this.openDebugPopupWindow());
+    }
+    if (this.btnDebugPopupFromModal) {
+      this.btnDebugPopupFromModal.addEventListener('click', () => this.openDebugPopupWindow());
+    }
+
+    if (this.btnLevelInfoClose) {
+      this.btnLevelInfoClose.addEventListener('click', () => {
+        if (this.levelInfoModal) this.levelInfoModal.classList.add('hidden');
+      });
+    }
+    if (this.levelInfoModal) {
+      this.levelInfoModal.addEventListener('click', (e) => {
+        if (e.target === this.levelInfoModal) {
+          this.levelInfoModal.classList.add('hidden');
+        }
+      });
+    }
+  }
+
+  openBpmModal() {
+    if (!this.bpmModal) return;
+    this.stopSingingSequence();
+    this.bpmRangeInput.value = String(this.singBpm);
+    this.bpmModalValue.textContent = String(this.singBpm);
+    this.bpmModal.classList.remove('hidden');
+  }
+
+  renderLevelList(containerEl, levelsArray, moduleType) {
+    if (!containerEl) return;
+    this.syncSettingsUi();
+
+    let suggestedAssigned = false;
+
+    containerEl.innerHTML = levelsArray
+      .map((lvl) => {
+        const stats = this.getLevelStats(lvl.id, moduleType);
+        const totalDone = stats.good + stats.bad;
+        const isDoneToday = totalDone >= this.dailyMin;
+
+        let state = 'pending';
+        let statusLabel = `Hechas: ${totalDone}/${this.dailyMin}`;
+
+        if (isDoneToday) {
+          state = 'done';
+          statusLabel = `Completado (${totalDone}/${this.dailyMin})`;
+        } else if (!suggestedAssigned) {
+          state = 'suggested';
+          suggestedAssigned = true;
+          statusLabel = `Sugerido · ${totalDone}/${this.dailyMin}`;
+        }
+
+        const starsHtml = [1, 2, 3]
+          .map((n) =>
+            n <= stats.stars
+              ? '<span class="star-filled">★</span>'
+              : '<span class="star-empty">★</span>'
+          )
+          .join('');
+
+        const blockNum = lvl.block || 1;
+
+        return `
+          <button type="button" class="level-card block-${blockNum} state-${state}" data-level-id="${lvl.id}">
+            <div class="level-info">
+              <div class="level-top-row">
+                <span class="level-title">${lvl.title}</span>
+                <span class="level-status-pill">${statusLabel}</span>
+              </div>
+              <p class="level-desc">${lvl.desc}</p>
+            </div>
+            <div class="level-right-actions">
+              <div class="level-stars" aria-label="${stats.stars} de 3 estrellas">
+                ${starsHtml}
+              </div>
+              <span role="button" tabindex="0" class="level-info-btn" data-info-level-id="${lvl.id}" title="Ver intervalos, rango y notas del nivel" aria-label="Información del nivel">ℹ</span>
+            </div>
+          </button>
+        `;
+      })
+      .join('');
+
+    containerEl.querySelectorAll('[data-info-level-id]').forEach((infoBtn) => {
+      infoBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = parseInt(infoBtn.getAttribute('data-info-level-id'), 10);
+        const lvl = levelsArray.find((l) => l.id === id);
+        if (lvl) this.openLevelInfoModal(lvl, moduleType);
+      });
+    });
+
+    containerEl.querySelectorAll('[data-level-id]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = parseInt(btn.getAttribute('data-level-id'), 10);
+        if (moduleType === 'singing') {
+          this.startSingingLevel(id);
+        } else {
+          this.startIntervalLevel(id);
+        }
+      });
+    });
+  }
+
+  renderIntervalLevels() {
+    this.renderLevelList(this.intervalsLevelsList, INTERVAL_LEVELS, 'intervals');
+  }
+
+  renderSingingLevels() {
+    this.renderLevelList(this.singingLevelsList, SINGING_LEVELS, 'singing');
+  }
+
+  startIntervalLevel(levelId) {
+    const level = INTERVAL_LEVELS.find((l) => l.id === levelId);
+    if (!level) return;
+
+    this.activeModule = 'intervals';
+    this.activeLevel = level;
+    this.sessionLog = [];
+    this.renderSessionLog();
+    this.generateNextQuestion();
+    this.updateExerciseUi();
+    this.navigateTo('interval-exercise');
+
+    if (this.exInlineStartBox) {
+      this.exInlineStartBox.classList.remove('hidden');
+    }
+  }
+
+  startSingingLevel(levelId) {
+    const level = SINGING_LEVELS.find((l) => l.id === levelId);
+    if (!level) return;
+
+    this.activeModule = 'singing';
+    this.activeLevel = level;
+    this.singSessionLog = [];
+    this.renderSingSessionLog();
+    this.generateNextQuestion();
+    this.updateSingingExerciseUi();
+    this.navigateTo('singing-exercise');
+
+    if (this.singInlineStartBox) {
+      this.singInlineStartBox.classList.remove('hidden');
+    }
+  }
+
+  generateNextQuestion() {
+    if (!this.activeLevel) return;
+    if (this.autoNextTimer) {
+      clearTimeout(this.autoNextTimer);
+      this.autoNextTimer = null;
+    }
+    this.stopSingingSequence();
+
+    const opts = this.activeLevel.options;
+    const randomKey = opts[Math.floor(Math.random() * opts.length)];
+
+    let midi1;
+    let midi2;
+
+    const semitones = INTERVAL_CATALOG[randomKey].semitones;
+    const isSinging = this.activeModule === 'singing';
+    const minAllowed = isSinging ? this.vocalMinMidi : 48;
+    const maxAllowed = isSinging ? Math.max(minAllowed + semitones, this.vocalMaxMidi) : 72;
+
+    if (this.activeLevel.restrictedPairs && this.activeLevel.restrictedPairs[randomKey]) {
+      const basePairs = this.activeLevel.restrictedPairs[randomKey];
+      // Si es el módulo de canto, adaptar los pares restringidos a las octavas del rango vocal del usuario
+      const adaptedPairs = [];
+      if (isSinging) {
+        basePairs.forEach(([m1, m2]) => {
+          for (const shift of [-24, -12, 0, 12, 24]) {
+            const s1 = m1 + shift;
+            const s2 = m2 + shift;
+            if (s1 >= minAllowed && s2 <= maxAllowed) {
+              adaptedPairs.push([s1, s2]);
+            }
+          }
+        });
+      }
+      const pairs = adaptedPairs.length > 0 ? adaptedPairs : basePairs;
+      const chosen = pairs[Math.floor(Math.random() * pairs.length)];
+      midi1 = chosen[0];
+      midi2 = chosen[1];
+    } else if (this.activeLevel.naturalTonicsOnly) {
+      const naturalPitches = [0, 2, 4, 5, 7, 9, 11]; // Do, Re, Mi, Fa, Sol, La, Si
+      const maxStart = Math.max(minAllowed, maxAllowed - semitones);
+      const validTonics = [];
+      for (let m = minAllowed; m <= maxStart; m++) {
+        if (naturalPitches.includes(((m % 12) + 12) % 12)) {
+          validTonics.push(m);
+        }
+      }
+      const pool = validTonics.length > 0 ? validTonics : NATURAL_TONIC_MIDIS;
+      midi1 = pool[Math.floor(Math.random() * pool.length)];
+      midi2 = midi1 + semitones;
+    } else if (this.activeLevel.midiRange) {
+      const minStart = isSinging
+        ? Math.max(this.activeLevel.midiRange.minStart, minAllowed)
+        : this.activeLevel.midiRange.minStart;
+      const effMaxEnd = isSinging
+        ? Math.min(this.activeLevel.midiRange.maxEnd, maxAllowed)
+        : this.activeLevel.midiRange.maxEnd;
+      const fallbackMin = effMaxEnd - semitones >= minStart ? minStart : minAllowed;
+      const fallbackMax = effMaxEnd - semitones >= minStart ? effMaxEnd : maxAllowed;
+      const maxStart = Math.max(fallbackMin, fallbackMax - semitones);
+      midi1 = fallbackMin + Math.floor(Math.random() * (maxStart - fallbackMin + 1));
+      midi2 = midi1 + semitones;
+    } else {
+      const maxStart = Math.max(minAllowed, maxAllowed - semitones);
+      midi1 = minAllowed + Math.floor(Math.random() * (maxStart - minAllowed + 1));
+      midi2 = midi1 + semitones;
+    }
+
+    this.currentQuestion = {
+      midi1,
+      midi2,
+      targetIntervalKey: randomKey,
+      answered: false,
+      firstButtonEl: null,
+      firstClass: null,
+    };
+
+    if (this.activeModule === 'singing') {
+      this.lastNoteDetails = null;
+      this.resetSingingQuestionUi();
+    } else {
+      this.clearAnswerButtonColors();
+      this.resetMysteryNotes();
+    }
+  }
+
+  midiToNoteNameEs(midi) {
+    const idx = ((Math.round(midi) % 12) + 12) % 12;
+    return NOTE_NAMES_ES[idx];
+  }
+
+  midiToNoteWithOctaveEs(midi) {
+    const rounded = Math.round(midi);
+    const octave = Math.floor(rounded / 12) - 1;
+    return `${this.midiToNoteNameEs(rounded)}${octave}`;
+  }
+
+  openLevelInfoModal(lvl, moduleType) {
+    if (!this.levelInfoModal) return;
+
+    const moduleLabel = moduleType === 'singing' ? 'Módulo 2 · Cantar Notas' : 'Módulo 1 · Reconocer Intervalos';
+    if (this.levelInfoModalModule) this.levelInfoModalModule.textContent = moduleLabel;
+    if (this.levelInfoModalTitle) this.levelInfoModalTitle.textContent = lvl.title;
+
+    // 1. Intervalos incluidos
+    const intervalsListHtml = (lvl.options || [])
+      .map((key) => {
+        const cat = INTERVAL_CATALOG[key];
+        if (!cat) return `<li>${key}</li>`;
+        const dirText = cat.semitones === 0 ? 'misma nota' : `${cat.semitones} semitono${cat.semitones === 1 ? '' : 's'} · ascendente`;
+        return `<li><strong>${cat.label} (${key}):</strong> ${dirText}</li>`;
+      })
+      .join('');
+
+    // 2. Rango y notas posibles según configuración del nivel
+    let rangeText = '';
+    let notesText = '';
+    let pairsHtml = '';
+
+    if (lvl.restrictedPairs) {
+      const allMidis = [];
+      const tonicMidis = [];
+      const pairItems = [];
+      (lvl.options || []).forEach((key) => {
+        const pairs = lvl.restrictedPairs[key] || [];
+        const cat = INTERVAL_CATALOG[key];
+        const formattedPairs = pairs.map(([m1, m2]) => {
+          allMidis.push(m1, m2);
+          tonicMidis.push(m1);
+          return `${this.midiToNoteWithOctaveEs(m1)} → ${this.midiToNoteWithOctaveEs(m2)}`;
+        });
+        if (formattedPairs.length > 0) {
+          pairItems.push(`<li><strong>${cat ? cat.label : key}:</strong> ${formattedPairs.join(', ')}</li>`);
+        }
+      });
+      const minMidi = Math.min(...allMidis);
+      const maxMidi = Math.max(...allMidis);
+      const uniqueTonicNames = [...new Set(tonicMidis.map((m) => this.midiToNoteNameEs(m)))];
+      const uniqueNoteNames = [...new Set(allMidis.map((m) => this.midiToNoteNameEs(m)))];
+
+      rangeText = `${this.midiToNoteWithOctaveEs(minMidi)} a ${this.midiToNoteWithOctaveEs(maxMidi)} (Octavas 3 y 4 · Clave de Fa y Sol)`;
+      notesText = `Tónicas: ${uniqueTonicNames.join(', ')} · Notas usadas: solo naturales (${uniqueNoteNames.join(', ')}) sin sostenidos`;
+      pairsHtml = `
+        <div class="level-info-section">
+          <span class="level-info-label">Ejercicios posibles (${allMidis.length / 2} combinaciones)</span>
+          <ul class="level-info-list">${pairItems.join('')}</ul>
+        </div>
+      `;
+    } else if (lvl.naturalTonicsOnly) {
+      const maxSemitones = Math.max(...(lvl.options || []).map((k) => INTERVAL_CATALOG[k]?.semitones || 0));
+      const minMidi = NATURAL_TONIC_MIDIS[0]; // Do3
+      const maxStartMidi = NATURAL_TONIC_MIDIS[NATURAL_TONIC_MIDIS.length - 1]; // Mi4
+      const maxEndMidi = maxStartMidi + maxSemitones;
+
+      rangeText = `Tónica entre ${this.midiToNoteWithOctaveEs(minMidi)} y ${this.midiToNoteWithOctaveEs(maxStartMidi)} · 2ª nota hasta ${this.midiToNoteWithOctaveEs(maxEndMidi)}`;
+      notesText = `Tónica (1ª nota): solo escala de Do natural (Do, Re, Mi, Fa, Sol, La, Si) · 2ª nota: libre según el intervalo (incluye ♯)`;
+    } else if (lvl.midiRange) {
+      const { minStart, maxEnd, label } = lvl.midiRange;
+      rangeText = `${label} · Desde ${this.midiToNoteWithOctaveEs(minStart)} hasta ${this.midiToNoteWithOctaveEs(maxEnd)}`;
+      notesText = `Tónica y 2ª nota: las 12 notas cromáticas (${NOTE_NAMES_ES.join(', ')})`;
+    } else {
+      const maxSemitones = Math.max(...(lvl.options || []).map((k) => INTERVAL_CATALOG[k]?.semitones || 0));
+      const minMidi = 48; // Do3
+      const maxStartMidi = 63; // Re#4
+      const maxEndMidi = maxStartMidi + maxSemitones;
+
+      rangeText = `Nota inicial entre ${this.midiToNoteWithOctaveEs(minMidi)} y ${this.midiToNoteWithOctaveEs(maxStartMidi)} · Nota final hasta ${this.midiToNoteWithOctaveEs(maxEndMidi)}`;
+      notesText = `Las 12 notas cromáticas (${NOTE_NAMES_ES.join(', ')})`;
+    }
+
+    if (this.levelInfoModalBody) {
+      this.levelInfoModalBody.innerHTML = `
+        <div class="level-info-section">
+          <span class="level-info-label">Tipos de intervalos (${(lvl.options || []).length})</span>
+          <ul class="level-info-list">${intervalsListHtml}</ul>
+        </div>
+        <div class="level-info-section">
+          <span class="level-info-label">Rango de alturas</span>
+          <p class="level-info-value">${rangeText}</p>
+        </div>
+        <div class="level-info-section">
+          <span class="level-info-label">Notas utilizadas</span>
+          <p class="level-info-value">${notesText}</p>
+        </div>
+        ${pairsHtml}
+      `;
+    }
+
+    this.levelInfoModal.classList.remove('hidden');
+  }
+
+  clearNoteAnimTimers() {
+    this.noteAnimTimers.forEach((t) => clearTimeout(t));
+    this.noteAnimTimers = [];
+    [this.mysteryNote1, this.mysteryNote2].forEach((el) => {
+      if (el) el.classList.remove('note-playing');
+    });
+  }
+
+  resetMysteryNotes() {
+    this.clearNoteAnimTimers();
+    if (this.mysteryNote1) {
+      this.mysteryNote1.textContent = '?';
+      this.mysteryNote1.classList.remove('note-revealed', 'note-wrong');
+    }
+    if (this.mysteryNote2) {
+      this.mysteryNote2.textContent = '?';
+      this.mysteryNote2.classList.remove('note-revealed', 'note-wrong');
+    }
+  }
+
+  revealMysteryNotes() {
+    if (!this.currentQuestion) return;
+    const { midi1, midi2 } = this.currentQuestion;
+    if (this.mysteryNote1) {
+      this.mysteryNote1.textContent = this.midiToNoteNameEs(midi1);
+      this.mysteryNote1.classList.add('note-revealed');
+    }
+    if (this.mysteryNote2) {
+      this.mysteryNote2.textContent = this.midiToNoteNameEs(midi2);
+      this.mysteryNote2.classList.add('note-revealed');
+    }
+  }
+
+  clearAnswerButtonColors() {
+    if (!this.exAnswersContainer) return;
+    this.exAnswersContainer.querySelectorAll('.answer-btn').forEach((btn) => {
+      if (btn._flashTimeout) {
+        clearTimeout(btn._flashTimeout);
+        btn._flashTimeout = null;
+      }
+      btn.classList.remove('flash-correct', 'flash-wrong');
+    });
+    if (this.currentQuestion) {
+      this.currentQuestion.firstButtonEl = null;
+      this.currentQuestion.firstClass = null;
+    }
+  }
+
+  updateExerciseUi() {
+    if (!this.activeLevel) return;
+    const stats = this.getLevelStats(this.activeLevel.id, 'intervals');
+    const totalDone = stats.good + stats.bad;
+
+    this.exLevelTitle.textContent = this.activeLevel.title;
+    if (this.exDateLabel) {
+      this.exDateLabel.textContent = this.getFormattedSpanishDate();
+    }
+    this.exGoodCount.textContent = String(stats.good);
+    this.exBadCount.textContent = String(stats.bad);
+    this.exDoneCount.textContent = `${totalDone}/${this.dailyMin}`;
+
+    this.exAnswersContainer.innerHTML = this.activeLevel.options
+      .map((key) => {
+        const item = INTERVAL_CATALOG[key];
+        return `
+          <button type="button" class="answer-btn" data-answer-key="${key}">
+            ${item.label}
+          </button>
+        `;
+      })
+      .join('');
+
+    this.exAnswersContainer.querySelectorAll('[data-answer-key]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        this.handleAnswerSelection(btn, btn.getAttribute('data-answer-key'));
+      });
+    });
+  }
+
+  handleAnswerSelection(btnEl, selectedKey) {
+    if (!this.activeLevel || !this.currentQuestion) return;
+    const stats = this.getLevelStats(this.activeLevel.id, 'intervals');
+    const isCorrect = selectedKey === this.currentQuestion.targetIntervalKey;
+    const colorClass = isCorrect ? 'flash-correct' : 'flash-wrong';
+
+    if (isCorrect) {
+      this.revealMysteryNotes();
+    }
+
+    if (!this.currentQuestion.answered) {
+      this.currentQuestion.answered = true;
+      this.currentQuestion.firstButtonEl = btnEl;
+      this.currentQuestion.firstClass = colorClass;
+      btnEl.classList.add(colorClass);
+
+      if (isCorrect) {
+        stats.good += 1;
+        if (this.autoNextTimer) {
+          clearTimeout(this.autoNextTimer);
+        }
+        this.autoNextTimer = setTimeout(() => {
+          this.autoNextTimer = null;
+          this.generateNextQuestion();
+          this.schedulePlayAfterOneSecond();
+        }, 2000);
+      } else {
+        stats.bad += 1;
+      }
+
+      const note1 = this.midiToNoteNameEs(this.currentQuestion.midi1);
+      const note2 = this.midiToNoteNameEs(this.currentQuestion.midi2);
+      this.sessionLog.unshift({
+        index: this.sessionLog.length + 1,
+        notes: `${note1} - ${note2}`,
+        answer: INTERVAL_CATALOG[selectedKey]?.label || selectedKey,
+        isCorrect,
+      });
+      this.renderSessionLog();
+
+      const totalDone = stats.good + stats.bad;
+
+      if (totalDone >= this.dailyMin) {
+        const ratio = totalDone > 0 ? stats.good / totalDone : 0;
+        const earnedStars = ratio >= 0.85 ? 3 : ratio >= 0.65 ? 2 : 1;
+        if (earnedStars > stats.stars) {
+          stats.stars = earnedStars;
+        }
+      }
+
+      this.saveProgress();
+      this.exGoodCount.textContent = String(stats.good);
+      this.exBadCount.textContent = String(stats.bad);
+      this.exDoneCount.textContent = `${totalDone}/${this.dailyMin}`;
+    } else {
+      if (btnEl === this.currentQuestion.firstButtonEl) {
+        return;
+      }
+      if (btnEl._flashTimeout) {
+        clearTimeout(btnEl._flashTimeout);
+      }
+      btnEl.classList.add(colorClass);
+      btnEl._flashTimeout = setTimeout(() => {
+        btnEl.classList.remove(colorClass);
+        btnEl._flashTimeout = null;
+      }, 1000);
+    }
+  }
+
+  renderSessionLog() {
+    this.renderLogTable(this.sessionLogWrapper, this.sessionLogTbody, this.sessionLog);
+  }
+
+  renderSingSessionLog() {
+    this.renderLogTable(this.singSessionLogWrapper, this.singSessionLogTbody, this.singSessionLog);
+  }
+
+  renderLogTable(wrapperEl, tbodyEl, list) {
+    if (!wrapperEl || !tbodyEl) return;
+    if (list.length === 0) {
+      wrapperEl.classList.add('hidden');
+      tbodyEl.innerHTML = '';
+      return;
+    }
+
+    const gradeLabel = {
+      admirable: { text: '✨ Admirable', cls: 'grade-admirable' },
+      bueno:     { text: '✓ Bueno',     cls: 'grade-bueno' },
+      aceptable: { text: '✓ Aceptable', cls: 'grade-aceptable' },
+      casi:      { text: '≈ Casi',      cls: 'grade-casi' },
+      malo:      { text: '✕ Malo',      cls: 'grade-malo' },
+      // compatibilidad con módulo intervalos (isCorrect booleano)
+    };
+
+    wrapperEl.classList.remove('hidden');
+    tbodyEl.innerHTML = list
+      .map((item) => {
+        // Módulo de intervalos usa isCorrect booleano sin exerciseGrade
+        const hasGrade = item.exerciseGrade !== undefined;
+        const gl = hasGrade ? (gradeLabel[item.exerciseGrade] || gradeLabel.malo) : null;
+        const statusCell = hasGrade
+          ? `<td class="log-grade ${gl.cls}">${gl.text}</td>`
+          : `<td class="${item.isCorrect ? 'log-icon-ok' : 'log-icon-err'}">
+               <span class="status-icon-badge ${item.isCorrect ? 'badge-ok' : 'badge-err'}">
+                 ${item.isCorrect ? '✓' : '✕'}
+               </span>
+             </td>`;
+        return `
+          <tr>
+            <td>${item.index}</td>
+            <td>${item.notes}</td>
+            <td>${item.answer}</td>
+            ${statusCell}
+          </tr>
+        `;
+      })
+      .join('');
+  }
+
+  /* =========================================================================
+   * MÓDULO 2: CANTAR NOTAS (GRAN PENTAGRAMA SOL/FA DE 2 COMPASES)
+   * ========================================================================= */
+
+  async ensureMicStreamReady() {
+    if (this.mediaStream && this.mediaStream.active) return true;
+    try {
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+          channelCount: 1,
+        },
+      });
+      return true;
+    } catch (_) {
+      if (this.singFeedbackText) {
+        this.singFeedbackText.textContent = 'Permite el micrófono para grabar tu voz en el 2º compás.';
+      }
+      return false;
+    }
+  }
+
+  releaseMicStream() {
+    if (this.mediaStream) {
+      this.mediaStream.getTracks().forEach((t) => t.stop());
+      this.mediaStream = null;
+    }
+  }
+
+  updateSingingExerciseUi() {
+    if (!this.activeLevel) return;
+    const stats = this.getLevelStats(this.activeLevel.id, 'singing');
+    const totalDone = stats.good + stats.bad;
+
+    this.singLevelTitle.textContent = this.activeLevel.title;
+    if (this.singDateLabel) {
+      this.singDateLabel.textContent = this.getFormattedSpanishDate();
+    }
+    if (this.singBpmLabel) {
+      this.singBpmLabel.textContent = `♩ = ${this.singBpm} BPM`;
+    }
+    this.singGoodCount.textContent = String(stats.good);
+    this.singBadCount.textContent = String(stats.bad);
+    this.singDoneCount.textContent = `${totalDone}/${this.dailyMin}`;
+  }
+
+  resetSingingQuestionUi() {
+    this.lastVoiceFrames = [];
+    this.lastNoteGrades = null;
+    this.lastNoteDetails = null;
+    if (this.singDebugPanel) this.singDebugPanel.classList.add('hidden');
+    if (!this.currentQuestion) return;
+
+    const { targetIntervalKey } = this.currentQuestion;
+    if (this.singIntervalName) {
+      this.singIntervalName.textContent = INTERVAL_CATALOG[targetIntervalKey]?.label || '';
+    }
+    if (this.singPhaseBadge) {
+      this.singPhaseBadge.textContent = 'Listo';
+      this.singPhaseBadge.classList.remove('phase-recording');
+    }
+    if (this.singFeedbackText) {
+      this.singFeedbackText.textContent = '';
+    }
+    this.drawGrandStaff(null, []);
+  }
+
+  stopSingingSequence() {
+    if (this.singRafId) {
+      cancelAnimationFrame(this.singRafId);
+      this.singRafId = null;
+    }
+    this.singTimers.forEach((t) => clearTimeout(t));
+    this.singTimers = [];
+    this.stopMicProcessor();
+  }
+
+  stopMicProcessor() {
+    this.isRecording = false;
+    if (this.processorNode) {
+      this.processorNode.onaudioprocess = null;
+      try {
+        this.processorNode.disconnect();
+      } catch (_) {}
+      this.processorNode = null;
+    }
+    if (this.sourceNode) {
+      try {
+        this.sourceNode.disconnect();
+      } catch (_) {}
+      this.sourceNode = null;
+    }
+  }
+
+  /**
+   * Inicia la secuencia de 2 compases en 4/4:
+   * - 2 clicks de cuenta previa (pulsos -2 y -1)
+   * - Compás 1 (pulsos 0..4): suenan 2 negras (midi1, midi2) + 2 silencios de negra
+   * - Compás 2 (pulsos 4..8): no suenan las notas, avanza el cursor y graba la voz
+   */
+  async startSingingSequence() {
+    if (!this.currentQuestion) return;
+    this.stopSingingSequence();
+    this.lastVoiceFrames = [];
+    this.lastNoteGrades = null;
+    this.lastNoteDetails = null;
+    if (this.singFeedbackText) {
+      this.singFeedbackText.textContent = '';
+    }
+
+    await this.ensureAudioReady();
+    await this.ensureMicStreamReady();
+
+    const beatSec = 60 / this.singBpm; // ej. 72 BPM -> 0.8333s por negra
+    const { midi1, midi2 } = this.currentQuestion;
+    const hz1 = 440 * Math.pow(2, (midi1 - 69) / 12);
+    const hz2 = 440 * Math.pow(2, (midi2 - 69) / 12);
+
+    const t0 = this.audioCtx.currentTime + 0.05;
+
+    // 1. Dos clicks marcando el pulso antes del Compás 1 (mismo sonido agudo para ambos)
+    this.playMetronomeClick(t0, true);
+    this.playMetronomeClick(t0 + beatSec, true);
+
+    // 2. Compás 1 (empieza en t0 + 2 * beatSec): 2 negras y 2 silencios de negra
+    const m1Start = t0 + 2 * beatSec;
+    this.playTone(hz1, m1Start, beatSec * 0.9);
+    this.playTone(hz2, m1Start + beatSec, beatSec * 0.9);
+    // Pulsos 3 y 4 del Compás 1 son silencios de negra (no suenan)
+
+    // 3. Grabación de voz: comienza 0.5s ANTES del Compás 2 para registrar si el usuario se adelanta al cantar
+    const preRollSec = 0.5;
+    const m2DurationSec = 4 * beatSec;
+    const recordStartDelayMs = Math.max(0, ((2 + 4) * beatSec - preRollSec) * 1000);
+    const m2BadgeDelayMs = Math.max(0, (2 + 4) * beatSec * 1000);
+
+    if (this.singPhaseBadge) {
+      this.singPhaseBadge.textContent = '2 Clicks...';
+      this.singPhaseBadge.classList.remove('phase-recording');
+    }
+
+    this.singTimers.push(
+      setTimeout(() => {
+        if (this.singPhaseBadge) {
+          this.singPhaseBadge.textContent = 'Compás 1 · Escucha';
+        }
+      }, 2 * beatSec * 1000),
+      setTimeout(() => {
+        this.beginCompas2Recording(preRollSec, m2DurationSec);
+      }, recordStartDelayMs),
+      setTimeout(() => {
+        if (this.singPhaseBadge) {
+          this.singPhaseBadge.textContent = 'Compás 2 · ¡Canta!';
+          this.singPhaseBadge.classList.add('phase-recording');
+        }
+      }, m2BadgeDelayMs)
+    );
+
+    // Animar la línea/punto de tiempo en los 2 compases (de beat 0 a beat 8)
+    const animatePlayhead = () => {
+      const now = this.audioCtx.currentTime;
+      const elapsedFromM1 = now - m1Start;
+      const currentBeat = elapsedFromM1 / beatSec; // <0 durante los 2 clicks, 0..4 Compás 1, 4..8 Compás 2
+
+      if (currentBeat <= 8.05) {
+        const playheadNorm = currentBeat >= 0 ? Math.min(1, currentBeat / 8) : null;
+        this.drawGrandStaff(playheadNorm, this.lastVoiceFrames, currentBeat);
+        this.singRafId = requestAnimationFrame(animatePlayhead);
+      } else {
+        this.singRafId = null;
+        this.drawGrandStaff(null, this.lastVoiceFrames);
+      }
+    };
+
+    this.singRafId = requestAnimationFrame(animatePlayhead);
+  }
+
+  playMetronomeClick(startTime, isAccent = false) {
+    const osc = this.audioCtx.createOscillator();
+    const gain = this.audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(isAccent ? 1250 : 1000, startTime);
+    osc.frequency.exponentialRampToValueAtTime(750, startTime + 0.065);
+
+    const peakGain = Math.max(0.01, ((this.clickVolume ?? 90) / 100) * 0.98);
+    gain.gain.setValueAtTime(0.0001, startTime);
+    gain.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.075);
+
+    osc.connect(gain);
+    gain.connect(this.audioCtx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + 0.08);
+  }
+
+  beginCompas2Recording(preRollSec, m2DurationSec) {
+    if (!this.mediaStream || !this.mediaStream.active) {
+      if (this.singPhaseBadge) {
+        this.singPhaseBadge.textContent = 'Sin micrófono';
+        this.singPhaseBadge.classList.remove('phase-recording');
+      }
+      return;
+    }
+
+    this.stopMicProcessor();
+    this.isRecording = true;
+
+    const totalDurationSec = preRollSec + m2DurationSec;
+    const sampleRate = this.audioCtx.sampleRate;
+    const totalSamples = Math.round(totalDurationSec * sampleRate);
+    const chunks = [];
+    let collected = 0;
+
+    this.sourceNode = this.audioCtx.createMediaStreamSource(this.mediaStream);
+    this.processorNode = this.audioCtx.createScriptProcessor(2048, 1, 1);
+
+    const silentGain = this.audioCtx.createGain();
+    silentGain.gain.value = 0;
+    this.sourceNode.connect(this.processorNode);
+    this.processorNode.connect(silentGain);
+    silentGain.connect(this.audioCtx.destination);
+
+    const startMs = performance.now();
+
+    this.processorNode.onaudioprocess = (e) => {
+      if (!this.isRecording) return;
+      const input = e.inputBuffer.getChannelData(0);
+      chunks.push(new Float32Array(input));
+      collected += input.length;
+
+      const elapsedSec = (performance.now() - startMs) / 1000;
+      if (collected >= totalSamples || elapsedSec >= totalDurationSec) {
+        this.finishCompas2Recording(chunks, totalSamples, sampleRate, preRollSec, m2DurationSec);
+      }
+    };
+  }
+
+  finishCompas2Recording(chunks, totalSamples, sampleRate, preRollSec, m2DurationSec) {
+    this.stopMicProcessor();
+    if (this.singPhaseBadge) {
+      this.singPhaseBadge.textContent = 'Análisis listo';
+      this.singPhaseBadge.classList.remove('phase-recording');
+    }
+
+    const pcm = new Float32Array(totalSamples);
+    let offset = 0;
+    for (const c of chunks) {
+      const rem = totalSamples - offset;
+      if (rem <= 0) break;
+      const len = Math.min(c.length, rem);
+      pcm.set(c.subarray(0, len), offset);
+      offset += len;
+    }
+
+    const preRollSamples = Math.round(preRollSec * sampleRate);
+    const m2Samples      = Math.max(1, totalSamples - preRollSamples);
+    const { midi1, midi2 } = this.currentQuestion;
+
+    // ── Extraer frames de todo el compás 2 incluyendo los mismos 500ms de pre-roll que dibuja el pentagrama ──
+    const earlyAllowance = preRollSamples;
+    const m2PcmStart     = 0;
+    const m2AllFrames    = this.extractMidiFrames(pcm.subarray(m2PcmStart), sampleRate);
+
+    // Duración esperada de cada negra en frames (20ms/frame)
+    const noteDurSec    = m2DurationSec / 4;          // 4 pulsos por compás, solo usamos 2
+    const noteDurFrames = Math.round(noteDurSec / 0.02);
+    const earlyFrames   = Math.round(earlyAllowance / (sampleRate * 0.02));
+
+    // Pulsos esperados dentro de m2AllFrames (el compás 2 empieza en earlyFrames)
+    const pulse1Frame = earlyFrames;
+    const pulse2Frame = earlyFrames + noteDurFrames;
+    const pulse3Frame = earlyFrames + noteDurFrames * 2;   // límite máximo útil
+
+    // ── Segmentar y mapear notas ──────────────────────────────────────────────
+    const segResult = this.segmentNotes(
+      m2AllFrames, pulse1Frame, pulse2Frame, pulse3Frame, noteDurFrames
+    );
+    const [midiFrames1, midiFrames2] = segResult.frames;
+
+    // ── Evaluación ────────────────────────────────────────────────────────────
+    const eval1 = this.getNoteGradeFromFrames(midiFrames1, midi1);
+    const eval2 = this.getNoteGradeFromFrames(midiFrames2, midi2);
+
+    const analysis1 = this.buildNoteAnalysis(midiFrames1, midi1);
+    const analysis2 = this.buildNoteAnalysis(midiFrames2, midi2);
+
+    const makeTonal = (a) => ({
+      label:      a.label,
+      isVibrato:  a.voiceType === 'vibrato',
+      isUnstable: a.voiceType === 'inestable',
+      vibratoHz:  a.vibratoHz,
+      glissando:  a.glissando,
+      isHighLow:  a.isHighLow,
+    });
+
+    this.lastNoteGrades  = [eval1.grade, eval2.grade];
+    this.lastNoteDetails = [
+      { ...eval1, tonal: makeTonal(analysis1) },
+      { ...eval2, tonal: makeTonal(analysis2) },
+    ];
+
+    // Guardar datos de debug completos
+    this.lastDebugData = {
+      segmentation: segResult.dbg,
+      allFrames: m2AllFrames,
+      midiFrames1,
+      midiFrames2,
+      noteDurFrames,
+      pulse1: pulse1Frame,
+      pulse2: pulse2Frame,
+      pulse3: pulse3Frame,
+      analysis1,
+      analysis2,
+    };
+
+    // Construir la curva del pentagrama exactamente con los mismos m2AllFrames analizados
+    const hopSamples = Math.round(sampleRate * 0.02);
+    this.lastVoiceFrames = m2AllFrames.map((midi, idx) => {
+      const tSec = (idx * hopSamples) / sampleRate;
+      const ratio = (tSec - preRollSec) / Math.max(0.1, m2DurationSec);
+      return { ratio, midi };
+    });
+    this.drawGrandStaff(null, this.lastVoiceFrames);
+    this.evaluateSingingTake();
+  }
+
+  /**
+   * Segmenta los frames del compás 2 en exactamente 2 arrays de frames MIDI,
+   * uno por cada nota esperada.
+   *
+   * Estrategia:
+   *  1. Detectar segmentos de sonido (onset/offset) y cambios bruscos de pitch.
+   *  2. Fusionar segmentos muy cercanos con pitch similar (cortes involuntarios).
+   *  3. Detectar desplazamiento global si el primer onset llega muy tarde.
+   *  4. Mapear segmentos a las 2 notas esperadas.
+   *  5. Fallback estricto: corte por tiempo fijo ajustado por desplazamiento.
+   *
+   * Una nota se considera no cantada solo si tiene < 20% de frames útiles
+   * respecto a noteDurFrames.
+   */
+  segmentNotes(allFrames, pulse1, pulse2, pulse3, noteDurFrames) {
+    const MIN_VOICED_PCT   = 0.20;   // < 20% → no cantada
+    const MERGE_GAP_MAX    = 5;      // frames de silencio para fusionar (≈100ms)
+    const PITCH_MERGE_MAX  = 150;    // cents — diferencia máxima para fusionar
+    const PITCH_BREAK_MIN  = 150;    // cents — cambio brusco de pitch → nuevo segmento
+    const PITCH_BREAK_FRAMES = 3;    // en cuántos frames debe sostenerse el cambio
+
+    // ── Paso 1: detectar segmentos de sonido ─────────────────────────────────
+    const segments = [];   // [{ start, end, frames[] }]
+    let segStart = -1;
+
+    for (let i = 0; i < allFrames.length; i++) {
+      const voiced = allFrames[i] !== null;
+      if (voiced && segStart === -1) {
+        segStart = i;
+      } else if (!voiced && segStart !== -1) {
+        segments.push({ start: segStart, end: i - 1, frames: allFrames.slice(segStart, i) });
+        segStart = -1;
+      }
+      // Cambio brusco de pitch sin silencio → dividir segmento
+      if (voiced && segStart !== -1 && i >= segStart + PITCH_BREAK_FRAMES) {
+        const recent = allFrames.slice(i - PITCH_BREAK_FRAMES, i).filter(Boolean);
+        if (recent.length >= 2 && allFrames[i] !== null) {
+          const recentMean = recent.reduce((s, v) => s + v, 0) / recent.length;
+          const diffCents  = Math.abs((allFrames[i] - recentMean) * 100);
+          if (diffCents > PITCH_BREAK_MIN) {
+            segments.push({ start: segStart, end: i - 1, frames: allFrames.slice(segStart, i) });
+            segStart = i;
+          }
+        }
+      }
+    }
+    if (segStart !== -1) {
+      segments.push({ start: segStart, end: allFrames.length - 1, frames: allFrames.slice(segStart) });
+    }
+
+    // ── Paso 2: fusionar segmentos cercanos con pitch similar ─────────────────
+    const merged = [];
+    for (const seg of segments) {
+      if (merged.length === 0) { merged.push({ ...seg }); continue; }
+      const prev = merged[merged.length - 1];
+      const gap  = seg.start - prev.end - 1;
+      if (gap <= MERGE_GAP_MAX) {
+        // Comparar pitch medio
+        const prevMidi = prev.frames.filter(Boolean);
+        const currMidi = seg.frames.filter(Boolean);
+        if (prevMidi.length > 0 && currMidi.length > 0) {
+          const prevMean = prevMidi.reduce((s, v) => s + v, 0) / prevMidi.length;
+          const currMean = currMidi.reduce((s, v) => s + v, 0) / currMidi.length;
+          const diffCents = Math.abs((prevMean - currMean) * 100);
+          if (diffCents < PITCH_MERGE_MAX) {
+            // Fusionar: rellenar el gap con nulls
+            const gap_nulls = new Array(gap).fill(null);
+            prev.frames = [...prev.frames, ...gap_nulls, ...seg.frames];
+            prev.end = seg.end;
+            continue;
+          }
+        }
+      }
+      merged.push({ ...seg });
+    }
+
+    // ── Paso 3: detectar desplazamiento global ───────────────────────────────
+    let globalShift = 0;   // en frames
+    const firstOnset = merged.length > 0 ? merged[0].start : -1;
+    if (firstOnset > pulse1 + Math.round(0.2 / 0.02)) {
+      // El primer sonido llega más de 200ms tarde → todo está corrido
+      globalShift = firstOnset - pulse1;
+    }
+
+    const p1 = pulse1 + globalShift;
+    const p2 = pulse2 + globalShift;
+    const p3 = Math.min(pulse3 + globalShift, allFrames.length);
+
+    // ── Paso 4: mapear segmentos a las 2 notas ───────────────────────────────
+    if (merged.length >= 2) {
+      const centerOf = (seg) => (seg.start + seg.end) / 2;
+      let seg1 = null;
+      let seg2 = null;
+
+      const cands1 = merged.filter((s) => centerOf(s) < p2);
+      const cands2 = merged.filter((s) => centerOf(s) >= p2 - noteDurFrames * 0.3);
+
+      if (cands1.length > 0 && cands2.length > 0) {
+        seg1 = cands1[0];
+        seg2 = cands2.find((s) => s !== seg1) || (cands1.length >= 2 ? cands1[1] : null);
+      }
+      if (!seg1 || !seg2 || seg1 === seg2) {
+        seg1 = merged[0];
+        seg2 = merged[1];
+      }
+
+      const frames1 = this._framesForNote(seg1.frames, noteDurFrames, MIN_VOICED_PCT);
+      const frames2 = this._framesForNote(seg2.frames, noteDurFrames, MIN_VOICED_PCT);
+      return { frames: [frames1, frames2], dbg: {
+        strategy: 'segmentos múltiples',
+        rawSegments: segments.length,
+        mergedSegments: merged.map(s => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
+        globalShift, note1: { start: seg1.start, end: seg1.end }, note2: { start: seg2.start, end: seg2.end },
+      }};
+    }
+
+    if (merged.length === 1) {
+      const seg = merged[0];
+      const midZone = seg.frames.slice(
+        Math.floor(seg.frames.length * 0.3),
+        Math.floor(seg.frames.length * 0.7)
+      );
+      let splitAt = -1;
+      let splitReason = 'segmento único dividido por pitch';
+      for (let i = 1; i < midZone.length; i++) {
+        if (midZone[i] !== null && midZone[i - 1] !== null) {
+          const diffCents = Math.abs((midZone[i] - midZone[i - 1]) * 100);
+          if (diffCents > PITCH_BREAK_MIN) { splitAt = Math.floor(seg.frames.length * 0.3) + i; break; }
+        }
+      }
+      // Si es unísono (sin salto de pitch > 150c) pero el segmento abarca ambas negras, dividir en p2 o a la mitad
+      if (splitAt <= 0 && seg.frames.length >= Math.round(noteDurFrames * 1.15)) {
+        if (p2 > seg.start + 4 && p2 < seg.end - 4) {
+          splitAt = p2 - seg.start;
+        } else {
+          splitAt = Math.floor(seg.frames.length / 2);
+        }
+        splitReason = 'segmento único dividido por duración (unísono/legato)';
+      }
+      if (splitAt > 0) {
+        const f1 = this._framesForNote(seg.frames.slice(0, splitAt), noteDurFrames, MIN_VOICED_PCT);
+        const f2 = this._framesForNote(seg.frames.slice(splitAt), noteDurFrames, MIN_VOICED_PCT);
+        return { frames: [f1, f2], dbg: {
+          strategy: splitReason,
+          rawSegments: segments.length, mergedSegments: merged.map(s => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
+          globalShift, splitAt,
+          note1: { start: seg.start, end: seg.start + splitAt - 1 },
+          note2: { start: seg.start + splitAt, end: seg.end },
+        }};
+      }
+    }
+
+    // ── Paso 5: fallback estricto con desplazamiento ajustado ─────────────────
+    const f1 = this._framesForNote(allFrames.slice(p1, p2), noteDurFrames, MIN_VOICED_PCT);
+    const f2 = this._framesForNote(allFrames.slice(p2, p3), noteDurFrames, MIN_VOICED_PCT);
+    return { frames: [f1, f2], dbg: {
+      strategy: 'fallback estricto por tiempo',
+      rawSegments: segments.length, mergedSegments: merged.map(s => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
+      globalShift, p1, p2, p3,
+      note1: { start: p1, end: p2 - 1 },
+      note2: { start: p2, end: p3 - 1 },
+    }};
+  }
+
+  /**
+   * Dado un array de frames y la duración esperada, retorna los frames si hay
+   * suficiente contenido (≥ MIN_VOICED_PCT), o un array vacío (nota no cantada).
+   */
+  _framesForNote(frames, noteDurFrames, minPct) {
+    const voiced = frames.filter((f) => f !== null).length;
+    if (voiced < noteDurFrames * minPct) return [];   // nota no cantada → grade malo
+    return frames;
+  }
+
+  /**
+   * Extrae un array de valores MIDI continuos (o null si silencio) de un segmento PCM.
+   * Un frame por cada 20ms de audio.
+   */
+  extractMidiFrames(segment, sampleRate) {
+    const winSize = 2048;
+    const hop = Math.round(sampleRate * 0.02);
+    const frames = [];
+    for (let pos = 0; pos + winSize <= segment.length; pos += hop) {
+      let sumSq = 0;
+      for (let i = 0; i < winSize; i++) { const s = segment[pos + i]; sumSq += s * s; }
+      const rms = Math.sqrt(sumSq / winSize);
+      if (rms < 0.01) { frames.push(null); continue; }
+      const hz = this.yinPitch(segment, pos, winSize, sampleRate);
+      if (hz >= 65 && hz <= 1000) {
+        frames.push(69 + 12 * Math.log2(hz / 440));
+      } else {
+        frames.push(null);
+      }
+    }
+    return frames;
+  }
+
+  /**
+   * Calcula la mediana con signo de la desviación en cents (plegada por octava)
+   * para mostrar al usuario si cantó "alto" o "bajo".
+   */
+  getSignedMedianCents(midiFrames, targetMidi) {
+    const voiced = midiFrames.filter((m) => m !== null);
+    if (voiced.length === 0) return null;
+    const signed = voiced.map((m) => {
+      const ss = (((m - targetMidi) % 12) + 18) % 12 - 6;
+      return Math.round(ss * 100);
+    });
+    signed.sort((a, b) => a - b);
+    return signed[Math.floor(signed.length / 2)];
+  }
+
+  /**
+   * Convierte una nota MIDI a paso diatónico en el Gran Pentagrama donde:
+   * - step = 0 es Do central (Do4 = MIDI 60, línea adicional entre clave de Fa y clave de Sol)
+   * - Clave de Sol (arriba): líneas en steps 2 (Mi4), 4 (Sol4), 6 (Si4), 8 (Re5), 10 (Fa5)
+   * - Clave de Fa (abajo): líneas en steps -2 (La3), -4 (Fa3), -6 (Re3), -8 (Si2), -10 (Sol2)
+   */
+  midiToGrandStaffStep(midi) {
+    const diatonicMap = [0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6];
+    const sharpMap = [false, true, false, true, false, false, true, false, true, false, true, false];
+    const rounded = Math.round(midi);
+    const octave = Math.floor(rounded / 12) - 1; // Do4 -> 4, Do3 -> 3
+    const noteIdx = ((rounded % 12) + 12) % 12;
+    const stepFromDo4 = (octave - 4) * 7 + diatonicMap[noteIdx];
+    return {
+      step: stepFromDo4,
+      isSharp: sharpMap[noteIdx],
+    };
+  }
+
+  /**
+   * Dibuja el Gran Pentagrama (Clave de Sol + Clave de Fa) con 2 compases (2 negras + 2 silencios c/u),
+   * el indicador de avance del tiempo y la curva de frecuencia de la voz en el 2º compás.
+   * @param {number|null} playheadNorm - 0..1 a lo largo de los 2 compases (0..0.5 Compás 1, 0.5..1 Compás 2)
+   * @param {Array<{ratio: number, midi: number|null}>} voiceFrames - muestras grabadas en el Compás 2
+   * @param {number} [rawBeat] - pulso actual (-2..0 durante los 2 clicks)
+   */
+  drawGrandStaff(playheadNorm = null, voiceFrames = [], rawBeat = null) {
+    if (!this.singStaffCanvas || !this.currentQuestion) return;
+    const canvas = this.singStaffCanvas;
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || 420;
+    const cssH = canvas.clientHeight || 235;
+
+    if (canvas.width !== Math.round(cssW * dpr) || canvas.height !== Math.round(cssH * dpr)) {
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+    }
+
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, cssW, cssH);
+
+    const { midi1, midi2 } = this.currentQuestion;
+
+    // Geometría vertical del Gran Pentagrama
+    // step = 0 (Do4) en el centro entre ambos pentagramas
+    const halfSpace = 5.0; // 5px por grado diatónico (10px entre líneas)
+    const centerDo4Y = cssH / 2 - 4;
+    const stepToY = (step) => centerDo4Y - step * halfSpace;
+
+    const staffLeft = 2;
+    const staffRight = cssW - 2;
+    const clefsWidth = 38;
+    const m1Start = staffLeft + clefsWidth;
+    const totalMeasuresW = staffRight - m1Start;
+    const barlineX = m1Start + totalMeasuresW / 2;
+    const m2Start = barlineX;
+
+    const topStaffTopY = stepToY(10);    // Fa5 (5ª línea Sol)
+    const topStaffBotY = stepToY(2);     // Mi4 (1ª línea Sol)
+    const botStaffTopY = stepToY(-2);    // La3 (5ª línea Fa)
+    const botStaffBotY = stepToY(-10);   // Sol2 (1ª línea Fa)
+
+    // 1. Encabezado de los 2 compases y BPM
+    ctx.font = '600 10px Inter, sans-serif';
+    ctx.fillStyle = '#111827';
+    ctx.textAlign = 'left';
+    ctx.fillText(`♩ = ${this.singBpm}`, staffLeft + 4, 13);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#334155';
+    ctx.fillText('Compás 1 (Escucha)', (m1Start + barlineX) / 2, 13);
+    ctx.fillStyle = '#334155';
+    ctx.fillText('Compás 2 (Canta)', (m2Start + staffRight) / 2, 13);
+
+    // Si estamos en los 2 clicks previos (rawBeat entre -2 y 0), mostrar los 2 puntos de pulso arriba
+    if (rawBeat !== null && rawBeat < 0) {
+      const clickIdx = rawBeat < -1 ? 1 : 2;
+      ctx.fillStyle = '#d97706';
+      ctx.font = 'bold 11px Outfit, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`Click ${clickIdx} / 2`, staffRight - 4, 13);
+    }
+
+    // 2. Líneas del Pentagrama Superior (Clave de Sol: steps 2, 4, 6, 8, 10) en negro
+    ctx.strokeStyle = '#111827';
+    ctx.lineWidth = 1.1;
+    for (let s = 2; s <= 10; s += 2) {
+      const y = stepToY(s);
+      ctx.beginPath();
+      ctx.moveTo(staffLeft, y);
+      ctx.lineTo(staffRight, y);
+      ctx.stroke();
+    }
+
+    // 3. Líneas del Pentagrama Inferior (Clave de Fa: steps -2, -4, -6, -8, -10) en negro
+    for (let s = -10; s <= -2; s += 2) {
+      const y = stepToY(s);
+      ctx.beginPath();
+      ctx.moveTo(staffLeft, y);
+      ctx.lineTo(staffRight, y);
+      ctx.stroke();
+    }
+
+    // 4. Barras verticales de sistema y división de los 2 compases en negro
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.4;
+    // Barra inicial izquierda uniendo Sol y Fa
+    ctx.beginPath();
+    ctx.moveTo(staffLeft, topStaffTopY);
+    ctx.lineTo(staffLeft, botStaffBotY);
+    // Línea divisoria entre Compás 1 y Compás 2
+    ctx.moveTo(barlineX, topStaffTopY);
+    ctx.lineTo(barlineX, botStaffBotY);
+    // Doble barra final derecha
+    ctx.moveTo(staffRight - 4, topStaffTopY);
+    ctx.lineTo(staffRight - 4, botStaffBotY);
+    ctx.stroke();
+
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(staffRight, topStaffTopY);
+    ctx.lineTo(staffRight, botStaffBotY);
+    ctx.stroke();
+
+    // 5. Dibujar Clave de Sol (𝄞) arriba y Clave de Fa (𝄢) abajo en negro
+    ctx.fillStyle = '#000000';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = '34px serif';
+    ctx.fillText('𝄞', staffLeft + 4, stepToY(5));
+    ctx.font = '27px serif';
+    ctx.fillText('𝄢', staffLeft + 5, stepToY(-5));
+
+    // 6. Función para dibujar un compás (2 negras en pulsos 1 y 2 + 2 silencios de negra en pulsos 3 y 4)
+    const pos1 = this.midiToGrandStaffStep(midi1);
+    const pos2 = this.midiToGrandStaffStep(midi2);
+
+    const drawQuarterNote = (x, pos, color) => {
+      const y = stepToY(pos.step);
+
+      // Línea adicional central si es Do4 (step === 0)
+      if (pos.step === 0) {
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(x - 10, y);
+        ctx.lineTo(x + 10, y);
+        ctx.stroke();
+      }
+
+      // Cabeza de negra rellena
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(-0.25);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 6.2, 4.4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Plica de la negra (hacia arriba o hacia abajo según altura)
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      if (pos.step >= 0) {
+        ctx.moveTo(x + 5.5, y);
+        ctx.lineTo(x + 5.5, y - 24);
+      } else {
+        ctx.moveTo(x - 5.5, y);
+        ctx.lineTo(x - 5.5, y + 24);
+      }
+      ctx.stroke();
+
+      if (pos.isSharp) {
+        ctx.fillStyle = color;
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('♯', x - 8, y);
+      }
+    };
+
+    const drawQuarterRest = (x, yCenter) => {
+      // Silencio de negra en negro
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1.8;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x - 2, yCenter - 9);
+      ctx.lineTo(x + 3, yCenter - 3);
+      ctx.lineTo(x - 3, yCenter + 2);
+      ctx.lineTo(x + 2, yCenter + 7);
+      ctx.arc(x - 1, yCenter + 9, 2.5, -0.3, Math.PI * 0.85, true);
+      ctx.stroke();
+    };
+
+    // Dibujar los 4 tiempos en Compás 1 y en Compás 2 centrados en 4 columnas iguales por compás
+    const restY = midi1 >= 60 ? stepToY(6) : stepToY(-6);
+
+    const getMeasureBeatX = (mStart, mEnd, beatFraction) => {
+      const mW = mEnd - mStart;
+      // beatFraction: 0.0 -> centro de columna 1 (0.125), 0.25 -> centro de columna 2 (0.375), etc.
+      return mStart + (beatFraction + 0.125) * mW;
+    };
+
+    // 6b. Barra fija de tiempo que aparece directamente sobre la figura musical o silencio activo
+    if (rawBeat !== null && rawBeat >= 0 && rawBeat < 8) {
+      const isCompas1 = rawBeat < 4;
+      const mStart = isCompas1 ? m1Start : m2Start;
+      const mEnd = isCompas1 ? barlineX : staffRight - 4;
+      const beatIndex = Math.floor(isCompas1 ? rawBeat : rawBeat - 4); // 0, 1, 2, 3
+      const figX = getMeasureBeatX(mStart, mEnd, beatIndex * 0.25);
+      const colW = Math.min(26, (mEnd - mStart) / 4 - 4);
+
+      // Franja vertical suave sobre la figura activa + barra superior e inferior fija
+      ctx.fillStyle = isCompas1 ? 'rgba(2, 132, 199, 0.16)' : 'rgba(245, 158, 11, 0.20)';
+      ctx.fillRect(figX - colW / 2, topStaffTopY - 6, colW, botStaffBotY - topStaffTopY + 12);
+
+      ctx.fillStyle = isCompas1 ? '#0284c7' : '#d97706';
+      ctx.fillRect(figX - colW / 2, topStaffTopY - 8, colW, 4);
+      ctx.fillRect(figX - colW / 2, botStaffBotY + 4, colW, 4);
+    }
+
+    const drawMeasureContents = (mStart, mEnd, noteColor) => {
+      const b1X = getMeasureBeatX(mStart, mEnd, 0.00);
+      const b2X = getMeasureBeatX(mStart, mEnd, 0.25);
+      const b3X = getMeasureBeatX(mStart, mEnd, 0.50);
+      const b4X = getMeasureBeatX(mStart, mEnd, 0.75);
+
+      drawQuarterNote(b1X, pos1, noteColor);
+      drawQuarterNote(b2X, pos2, noteColor);
+      drawQuarterRest(b3X, restY);
+      drawQuarterRest(b4X, restY);
+    };
+
+    drawMeasureContents(m1Start, barlineX, '#000000');
+    drawMeasureContents(m2Start, staffRight - 4, '#000000');
+
+    // 7. Graficar la línea de frecuencia de la voz sobre el Compás 2 una vez terminada la grabación
+    if (Array.isArray(voiceFrames) && voiceFrames.length > 0) {
+      const m2W = staffRight - 4 - m2Start;
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      let prevPt = null;
+      voiceFrames.forEach((f) => {
+        if (f.midi === null) {
+          prevPt = null;
+          return;
+        }
+        const isFirstNote = f.ratio < 0.25;
+        const targetMidi = isFirstNote ? midi1 : midi2;
+        const targetPos = isFirstNote ? pos1 : pos2;
+        const targetY = stepToY(targetPos.step);
+
+        // Desviación en semitonos plegada por octava para coincidir con el pentagrama donde está escrita la nota
+        const signedSemitones = (((f.midi - targetMidi) % 12) + 18) % 12 - 6;
+        const clamped = Math.max(-4, Math.min(4, signedSemitones));
+
+        const x = m2Start + f.ratio * m2W;
+        const y = targetY - clamped * halfSpace;
+
+        const absS = Math.abs(signedSemitones);
+        const strokeColor =
+          absS <= 0.15 ? '#059669' :   // admirable (≤15c)
+          absS <= 0.40 ? '#10b981' :   // bueno/aceptable (≤40c)
+          absS <= 0.80 ? '#f59e0b' :   // casi (41-80c)
+                         '#ef4444';    // malo (>80c)
+
+        if (prevPt) {
+          ctx.strokeStyle = strokeColor;
+          ctx.beginPath();
+          ctx.moveTo(prevPt.x, prevPt.y);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        } else {
+          ctx.fillStyle = strokeColor;
+          ctx.beginPath();
+          ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        prevPt = { x, y };
+      });
+    }
+
+    // 8. Íconos de evaluación debajo de cada nota cantada en el Compás 2 (5 niveles)
+    if (Array.isArray(this.lastNoteGrades) && this.lastNoteGrades.length === 2) {
+      const m2End = staffRight - 4;
+      const noteXPositions = [
+        getMeasureBeatX(m2Start, m2End, 0.00),
+        getMeasureBeatX(m2Start, m2End, 0.25),
+      ];
+      const iconY = botStaffBotY + 15;
+
+      const gradeStyles = {
+        admirable: { bg: '#059669', symbol: '✨', border: '#34d399' },
+        bueno:     { bg: '#10b981', symbol: '✓',  border: null },
+        aceptable: { bg: '#22c55e', symbol: '✓',  border: null },
+        casi:      { bg: '#f59e0b', symbol: '≈',  border: null },
+        malo:      { bg: '#ef4444', symbol: '✕',  border: null },
+      };
+
+      this.lastNoteGrades.forEach((grade, idx) => {
+        const style = gradeStyles[grade] || gradeStyles.malo;
+        const x = noteXPositions[idx];
+
+        // Borde extra para Admirable
+        if (style.border) {
+          ctx.strokeStyle = style.border;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(x, iconY, 11, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = style.bg;
+        ctx.beginPath();
+        ctx.arc(x, iconY, 9, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = grade === 'admirable' ? '10px Inter, sans-serif' : 'bold 12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(style.symbol, x, iconY + 0.5);
+      });
+
+      // Ícono del ejercicio completo (nivel más bajo) a la derecha
+      if (this.lastNoteGrades.length === 2) {
+        const exerciseGrade = this.worstGrade(this.lastNoteGrades[0], this.lastNoteGrades[1]);
+        const style = gradeStyles[exerciseGrade] || gradeStyles.malo;
+        const exX = staffRight - 10;
+        const exY = (topStaffTopY + botStaffBotY) / 2;
+
+        ctx.fillStyle = style.bg;
+        ctx.beginPath();
+        ctx.arc(exX, exY, 11, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = exerciseGrade === 'admirable' ? '11px Inter, sans-serif' : 'bold 13px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(style.symbol, exX, exY + 0.5);
+      }
+    }
+  }
+
+  /**
+   * Extrae la curva temporal de alturas MIDI incluyendo los 0.5s previos al Compás 2 (ratio < 0)
+   * y los 4 pulsos del Compás 2 (ratio 0..1).
+   */
+  extractVoiceFrames(pcm, sampleRate, preRollSec = 0.5, m2DurationSec = 3.0) {
+    const winSize = 2048;
+    const hop = Math.round(sampleRate * 0.025);
+    const frames = [];
+
+    for (let pos = 0; pos + winSize <= pcm.length; pos += hop) {
+      const tSec = pos / sampleRate;
+      const ratio = (tSec - preRollSec) / Math.max(0.1, m2DurationSec);
+      let sumSq = 0;
+      for (let i = 0; i < winSize; i++) {
+        const s = pcm[pos + i];
+        sumSq += s * s;
+      }
+      const rms = Math.sqrt(sumSq / winSize);
+      if (rms < 0.01) {
+        frames.push({ ratio, midi: null });
+        continue;
+      }
+      const hz = this.yinPitch(pcm, pos, winSize, sampleRate);
+      if (hz >= 65 && hz <= 1000) {
+        const midi = 69 + 12 * Math.log2(hz / 440);
+        frames.push({ ratio, midi });
+      } else {
+        frames.push({ ratio, midi: null });
+      }
+    }
+    return frames;
+  }
+
+  detectDominantMidi(segment, sampleRate) {
+    const winSize = 2048;
+    const hop = Math.round(sampleRate * 0.02);
+    const midis = [];
+
+    for (let pos = 0; pos + winSize <= segment.length; pos += hop) {
+      let sumSq = 0;
+      for (let i = 0; i < winSize; i++) {
+        const s = segment[pos + i];
+        sumSq += s * s;
+      }
+      const rms = Math.sqrt(sumSq / winSize);
+      if (rms < 0.01) continue;
+
+      const hz = this.yinPitch(segment, pos, winSize, sampleRate);
+      if (hz >= 65 && hz <= 1000) {
+        const m = 69 + 12 * Math.log2(hz / 440);
+        midis.push(m);
+      }
+    }
+
+    if (midis.length < 2) return null;
+    midis.sort((a, b) => a - b);
+    return midis[Math.floor(midis.length / 2)];
+  }
+
+  yinPitch(buf, start, winSize, sampleRate) {
+    const half = winSize >> 1;
+    const tauMin = Math.max(2, Math.floor(sampleRate / 1000));
+    const tauMax = Math.min(half - 1, Math.floor(sampleRate / 65));
+    const yin = new Float32Array(tauMax + 1);
+    yin[0] = 1;
+    let runningSum = 0;
+
+    for (let tau = 1; tau <= tauMax; tau++) {
+      let diff = 0;
+      for (let i = 0; i < half; i++) {
+        const d = buf[start + i] - buf[start + i + tau];
+        diff += d * d;
+      }
+      runningSum += diff;
+      yin[tau] = runningSum > 0 ? (diff * tau) / runningSum : 1;
+    }
+
+    let tauEst = -1;
+    for (let tau = tauMin; tau <= tauMax; tau++) {
+      if (yin[tau] < 0.18) {
+        while (tau + 1 <= tauMax && yin[tau + 1] < yin[tau]) tau++;
+        tauEst = tau;
+        break;
+      }
+    }
+    if (tauEst === -1) return 0;
+    return sampleRate / tauEst;
+  }
+
+  getSignedCentsDiff(detectedMidi, targetMidi) {
+    if (detectedMidi === null) return null;
+    const signedSemitones = (((detectedMidi - targetMidi) % 12) + 18) % 12 - 6;
+    return Math.round(signedSemitones * 100);
+  }
+
+  /**
+   * Clasifica frame a frame la desviación en cents en 3 zonas:
+   * - 'good':   |cents| ≤ 40
+   * - 'almost': 41–80 cents
+   * - 'bad':    > 80 cents
+   */
+  classifyFrameCents(absCents) {
+    if (absCents <= 40) return 'good';
+    if (absCents <= 80) return 'almost';
+    return 'bad';
+  }
+
+  /**
+   * =========================================================================
+   * ANÁLISIS DE FORMA DE ONDA VOCAL — 3 etapas independientes
+   * =========================================================================
+   *
+   * Etapa 1: analyzeVoiceShape(midiFrames, targetMidi)
+   *   → Determina tipo de voz: 'plana' | 'vibrato' | 'inestable'
+   *   → Detecta glisando como flag independiente
+   *
+   * Etapa 2: analyzeTonalCenter(signedList, voiceShape)
+   *   → Calcula el label de afinación y si está muy alto/bajo
+   *
+   * Etapa 3: buildNoteAnalysis(midiFrames, targetMidi)
+   *   → Orquesta ambas etapas y devuelve el objeto completo
+   * =========================================================================
+   */
+
+  /**
+   * Etapa 1 — Análisis de forma de onda.
+   *
+   * Paso A: ¿Justifica análisis de picos?
+   *   SD de los cents < FLAT_SD_THRESHOLD → voz plana, fin.
+   *
+   * Paso B: Detección de picos locales (máximos y mínimos).
+   *
+   * Paso C: Clasificación por periodicidad de los picos.
+   *   - Vibrato:   CV temporal ≤ 0.35  Y  frecuencia 4–8 Hz  Y  ≥ 3 ciclos
+   *   - Inestable: hay picos pero no cumple vibrato
+   *
+   * Paso D: Detección de glisando (independiente).
+   *   - Los primeros 20% de frames tienen desviación media > 50c
+   *     Y la media del último 30% está dentro de 30c → glisando detectado
+   *
+   * @returns {{ type: 'plana'|'vibrato'|'inestable', vibratoHz: number|null, glissando: boolean }}
+   */
+  analyzeVoiceShape(midiFrames, targetMidi) {
+    const HOP_SEC            = 0.02;
+    const FLAT_SD_THRESHOLD  = 35;   // cents — por debajo: micro-variación normal
+    const PEAK_MIN_EXCURSION = 20;   // cents — excursión mínima respecto al entorno para contar como pico
+    const VIBRATO_CV_MAX     = 0.35;
+    const VIBRATO_HZ_MIN     = 4;
+    const VIBRATO_HZ_MAX     = 8;
+    const VIBRATO_MIN_CYCLES = 3;
+
+    const voiced = midiFrames.filter((m) => m !== null);
+    if (voiced.length < 4) return { type: 'plana', vibratoHz: null, glissando: false, peaks: [], sd: 0 };
+
+    // Convertir a cents con signo (plegado por octava)
+    const cents = voiced.map((m) => {
+      const ss = (((m - targetMidi) % 12) + 18) % 12 - 6;
+      return ss * 100;
+    });
+
+    const mean = cents.reduce((s, c) => s + c, 0) / cents.length;
+    const sd = Math.sqrt(cents.reduce((s, c) => s + (c - mean) ** 2, 0) / cents.length);
+
+    // ── Encontrar picos locales (máximos y mínimos significativos) ─────────
+    const peakIndices = [];
+    const winRadius = 2; // ventana de ±2 frames (40ms) para evaluar prominencia local
+    for (let i = 1; i < cents.length - 1; i++) {
+      const curr = cents[i];
+      const prev = cents[i - 1];
+      const next = cents[i + 1];
+
+      // ¿Es extremo local inmediato?
+      const isLocalMax = curr >= prev && curr >= next && (curr > prev || curr > next);
+      const isLocalMin = curr <= prev && curr <= next && (curr < prev || curr < next);
+      if (!isLocalMax && !isLocalMin) continue;
+
+      // Verificar que sea el extremo dentro de ±winRadius y tenga excursión mínima
+      const wStart = Math.max(0, i - winRadius);
+      const wEnd   = Math.min(cents.length - 1, i + winRadius);
+      let wMin = Infinity;
+      let wMax = -Infinity;
+      for (let k = wStart; k <= wEnd; k++) {
+        if (cents[k] < wMin) wMin = cents[k];
+        if (cents[k] > wMax) wMax = cents[k];
+      }
+
+      const isProminentMax = isLocalMax && curr >= wMax && (curr - wMin >= PEAK_MIN_EXCURSION || Math.abs(curr - mean) >= PEAK_MIN_EXCURSION);
+      const isProminentMin = isLocalMin && curr <= wMin && (wMax - curr >= PEAK_MIN_EXCURSION || Math.abs(curr - mean) >= PEAK_MIN_EXCURSION);
+
+      if (isProminentMax || isProminentMin) {
+        // Evitar duplicar picos en mesetas contiguas (quedarse con el más extremo si están a 1 frame)
+        const lastIdx = peakIndices.length > 0 ? peakIndices[peakIndices.length - 1] : -99;
+        if (i - lastIdx <= 1) {
+          if (Math.abs(curr - mean) > Math.abs(cents[lastIdx] - mean)) {
+            peakIndices[peakIndices.length - 1] = i;
+          }
+        } else {
+          peakIndices.push(i);
+        }
+      }
+    }
+
+    const peakData  = peakIndices.map(i => ({ frameIdx: i, cents: Math.round(cents[i]) }));
+    const glissando = this._detectGlissando(cents);
+
+    // ── Paso A: ¿Justifica clasificación de vibrato/inestable por SD y cantidad de picos? ──
+    if (sd < FLAT_SD_THRESHOLD || peakIndices.length < 4) {
+      return {
+        type: 'plana',
+        vibratoHz: null,
+        glissando,
+        peaks: peakData,
+        sd: Math.round(sd),
+      };
+    }
+
+    // ── Paso C: Clasificar por periodicidad ───────────────────────────────
+    // Intervalos de tiempo entre picos consecutivos (en segundos)
+    const intervals = [];
+    for (let i = 1; i < peakIndices.length; i++) {
+      intervals.push((peakIndices[i] - peakIndices[i - 1]) * HOP_SEC);
+    }
+
+    const iMean = intervals.reduce((s, v) => s + v, 0) / intervals.length;
+    const iSd   = Math.sqrt(intervals.reduce((s, v) => s + (v - iMean) ** 2, 0) / intervals.length);
+    const cv    = iMean > 0 ? iSd / iMean : 1;
+
+    // Frecuencia estimada de oscilación
+    const freqHz = iMean > 0 ? 1 / iMean : 0;
+    const cycles = peakIndices.length / 2;
+
+    if (
+      cv <= VIBRATO_CV_MAX &&
+      freqHz >= VIBRATO_HZ_MIN &&
+      freqHz <= VIBRATO_HZ_MAX &&
+      cycles >= VIBRATO_MIN_CYCLES
+    ) {
+      return {
+        type: 'vibrato',
+        vibratoHz: Math.round(freqHz * 10) / 10,
+        glissando,
+        peaks: peakData,
+        sd: Math.round(sd),
+        cv: Math.round(cv * 100) / 100,
+        freqHz: Math.round(freqHz * 10) / 10,
+      };
+    }
+
+    return { type: 'inestable', vibratoHz: null, glissando,
+             peaks: peakData, sd: Math.round(sd),
+             cv: Math.round(cv * 100) / 100,
+             freqHz: Math.round(freqHz * 10) / 10 };
+  }
+
+  /**
+   * Detecta glisando: los primeros 20% de frames tienen desviación media > 60c,
+   * el desplazamiento entre el ataque y la cola estabilizada supera los 60c,
+   * y la media del último 30% está dentro de ±30c del centro.
+   */
+  _detectGlissando(cents) {
+    if (cents.length < 10) return false;
+    const headEnd   = Math.floor(cents.length * 0.20);
+    const tailStart = Math.floor(cents.length * 0.70);
+
+    const headSignedMean = cents.slice(0, headEnd).reduce((s, c) => s + c, 0) / headEnd;
+    const tailSignedMean = cents.slice(tailStart).reduce((s, c) => s + c, 0) / (cents.length - tailStart);
+
+    const headAbs  = Math.abs(headSignedMean);
+    const tailAbs  = Math.abs(tailSignedMean);
+    const slideMag = Math.abs(headSignedMean - tailSignedMean);
+
+    return headAbs > 60 && slideMag > 60 && tailAbs <= 30;
+  }
+
+  /**
+   * Etapa 2 — Centro tonal y guía de afinación.
+   *
+   * Si tipo = vibrato o inestable → usa mediana (la oscilación no distorsiona el centro)
+   * Sobre la mediana:
+   *   - Si NO es vibrato Y highPct ≥ 30% Y lowPct ≥ 30% → "(muy alto y muy bajo)"
+   *   - Si NO es vibrato Y highPct ≥ 30%                 → "Muy alto"
+   *   - Si NO es vibrato Y lowPct  ≥ 30%                 → "Muy bajo"
+   *   - Ninguno                                          → label normal de mediana
+   *
+   * @returns {{ label: string, isHighLow: boolean }}
+   */
+  analyzeTonalCenter(midiFrames, targetMidi, voiceShape) {
+    const voiced = midiFrames.filter((m) => m !== null);
+    if (voiced.length === 0) return { label: 'Silencio', isHighLow: false };
+
+    const signedList = voiced.map((m) => {
+      const ss = (((m - targetMidi) % 12) + 18) % 12 - 6;
+      return Math.round(ss * 100);
+    });
+
+    const sorted = [...signedList].sort((a, b) => a - b);
+    const medianSigned = sorted[Math.floor(sorted.length / 2)];
+    const baseLabel = this.formatTonalCenterLabel(Math.abs(medianSigned), medianSigned);
+
+    // Solo aplicar análisis alto/bajo si NO es vibrato
+    if (voiceShape?.type !== 'vibrato') {
+      const total    = signedList.length;
+      const highPct  = signedList.filter((c) => c > 50).length / total;
+      const lowPct   = signedList.filter((c) => c < -50).length / total;
+
+      if (highPct >= 0.30 && lowPct >= 0.30) {
+        return { label: 'Muy alto y muy bajo', isHighLow: true };
+      }
+      if (highPct >= 0.30) {
+        return { label: 'Muy alto', isHighLow: true };
+      }
+      if (lowPct >= 0.30) {
+        return { label: 'Muy bajo', isHighLow: true };
+      }
+    }
+
+    return { label: baseLabel, isHighLow: false };
+  }
+
+  /**
+   * Etapa 3 — Orquestador: llama a analyzeVoiceShape + analyzeTonalCenter
+   * y devuelve el objeto completo para el feedback.
+   *
+   * @returns {{
+   *   voiceType:  'plana'|'vibrato'|'inestable',
+   *   vibratoHz:  number|null,
+   *   glissando:  boolean,
+   *   label:      string,
+   *   isHighLow:  boolean
+   * }}
+   */
+  buildNoteAnalysis(midiFrames, targetMidi) {
+    const voiceShape = this.analyzeVoiceShape(midiFrames, targetMidi);
+    const tonal      = this.analyzeTonalCenter(midiFrames, targetMidi, voiceShape);
+    return {
+      voiceType:  voiceShape.type,
+      vibratoHz:  voiceShape.vibratoHz,
+      glissando:  voiceShape.glissando,
+      peaks:      voiceShape.peaks || [],
+      sd:         voiceShape.sd,
+      cv:         voiceShape.cv,
+      freqHz:     voiceShape.freqHz,
+      label:      tonal.label,
+      isHighLow:  tonal.isHighLow,
+    };
+  }
+
+  /**
+   * Etiqueta legible del centro tonal para mostrar al usuario.
+   * Ej: (+30c) Leve alto  |  (-8c) Casi perfecto  |  (0c) Perfecto
+   */
+
+  /**
+   * Clasifica una nota cantada en 5 niveles basándose en distribución de frames:
+   *
+   * Regla 1 — MALO:      ≥ 20% de frames con |cents| > 80
+   * Regla 2 — ADMIRABLE: ≥ 85% de frames con |cents| ≤ 15  Y  mediana ≤ 10c
+   * Regla 3 — BUENO:     ≥ 85% de frames con |cents| ≤ 40  Y  mediana ≤ 20c
+   * Regla 4 — ACEPTABLE: ≥ 85% de frames con |cents| ≤ 40
+   * Regla 5 — CASI:      el resto
+   *
+   * El ejercicio completo toma el nivel más bajo de todas sus notas.
+   *
+   * Levels: 'admirable' | 'bueno' | 'aceptable' | 'casi' | 'malo'
+   */
+  getNoteGradeFromFrames(midiFrames, targetMidi) {
+    const hopSec = 0.02;
+    // Separar frames con pitch
+    const voiced = midiFrames.filter((m) => m !== null);
+    if (voiced.length < 2) return { grade: 'malo', medianCents: null, vibrato: { detected: false, freqHz: null } };
+
+    // Calcular desviación en cents para cada frame (plegada por octava)
+    const centsList = voiced.map((m) => {
+      const signedSemitones = (((m - targetMidi) % 12) + 18) % 12 - 6;
+      return Math.abs(Math.round(signedSemitones * 100));
+    });
+
+    const total = centsList.length;
+
+    // Mediana de la desviación absoluta (centro tonal)
+    const sorted = [...centsList].sort((a, b) => a - b);
+    const medianCents = sorted[Math.floor(sorted.length / 2)];
+
+    // Distribución por zona
+    const badCount   = centsList.filter((c) => c > 80).length;
+    const goodCount  = centsList.filter((c) => c <= 40).length;
+    const tightCount = centsList.filter((c) => c <= 15).length;
+
+    const badPct   = badCount   / total;
+    const goodPct  = goodCount  / total;
+    const tightPct = tightCount / total;
+
+    // Detección de forma de voz integrada en buildNoteAnalysis
+    const noteAnalysis = this.buildNoteAnalysis(voiced.map((_, i) => voiced[i]), targetMidi);
+    // Compatibilidad: exponer campo vibrato con la forma antigua para que el resto del código funcione
+    const vibrato = noteAnalysis.voiceType === 'vibrato'
+      ? { detected: true, freqHz: noteAnalysis.vibratoHz }
+      : { detected: false, freqHz: null };
+
+    // Aplicar reglas en orden de prioridad
+    let grade;
+    if (badPct >= 0.20) {
+      grade = 'malo';
+    } else if (tightPct >= 0.85 && medianCents <= 10) {
+      grade = 'admirable';
+    } else if (goodPct >= 0.85 && medianCents <= 20) {
+      grade = 'bueno';
+    } else if (goodPct >= 0.85) {
+      grade = 'aceptable';
+    } else {
+      grade = 'casi';
+    }
+
+    return { grade, medianCents, vibrato, _dbg: { total, badPct, goodPct, tightPct } };
+  }
+
+  /**
+   * Etiqueta legible del centro tonal para mostrar al usuario.
+   * Ej: (+30c) Alto  |  (-8c) Casi perfecto  |  (0c) Perfecto
+   */
+  formatTonalCenterLabel(medianCents, signedMedianCents) {
+    if (medianCents === null) return 'Silencio';
+    const direction = signedMedianCents >= 0 ? 'alto' : 'bajo';
+    const abs = Math.abs(signedMedianCents);
+    let level;
+    if (abs <= 5)       level = 'Perfecto';
+    else if (abs <= 15) level = 'Casi perfecto';
+    else if (abs <= 30) level = `Leve ${direction}`;
+    else if (abs <= 60) level = direction.charAt(0).toUpperCase() + direction.slice(1);
+    else                level = `Muy ${direction}`;
+
+    if (abs <= 5) return `(${signedMedianCents >= 0 ? '+' : ''}${signedMedianCents}c) ${level}`;
+    return `(${signedMedianCents >= 0 ? '+' : ''}${signedMedianCents}c) ${level}`;
+  }
+
+  /**
+   * Retorna el nivel más bajo (más severo) entre dos grades de nota.
+   * Orden de severidad: malo < casi < aceptable < bueno < admirable
+   */
+  worstGrade(gradeA, gradeB) {
+    const rank = { malo: 0, casi: 1, aceptable: 2, bueno: 3, admirable: 4 };
+    return rank[gradeA] <= rank[gradeB] ? gradeA : gradeB;
+  }
+
+  /**
+   * @deprecated Mantener compatibilidad con flujo legado de detección por mediana.
+   * Usar getNoteGradeFromFrames() para evaluación completa.
+   */
+  getNoteGrade(detectedMidi, targetMidi) {
+    if (detectedMidi === null) return 'malo';
+    const cents = this.getSignedCentsDiff(detectedMidi, targetMidi);
+    if (cents === null) return 'malo';
+    const abs = Math.abs(cents);
+    if (abs <= 15) return 'admirable';
+    if (abs <= 20) return 'bueno';
+    if (abs <= 40) return 'aceptable';
+    if (abs <= 80) return 'casi';
+    return 'malo';
+  }
+
+  isNoteMatch(grade) {
+    return grade === 'admirable' || grade === 'bueno' || grade === 'aceptable';
+  }
+
+  formatCentsLabel(cents) {
+    if (cents === null) return 'Silencio';
+    if (Math.abs(cents) <= 5) return 'Perfecta (0c)';
+    return cents > 0 ? `+${cents}c (alta)` : `${cents}c (baja)`;
+  }
+
+  evaluateSingingTake() {
+    if (!this.activeLevel || !this.currentQuestion) return;
+    const { midi1, midi2 } = this.currentQuestion;
+
+    const [det1, det2] = this.lastNoteDetails || [];
+    const grade1 = det1?.grade || 'malo';
+    const grade2 = det2?.grade || 'malo';
+
+    // El ejercicio toma el nivel más bajo de todas las notas
+    const exerciseGrade = this.worstGrade(grade1, grade2);
+    const isCorrect = this.isNoteMatch(exerciseGrade);
+
+    const note1Name = this.midiToNoteNameEs(midi1);
+    const note2Name = this.midiToNoteNameEs(midi2);
+
+    const tonal1 = det1?.tonal || { label: 'Silencio', isVibrato: false, isUnstable: false, vibratoHz: null };
+    const tonal2 = det2?.tonal || { label: 'Silencio', isVibrato: false, isUnstable: false, vibratoHz: null };
+
+    // Badges Vib, Irr y Gli con tooltip
+    const makeBadges = (tonal) => {
+      let b = '';
+      if (tonal.isVibrato)
+        b += `<span class="voice-badge badge-vibrato" title="Vibrato detectado (${tonal.vibratoHz}Hz)">Vib</span>`;
+      else if (tonal.isUnstable || tonal.isHighLow)
+        b += `<span class="voice-badge badge-unstable" title="Voz inestable detectada">Irr</span>`;
+      if (tonal.glissando)
+        b += `<span class="voice-badge badge-glissando" title="Glisando detectado: la nota partió lejos y se niveló">Gli</span>`;
+      return b;
+    };
+    const badge1 = makeBadges(tonal1);
+    const badge2 = makeBadges(tonal2);
+    // Texto con salto de línea por nota y badges (V), (I), (G) para la tabla de sesión y debajo del pentagrama
+    const sungSummary = `${note1Name}: ${tonal1.label}${badge1}<br>${note2Name}: ${tonal2.label}${badge2}`;
+
+    if (this.singFeedbackText) {
+      const resultLine =
+        `${note1Name}: ${tonal1.label}${badge1}<br>` +
+        `${note2Name}: ${tonal2.label}${badge2}`;
+      if (this.currentQuestion.answered) {
+        this.singFeedbackText.innerHTML =
+          `<span class="feedback-retry">🔄 Este es un reintento (Los reintentos no se registran)</span>` +
+          `<span class="feedback-result">${resultLine}</span>`;
+      } else {
+        this.singFeedbackText.innerHTML =
+          `<span class="feedback-result">${resultLine}</span>`;
+      }
+    }
+
+    const stats = this.getLevelStats(this.activeLevel.id, 'singing');
+
+    if (!this.currentQuestion.answered) {
+      this.currentQuestion.answered = true;
+
+      if (isCorrect) {
+        stats.good += 1;
+      } else {
+        stats.bad += 1;
+      }
+
+      this.singSessionLog.unshift({
+        index: this.singSessionLog.length + 1,
+        notes: `${note1Name}<br>${note2Name}`,
+        answer: sungSummary,
+        isCorrect,
+        exerciseGrade,
+      });
+      this.renderSingSessionLog();
+
+      const totalDone = stats.good + stats.bad;
+      if (totalDone >= this.dailyMin) {
+        const ratio = totalDone > 0 ? stats.good / totalDone : 0;
+        const earnedStars = ratio >= 0.85 ? 3 : ratio >= 0.65 ? 2 : 1;
+        if (earnedStars > stats.stars) {
+          stats.stars = earnedStars;
+        }
+      }
+
+      this.saveProgress();
+      this.singGoodCount.textContent = String(stats.good);
+      this.singBadCount.textContent = String(stats.bad);
+      this.singDoneCount.textContent = `${totalDone}/${this.dailyMin}`;
+    }
+
+    // Debug: siempre actualizar con el último análisis (incluye reintentos)
+    this.renderDebugPanel(note1Name, note2Name, det1, det2, tonal1, tonal2, exerciseGrade);
+  }
+
+  /* =========================================================================
+   * DEBUG PANEL
+   * ========================================================================= */
+
+  renderDebugPanel(note1Name, note2Name, det1, det2, tonal1, tonal2, exerciseGrade) {
+    const dbg  = this.lastDebugData || {};
+    const seg  = dbg.segmentation  || {};
+    const midiT = this.currentQuestion;
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    const pct  = (v) => v != null ? (v * 100).toFixed(1) + '%' : '—';
+    const fmtC = (c) => c == null ? '·' : (c >= 0 ? `+${c}c` : `${c}c`);
+
+    const frameCents = (midi, target) => {
+      if (midi == null) return null;
+      const ss = (((midi - target) % 12) + 18) % 12 - 6;
+      return Math.round(ss * 100);
+    };
+
+    // ── 15 filas simétricas ──────────────────────────────────────────────────
+    const ROWS = [
+      { label: '> +300c',       min:  300, max: null, bg: '#7f1d1d', fg: '#fca5a5' },
+      { label: '+200 a +300c',  min:  200, max:  300, bg: '#991b1b', fg: '#fca5a5' },
+      { label: '+100 a +200c',  min:  100, max:  200, bg: '#b91c1c', fg: '#fecaca' },
+      { label:  '+80 a +100c',  min:   80, max:  100, bg: '#c2410c', fg: '#fed7aa' },
+      { label:  '+40 a  +80c',  min:   40, max:   80, bg: '#d97706', fg: '#fef3c7' },
+      { label:  '+15 a  +40c',  min:   15, max:   40, bg: '#15803d', fg: '#bbf7d0' },
+      { label:  '+10 a  +15c',  min:   10, max:   15, bg: '#16a34a', fg: '#dcfce7' },
+      { label:     '±10c ✨',   min:  -10, max:   10, bg: '#14532d', fg: '#86efac' },
+      { label:  '-10 a  -15c',  min:  -15, max:  -10, bg: '#16a34a', fg: '#dcfce7' },
+      { label:  '-15 a  -40c',  min:  -40, max:  -15, bg: '#15803d', fg: '#bbf7d0' },
+      { label:  '-40 a  -80c',  min:  -80, max:  -40, bg: '#d97706', fg: '#fef3c7' },
+      { label:  '-80 a -100c',  min: -100, max:  -80, bg: '#c2410c', fg: '#fed7aa' },
+      { label: '-100 a -200c',  min: -200, max: -100, bg: '#b91c1c', fg: '#fecaca' },
+      { label: '-200 a -300c',  min: -300, max: -200, bg: '#991b1b', fg: '#fca5a5' },
+      { label:    '< -300c',    min: null, max: -300, bg: '#7f1d1d', fg: '#fca5a5' },
+    ];
+
+    const rowFor = (cents) => {
+      if (cents == null) return -1;
+      for (let r = 0; r < ROWS.length; r++) {
+        const { min, max } = ROWS[r];
+        const aboveMin = min == null || cents >= min;
+        const belowMax = max == null || cents < max;
+        if (aboveMin && belowMax) return r;
+      }
+      return -1;
+    };
+
+    // ── Calcular rangos de columna para cada nota ─────────────────────────────
+    // Usamos los índices start/end del segmento de la segmentación
+    const segDbg   = seg;
+    const note1Range = segDbg.note1
+      ? { start: segDbg.note1.start, end: segDbg.note1.end }
+      : dbg.pulse1 != null
+        ? { start: dbg.pulse1, end: dbg.pulse2 - 1 }
+        : null;
+    const note2Range = segDbg.note2
+      ? { start: segDbg.note2.start, end: segDbg.note2.end }
+      : dbg.pulse2 != null
+        ? { start: dbg.pulse2, end: dbg.pulse2 + dbg.noteDurFrames - 1 }
+        : null;
+
+    const inRange = (col, range) =>
+      range && col >= range.start && col <= range.end;
+
+    // ── Centro tonal por nota (mediana firmada en cents) y su fila en la tabla ─
+    const allFrames = dbg.allFrames || [];
+    const cols      = allFrames.length;
+    const target1   = midiT?.midi1;
+    const target2   = midiT?.midi2;
+
+    const tonalCents1 = target1 != null ? this.getSignedMedianCents(dbg.midiFrames1 || [], target1) : null;
+    const tonalCents2 = target2 != null ? this.getSignedMedianCents(dbg.midiFrames2 || [], target2) : null;
+    const tonalRow1   = rowFor(tonalCents1);
+    const tonalRow2   = rowFor(tonalCents2);
+
+    // ── Peaks: mapear al índice de frame global en allFrames ─────────────────
+    const buildPeakSet = (analysis, range) => {
+      if (!analysis?.peaks?.length || !range) return new Map();
+      const map = new Map();
+      const segFrames = allFrames.slice(range.start, range.end + 1);
+      let vIdx = 0;
+      segFrames.forEach((f, i) => {
+        if (f !== null) {
+          analysis.peaks.forEach(p => {
+            if (p.frameIdx === vIdx) map.set(range.start + i, p.cents);
+          });
+          vIdx++;
+        }
+      });
+      return map;
+    };
+
+    const peaks1 = buildPeakSet(dbg.analysis1, note1Range);
+    const peaks2 = buildPeakSet(dbg.analysis2, note2Range);
+
+    let tableHtml = `<div class="dbg-frame-scroll"><table class="dbg-frame-table">`;
+
+    // Fila superior indicando qué nota se analiza realmente en cada columna (N1, N2 o sin nota)
+    tableHtml += `<tr><th class="dbg-row-label">Nota analizada</th>`;
+    for (let c = 0; c < cols; c++) {
+      const isNote1Col = inRange(c, note1Range) && (dbg.midiFrames1 || []).length > 0;
+      const isNote2Col = inRange(c, note2Range) && (dbg.midiFrames2 || []).length > 0;
+      const hasVoiced  = allFrames[c] !== null;
+      if (isNote1Col && hasVoiced) {
+        tableHtml += `<th class="dbg-note-hdr dbg-note1-hdr">N1</th>`;
+      } else if (isNote2Col && hasVoiced) {
+        tableHtml += `<th class="dbg-note-hdr dbg-note2-hdr">N2</th>`;
+      } else {
+        tableHtml += `<th class="dbg-note-hdr dbg-note-none">·</th>`;
+      }
+    }
+    tableHtml += `</tr>`;
+
+    // Fila de encabezado con número de frame y marcadores de pulso (P1, P2, P3)
+    tableHtml += `<tr><th class="dbg-row-label">Frame / Pulso</th>`;
+    for (let c = 0; c < cols; c++) {
+      const isPulse1 = c === dbg.pulse1;
+      const isPulse2 = c === dbg.pulse2;
+      const isPulse3 = c === dbg.pulse3;
+      const cls = isPulse1 ? ' dbg-pulse1-hdr' : isPulse2 ? ' dbg-pulse2-hdr' : '';
+      const pTag = isPulse1 ? ' (P1)' : isPulse2 ? ' (P2)' : isPulse3 ? ' (S1)' : '';
+      tableHtml += `<th class="dbg-frame-hdr${cls}">${c + 1}${pTag}</th>`;
+    }
+    tableHtml += `</tr>`;
+
+    // 15 filas de contenido (muestra exactamente los frames que entran al análisis de N1 y N2)
+    for (let r = 0; r < ROWS.length; r++) {
+      const row       = ROWS[r];
+      const isCenterRow = r === 7;
+      tableHtml += `<tr${isCenterRow ? ' class="dbg-center-row"' : ''}>`;
+      tableHtml += `<td class="dbg-row-label">${row.label}</td>`;
+
+      for (let c = 0; c < cols; c++) {
+        const isNote1Col = inRange(c, note1Range) && (dbg.midiFrames1 || []).length > 0;
+        const isNote2Col = inRange(c, note2Range) && (dbg.midiFrames2 || []).length > 0;
+        const targetMidi = isNote1Col ? target1 : isNote2Col ? target2 : null;
+        const cents      = targetMidi != null ? frameCents(allFrames[c], targetMidi) : null;
+        const activeRow  = rowFor(cents);
+        const isPeak     = (isNote1Col && peaks1.has(c)) || (isNote2Col && peaks2.has(c));
+        const hasNote    = (isNote1Col || isNote2Col) && cents !== null;
+
+        // Fondo de columna: negro si no hay nota analizada en esta columna
+        let colBg = '#000000';
+        if (hasNote && isNote1Col) colBg = 'rgba(56,189,248,0.09)';
+        else if (hasNote && isNote2Col) colBg = 'rgba(167,139,250,0.09)';
+
+        if (!hasNote) {
+          const silenceDot = allFrames[c] === null && (isNote1Col || isNote2Col) && r === 7 ? '·' : '';
+          tableHtml += `<td class="dbg-frame-cell dbg-no-note">${silenceDot}</td>`;
+        } else if (activeRow === r && cents !== null) {
+          // Celda activa con el valor del frame; entre paréntesis si es un pico detectado
+          const display = isPeak ? `(${fmtC(cents)})` : fmtC(cents);
+          const extraStyle = isPeak ? 'font-style:italic;' : '';
+          tableHtml += `<td class="dbg-frame-cell dbg-active" style="background:${row.bg};color:${row.fg};${extraStyle}">${display}</td>`;
+        } else {
+          // Celda vacía en columna con nota detectada: anotar tonalidad central en su fila correspondiente
+          let content = '';
+          if (isNote1Col && r === tonalRow1 && tonalCents1 !== null) {
+            content = `<span class="dbg-tonal-hint">${fmtC(tonalCents1)}</span>`;
+          } else if (isNote2Col && r === tonalRow2 && tonalCents2 !== null) {
+            content = `<span class="dbg-tonal-hint">${fmtC(tonalCents2)}</span>`;
+          }
+          tableHtml += `<td class="dbg-frame-cell" style="background:${colBg}">${content}</td>`;
+        }
+      }
+      tableHtml += `</tr>`;
+    }
+    tableHtml += `</table></div>`;
+
+    // ── Sección de segmentación ───────────────────────────────────────────────
+    const mergedStr = (seg.mergedSegments || [])
+      .map((s, i) => `seg${i+1}: frames ${s.start + 1}–${s.end + 1} (${s.voiced} con pitch)`)
+      .join(' | ');
+    const n1RangeStr = note1Range && (dbg.midiFrames1 || []).length > 0
+      ? `frames ${note1Range.start + 1}–${note1Range.end + 1} (${(dbg.midiFrames1 || []).filter(m => m !== null).length} útiles)`
+      : 'Silencio (sin frames válidos)';
+    const n2RangeStr = note2Range && (dbg.midiFrames2 || []).length > 0
+      ? `frames ${note2Range.start + 1}–${note2Range.end + 1} (${(dbg.midiFrames2 || []).filter(m => m !== null).length} útiles)`
+      : 'Silencio (sin frames válidos)';
+
+    const segHtml = `
+      <div class="dbg-section">
+        <div class="dbg-section-title">Tabla de frames analizados (${cols} frames · N1=${note1Name} azul · N2=${note2Name} violeta · Negro=sin nota)</div>
+        ${tableHtml}
+        <div class="dbg-kv-grid" style="margin-top:0.4rem">
+          <span class="dbg-k">Estrategia</span><span class="dbg-v">${seg.strategy ?? '—'}</span>
+          <span class="dbg-k">Nota 1 (N1)</span><span class="dbg-v">${n1RangeStr}</span>
+          <span class="dbg-k">Nota 2 (N2)</span><span class="dbg-v">${n2RangeStr}</span>
+          <span class="dbg-k">Pulsos esperados</span><span class="dbg-v">P1=frame ${(dbg.pulse1 ?? 0) + 1} · P2=frame ${(dbg.pulse2 ?? 0) + 1} · S1=frame ${(dbg.pulse3 ?? 0) + 1}</span>
+          <span class="dbg-k">Desp. global</span><span class="dbg-v">${seg.globalShift != null ? seg.globalShift + ' frames (' + Math.round(seg.globalShift * 20) + 'ms)' : '0'}</span>
+          <span class="dbg-k">Segmentos detectados</span><span class="dbg-v">${mergedStr || '—'}</span>
+        </div>
+      </div>`;
+
+    // ── Sección por nota ──────────────────────────────────────────────────────
+    const noteSection = (tag, noteName, det, tonal, analysis) => {
+      const voiceType = tonal.isVibrato ? 'vibrato' : tonal.isUnstable ? 'inestable' : 'plana';
+      const peaksStr = (analysis?.peaks || [])
+        .map(p => `${fmtC(p.cents)}@f${p.frameIdx + 1}`).join(' · ') || '—';
+      return `
+        <div class="dbg-section">
+          <div class="dbg-section-title">${tag}: ${noteName} — Grade: <strong>${det?.grade ?? '—'}</strong></div>
+          <div class="dbg-kv-grid">
+            <span class="dbg-k">badPct</span>       <span class="dbg-v">${pct(det?._dbg?.badPct)}</span>
+            <span class="dbg-k">goodPct</span>      <span class="dbg-v">${pct(det?._dbg?.goodPct)}</span>
+            <span class="dbg-k">tightPct</span>     <span class="dbg-v">${pct(det?._dbg?.tightPct)}</span>
+            <span class="dbg-k">medianCents</span>  <span class="dbg-v">${det?.medianCents ?? '—'}</span>
+            <span class="dbg-k">Centro tonal</span> <span class="dbg-v">${tonal.label}</span>
+            <span class="dbg-k">SD voz</span>       <span class="dbg-v">${analysis?.sd ?? '—'}c</span>
+            <span class="dbg-k">Tipo de voz</span>  <span class="dbg-v">${voiceType}</span>
+            <span class="dbg-k">Vibrato Hz</span>   <span class="dbg-v">${tonal.vibratoHz ?? '—'}</span>
+            <span class="dbg-k">CV picos</span>     <span class="dbg-v">${analysis?.cv ?? '—'}</span>
+            <span class="dbg-k">Freq picos</span>   <span class="dbg-v">${analysis?.freqHz ?? '—'} Hz</span>
+            <span class="dbg-k">Glisando</span>     <span class="dbg-v">${tonal.glissando ? 'sí' : 'no'}</span>
+            <span class="dbg-k">isHighLow</span>    <span class="dbg-v">${tonal.isHighLow ? 'sí' : 'no'}</span>
+            <span class="dbg-k">Picos (${(analysis?.peaks||[]).length})</span>
+            <span class="dbg-v">${peaksStr}</span>
+          </div>
+        </div>`;
+    };
+
+    const fullHtml =
+      `<div class="dbg-header-line">Ejercicio: <strong>${exerciseGrade.toUpperCase()}</strong></div>` +
+      segHtml +
+      `<div class="dbg-notes-grid">` +
+      noteSection('N1 (1ª Nota)', note1Name, det1, tonal1, dbg.analysis1) +
+      noteSection('N2 (2ª Nota)', note2Name, det2, tonal2, dbg.analysis2) +
+      `</div>`;
+
+    this.lastDebugHtml = fullHtml;
+    if (this.singDebugBody) {
+      this.singDebugBody.innerHTML = fullHtml;
+    }
+    if (this.debugLargeBody) {
+      this.debugLargeBody.innerHTML = fullHtml;
+    }
+    this.syncDebugPopupWindow();
+  }
+
+  openDebugPopupWindow() {
+    const win = window.open('', 'TrinoDebugWindow', 'width=1280,height=820,resizable=yes,scrollbars=yes');
+    if (!win) {
+      // Si el navegador bloquea pop-ups, abrir la ventana grande flotante a pantalla completa
+      if (this.debugLargeModal) this.debugLargeModal.classList.remove('hidden');
+      return;
+    }
+    this.debugPopupWin = win;
+    this.syncDebugPopupWindow();
+    win.focus();
+  }
+
+  syncDebugPopupWindow() {
+    if (!this.debugPopupWin || this.debugPopupWin.closed) return;
+    const cssHref = new URL('./css/styles.css?v=27', window.location.href).href;
+    const doc = this.debugPopupWin.document;
+    doc.open();
+    doc.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>🔬 Trino — Debug Análisis en Vivo</title>
+  <link rel="stylesheet" href="${cssHref}" />
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: 'Courier New', Courier, monospace;
+      display: block;
+      min-height: 100vh;
+    }
+    .dbg-frame-table th, .dbg-frame-table td {
+      min-width: 42px;
+      height: 20px;
+      font-size: 0.68rem;
+      padding: 2px 5px;
+    }
+    .dbg-row-label {
+      font-size: 0.66rem !important;
+      min-width: 105px !important;
+    }
+    .dbg-tonal-hint {
+      font-size: 0.62rem;
+    }
+    .dbg-kv-grid, .dbg-section-title, .dbg-header-line {
+      font-size: 0.8rem;
+    }
+    .dbg-notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+  ${this.lastDebugHtml || '<p style="color:#94a3b8;">Aún no hay datos de análisis. Canta un ejercicio en Trino.</p>'}
+</body>
+</html>`);
+    doc.close();
+  }
+
+  /* =========================================================================
+   * REPRODUCCIÓN DE AUDIO Y NAVEGACIÓN
+   * ========================================================================= */
+
+  async ensureAudioReady() {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!this.audioCtx) {
+      this.audioCtx = new AudioCtx();
+    }
+    if (this.audioCtx.state === 'suspended') {
+      await this.audioCtx.resume();
+    }
+  }
+
+  async schedulePlayAfterOneSecond() {
+    if (this.delayedPlayTimer) {
+      clearTimeout(this.delayedPlayTimer);
+      this.delayedPlayTimer = null;
+    }
+    await this.ensureAudioReady();
+    this.delayedPlayTimer = setTimeout(() => {
+      this.delayedPlayTimer = null;
+      if (this.activeModule === 'singing') {
+        this.startSingingSequence();
+      } else {
+        this.playCurrentInterval();
+      }
+    }, 1000);
+  }
+
+  async playCurrentInterval() {
+    if (!this.currentQuestion) return;
+    if (this.delayedPlayTimer) {
+      clearTimeout(this.delayedPlayTimer);
+      this.delayedPlayTimer = null;
+    }
+
+    if (this.activeModule === 'singing') {
+      this.startSingingSequence();
+      return;
+    }
+
+    this.clearAnswerButtonColors();
+    await this.ensureAudioReady();
+
+    const { midi1, midi2 } = this.currentQuestion;
+
+    const hz1 = 440 * Math.pow(2, (midi1 - 69) / 12);
+    const hz2 = 440 * Math.pow(2, (midi2 - 69) / 12);
+
+    const now = this.audioCtx.currentTime;
+    this.playTone(hz1, now, 0.55);
+    this.playTone(hz2, now + 0.65, 0.65);
+
+    this.clearNoteAnimTimers();
+    if (this.mysteryNote1) {
+      this.mysteryNote1.classList.add('note-playing');
+    }
+    this.noteAnimTimers.push(
+      setTimeout(() => {
+        if (this.mysteryNote1) this.mysteryNote1.classList.remove('note-playing');
+      }, 550),
+      setTimeout(() => {
+        if (this.mysteryNote2) this.mysteryNote2.classList.add('note-playing');
+      }, 650),
+      setTimeout(() => {
+        if (this.mysteryNote2) this.mysteryNote2.classList.remove('note-playing');
+      }, 1300)
+    );
+  }
+
+  playTone(hz, startTime, duration) {
+    const osc = this.audioCtx.createOscillator();
+    const gain = this.audioCtx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(hz, startTime);
+
+    const peakGain = Math.max(0.01, ((this.noteVolume ?? 80) / 100) * 0.40);
+    gain.gain.setValueAtTime(0.0001, startTime);
+    gain.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.03);
+    gain.gain.setValueAtTime(peakGain, startTime + duration - 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+    osc.connect(gain);
+    gain.connect(this.audioCtx.destination);
+
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.02);
+  }
+
+  /* =========================================================================
+   * HERRAMIENTAS DE MICRÓFONO EN CONFIGURACIÓN (RANGO VOCAL + PROBADOR EN VIVO)
+   * ========================================================================= */
+
+  stopSettingsMicTools() {
+    this.isMicTesting = false;
+    this.isDetectingVocalLimit = false;
+    this.stopMicProcessor();
+    if (this.btnDetectVocalMin) this.btnDetectVocalMin.classList.remove('recording-active');
+    if (this.btnDetectVocalMax) this.btnDetectVocalMax.classList.remove('recording-active');
+    if (this.btnMicTester) {
+      this.btnMicTester.classList.remove('active');
+      this.btnMicTester.textContent = '🎙️ Probar Micrófono';
+    }
+    if (this.micMeterFill) this.micMeterFill.style.width = '0%';
+    if (this.micLiveNote) this.micLiveNote.textContent = '—';
+    if (this.micLiveDetail) {
+      this.micLiveDetail.textContent = 'Pulsa "Probar Micrófono" y canta una nota';
+    }
+  }
+
+  async detectVocalLimitByVoice(mode) {
+    // Si ya estaba detectando, cancelar
+    if (this.isDetectingVocalLimit) {
+      this.stopSettingsMicTools();
+      if (this.vocalDetectStatus) {
+        this.vocalDetectStatus.textContent = 'Detección cancelada.';
+      }
+      return;
+    }
+
+    this.stopSettingsMicTools();
+    await this.ensureAudioReady();
+    const ok = await this.ensureMicStreamReady();
+    if (!ok) {
+      if (this.vocalDetectStatus) {
+        this.vocalDetectStatus.classList.remove('hidden');
+        this.vocalDetectStatus.textContent = '⚠️ Permite el acceso al micrófono en tu navegador.';
+      }
+      return;
+    }
+
+    this.isDetectingVocalLimit = true;
+    const targetBtn = mode === 'min' ? this.btnDetectVocalMin : this.btnDetectVocalMax;
+    if (targetBtn) targetBtn.classList.add('recording-active');
+
+    const labelTipo = mode === 'min' ? 'más grave' : 'más aguda';
+    if (this.vocalDetectStatus) {
+      this.vocalDetectStatus.classList.remove('hidden');
+      this.vocalDetectStatus.textContent = `🎙️ Canta y mantén tu nota ${labelTipo} (2.5 s)...`;
+    }
+
+    const durationSec = 2.5;
+    const sampleRate = this.audioCtx.sampleRate;
+    const totalSamples = Math.round(durationSec * sampleRate);
+    const chunks = [];
+    let collected = 0;
+
+    this.sourceNode = this.audioCtx.createMediaStreamSource(this.mediaStream);
+    this.processorNode = this.audioCtx.createScriptProcessor(2048, 1, 1);
+
+    const silentGain = this.audioCtx.createGain();
+    silentGain.gain.value = 0;
+    this.sourceNode.connect(this.processorNode);
+    this.processorNode.connect(silentGain);
+    silentGain.connect(this.audioCtx.destination);
+
+    const startMs = performance.now();
+
+    this.processorNode.onaudioprocess = (e) => {
+      if (!this.isDetectingVocalLimit) return;
+      const input = e.inputBuffer.getChannelData(0);
+      chunks.push(new Float32Array(input));
+      collected += input.length;
+
+      const elapsedSec = (performance.now() - startMs) / 1000;
+      if (collected >= totalSamples || elapsedSec >= durationSec) {
+        this.isDetectingVocalLimit = false;
+        this.stopMicProcessor();
+        if (targetBtn) targetBtn.classList.remove('recording-active');
+
+        const pcm = new Float32Array(totalSamples);
+        let offset = 0;
+        for (const c of chunks) {
+          const rem = totalSamples - offset;
+          if (rem <= 0) break;
+          const len = Math.min(c.length, rem);
+          pcm.set(c.subarray(0, len), offset);
+          offset += len;
+        }
+
+        const domMidi = this.detectDominantMidi(pcm, sampleRate);
+        if (domMidi === null) {
+          if (this.vocalDetectStatus) {
+            this.vocalDetectStatus.textContent = `⚠️ No se detectó voz clara. Intenta cantar más fuerte.`;
+          }
+          return;
+        }
+
+        const roundedMidi = Math.round(domMidi);
+        if (mode === 'min') {
+          const clamped = Math.max(36, Math.min(72, roundedMidi));
+          this.vocalMinMidi = clamped;
+          if (this.vocalMaxMidi < clamped + 6) {
+            this.vocalMaxMidi = Math.min(84, clamped + 12);
+          }
+        } else {
+          const clamped = Math.max(48, Math.min(84, roundedMidi));
+          this.vocalMaxMidi = clamped;
+          if (this.vocalMinMidi > clamped - 6) {
+            this.vocalMinMidi = Math.max(36, clamped - 12);
+          }
+        }
+
+        this.saveAllSettings();
+        this.syncSettingsUi();
+
+        const finalMidi = mode === 'min' ? this.vocalMinMidi : this.vocalMaxMidi;
+        const hz = Math.round(440 * Math.pow(2, (finalMidi - 69) / 12));
+        const noteName = this.midiToNoteWithOctaveEs(finalMidi);
+        if (this.vocalDetectStatus) {
+          this.vocalDetectStatus.textContent = `✓ Nota ${labelTipo} guardada: ${noteName} (${hz} Hz)`;
+        }
+      }
+    };
+  }
+
+  async toggleMicTester() {
+    if (this.isMicTesting) {
+      this.stopSettingsMicTools();
+      return;
+    }
+
+    this.stopSettingsMicTools();
+    await this.ensureAudioReady();
+    const ok = await this.ensureMicStreamReady();
+    if (!ok) {
+      if (this.micLiveDetail) {
+        this.micLiveDetail.textContent = '⚠️ Permite el acceso al micrófono en tu navegador.';
+      }
+      return;
+    }
+
+    this.isMicTesting = true;
+    if (this.btnMicTester) {
+      this.btnMicTester.classList.add('active');
+      this.btnMicTester.textContent = '⏹ Detener';
+    }
+    if (this.micLiveDetail) {
+      this.micLiveDetail.textContent = 'Escuchando... Canta una nota';
+    }
+
+    const sampleRate = this.audioCtx.sampleRate;
+    this.sourceNode = this.audioCtx.createMediaStreamSource(this.mediaStream);
+    this.processorNode = this.audioCtx.createScriptProcessor(2048, 1, 1);
+
+    const silentGain = this.audioCtx.createGain();
+    silentGain.gain.value = 0;
+    this.sourceNode.connect(this.processorNode);
+    this.processorNode.connect(silentGain);
+    silentGain.connect(this.audioCtx.destination);
+
+    this.processorNode.onaudioprocess = (e) => {
+      if (!this.isMicTesting) return;
+      const input = e.inputBuffer.getChannelData(0);
+      let sumSq = 0;
+      for (let i = 0; i < input.length; i++) {
+        sumSq += input[i] * input[i];
+      }
+      const rms = Math.sqrt(sumSq / input.length);
+      const levelPct = Math.min(100, Math.round(rms * 450));
+      if (this.micMeterFill) {
+        this.micMeterFill.style.width = `${levelPct}%`;
+      }
+
+      if (rms >= 0.008) {
+        const hz = this.yinPitch(input, 0, input.length, sampleRate);
+        if (hz >= 65 && hz <= 1050) {
+          const midi = 69 + 12 * Math.log2(hz / 440);
+          const nearestMidi = Math.round(midi);
+          const cents = Math.round((midi - nearestMidi) * 100);
+          const sign = cents >= 0 ? '+' : '';
+          if (this.micLiveNote) {
+            this.micLiveNote.textContent = this.midiToNoteWithOctaveEs(nearestMidi);
+          }
+          if (this.micLiveDetail) {
+            this.micLiveDetail.textContent = `${Math.round(hz)} Hz · ${sign}${cents}c`;
+          }
+        }
+      } else {
+        if (this.micLiveNote) this.micLiveNote.textContent = '—';
+        if (this.micLiveDetail) this.micLiveDetail.textContent = 'Escuchando... Canta una nota';
+      }
+    };
+  }
+
+  navigateTo(viewKey) {
+    if (!VIEWS[viewKey]) return;
+    this.currentView = viewKey;
+    this.menuDrawer.classList.add('hidden');
+
+    if (viewKey !== 'settings') {
+      this.stopSettingsMicTools();
+    }
+
+    const isExerciseView =
+      viewKey === 'interval-exercise' || viewKey === 'singing-exercise';
+
+    if (!isExerciseView) {
+      if (this.delayedPlayTimer) {
+        clearTimeout(this.delayedPlayTimer);
+        this.delayedPlayTimer = null;
+      }
+      if (this.autoNextTimer) {
+        clearTimeout(this.autoNextTimer);
+        this.autoNextTimer = null;
+      }
+      this.stopSingingSequence();
+      if (viewKey !== 'settings') {
+        this.releaseMicStream();
+      }
+      if (this.startModal) {
+        this.startModal.classList.add('hidden');
+      }
+    }
+
+    if (viewKey === 'intervals') {
+      this.renderIntervalLevels();
+    } else if (viewKey === 'singing') {
+      this.renderSingingLevels();
+    }
+
+    Object.keys(VIEWS).forEach((key) => {
+      const el = document.getElementById(VIEWS[key].id);
+      if (el) {
+        el.classList.toggle('hidden', key !== viewKey);
+      }
+    });
+
+    if (viewKey === 'singing-exercise') {
+      requestAnimationFrame(() => this.drawGrandStaff(null, []));
+    }
+
+    this.sectionBadge.textContent = VIEWS[viewKey].badge;
+    document.querySelectorAll('[data-target]').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-target') === viewKey);
+    });
+
+    this.renderBottomCommands(viewKey);
+  }
+
+  renderBottomCommands(viewKey) {
+    if (viewKey === 'home') {
+      this.bottomZone.innerHTML = '';
+      return;
+    }
+
+    if (viewKey === 'interval-exercise' || viewKey === 'singing-exercise') {
+      const backTarget = viewKey === 'singing-exercise' ? 'singing' : 'intervals';
+      this.bottomZone.innerHTML = `
+        <button type="button" class="cmd-btn" id="cmd-back-levels">← Niveles</button>
+        <button type="button" class="cmd-btn" id="cmd-play-interval" aria-label="Reintentar ejercicio" title="Reintentar ejercicio">↻ Reintentar</button>
+        <button type="button" class="cmd-btn cmd-btn-primary" id="cmd-next-interval">Siguiente ⏭</button>
+      `;
+
+      document.getElementById('cmd-back-levels').addEventListener('click', () => {
+        this.navigateTo(backTarget);
+      });
+
+      document.getElementById('cmd-play-interval').addEventListener('click', () => {
+        if (this.exInlineStartBox) this.exInlineStartBox.classList.add('hidden');
+        if (this.singInlineStartBox) this.singInlineStartBox.classList.add('hidden');
+        this.playCurrentInterval();
+      });
+
+      document.getElementById('cmd-next-interval').addEventListener('click', () => {
+        if (this.exInlineStartBox) this.exInlineStartBox.classList.add('hidden');
+        if (this.singInlineStartBox) this.singInlineStartBox.classList.add('hidden');
+        this.generateNextQuestion();
+        this.schedulePlayAfterOneSecond();
+      });
+      return;
+    }
+
+    this.bottomZone.innerHTML = `
+      <button type="button" class="cmd-btn" data-cmd-nav="home">← Volver al Inicio</button>
+    `;
+
+    this.bottomZone.querySelectorAll('[data-cmd-nav]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        this.navigateTo(btn.getAttribute('data-cmd-nav'));
+      });
+    });
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  window.trinoShell = new TrinoShell();
+});

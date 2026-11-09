@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Trino</title>
+  <link rel="stylesheet" href="./css/styles.css?v=35" />
+</head>
+
+<body>
+  <div class="mobile-frame">
+    <!-- 1. ZONA SUPERIOR FIJA -->
+    <header class="top-zone">
+      <div class="app-brand" id="brand-home-btn" title="Ir al inicio">
+        <div class="app-logo-dot">🎵</div>
+        <span class="app-name">Trino</span>
+        <span class="section-indicator" id="top-section-badge">Inicio</span>
+      </div>
+
+      <span class="app-version" id="app-version-badge">v1.0.0027</span>
+
+      <button type="button" class="menu-btn" id="menu-toggle-btn" aria-label="Abrir menú">
+        ☰
+      </button>
+    </header>
+
+    <!-- Menú desplegable -->
+    <nav class="menu-drawer hidden" id="menu-drawer" aria-label="Menú principal">
+      <button type="button" class="menu-item" data-target="settings">
+        <span>⚙️</span> Configuración
+      </button>
+    </nav>
+
+    <!-- 2. ZONA MEDIA FLEXIBLE CON SCROLL -->
+    <main class="middle-zone" id="main-scroll-zone">
+      <!-- VISTA: INICIO (Bienvenida + Acceso a Módulos) -->
+      <section id="view-home">
+        <div class="welcome-box">
+          <span class="welcome-badge">Entrenamiento Auditivo y Vocal</span>
+          <h1 class="welcome-title">¡Bienvenido a Trino!</h1>
+          <p class="welcome-text">
+            Afina tu oído, descubre tu voz y disfruta cada nota del camino.
+          </p>
+        </div>
+
+        <div class="modules-list">
+          <!-- Módulo 1: Reconocer Intervalos -->
+          <button type="button" class="module-card" data-open-module="intervals">
+            <div class="module-icon icon-intervals">👂</div>
+            <div class="module-info">
+              <span class="module-tag">Módulo 1 · Oído</span>
+              <h2 class="module-title">Reconocer Intervalos</h2>
+              <p class="module-desc">Escucha dos notas e identifica la distancia musical entre ellas.</p>
+            </div>
+          </button>
+
+          <!-- Módulo 2: Cantar Notas -->
+          <button type="button" class="module-card" data-open-module="singing">
+            <div class="module-icon icon-singing">🎙️</div>
+            <div class="module-info">
+              <span class="module-tag">Módulo 2 · Voz</span>
+              <h2 class="module-title">Cantar Notas</h2>
+              <p class="module-desc">Entona las notas indicadas y revisa la precisión de tu afinación.</p>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- VISTA: MÓDULO 1 (Reconocer Intervalos — Listado de Niveles) -->
+      <section id="view-intervals" class="hidden">
+        <div class="levels-header">
+          <h2 class="welcome-title">Reconocer Intervalos</h2>
+          <p class="welcome-text" id="intervals-daily-goal-text">Meta diaria por nivel: 100 ejercicios.</p>
+        </div>
+
+        <div class="levels-list" id="intervals-levels-list">
+          <!-- Renderizado dinámicamente desde js/app.js -->
+        </div>
+      </section>
+
+      <!-- VISTA: EJERCICIO ACTIVO DE INTERVALOS -->
+      <section id="view-interval-exercise" class="hidden">
+        <div class="exercise-header-card">
+          <span class="exercise-level-name" id="ex-level-title">Nivel 1</span>
+          <div class="exercise-stats-line" id="ex-daily-counter">
+            <span class="stat-hoy" id="ex-date-label">Hoy</span>
+            <span class="stat-good">Bien:<strong id="ex-good-count">0</strong></span>
+            <span class="stat-bad">Mal:<strong id="ex-bad-count">0</strong></span>
+            <span class="stat-done">Hechas:<strong id="ex-done-count">0/100</strong></span>
+          </div>
+        </div>
+
+        <p class="exercise-prompt" id="ex-prompt-text">
+          Escucha el intervalo y marca la respuesta correcta entre las opciones
+        </p>
+
+        <div class="mystery-notes-row" aria-live="polite">
+          <span class="mystery-note" id="mystery-note-1">?</span>
+          <span class="mystery-note" id="mystery-note-2">?</span>
+        </div>
+
+        <div class="answers-grid" id="ex-answers-container">
+          <!-- Alternativas de respuesta generadas dinámicamente -->
+        </div>
+
+        <div class="inline-start-box" id="ex-inline-start-box">
+          <button type="button" class="start-modal-btn" id="btn-start-intervals">
+            Comenzar
+          </button>
+        </div>
+
+        <div class="session-log-wrapper hidden" id="session-log-wrapper">
+          <table class="session-log-table" aria-label="Historial de respuestas de la sesión">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Notas</th>
+                <th>Tu respuesta</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="session-log-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VISTA: MÓDULO 2 (Cantar Notas — Listado de Niveles) -->
+      <section id="view-singing" class="hidden">
+        <div class="levels-header">
+          <h2 class="welcome-title">Cantar Notas</h2>
+          <p class="welcome-text" id="singing-daily-goal-text">Meta diaria por nivel: 100 ejercicios.</p>
+        </div>
+
+        <div class="levels-list" id="singing-levels-list">
+          <!-- Renderizado dinámicamente desde js/app.js -->
+        </div>
+      </section>
+
+      <!-- VISTA: EJERCICIO ACTIVO DE CANTAR NOTAS -->
+      <section id="view-singing-exercise" class="hidden">
+        <div class="exercise-header-card">
+          <span class="exercise-level-name" id="sing-level-title">Nivel 1</span>
+          <div class="exercise-stats-line">
+            <span class="stat-hoy" id="sing-date-label">Hoy</span>
+            <span class="stat-good">Bien:<strong id="sing-good-count">0</strong></span>
+            <span class="stat-bad">Mal:<strong id="sing-bad-count">0</strong></span>
+            <span class="stat-done">Hechas:<strong id="sing-done-count">0/100</strong></span>
+          </div>
+        </div>
+
+        <p class="exercise-prompt" id="sing-prompt-text">
+          Escucha el primer compás y cántalo en el segundo compás
+        </p>
+
+        <div class="singing-meta-row">
+          <span class="singing-target-badge" id="sing-interval-name">Unísono</span>
+          <button type="button" class="singing-bpm-badge" id="sing-bpm-label" title="Cambiar BPM">
+            ♩ = 72 BPM
+          </button>
+          <span class="singing-phase-badge" id="sing-phase-badge">Listo</span>
+        </div>
+
+        <!-- Gran Pentagrama (Sol y Fa) de 2 Compases + Indicador de Tiempo y Curva de Voz -->
+        <div class="staff-canvas-box">
+          <canvas id="sing-staff-canvas" width="440" height="235"></canvas>
+        </div>
+
+        <p class="sing-feedback-text" id="sing-feedback-text"></p>
+
+        <div class="debug-btn-row">
+          <button type="button" class="debug-action-btn" id="btn-debug-popup" title="Abrir análisis de debug en una ventana aparte">
+            🔬 Debug (ventana aparte)
+          </button>
+        </div>
+
+        <div class="inline-start-box" id="sing-inline-start-box">
+          <button type="button" class="start-modal-btn" id="btn-start-singing">
+            Comenzar
+          </button>
+        </div>
+
+        <div class="session-log-wrapper hidden" id="sing-session-log-wrapper">
+          <table class="session-log-table" aria-label="Historial de canto de la sesión">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Notas</th>
+                <th>Afinación</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="sing-session-log-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VISTA: CONFIGURACIÓN -->
+      <section id="view-settings" class="hidden">
+        <div class="view-placeholder settings-panel">
+          <span class="welcome-badge">Ajustes</span>
+          <h2 class="welcome-title">Configuración</h2>
+
+          <!-- 1. Meta diaria -->
+          <div class="settings-group">
+            <span class="settings-group-title">Meta de Práctica</span>
+            <div class="settings-field">
+              <label for="daily-min-select" class="settings-label">Mínimo diario por nivel</label>
+              <select id="daily-min-select" class="settings-select">
+                <option value="10">10 diarios</option>
+                <option value="20">20 diarios</option>
+                <option value="30">30 diarios</option>
+                <option value="40">40 diarios</option>
+                <option value="50">50 diarios</option>
+                <option value="60">60 diarios</option>
+                <option value="70">70 diarios</option>
+                <option value="80">80 diarios</option>
+                <option value="90">90 diarios</option>
+                <option value="100" selected>100 diarios</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 2. Rango vocal del usuario (Cantar Notas) -->
+          <div class="settings-group">
+            <span class="settings-group-title">Rango Vocal (Cantar Notas)</span>
+            <p class="settings-hint">
+              Define la nota más grave y más aguda que puedes cantar cómodamente.
+            </p>
+
+            <div class="settings-field">
+              <label for="vocal-preset-select" class="settings-label">Registro vocal rápido</label>
+              <select id="vocal-preset-select" class="settings-select">
+                <option value="40-64">Bajo (Mi2 – Mi4)</option>
+                <option value="43-67">Barítono (Sol2 – Sol4)</option>
+                <option value="48-72" selected>Tenor / Estándar (Do3 – Do5)</option>
+                <option value="53-77">Contralto (Fa3 – Fa5)</option>
+                <option value="57-81">Mezzosoprano (La3 – La5)</option>
+                <option value="60-84">Soprano (Do4 – Do6)</option>
+                <option value="custom">Personalizado</option>
+              </select>
+            </div>
+
+            <div class="settings-range-grid">
+              <div class="settings-field">
+                <label for="vocal-min-select" class="settings-label">Nota más grave</label>
+                <div class="settings-inline-row">
+                  <select id="vocal-min-select" class="settings-select"></select>
+                  <button type="button" class="settings-test-btn" id="btn-test-vocal-min" title="Escuchar nota más grave">🔊</button>
+                  <button type="button" class="settings-test-btn" id="btn-detect-vocal-min" title="Cantar tu nota más grave para detectarla">🎙️</button>
+                </div>
+              </div>
+
+              <div class="settings-field">
+                <label for="vocal-max-select" class="settings-label">Nota más aguda</label>
+                <div class="settings-inline-row">
+                  <select id="vocal-max-select" class="settings-select"></select>
+                  <button type="button" class="settings-test-btn" id="btn-test-vocal-max" title="Escuchar nota más aguda">🔊</button>
+                  <button type="button" class="settings-test-btn" id="btn-detect-vocal-max" title="Cantar tu nota más aguda para detectarla">🎙️</button>
+                </div>
+              </div>
+            </div>
+            <div class="settings-detect-status hidden" id="vocal-detect-status"></div>
+          </div>
+
+          <!-- 3. Probador de Micrófono en vivo -->
+          <div class="settings-group">
+            <div class="settings-label-row">
+              <span class="settings-group-title">Probador de Micrófono</span>
+              <button type="button" class="settings-mic-toggle-btn" id="btn-mic-tester">🎙️ Probar Micrófono</button>
+            </div>
+            <div class="mic-tester-box" id="mic-tester-box">
+              <div class="mic-meter-track">
+                <div class="mic-meter-fill" id="mic-meter-fill"></div>
+              </div>
+              <div class="mic-live-readout">
+                <span class="mic-live-note" id="mic-live-note">—</span>
+                <span class="mic-live-detail" id="mic-live-detail">Pulsa "Probar Micrófono" y canta una nota</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Volumen de audio -->
+          <div class="settings-group">
+            <span class="settings-group-title">Volumen de Audio</span>
+
+            <div class="settings-field">
+              <div class="settings-label-row">
+                <label for="note-volume-input" class="settings-label">Volumen de las notas</label>
+                <span class="settings-val-badge" id="note-volume-val">80%</span>
+              </div>
+              <div class="settings-inline-row">
+                <input type="range" id="note-volume-input" class="bpm-slider" min="10" max="100" step="5" value="80" />
+                <button type="button" class="settings-test-btn" id="btn-test-note-vol" title="Probar volumen de nota">🔊</button>
+              </div>
+            </div>
+
+            <div class="settings-field">
+              <div class="settings-label-row">
+                <label for="click-volume-input" class="settings-label">Volumen del metrónomo (clicks)</label>
+                <span class="settings-val-badge" id="click-volume-val">90%</span>
+              </div>
+              <div class="settings-inline-row">
+                <input type="range" id="click-volume-input" class="bpm-slider" min="10" max="100" step="5" value="90" />
+                <button type="button" class="settings-test-btn" id="btn-test-click-vol" title="Probar volumen de click">🔊</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 3. ZONA INFERIOR FIJA (Comandos y Botones de la sección) -->
+    <footer class="bottom-zone" id="bottom-commands">
+      <!-- Se actualiza según la sección activa -->
+    </footer>
+
+    <!-- POP-UP SENCILLO PARA CAMBIAR BPM -->
+    <div class="start-modal-overlay hidden" id="bpm-modal">
+      <div class="start-modal-card bpm-modal-card">
+        <span class="bpm-modal-title">Velocidad (BPM)</span>
+        <div class="bpm-control-row">
+          <button type="button" class="bpm-step-btn" id="bpm-minus-btn">−</button>
+          <span class="bpm-display-val" id="bpm-modal-value">72</span>
+          <button type="button" class="bpm-step-btn" id="bpm-plus-btn">+</button>
+        </div>
+        <input type="range" id="bpm-range-input" class="bpm-slider" min="40" max="140" step="2" value="72" />
+        <button type="button" class="start-modal-btn" id="btn-bpm-confirm">
+          Aceptar
+        </button>
+      </div>
+    </div>
+
+    <!-- POP-UP DE INFORMACIÓN DE NIVEL (INTERVALOS, RANGOS Y NOTAS) -->
+    <div class="start-modal-overlay hidden" id="level-info-modal">
+      <div class="start-modal-card level-info-modal-card">
+        <div class="level-info-modal-header">
+          <span class="level-info-modal-badge" id="level-info-modal-module">Módulo</span>
+          <h3 class="level-info-modal-title" id="level-info-modal-title">Nivel</h3>
+        </div>
+        <div class="level-info-modal-body" id="level-info-modal-body"></div>
+        <button type="button" class="start-modal-btn" id="btn-level-info-close">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VENTANA GRANDE FLOTANTE DE DEBUG (FUERA DE MOBILE-FRAME PARA USAR TODA LA PANTALLA) -->
+  <div class="debug-large-overlay hidden" id="debug-large-modal">
+    <div class="debug-large-window">
+      <div class="debug-large-header">
+        <span>🔬 Debug — Análisis detallado del ejercicio</span>
+        <div class="debug-panel-actions">
+          <button type="button" class="debug-action-btn" id="btn-debug-popup-from-modal">🗗 Abrir en ventana aparte</button>
+          <button type="button" class="debug-action-btn debug-close-btn" id="btn-debug-modal-close">✕ Cerrar</button>
+        </div>
+      </div>
+      <div class="debug-large-body" id="debug-large-body"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/app.js?v=35"></script>
+</body>
+
+</html>
