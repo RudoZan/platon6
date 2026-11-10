@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=35" />
+  <link rel="stylesheet" href="./css/styles.css?v=32" />
 </head>
 
 <body>
@@ -18,7 +18,7 @@
         <span class="section-indicator" id="top-section-badge">Inicio</span>
       </div>
 
-      <span class="app-version" id="app-version-badge">v1.0.0027</span>
+      <span class="app-version" id="app-version-badge">v1.0.0031</span>
 
       <button type="button" class="menu-btn" id="menu-toggle-btn" aria-label="Abrir menú">
         ☰
@@ -28,7 +28,14 @@
     <!-- Menú desplegable -->
     <nav class="menu-drawer hidden" id="menu-drawer" aria-label="Menú principal">
       <button type="button" class="menu-item" data-target="settings">
-        <span>⚙️</span> Configuración
+        <span>Configuración</span>
+        <span>⚙️</span>
+      </button>
+      <button type="button" class="menu-item" id="menu-about-btn">
+        <span>Acerca de</span>
+      </button>
+      <button type="button" class="menu-item hidden" id="menu-logout-btn">
+        <span>Cerrar sesión</span>
       </button>
     </nav>
 
@@ -38,10 +45,21 @@
       <section id="view-home">
         <div class="welcome-box">
           <span class="welcome-badge">Entrenamiento Auditivo y Vocal</span>
-          <h1 class="welcome-title">¡Bienvenido a Trino!</h1>
-          <p class="welcome-text">
-            Afina tu oído, descubre tu voz y disfruta cada nota del camino.
-          </p>
+          <h1 class="welcome-title" id="home-greeting-title">¡Bienvenido a Trino!</h1>
+          <div id="home-guest-box" class="auth-home-box">
+            <p class="welcome-text">
+              Si quieres puedes hacer los ejercicios libremente, pero si te registras tendrás la opción de guardar un
+              registro histórico de tus ejercicios y acceder a estadísticas de progreso.
+            </p>
+            <button type="button" class="auth-activate-btn" id="btn-open-auth-modal">
+              Activar registro
+            </button>
+          </div>
+          <div id="home-user-box" class="auth-home-box hidden">
+            <p class="welcome-text" id="home-user-subtitle">
+              Afina tu oído, descubre tu voz y disfruta cada nota del camino.
+            </p>
+          </div>
         </div>
 
         <div class="modules-list">
@@ -85,9 +103,7 @@
           <span class="exercise-level-name" id="ex-level-title">Nivel 1</span>
           <div class="exercise-stats-line" id="ex-daily-counter">
             <span class="stat-hoy" id="ex-date-label">Hoy</span>
-            <span class="stat-good">Bien:<strong id="ex-good-count">0</strong></span>
-            <span class="stat-bad">Mal:<strong id="ex-bad-count">0</strong></span>
-            <span class="stat-done">Hechas:<strong id="ex-done-count">0/100</strong></span>
+            <span class="stat-done">Completados <strong id="ex-done-count">0 de 100</strong></span>
           </div>
         </div>
 
@@ -112,14 +128,6 @@
 
         <div class="session-log-wrapper hidden" id="session-log-wrapper">
           <table class="session-log-table" aria-label="Historial de respuestas de la sesión">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Notas</th>
-                <th>Tu respuesta</th>
-                <th></th>
-              </tr>
-            </thead>
             <tbody id="session-log-tbody"></tbody>
           </table>
         </div>
@@ -143,9 +151,7 @@
           <span class="exercise-level-name" id="sing-level-title">Nivel 1</span>
           <div class="exercise-stats-line">
             <span class="stat-hoy" id="sing-date-label">Hoy</span>
-            <span class="stat-good">Bien:<strong id="sing-good-count">0</strong></span>
-            <span class="stat-bad">Mal:<strong id="sing-bad-count">0</strong></span>
-            <span class="stat-done">Hechas:<strong id="sing-done-count">0/100</strong></span>
+            <span class="stat-done">Completados <strong id="sing-done-count">0 de 100</strong></span>
           </div>
         </div>
 
@@ -169,7 +175,8 @@
         <p class="sing-feedback-text" id="sing-feedback-text"></p>
 
         <div class="debug-btn-row">
-          <button type="button" class="debug-action-btn" id="btn-debug-popup" title="Abrir análisis de debug en una ventana aparte">
+          <button type="button" class="debug-action-btn" id="btn-debug-popup"
+            title="Abrir análisis de debug en una ventana aparte">
             🔬 Debug (ventana aparte)
           </button>
         </div>
@@ -181,15 +188,7 @@
         </div>
 
         <div class="session-log-wrapper hidden" id="sing-session-log-wrapper">
-          <table class="session-log-table" aria-label="Historial de canto de la sesión">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Notas</th>
-                <th>Afinación</th>
-                <th></th>
-              </tr>
-            </thead>
+          <table class="session-log-table sing-log-table" aria-label="Historial de canto de la sesión">
             <tbody id="sing-session-log-tbody"></tbody>
           </table>
         </div>
@@ -246,8 +245,10 @@
                 <label for="vocal-min-select" class="settings-label">Nota más grave</label>
                 <div class="settings-inline-row">
                   <select id="vocal-min-select" class="settings-select"></select>
-                  <button type="button" class="settings-test-btn" id="btn-test-vocal-min" title="Escuchar nota más grave">🔊</button>
-                  <button type="button" class="settings-test-btn" id="btn-detect-vocal-min" title="Cantar tu nota más grave para detectarla">🎙️</button>
+                  <button type="button" class="settings-test-btn" id="btn-test-vocal-min"
+                    title="Escuchar nota más grave">🔊</button>
+                  <button type="button" class="settings-test-btn" id="btn-detect-vocal-min"
+                    title="Cantar tu nota más grave para detectarla">🎙️</button>
                 </div>
               </div>
 
@@ -255,8 +256,10 @@
                 <label for="vocal-max-select" class="settings-label">Nota más aguda</label>
                 <div class="settings-inline-row">
                   <select id="vocal-max-select" class="settings-select"></select>
-                  <button type="button" class="settings-test-btn" id="btn-test-vocal-max" title="Escuchar nota más aguda">🔊</button>
-                  <button type="button" class="settings-test-btn" id="btn-detect-vocal-max" title="Cantar tu nota más aguda para detectarla">🎙️</button>
+                  <button type="button" class="settings-test-btn" id="btn-test-vocal-max"
+                    title="Escuchar nota más aguda">🔊</button>
+                  <button type="button" class="settings-test-btn" id="btn-detect-vocal-max"
+                    title="Cantar tu nota más aguda para detectarla">🎙️</button>
                 </div>
               </div>
             </div>
@@ -291,7 +294,8 @@
               </div>
               <div class="settings-inline-row">
                 <input type="range" id="note-volume-input" class="bpm-slider" min="10" max="100" step="5" value="80" />
-                <button type="button" class="settings-test-btn" id="btn-test-note-vol" title="Probar volumen de nota">🔊</button>
+                <button type="button" class="settings-test-btn" id="btn-test-note-vol"
+                  title="Probar volumen de nota">🔊</button>
               </div>
             </div>
 
@@ -302,9 +306,31 @@
               </div>
               <div class="settings-inline-row">
                 <input type="range" id="click-volume-input" class="bpm-slider" min="10" max="100" step="5" value="90" />
-                <button type="button" class="settings-test-btn" id="btn-test-click-vol" title="Probar volumen de click">🔊</button>
+                <button type="button" class="settings-test-btn" id="btn-test-click-vol"
+                  title="Probar volumen de click">🔊</button>
               </div>
             </div>
+          </div>
+
+          <!-- 5. Cuenta registrada -->
+          <div class="settings-group">
+            <div class="settings-label-row">
+              <span class="settings-group-title">Cuenta y Registro en la Nube</span>
+              <button type="button" class="settings-mic-toggle-btn" id="btn-settings-auth-action">Activar
+                registro</button>
+            </div>
+            <p class="settings-hint" id="settings-auth-status-text">
+              Sin cuenta activa (guardando solo en este dispositivo).
+            </p>
+          </div>
+
+          <!-- 6. Acerca de -->
+          <div class="settings-group">
+            <span class="settings-group-title">Acerca de Trino</span>
+            <p class="settings-hint">
+              Entrenamiento auditivo y de afinación vocal.<br />
+              <strong>Desarrollado por Astutosoft 2026</strong>
+            </p>
           </div>
         </div>
       </section>
@@ -344,6 +370,101 @@
         </button>
       </div>
     </div>
+
+    <!-- POP-UP ACERCA DE TRINO -->
+    <div class="start-modal-overlay hidden" id="about-modal">
+      <div class="start-modal-card level-info-modal-card">
+        <div class="level-info-modal-header">
+          <span class="level-info-modal-badge">Acerca de</span>
+          <h3 class="level-info-modal-title">🎵 Trino <span id="about-modal-version">v1.0.0029</span></h3>
+        </div>
+        <div class="level-info-modal-body">
+          <div class="level-info-section">
+            <span class="level-info-label">Aplicación</span>
+            <p class="level-info-value">
+              Entrenador progresivo de reconocimiento auditivo de intervalos y afinación de canto.
+            </p>
+          </div>
+          <div class="level-info-section">
+            <span class="level-info-label">Créditos</span>
+            <p class="level-info-value">
+              Desarrollado por <strong>Astutosoft 2026</strong>
+            </p>
+          </div>
+        </div>
+        <button type="button" class="start-modal-btn" id="btn-about-close">
+          Cerrar
+        </button>
+      </div>
+    </div>
+
+    <!-- POP-UP DE ACTIVACIÓN DE REGISTRO Y VALIDACIÓN CON 3 NOTAS -->
+    <div class="start-modal-overlay hidden" id="auth-modal">
+      <div class="start-modal-card auth-modal-card">
+        <!-- PASO 1: INGRESO DE NOMBRE Y CORREO -->
+        <div id="auth-step-form" class="auth-step-container">
+          <span class="level-info-modal-badge">Registro en Trino</span>
+          <h3 class="level-info-modal-title">Activar Registro</h3>
+
+          <div class="auth-input-group">
+            <label for="auth-name-input" class="settings-label">Tu nombre</label>
+            <input type="text" id="auth-name-input" class="auth-text-input" placeholder="Ej. Ana" maxlength="40"
+              autocomplete="given-name" />
+          </div>
+
+          <div class="auth-input-group">
+            <label for="auth-email-input" class="settings-label">Correo electrónico</label>
+            <input type="email" id="auth-email-input" class="auth-text-input" placeholder="tu@correo.com"
+              maxlength="100" autocomplete="email" />
+          </div>
+
+          <p class="auth-info-note">
+            Se te enviará un correo de verificación para activar la cuenta. Si ya tienes este correo registrado, se
+            activará tu cuenta ya registrada.
+          </p>
+
+          <div id="auth-form-status" class="auth-status-msg hidden"></div>
+
+          <div class="auth-actions-row">
+            <button type="button" class="cmd-btn" id="btn-auth-cancel-1">Cancelar</button>
+            <button type="button" class="cmd-btn cmd-btn-primary" id="btn-auth-submit">Activar</button>
+          </div>
+        </div>
+
+        <!-- PASO 2: VALIDACIÓN DE LAS 3 NOTAS EN ORDEN -->
+        <div id="auth-step-notes" class="auth-step-container hidden">
+          <span class="level-info-modal-badge">Verificación Musical</span>
+          <h3 class="level-info-modal-title">Ingresa tus 3 Notas</h3>
+          <p class="auth-info-note" id="auth-notes-subtitle">
+            Revisa tu correo y pulsa en orden las 3 notas recibidas:
+          </p>
+
+          <div class="auth-slots-row">
+            <div class="auth-note-slot" id="auth-slot-0">—</div>
+            <div class="auth-note-slot" id="auth-slot-1">—</div>
+            <div class="auth-note-slot" id="auth-slot-2">—</div>
+            <button type="button" class="auth-slot-clear-btn" id="btn-auth-note-back"
+              title="Borrar última nota">⌫</button>
+          </div>
+
+          <div class="auth-notes-grid" id="auth-notes-grid">
+            <button type="button" class="auth-note-btn" data-auth-note="Do">Do</button>
+            <button type="button" class="auth-note-btn" data-auth-note="Re">Re</button>
+            <button type="button" class="auth-note-btn" data-auth-note="Mi">Mi</button>
+            <button type="button" class="auth-note-btn" data-auth-note="Fa">Fa</button>
+            <button type="button" class="auth-note-btn" data-auth-note="Sol">Sol</button>
+            <button type="button" class="auth-note-btn" data-auth-note="La">La</button>
+            <button type="button" class="auth-note-btn" data-auth-note="Si">Si</button>
+          </div>
+
+          <div id="auth-notes-status" class="auth-status-msg hidden"></div>
+
+          <div class="auth-actions-row">
+            <button type="button" class="cmd-btn" id="btn-auth-cancel-2">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- VENTANA GRANDE FLOTANTE DE DEBUG (FUERA DE MOBILE-FRAME PARA USAR TODA LA PANTALLA) -->
@@ -352,7 +473,8 @@
       <div class="debug-large-header">
         <span>🔬 Debug — Análisis detallado del ejercicio</span>
         <div class="debug-panel-actions">
-          <button type="button" class="debug-action-btn" id="btn-debug-popup-from-modal">🗗 Abrir en ventana aparte</button>
+          <button type="button" class="debug-action-btn" id="btn-debug-popup-from-modal">🗗 Abrir en ventana
+            aparte</button>
           <button type="button" class="debug-action-btn debug-close-btn" id="btn-debug-modal-close">✕ Cerrar</button>
         </div>
       </div>
@@ -360,7 +482,9 @@
     </div>
   </div>
 
-  <script type="module" src="./js/app.js?v=35"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabaseClient.js"></script>
+  <script src="./js/app.js?v=32"></script>
 </body>
 
 </html>

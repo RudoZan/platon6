@@ -4,7 +4,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0027';
+const APP_VERSION = 'v1.0.0032';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -240,11 +240,27 @@ const SINGING_LEVELS = INTERVAL_LEVELS.map((lvl) => ({
 const STORAGE_KEY_SETTINGS = 'trino_settings_v2';
 const STORAGE_KEY_PROGRESS = 'trino_interval_progress_v1';
 const STORAGE_KEY_SING_PROGRESS = 'trino_singing_progress_v1';
+const STORAGE_KEY_USER = 'trino_user_v1';
+const STORAGE_KEY_DAY_LOGS = 'trino_day_logs_v1';
+
+const AUTH_NATURAL_NOTES = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+const AUTH_NOTE_MIDI = { Do: 60, Re: 62, Mi: 64, Fa: 65, Sol: 67, La: 69, Si: 71 };
+
+/**
+ * URL de Google Apps Script Web App para enviar el correo con las 3 notas.
+ */
+const TRINO_MAIL_WEBHOOK_URL =
+  window.TRINO_MAIL_WEBHOOK_URL ||
+  'https://script.google.com/macros/s/AKfycbwFZbp56xCsj5KTZmt2kq1x9QRCHOTjdL0wKsC78IMXHmcixhLHqGJ21IPi_Z2v1F3xQg/exec';
 
 class TrinoShell {
   constructor() {
     this.currentView = 'home';
     this.audioCtx = null;
+    this.supabase = this.initSupabaseClient();
+    this.currentUser = this.loadCurrentUser();
+    this.pendingAuth = null;
+    this.authEnteredNotes = [];
 
     // Configuración (mínimo diario, rango vocal y volúmenes)
     this.dailyMin = this.loadDailyMin();
@@ -256,6 +272,7 @@ class TrinoShell {
     this.clickVolume = vols.click;
     this.progress = this.loadProgress(STORAGE_KEY_PROGRESS);
     this.singProgress = this.loadProgress(STORAGE_KEY_SING_PROGRESS);
+    this.dayLogs = this.loadDayLogs();
 
     // Estado de ejercicio activo
     this.activeModule = null; // 'intervals' | 'singing'
@@ -283,10 +300,14 @@ class TrinoShell {
     this.cacheDom();
     this.bindEvents();
     this.syncSettingsUi();
+    this.syncAuthUi();
     this.renderIntervalLevels();
     this.renderSingingLevels();
     this.syncVersionBadge();
     this.navigateTo('home');
+    if (this.currentUser?.verificado) {
+      this.syncFromCloudOnLoad();
+    }
   }
 
   cacheDom() {
@@ -326,8 +347,6 @@ class TrinoShell {
     // Elementos de ejercicio de Reconocer Intervalos
     this.exLevelTitle = document.getElementById('ex-level-title');
     this.exDateLabel = document.getElementById('ex-date-label');
-    this.exGoodCount = document.getElementById('ex-good-count');
-    this.exBadCount = document.getElementById('ex-bad-count');
     this.exDoneCount = document.getElementById('ex-done-count');
     this.exAnswersContainer = document.getElementById('ex-answers-container');
     this.mysteryNote1 = document.getElementById('mystery-note-1');
@@ -338,8 +357,6 @@ class TrinoShell {
     // Elementos de ejercicio de Cantar Notas
     this.singLevelTitle = document.getElementById('sing-level-title');
     this.singDateLabel = document.getElementById('sing-date-label');
-    this.singGoodCount = document.getElementById('sing-good-count');
-    this.singBadCount = document.getElementById('sing-bad-count');
     this.singDoneCount = document.getElementById('sing-done-count');
     this.singIntervalName = document.getElementById('sing-interval-name');
     this.singBpmLabel = document.getElementById('sing-bpm-label');
@@ -378,11 +395,49 @@ class TrinoShell {
     this.levelInfoModalTitle = document.getElementById('level-info-modal-title');
     this.levelInfoModalBody = document.getElementById('level-info-modal-body');
     this.btnLevelInfoClose = document.getElementById('btn-level-info-close');
+
+    // Elementos de Bienvenida / Registro y Pop-up de 3 Notas
+    this.homeGreetingTitle = document.getElementById('home-greeting-title');
+    this.homeGuestBox = document.getElementById('home-guest-box');
+    this.homeUserBox = document.getElementById('home-user-box');
+    this.homeUserSubtitle = document.getElementById('home-user-subtitle');
+    this.btnOpenAuthModal = document.getElementById('btn-open-auth-modal');
+    this.btnSettingsAuthAction = document.getElementById('btn-settings-auth-action');
+    this.settingsAuthStatusText = document.getElementById('settings-auth-status-text');
+
+    this.authModal = document.getElementById('auth-modal');
+    this.authStepForm = document.getElementById('auth-step-form');
+    this.authStepNotes = document.getElementById('auth-step-notes');
+    this.authNameInput = document.getElementById('auth-name-input');
+    this.authEmailInput = document.getElementById('auth-email-input');
+    this.authFormStatus = document.getElementById('auth-form-status');
+    this.btnAuthCancel1 = document.getElementById('btn-auth-cancel-1');
+    this.btnAuthSubmit = document.getElementById('btn-auth-submit');
+    this.authNotesSubtitle = document.getElementById('auth-notes-subtitle');
+    this.authSlots = [
+      document.getElementById('auth-slot-0'),
+      document.getElementById('auth-slot-1'),
+      document.getElementById('auth-slot-2'),
+    ];
+    this.btnAuthNoteBack = document.getElementById('btn-auth-note-back');
+    this.authNotesGrid = document.getElementById('auth-notes-grid');
+    this.authNotesStatus = document.getElementById('auth-notes-status');
+    this.btnAuthCancel2 = document.getElementById('btn-auth-cancel-2');
+
+    // Menú Acerca de y Cerrar sesión
+    this.menuAboutBtn = document.getElementById('menu-about-btn');
+    this.menuLogoutBtn = document.getElementById('menu-logout-btn');
+    this.aboutModal = document.getElementById('about-modal');
+    this.aboutModalVersion = document.getElementById('about-modal-version');
+    this.btnAboutClose = document.getElementById('btn-about-close');
   }
 
   syncVersionBadge() {
     if (this.versionBadge) {
       this.versionBadge.textContent = APP_VERSION;
+    }
+    if (this.aboutModalVersion) {
+      this.aboutModalVersion.textContent = APP_VERSION;
     }
   }
 
@@ -409,6 +464,71 @@ class TrinoShell {
     return `${y}-${m}-${d}`;
   }
 
+  getYesterdayKey() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  loadDayLogs() {
+    const today = this.getTodayKey();
+    const yesterday = this.getYesterdayKey();
+    const cleanStore = { intervals: {}, singing: {} };
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_DAY_LOGS);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        ['intervals', 'singing'].forEach((mod) => {
+          const modObj = parsed?.[mod] || {};
+          Object.keys(modObj).forEach((lvlId) => {
+            const arr = Array.isArray(modObj[lvlId]) ? modObj[lvlId] : [];
+            const filtered = arr.filter((it) => it && (it.date === today || it.date === yesterday));
+            if (filtered.length > 0) {
+              cleanStore[mod][lvlId] = filtered;
+            }
+          });
+        });
+      }
+    } catch (_) {}
+    return cleanStore;
+  }
+
+  saveDayLogs() {
+    const today = this.getTodayKey();
+    const yesterday = this.getYesterdayKey();
+    try {
+      ['intervals', 'singing'].forEach((mod) => {
+        const modObj = this.dayLogs[mod] || {};
+        Object.keys(modObj).forEach((lvlId) => {
+          modObj[lvlId] = (modObj[lvlId] || []).filter(
+            (it) => it && (it.date === today || it.date === yesterday)
+          );
+        });
+      });
+      localStorage.setItem(STORAGE_KEY_DAY_LOGS, JSON.stringify(this.dayLogs));
+    } catch (_) {}
+  }
+
+  getLevelDayLog(moduleType, levelId) {
+    const today = this.getTodayKey();
+    const yesterday = this.getYesterdayKey();
+    if (!this.dayLogs[moduleType]) this.dayLogs[moduleType] = {};
+    const list = this.dayLogs[moduleType][levelId] || [];
+    this.dayLogs[moduleType][levelId] = list.filter(
+      (it) => it && (it.date === today || it.date === yesterday)
+    );
+    return this.dayLogs[moduleType][levelId];
+  }
+
+  pushLevelDayLog(moduleType, levelId, entry) {
+    const list = this.getLevelDayLog(moduleType, levelId);
+    list.unshift(entry);
+    this.saveDayLogs();
+  }
+
   loadDailyMin() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
@@ -421,20 +541,29 @@ class TrinoShell {
     return 100;
   }
 
+  getCurrentConfigObject() {
+    return {
+      dailyMin: this.dailyMin,
+      singBpm: this.singBpm,
+      vocalMinMidi: this.vocalMinMidi,
+      vocalMaxMidi: this.vocalMaxMidi,
+      noteVolume: this.noteVolume,
+      clickVolume: this.clickVolume,
+    };
+  }
+
   saveAllSettings() {
+    const cfg = this.getCurrentConfigObject();
     try {
-      localStorage.setItem(
-        STORAGE_KEY_SETTINGS,
-        JSON.stringify({
-          dailyMin: this.dailyMin,
-          singBpm: this.singBpm,
-          vocalMinMidi: this.vocalMinMidi,
-          vocalMaxMidi: this.vocalMaxMidi,
-          noteVolume: this.noteVolume,
-          clickVolume: this.clickVolume,
-        })
-      );
+      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(cfg));
     } catch (_) {}
+    if (this.currentUser?.verificado && this.supabase) {
+      this.supabase
+        .from('trino_usuarios')
+        .update({ configuracion: cfg })
+        .eq('email', this.currentUser.email)
+        .then(() => {});
+    }
   }
 
   saveDailyMin(val) {
@@ -813,6 +942,420 @@ class TrinoShell {
         }
       });
     }
+
+    // Eventos de Registro y Validación de 3 Notas
+    if (this.btnOpenAuthModal) {
+      this.btnOpenAuthModal.addEventListener('click', () => this.openAuthModal());
+    }
+    if (this.btnSettingsAuthAction) {
+      this.btnSettingsAuthAction.addEventListener('click', () => {
+        if (this.currentUser?.verificado) {
+          this.logoutUser();
+        } else {
+          this.openAuthModal();
+        }
+      });
+    }
+    if (this.btnAuthCancel1) {
+      this.btnAuthCancel1.addEventListener('click', () => this.closeAuthModal());
+    }
+    if (this.btnAuthCancel2) {
+      this.btnAuthCancel2.addEventListener('click', () => this.closeAuthModal());
+    }
+    if (this.btnAuthSubmit) {
+      this.btnAuthSubmit.addEventListener('click', () => this.handleAuthSubmit());
+    }
+    if (this.btnAuthNoteBack) {
+      this.btnAuthNoteBack.addEventListener('click', () => {
+        if (this.authEnteredNotes.length > 0) {
+          this.authEnteredNotes.pop();
+          this.renderAuthNoteSlots();
+        }
+      });
+    }
+    if (this.authNotesGrid) {
+      this.authNotesGrid.querySelectorAll('[data-auth-note]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const note = btn.getAttribute('data-auth-note');
+          this.handleAuthNoteClick(note);
+        });
+      });
+    }
+
+    if (this.menuAboutBtn) {
+      this.menuAboutBtn.addEventListener('click', () => {
+        this.menuDrawer.classList.add('hidden');
+        if (this.aboutModal) this.aboutModal.classList.remove('hidden');
+      });
+    }
+    if (this.btnAboutClose) {
+      this.btnAboutClose.addEventListener('click', () => {
+        if (this.aboutModal) this.aboutModal.classList.add('hidden');
+      });
+    }
+    if (this.aboutModal) {
+      this.aboutModal.addEventListener('click', (e) => {
+        if (e.target === this.aboutModal) {
+          this.aboutModal.classList.add('hidden');
+        }
+      });
+    }
+    if (this.menuLogoutBtn) {
+      this.menuLogoutBtn.addEventListener('click', () => {
+        this.menuDrawer.classList.add('hidden');
+        this.logoutUser();
+        this.navigateTo('home');
+      });
+    }
+  }
+
+  /* =========================================================================
+   * REGISTRO DE USUARIO, VALIDACIÓN POR 3 NOTAS Y SINCRONIZACIÓN SUPABASE
+   * ========================================================================= */
+
+  initSupabaseClient() {
+    try {
+      if (typeof window.getPlaton6Supabase === 'function') {
+        const client = window.getPlaton6Supabase();
+        if (client) return client;
+      }
+      const createClientFn = window.supabase?.createClient || window.supabaseJs?.createClient;
+      if (createClientFn) {
+        return createClientFn(
+          'https://junonydusnrcumbjjzqt.supabase.co',
+          'sb_publishable_vmnxlj3GbQPYqoXSjoK4IA_WN37wTR8'
+        );
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  loadCurrentUser() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_USER);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.email && parsed.nombre && parsed.verificado) {
+          return parsed;
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  saveCurrentUser(userObj) {
+    this.currentUser = userObj;
+    try {
+      if (userObj) {
+        localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userObj));
+      } else {
+        localStorage.removeItem(STORAGE_KEY_USER);
+      }
+    } catch (_) {}
+    this.syncAuthUi();
+  }
+
+  logoutUser() {
+    this.saveCurrentUser(null);
+  }
+
+  syncAuthUi() {
+    const isVerified = Boolean(this.currentUser?.verificado);
+    if (this.homeGreetingTitle) {
+      this.homeGreetingTitle.textContent = isVerified
+        ? `¡Hola, ${this.currentUser.nombre}!`
+        : '¡Bienvenido a Trino!';
+    }
+    if (this.homeGuestBox) {
+      this.homeGuestBox.classList.toggle('hidden', isVerified);
+    }
+    if (this.homeUserBox) {
+      this.homeUserBox.classList.toggle('hidden', !isVerified);
+    }
+    if (this.homeUserSubtitle && isVerified) {
+      this.homeUserSubtitle.textContent =
+        `Registro activo (${this.currentUser.email}). Tu historial de ejercicios y configuración se guardan automáticamente.`;
+    }
+    if (this.settingsAuthStatusText) {
+      this.settingsAuthStatusText.textContent = isVerified
+        ? `Cuenta activa: ${this.currentUser.nombre} (${this.currentUser.email})`
+        : 'Sin cuenta activa (guardando solo en este dispositivo).';
+    }
+    if (this.btnSettingsAuthAction) {
+      this.btnSettingsAuthAction.textContent = isVerified ? 'Cerrar sesión' : 'Activar registro';
+    }
+    if (this.menuLogoutBtn) {
+      this.menuLogoutBtn.classList.toggle('hidden', !isVerified);
+    }
+  }
+
+  openAuthModal() {
+    if (!this.authModal) return;
+    this.pendingAuth = null;
+    this.authEnteredNotes = [];
+    if (this.authStepForm) this.authStepForm.classList.remove('hidden');
+    if (this.authStepNotes) this.authStepNotes.classList.add('hidden');
+    if (this.authFormStatus) {
+      this.authFormStatus.classList.add('hidden');
+      this.authFormStatus.textContent = '';
+    }
+    if (this.authNotesStatus) {
+      this.authNotesStatus.classList.add('hidden');
+      this.authNotesStatus.textContent = '';
+    }
+    this.authModal.classList.remove('hidden');
+    if (this.authNameInput) this.authNameInput.focus();
+  }
+
+  closeAuthModal() {
+    if (this.authModal) {
+      this.authModal.classList.add('hidden');
+    }
+    this.pendingAuth = null;
+    this.authEnteredNotes = [];
+  }
+
+  generateRandomThreeNotes() {
+    const picked = [];
+    for (let i = 0; i < 3; i++) {
+      const idx = Math.floor(Math.random() * AUTH_NATURAL_NOTES.length);
+      picked.push(AUTH_NATURAL_NOTES[idx]);
+    }
+    return picked;
+  }
+
+  showAuthStatus(el, msg, type = 'info') {
+    if (!el) return;
+    el.classList.remove('hidden', 'status-error', 'status-ok');
+    if (type === 'error') el.classList.add('status-error');
+    if (type === 'ok') el.classList.add('status-ok');
+    el.textContent = msg;
+  }
+
+  async handleAuthSubmit() {
+    const nombre = (this.authNameInput?.value || '').trim();
+    const email = (this.authEmailInput?.value || '').trim().toLowerCase();
+
+    if (!nombre) {
+      this.showAuthStatus(this.authFormStatus, 'Ingresa tu nombre.', 'error');
+      return;
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      this.showAuthStatus(this.authFormStatus, 'Ingresa un correo electrónico válido.', 'error');
+      return;
+    }
+
+    const notesArr = this.generateRandomThreeNotes();
+    const codeStr = notesArr.join('-');
+
+    if (this.btnAuthSubmit) this.btnAuthSubmit.disabled = true;
+    this.showAuthStatus(this.authFormStatus, 'Preparando código musical de 3 notas...');
+
+    let dbUser = null;
+    let isExisting = false;
+
+    if (this.supabase) {
+      try {
+        const { data: existing } = await this.supabase
+          .from('trino_usuarios')
+          .select('*')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (existing) {
+          isExisting = true;
+          const { data: updated } = await this.supabase
+            .from('trino_usuarios')
+            .update({ nombre: nombre || existing.nombre, codigo_notas: codeStr })
+            .eq('id', existing.id)
+            .select()
+            .single();
+          dbUser = updated || existing;
+        } else {
+          const { data: inserted } = await this.supabase
+            .from('trino_usuarios')
+            .insert([
+              {
+                email,
+                nombre,
+                verificado: false,
+                codigo_notas: codeStr,
+                configuracion: this.getCurrentConfigObject(),
+              },
+            ])
+            .select()
+            .single();
+          dbUser = inserted;
+        }
+      } catch (_) {}
+    }
+
+    const emailSent = await this.sendVerificationNotesEmail(email, nombre, notesArr);
+
+    if (this.btnAuthSubmit) this.btnAuthSubmit.disabled = false;
+
+    this.pendingAuth = {
+      id: dbUser?.id || null,
+      email,
+      nombre: dbUser?.nombre || nombre,
+      expectedCode: codeStr,
+      notesArr,
+      isExisting,
+      savedConfig: dbUser?.configuracion || null,
+    };
+
+    this.authEnteredNotes = [];
+    this.renderAuthNoteSlots();
+
+    if (this.authStepForm) this.authStepForm.classList.add('hidden');
+    if (this.authStepNotes) this.authStepNotes.classList.remove('hidden');
+
+    if (this.authNotesSubtitle) {
+      if (emailSent) {
+        this.authNotesSubtitle.textContent =
+          `Enviamos 3 notas a ${email}. Púlsalas en el mismo orden para activar tu cuenta:`;
+      } else {
+        // Si aún no se configuró el webhook de correo, mostrar las 3 notas para poder probar el flujo inmediato
+        this.authNotesSubtitle.textContent =
+          `Pulsa en orden las 3 notas de verificación (${notesArr.join(' - ')}) para activar la cuenta de ${email}:`;
+      }
+    }
+  }
+
+  async sendVerificationNotesEmail(email, nombre, notesArr) {
+    const webhookUrl = window.TRINO_MAIL_WEBHOOK_URL || TRINO_MAIL_WEBHOOK_URL;
+    if (!webhookUrl) return false;
+    try {
+      await fetch(webhookUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          email,
+          nombre,
+          notas: notesArr.join(' - '),
+        }),
+      });
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  renderAuthNoteSlots() {
+    this.authSlots.forEach((slotEl, idx) => {
+      if (!slotEl) return;
+      const note = this.authEnteredNotes[idx];
+      slotEl.textContent = note || '—';
+      slotEl.classList.toggle('filled', Boolean(note));
+    });
+  }
+
+  async handleAuthNoteClick(note) {
+    if (!this.pendingAuth || this.authEnteredNotes.length >= 3) return;
+
+    // Sonar la nota correspondiente en la octava Do4..Si4
+    await this.ensureAudioReady();
+    const midi = AUTH_NOTE_MIDI[note] || 60;
+    const hz = 440 * Math.pow(2, (midi - 69) / 12);
+    this.playTone(hz, this.audioCtx.currentTime, 0.42);
+
+    this.authEnteredNotes.push(note);
+    this.renderAuthNoteSlots();
+
+    if (this.authEnteredNotes.length === 3) {
+      await this.validateAuthNotes();
+    }
+  }
+
+  async validateAuthNotes() {
+    if (!this.pendingAuth) return;
+    const enteredCode = this.authEnteredNotes.join('-');
+
+    if (enteredCode !== this.pendingAuth.expectedCode) {
+      this.showAuthStatus(
+        this.authNotesStatus,
+        '✕ Las 3 notas no coinciden. Inténtalo de nuevo.',
+        'error'
+      );
+      setTimeout(() => {
+        this.authEnteredNotes = [];
+        this.renderAuthNoteSlots();
+      }, 650);
+      return;
+    }
+
+    this.showAuthStatus(this.authNotesStatus, '✓ ¡Cuenta verificada! Activando...', 'ok');
+
+    let userId = this.pendingAuth.id;
+    if (this.supabase) {
+      try {
+        const { data } = await this.supabase
+          .from('trino_usuarios')
+          .update({ verificado: true, codigo_notas: null })
+          .eq('email', this.pendingAuth.email)
+          .select()
+          .single();
+        if (data?.id) userId = data.id;
+      } catch (_) {}
+    }
+
+    // Si era una cuenta existente con configuración guardada, aplicarla
+    if (this.pendingAuth.isExisting && this.pendingAuth.savedConfig) {
+      this.applyCloudConfig(this.pendingAuth.savedConfig);
+    }
+
+    this.saveCurrentUser({
+      id: userId,
+      email: this.pendingAuth.email,
+      nombre: this.pendingAuth.nombre,
+      verificado: true,
+    });
+
+    await this.syncFromCloudOnLoad();
+
+    setTimeout(() => {
+      this.closeAuthModal();
+    }, 650);
+  }
+
+  applyCloudConfig(cfg) {
+    if (!cfg || typeof cfg !== 'object') return;
+    if (cfg.dailyMin >= 10 && cfg.dailyMin <= 100) this.dailyMin = cfg.dailyMin;
+    if (cfg.singBpm >= 40 && cfg.singBpm <= 140) this.singBpm = cfg.singBpm;
+    if (cfg.vocalMinMidi >= 36 && cfg.vocalMaxMidi <= 84) {
+      this.vocalMinMidi = cfg.vocalMinMidi;
+      this.vocalMaxMidi = cfg.vocalMaxMidi;
+    }
+    if (cfg.noteVolume >= 10 && cfg.noteVolume <= 100) this.noteVolume = cfg.noteVolume;
+    if (cfg.clickVolume >= 10 && cfg.clickVolume <= 100) this.clickVolume = cfg.clickVolume;
+    this.saveAllSettings();
+    this.syncSettingsUi();
+    this.renderIntervalLevels();
+    this.renderSingingLevels();
+  }
+
+  async syncFromCloudOnLoad() {
+    if (!this.supabase || !this.currentUser?.email) return;
+    try {
+      const { data: userRow } = await this.supabase
+        .from('trino_usuarios')
+        .select('*')
+        .eq('email', this.currentUser.email)
+        .maybeSingle();
+
+      if (!userRow) return;
+      if (userRow.id && userRow.id !== this.currentUser.id) {
+        this.saveCurrentUser({
+          ...this.currentUser,
+          id: userRow.id,
+          nombre: userRow.nombre || this.currentUser.nombre,
+        });
+      }
+      if (userRow.configuracion) {
+        this.applyCloudConfig(userRow.configuracion);
+      }
+    } catch (_) {}
   }
 
   openBpmModal() {
@@ -912,7 +1455,7 @@ class TrinoShell {
 
     this.activeModule = 'intervals';
     this.activeLevel = level;
-    this.sessionLog = [];
+    this.sessionLog = this.getLevelDayLog('intervals', levelId);
     this.renderSessionLog();
     this.generateNextQuestion();
     this.updateExerciseUi();
@@ -929,7 +1472,7 @@ class TrinoShell {
 
     this.activeModule = 'singing';
     this.activeLevel = level;
-    this.singSessionLog = [];
+    this.singSessionLog = this.getLevelDayLog('singing', levelId);
     this.renderSingSessionLog();
     this.generateNextQuestion();
     this.updateSingingExerciseUi();
@@ -1188,9 +1731,7 @@ class TrinoShell {
     if (this.exDateLabel) {
       this.exDateLabel.textContent = this.getFormattedSpanishDate();
     }
-    this.exGoodCount.textContent = String(stats.good);
-    this.exBadCount.textContent = String(stats.bad);
-    this.exDoneCount.textContent = `${totalDone}/${this.dailyMin}`;
+    this.exDoneCount.textContent = `${totalDone} de ${this.dailyMin}`;
 
     this.exAnswersContainer.innerHTML = this.activeLevel.options
       .map((key) => {
@@ -1242,12 +1783,16 @@ class TrinoShell {
 
       const note1 = this.midiToNoteNameEs(this.currentQuestion.midi1);
       const note2 = this.midiToNoteNameEs(this.currentQuestion.midi2);
-      this.sessionLog.unshift({
-        index: this.sessionLog.length + 1,
+      const todayKey = this.getTodayKey();
+      const todayCount = this.sessionLog.filter((it) => (it.date || todayKey) === todayKey).length;
+      this.pushLevelDayLog('intervals', this.activeLevel.id, {
+        date: todayKey,
+        index: todayCount + 1,
         notes: `${note1} - ${note2}`,
         answer: INTERVAL_CATALOG[selectedKey]?.label || selectedKey,
         isCorrect,
       });
+      this.sessionLog = this.getLevelDayLog('intervals', this.activeLevel.id);
       this.renderSessionLog();
 
       const totalDone = stats.good + stats.bad;
@@ -1261,9 +1806,7 @@ class TrinoShell {
       }
 
       this.saveProgress();
-      this.exGoodCount.textContent = String(stats.good);
-      this.exBadCount.textContent = String(stats.bad);
-      this.exDoneCount.textContent = `${totalDone}/${this.dailyMin}`;
+      this.exDoneCount.textContent = `${totalDone} de ${this.dailyMin}`;
     } else {
       if (btnEl === this.currentQuestion.firstButtonEl) {
         return;
@@ -1280,53 +1823,277 @@ class TrinoShell {
   }
 
   renderSessionLog() {
-    this.renderLogTable(this.sessionLogWrapper, this.sessionLogTbody, this.sessionLog);
+    this.renderLogTable(this.sessionLogWrapper, this.sessionLogTbody, this.sessionLog, false);
   }
 
   renderSingSessionLog() {
-    this.renderLogTable(this.singSessionLogWrapper, this.singSessionLogTbody, this.singSessionLog);
+    this.renderLogTable(this.singSessionLogWrapper, this.singSessionLogTbody, this.singSessionLog, true);
   }
 
-  renderLogTable(wrapperEl, tbodyEl, list) {
+  buildDaySummaryHtml(dayLabel, items, isSinging) {
+    const totalEx = items.length;
+    if (totalEx === 0) return '';
+
+    const exerciseGrades = { admirable: 0, bueno: 0, aceptable: 0, casi: 0, malo: 0 };
+    items.forEach((it) => {
+      const grade = exerciseGrades[it.exerciseGrade] !== undefined
+        ? it.exerciseGrade
+        : it.isCorrect ? 'bueno' : 'malo';
+      exerciseGrades[grade]++;
+    });
+
+    const pBadEx = Math.round((exerciseGrades.malo / totalEx) * 100);
+    const pRegEx = Math.round((exerciseGrades.casi / totalEx) * 100);
+    const pAcepEx = Math.round((exerciseGrades.aceptable / totalEx) * 100);
+    const pBuenoEx = Math.round((exerciseGrades.bueno / totalEx) * 100);
+    const pAdmEx = Math.max(0, 100 - pBadEx - pRegEx - pAcepEx - pBuenoEx);
+    const pGoodEx = Math.max(0, 100 - pBadEx);
+
+    let notesSummaryHtml = '';
+    if (isSinging) {
+      let nMalo = 0;
+      let nReg = 0;
+      let nAcep = 0;
+      let nBueno = 0;
+      let nAdm = 0;
+      let cGli = 0;
+      let cPlana = 0;
+      let cVib = 0;
+      let cIrr = 0;
+
+      items.forEach((it) => {
+        const ns = Array.isArray(it.noteStats) ? it.noteStats : [];
+        if (ns.length > 0) {
+          ns.forEach((n) => {
+            if (n.grade === 'admirable') nAdm++;
+            else if (n.grade === 'bueno') nBueno++;
+            else if (n.grade === 'aceptable') nAcep++;
+            else if (n.grade === 'casi') nReg++;
+            else nMalo++;
+
+            if (n.glissando) cGli++;
+            if (n.voiceType === 'vibrato') cVib++;
+            else if (n.voiceType === 'inestable') cIrr++;
+            else cPlana++;
+          });
+        }
+      });
+
+      const totalNotes = nMalo + nReg + nAcep + nBueno + nAdm;
+      if (totalNotes > 0) {
+        const pNReg = Math.round((nReg / totalNotes) * 100);
+        const pNAcep = Math.round((nAcep / totalNotes) * 100);
+        const pNBueno = Math.round((nBueno / totalNotes) * 100);
+        const pNAdm = Math.round((nAdm / totalNotes) * 100);
+        const pNMalo = Math.max(0, 100 - pNAdm - pNReg - pNAcep - pNBueno);
+
+        notesSummaryHtml = `
+          <div class="day-summary-line">
+            <span><strong>Notas:</strong> ${totalNotes}</span>
+            <span class="sum-adm" title="Admirables" aria-label="Admirables: ${pNAdm}%">✦ ${pNAdm}%</span>
+            <span class="sum-bueno" title="Buenas" aria-label="Buenas: ${pNBueno}%">✓ ${pNBueno}%</span>
+            <span class="sum-acep" title="Aceptables" aria-label="Aceptables: ${pNAcep}%">⊙ ${pNAcep}%</span>
+            <span class="sum-reg" title="Regulares" aria-label="Regulares: ${pNReg}%">≈ ${pNReg}%</span>
+            <span class="sum-bad" title="Fallidas" aria-label="Fallidas: ${pNMalo}%">✕ ${pNMalo}%</span>
+          </div>
+          <div class="day-prop-bar" title="Proporción de notas cantadas">
+            ${pNAdm > 0 ? `<div class="bar-seg seg-adm" style="width:${pNAdm}%"></div>` : ''}
+            ${pNBueno > 0 ? `<div class="bar-seg seg-bueno" style="width:${pNBueno}%"></div>` : ''}
+            ${pNAcep > 0 ? `<div class="bar-seg seg-acep" style="width:${pNAcep}%"></div>` : ''}
+            ${pNReg > 0 ? `<div class="bar-seg seg-reg" style="width:${pNReg}%"></div>` : ''}
+            ${pNMalo > 0 ? `<div class="bar-seg seg-bad" style="width:${pNMalo}%"></div>` : ''}
+          </div>
+          <div class="day-voice-counts">
+            <span>Glisandos: <strong>${cGli}</strong></span>
+            <span>Sin vibrato: <strong>${cPlana}</strong></span>
+            <span>Vibratos: <strong>${cVib}</strong></span>
+            <span>Irregulares: <strong>${cIrr}</strong></span>
+          </div>
+        `;
+      }
+    }
+
+    const colSpan = isSinging ? 7 : 4;
+    const headersRowHtml = isSinging
+      ? `<tr class="log-col-headers">
+           <th>#</th>
+           <th>Nota</th>
+           <th></th>
+           <th>Centro tonal</th>
+           <th>Voz</th>
+           <th>Gli</th>
+           <th></th>
+         </tr>`
+      : `<tr class="log-col-headers">
+           <th>#</th>
+           <th>Notas</th>
+           <th>Tu respuesta</th>
+           <th></th>
+         </tr>`;
+
+    return `
+      <tr class="day-divider-row">
+        <td colspan="${colSpan}" class="day-divider-cell">
+          <div class="day-divider-banner">--- ${dayLabel} ---</div>
+          <div class="day-summary-box">
+            <div class="day-summary-line">
+              <span><strong>Ejercicios:</strong> ${totalEx}</span>
+              ${isSinging
+                 ? `<span class="sum-adm" title="Admirables" aria-label="Admirables: ${pAdmEx}%">✦ ${pAdmEx}%</span>
+                   <span class="sum-bueno" title="Buenos" aria-label="Buenos: ${pBuenoEx}%">✓ ${pBuenoEx}%</span>
+                   <span class="sum-acep" title="Aceptables" aria-label="Aceptables: ${pAcepEx}%">⊙ ${pAcepEx}%</span>
+                   <span class="sum-reg" title="Regulares" aria-label="Regulares: ${pRegEx}%">≈ ${pRegEx}%</span>
+                   <span class="sum-bad" title="Fallidos" aria-label="Fallidos: ${pBadEx}%">✕ ${pBadEx}%</span>`
+                 : `<span class="sum-good" title="Buenos" aria-label="Buenos: ${pGoodEx}%">✓ ${pGoodEx}%</span>
+                   <span class="sum-bad" title="Fallidos" aria-label="Fallidos: ${pBadEx}%">✕ ${pBadEx}%</span>`}
+            </div>
+            <div class="day-prop-bar" title="Proporción de ejercicios">
+              ${isSinging
+                ? `${pAdmEx > 0 ? `<div class="bar-seg seg-adm" style="width:${pAdmEx}%"></div>` : ''}
+                   ${pBuenoEx > 0 ? `<div class="bar-seg seg-bueno" style="width:${pBuenoEx}%"></div>` : ''}
+                   ${pAcepEx > 0 ? `<div class="bar-seg seg-acep" style="width:${pAcepEx}%"></div>` : ''}
+                   ${pRegEx > 0 ? `<div class="bar-seg seg-reg" style="width:${pRegEx}%"></div>` : ''}
+                   ${pBadEx > 0 ? `<div class="bar-seg seg-bad" style="width:${pBadEx}%"></div>` : ''}`
+                : `${pGoodEx > 0 ? `<div class="bar-seg seg-bueno" style="width:${pGoodEx}%"></div>` : ''}
+                   ${pBadEx > 0 ? `<div class="bar-seg seg-bad" style="width:${pBadEx}%"></div>` : ''}`}
+            </div>
+            ${notesSummaryHtml}
+          </div>
+        </td>
+      </tr>
+      ${headersRowHtml}
+    `;
+  }
+
+  renderLogTable(wrapperEl, tbodyEl, list, isSinging = false) {
     if (!wrapperEl || !tbodyEl) return;
-    if (list.length === 0) {
+    if (!Array.isArray(list) || list.length === 0) {
       wrapperEl.classList.add('hidden');
       tbodyEl.innerHTML = '';
       return;
     }
 
     const gradeLabel = {
-      admirable: { text: '✨ Admirable', cls: 'grade-admirable' },
-      bueno:     { text: '✓ Bueno',     cls: 'grade-bueno' },
-      aceptable: { text: '✓ Aceptable', cls: 'grade-aceptable' },
-      casi:      { text: '≈ Casi',      cls: 'grade-casi' },
-      malo:      { text: '✕ Malo',      cls: 'grade-malo' },
-      // compatibilidad con módulo intervalos (isCorrect booleano)
+      admirable: { icon: '✦', label: 'Admirable', cls: 'grade-admirable' },
+      bueno:     { icon: '✓', label: 'Bueno', cls: 'grade-bueno' },
+      aceptable: { icon: '⊙', label: 'Aceptable', cls: 'grade-aceptable' },
+      casi:      { icon: '≈', label: 'Regular', cls: 'grade-casi' },
+      malo:      { icon: '✕', label: 'Fallido', cls: 'grade-malo' },
     };
 
+    const noteGradeLabel = {
+      admirable: { icon: '✦', label: 'Admirable', cls: 'grade-admirable' },
+      bueno:     { icon: '✓', label: 'Buena', cls: 'grade-bueno' },
+      aceptable: { icon: '⊙', label: 'Aceptable', cls: 'grade-aceptable' },
+      casi:      { icon: '≈', label: 'Regular', cls: 'grade-casi' },
+      malo:      { icon: '✕', label: 'Fallida', cls: 'grade-malo' },
+    };
+
+    const todayKey = this.getTodayKey();
+    const yesterdayKey = this.getYesterdayKey();
+
+    const todayItems = list.filter((it) => (it.date || todayKey) === todayKey);
+    const yesterdayItems = list.filter((it) => it.date === yesterdayKey);
+
+    const renderRows = (items) =>
+      items
+        .map((item) => {
+          if (isSinging) {
+            const gl = gradeLabel[item.exerciseGrade] || gradeLabel.malo;
+            const ns = Array.isArray(item.noteStats) ? item.noteStats : [];
+
+            const califHtml = ns.length > 0
+              ? ns.map((n) => {
+                  const ng = noteGradeLabel[n.grade] || noteGradeLabel.malo;
+                  return `<span class="log-note-indicator"><span class="note-grade-line ${ng.cls}" title="${ng.label}" aria-label="${ng.label}">${ng.icon}</span></span>`;
+                }).join('')
+              : `<span class="log-note-indicator"><span class="note-grade-line ${gl.cls}" title="${gl.label}" aria-label="${gl.label}">${gl.icon}</span></span>`;
+
+            const cantadaHtml = ns.length > 0
+              ? ns.map((n) => {
+                  const rawLabel = (n.label || ' ')
+                    .replace('Casi perfecto', 'Casi centrado')
+                    .replace('Perfecto', 'Centrado');
+                  if (n.sungNote && rawLabel !== 'Silencio') {
+                    return `<span class="log-note-indicator"><strong>${n.sungNote}</strong> ${rawLabel}</span>`;
+                  }
+                  return `<span class="log-note-indicator">${rawLabel}</span>`;
+                }).join('')
+              : `<span class="log-note-indicator">${item.answer || ' '}</span>`;
+
+            const vozHtml = ns.length > 0
+              ? ns.map((n) => {
+                  let badge = ' ';
+                  if (n.voiceType === 'vibrato') {
+                    const hzTxt = n.vibratoHz ? ` (${n.vibratoHz}Hz)` : '';
+                    badge = `<span class="voice-badge badge-vibrato" title="Vibrato detectado${hzTxt}">Vib</span>`;
+                  } else if (n.voiceType === 'inestable') {
+                    badge = `<span class="voice-badge badge-unstable" title="Voz irregular detectada">Irr</span>`;
+                  }
+                  return `<span class="log-note-indicator">${badge}</span>`;
+                }).join('')
+              : '<span class="log-note-indicator"> </span>';
+
+            const gliHtml = ns.length > 0
+              ? ns.map((n) => {
+                  const badge = n.glissando
+                    ? '<span class="voice-badge badge-glissando" title="Glisando detectado">Gli</span>'
+                    : ' ';
+                  return `<span class="log-note-indicator">${badge}</span>`;
+                }).join('')
+              : '<span class="log-note-indicator"> </span>';
+
+            return `
+              <tr>
+                <td>${item.index}</td>
+                <td class="log-notes-col">${item.notes}</td>
+                <td class="log-note-grades">${califHtml}</td>
+                <td class="log-tonal-col">${cantadaHtml}</td>
+                <td class="log-voice-col">${vozHtml}</td>
+                <td class="log-gli-col">${gliHtml}</td>
+                <td class="log-grade ${gl.cls}" title="${gl.label}" aria-label="${gl.label}">${gl.icon}</td>
+              </tr>
+            `;
+          }
+
+          const hasGrade = item.exerciseGrade !== undefined;
+          const gl = hasGrade ? (gradeLabel[item.exerciseGrade] || gradeLabel.malo) : null;
+          const statusCell = hasGrade
+            ? `<td class="log-grade ${gl.cls}" title="${gl.label}" aria-label="${gl.label}">${gl.icon}</td>`
+            : `<td class="${item.isCorrect ? 'log-icon-ok' : 'log-icon-err'}">
+                 <span class="status-icon-badge ${item.isCorrect ? 'badge-ok' : 'badge-err'}">
+                   ${item.isCorrect ? '✓' : '✕'}
+                 </span>
+               </td>`;
+          return `
+            <tr>
+              <td>${item.index}</td>
+              <td>${item.notes}</td>
+              <td>${item.answer}</td>
+              ${statusCell}
+            </tr>
+          `;
+        })
+        .join('');
+
+    let html = '';
+    if (todayItems.length > 0) {
+      html += this.buildDaySummaryHtml('HOY', todayItems, isSinging);
+      html += renderRows(todayItems);
+    }
+    if (yesterdayItems.length > 0) {
+      html += this.buildDaySummaryHtml('AYER', yesterdayItems, isSinging);
+      html += renderRows(yesterdayItems);
+    }
+
+    if (!html) {
+      wrapperEl.classList.add('hidden');
+      tbodyEl.innerHTML = '';
+      return;
+    }
+
     wrapperEl.classList.remove('hidden');
-    tbodyEl.innerHTML = list
-      .map((item) => {
-        // Módulo de intervalos usa isCorrect booleano sin exerciseGrade
-        const hasGrade = item.exerciseGrade !== undefined;
-        const gl = hasGrade ? (gradeLabel[item.exerciseGrade] || gradeLabel.malo) : null;
-        const statusCell = hasGrade
-          ? `<td class="log-grade ${gl.cls}">${gl.text}</td>`
-          : `<td class="${item.isCorrect ? 'log-icon-ok' : 'log-icon-err'}">
-               <span class="status-icon-badge ${item.isCorrect ? 'badge-ok' : 'badge-err'}">
-                 ${item.isCorrect ? '✓' : '✕'}
-               </span>
-             </td>`;
-        return `
-          <tr>
-            <td>${item.index}</td>
-            <td>${item.notes}</td>
-            <td>${item.answer}</td>
-            ${statusCell}
-          </tr>
-        `;
-      })
-      .join('');
+    tbodyEl.innerHTML = html;
   }
 
   /* =========================================================================
@@ -1372,9 +2139,7 @@ class TrinoShell {
     if (this.singBpmLabel) {
       this.singBpmLabel.textContent = `♩ = ${this.singBpm} BPM`;
     }
-    this.singGoodCount.textContent = String(stats.good);
-    this.singBadCount.textContent = String(stats.bad);
-    this.singDoneCount.textContent = `${totalDone}/${this.dailyMin}`;
+    this.singDoneCount.textContent = `${totalDone} de ${this.dailyMin}`;
   }
 
   resetSingingQuestionUi() {
@@ -1461,8 +2226,8 @@ class TrinoShell {
     this.playTone(hz2, m1Start + beatSec, beatSec * 0.9);
     // Pulsos 3 y 4 del Compás 1 son silencios de negra (no suenan)
 
-    // 3. Grabación de voz: comienza 0.5s ANTES del Compás 2 para registrar si el usuario se adelanta al cantar
-    const preRollSec = 0.5;
+    // 3. Grabación de voz: comienza 200ms ANTES del Compás 2 para registrar si el usuario se adelanta al cantar
+    const preRollSec = 0.2;
     const m2DurationSec = 4 * beatSec;
     const recordStartDelayMs = Math.max(0, ((2 + 4) * beatSec - preRollSec) * 1000);
     const m2BadgeDelayMs = Math.max(0, (2 + 4) * beatSec * 1000);
@@ -1589,7 +2354,7 @@ class TrinoShell {
     const m2Samples      = Math.max(1, totalSamples - preRollSamples);
     const { midi1, midi2 } = this.currentQuestion;
 
-    // ── Extraer frames de todo el compás 2 incluyendo los mismos 500ms de pre-roll que dibuja el pentagrama ──
+    // ── Extraer frames del compás 2 incluyendo el pre-roll que dibuja el pentagrama ──
     const earlyAllowance = preRollSamples;
     const m2PcmStart     = 0;
     const m2AllFrames    = this.extractMidiFrames(pcm.subarray(m2PcmStart), sampleRate);
@@ -1619,6 +2384,7 @@ class TrinoShell {
 
     const makeTonal = (a) => ({
       label:      a.label,
+      sungNote:   a.sungNote || null,
       isVibrato:  a.voiceType === 'vibrato',
       isUnstable: a.voiceType === 'inestable',
       vibratoHz:  a.vibratoHz,
@@ -2167,11 +2933,65 @@ class TrinoShell {
       const iconY = botStaffBotY + 15;
 
       const gradeStyles = {
-        admirable: { bg: '#059669', symbol: '✨', border: '#34d399' },
-        bueno:     { bg: '#10b981', symbol: '✓',  border: null },
-        aceptable: { bg: '#22c55e', symbol: '✓',  border: null },
-        casi:      { bg: '#f59e0b', symbol: '≈',  border: null },
-        malo:      { bg: '#ef4444', symbol: '✕',  border: null },
+        admirable: { bg: '#059669', border: '#34d399' },
+        bueno:     { bg: '#10b981', border: null },
+        aceptable: { bg: '#22c55e', border: null },
+        casi:      { bg: '#f59e0b', border: null },
+        malo:      { bg: '#ef4444', border: null },
+      };
+
+      const drawGradeIcon = (grade, x, y, radius) => {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.strokeStyle = '#ffffff';
+        ctx.fillStyle = '#ffffff';
+        ctx.lineWidth = Math.max(1.5, radius * 0.18);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        if (grade === 'admirable') {
+          ctx.beginPath();
+          ctx.moveTo(0, -radius);
+          ctx.lineTo(radius * 0.2, -radius * 0.2);
+          ctx.lineTo(radius, 0);
+          ctx.lineTo(radius * 0.2, radius * 0.2);
+          ctx.lineTo(0, radius);
+          ctx.lineTo(-radius * 0.2, radius * 0.2);
+          ctx.lineTo(-radius, 0);
+          ctx.lineTo(-radius * 0.2, -radius * 0.2);
+          ctx.closePath();
+          ctx.stroke();
+        } else if (grade === 'bueno') {
+          ctx.beginPath();
+          ctx.moveTo(-radius * 0.65, 0);
+          ctx.lineTo(-radius * 0.18, radius * 0.48);
+          ctx.lineTo(radius * 0.68, -radius * 0.52);
+          ctx.stroke();
+        } else if (grade === 'aceptable') {
+          ctx.beginPath();
+          ctx.arc(0, 0, radius * 0.62, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(0, 0, radius * 0.16, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (grade === 'casi') {
+          [-radius * 0.22, radius * 0.22].forEach((offset) => {
+            ctx.beginPath();
+            ctx.moveTo(-radius * 0.68, offset);
+            ctx.quadraticCurveTo(-radius * 0.34, offset - radius * 0.28, 0, offset);
+            ctx.quadraticCurveTo(radius * 0.34, offset + radius * 0.28, radius * 0.68, offset);
+            ctx.stroke();
+          });
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(-radius * 0.48, -radius * 0.48);
+          ctx.lineTo(radius * 0.48, radius * 0.48);
+          ctx.moveTo(radius * 0.48, -radius * 0.48);
+          ctx.lineTo(-radius * 0.48, radius * 0.48);
+          ctx.stroke();
+        }
+
+        ctx.restore();
       };
 
       this.lastNoteGrades.forEach((grade, idx) => {
@@ -2192,11 +3012,7 @@ class TrinoShell {
         ctx.arc(x, iconY, 9, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = '#ffffff';
-        ctx.font = grade === 'admirable' ? '10px Inter, sans-serif' : 'bold 12px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(style.symbol, x, iconY + 0.5);
+        drawGradeIcon(gradeStyles[grade] ? grade : 'malo', x, iconY, 6.5);
       });
 
       // Ícono del ejercicio completo (nivel más bajo) a la derecha
@@ -2211,20 +3027,16 @@ class TrinoShell {
         ctx.arc(exX, exY, 11, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = '#ffffff';
-        ctx.font = exerciseGrade === 'admirable' ? '11px Inter, sans-serif' : 'bold 13px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(style.symbol, exX, exY + 0.5);
+        drawGradeIcon(gradeStyles[exerciseGrade] ? exerciseGrade : 'malo', exX, exY, 8);
       }
     }
   }
 
   /**
-   * Extrae la curva temporal de alturas MIDI incluyendo los 0.5s previos al Compás 2 (ratio < 0)
+  * Extrae la curva temporal de alturas MIDI incluyendo los 0.2s previos al Compás 2 (ratio < 0)
    * y los 4 pulsos del Compás 2 (ratio 0..1).
    */
-  extractVoiceFrames(pcm, sampleRate, preRollSec = 0.5, m2DurationSec = 3.0) {
+  extractVoiceFrames(pcm, sampleRate, preRollSec = 0.2, m2DurationSec = 3.0) {
     const winSize = 2048;
     const hop = Math.round(sampleRate * 0.025);
     const frames = [];
@@ -2508,7 +3320,11 @@ class TrinoShell {
    */
   analyzeTonalCenter(midiFrames, targetMidi, voiceShape) {
     const voiced = midiFrames.filter((m) => m !== null);
-    if (voiced.length === 0) return { label: 'Silencio', isHighLow: false };
+    if (voiced.length === 0) return { label: 'Silencio', sungNote: null, isHighLow: false };
+
+    const sortedMidi = [...voiced].sort((a, b) => a - b);
+    const medianMidi = sortedMidi[Math.floor(sortedMidi.length / 2)];
+    const sungNote = this.midiToNoteNameEs(Math.round(medianMidi));
 
     const signedList = voiced.map((m) => {
       const ss = (((m - targetMidi) % 12) + 18) % 12 - 6;
@@ -2526,17 +3342,17 @@ class TrinoShell {
       const lowPct   = signedList.filter((c) => c < -50).length / total;
 
       if (highPct >= 0.30 && lowPct >= 0.30) {
-        return { label: 'Muy alto y muy bajo', isHighLow: true };
+        return { label: 'Muy alto y muy bajo', sungNote, isHighLow: true };
       }
       if (highPct >= 0.30) {
-        return { label: 'Muy alto', isHighLow: true };
+        return { label: 'Muy alto', sungNote, isHighLow: true };
       }
       if (lowPct >= 0.30) {
-        return { label: 'Muy bajo', isHighLow: true };
+        return { label: 'Muy bajo', sungNote, isHighLow: true };
       }
     }
 
-    return { label: baseLabel, isHighLow: false };
+    return { label: baseLabel, sungNote, isHighLow: false };
   }
 
   /**
@@ -2548,6 +3364,7 @@ class TrinoShell {
    *   vibratoHz:  number|null,
    *   glissando:  boolean,
    *   label:      string,
+   *   sungNote:   string|null,
    *   isHighLow:  boolean
    * }}
    */
@@ -2563,23 +3380,24 @@ class TrinoShell {
       cv:         voiceShape.cv,
       freqHz:     voiceShape.freqHz,
       label:      tonal.label,
+      sungNote:   tonal.sungNote,
       isHighLow:  tonal.isHighLow,
     };
   }
 
   /**
    * Etiqueta legible del centro tonal para mostrar al usuario.
-   * Ej: (+30c) Leve alto  |  (-8c) Casi perfecto  |  (0c) Perfecto
+   * Ej: (+30c) Leve alto  |  (-8c) Casi centrado  |  (0c) Centrado
    */
 
   /**
    * Clasifica una nota cantada en 5 niveles basándose en distribución de frames:
    *
-   * Regla 1 — MALO:      ≥ 20% de frames con |cents| > 80
-   * Regla 2 — ADMIRABLE: ≥ 85% de frames con |cents| ≤ 15  Y  mediana ≤ 10c
-   * Regla 3 — BUENO:     ≥ 85% de frames con |cents| ≤ 40  Y  mediana ≤ 20c
-   * Regla 4 — ACEPTABLE: ≥ 85% de frames con |cents| ≤ 40
-   * Regla 5 — CASI:      el resto
+   * Regla 1 — FALLIDO (malo): ≥ 20% de frames con |cents| > 80
+   * Regla 2 — ADMIRABLE:      ≥ 85% de frames con |cents| ≤ 15  Y  mediana ≤ 10c
+   * Regla 3 — BUENO:          ≥ 85% de frames con |cents| ≤ 40  Y  mediana ≤ 20c
+   * Regla 4 — ACEPTABLE:      ≥ 85% de frames con |cents| ≤ 40
+   * Regla 5 — REGULAR (casi): el resto
    *
    * El ejercicio completo toma el nivel más bajo de todas sus notas.
    *
@@ -2638,15 +3456,15 @@ class TrinoShell {
 
   /**
    * Etiqueta legible del centro tonal para mostrar al usuario.
-   * Ej: (+30c) Alto  |  (-8c) Casi perfecto  |  (0c) Perfecto
+   * Ej: (+30c) Alto  |  (-8c) Casi centrado  |  (0c) Centrado
    */
   formatTonalCenterLabel(medianCents, signedMedianCents) {
     if (medianCents === null) return 'Silencio';
     const direction = signedMedianCents >= 0 ? 'alto' : 'bajo';
     const abs = Math.abs(signedMedianCents);
     let level;
-    if (abs <= 5)       level = 'Perfecto';
-    else if (abs <= 15) level = 'Casi perfecto';
+    if (abs <= 5)       level = 'Centrado';
+    else if (abs <= 15) level = 'Casi centrado';
     else if (abs <= 30) level = `Leve ${direction}`;
     else if (abs <= 60) level = direction.charAt(0).toUpperCase() + direction.slice(1);
     else                level = `Muy ${direction}`;
@@ -2686,7 +3504,7 @@ class TrinoShell {
 
   formatCentsLabel(cents) {
     if (cents === null) return 'Silencio';
-    if (Math.abs(cents) <= 5) return 'Perfecta (0c)';
+    if (Math.abs(cents) <= 5) return 'Centrada (0c)';
     return cents > 0 ? `+${cents}c (alta)` : `${cents}c (baja)`;
   }
 
@@ -2705,8 +3523,8 @@ class TrinoShell {
     const note1Name = this.midiToNoteNameEs(midi1);
     const note2Name = this.midiToNoteNameEs(midi2);
 
-    const tonal1 = det1?.tonal || { label: 'Silencio', isVibrato: false, isUnstable: false, vibratoHz: null };
-    const tonal2 = det2?.tonal || { label: 'Silencio', isVibrato: false, isUnstable: false, vibratoHz: null };
+    const tonal1 = det1?.tonal || { label: 'Silencio', sungNote: null, isVibrato: false, isUnstable: false, vibratoHz: null };
+    const tonal2 = det2?.tonal || { label: 'Silencio', sungNote: null, isVibrato: false, isUnstable: false, vibratoHz: null };
 
     // Badges Vib, Irr y Gli con tooltip
     const makeBadges = (tonal) => {
@@ -2749,13 +3567,38 @@ class TrinoShell {
         stats.bad += 1;
       }
 
-      this.singSessionLog.unshift({
-        index: this.singSessionLog.length + 1,
+      const todayKey = this.getTodayKey();
+      const todayCount = this.singSessionLog.filter((it) => (it.date || todayKey) === todayKey).length;
+      const toVoiceType = (t) =>
+        t.isVibrato ? 'vibrato' : t.isUnstable || t.isHighLow ? 'inestable' : 'plana';
+
+      this.pushLevelDayLog('singing', this.activeLevel.id, {
+        date: todayKey,
+        index: todayCount + 1,
         notes: `${note1Name}<br>${note2Name}`,
         answer: sungSummary,
         isCorrect,
         exerciseGrade,
+        noteStats: [
+          {
+            grade: grade1,
+            sungNote: tonal1.sungNote || null,
+            label: tonal1.label,
+            voiceType: toVoiceType(tonal1),
+            vibratoHz: tonal1.vibratoHz || null,
+            glissando: Boolean(tonal1.glissando),
+          },
+          {
+            grade: grade2,
+            sungNote: tonal2.sungNote || null,
+            label: tonal2.label,
+            voiceType: toVoiceType(tonal2),
+            vibratoHz: tonal2.vibratoHz || null,
+            glissando: Boolean(tonal2.glissando),
+          },
+        ],
       });
+      this.singSessionLog = this.getLevelDayLog('singing', this.activeLevel.id);
       this.renderSingSessionLog();
 
       const totalDone = stats.good + stats.bad;
@@ -2768,9 +3611,7 @@ class TrinoShell {
       }
 
       this.saveProgress();
-      this.singGoodCount.textContent = String(stats.good);
-      this.singBadCount.textContent = String(stats.bad);
-      this.singDoneCount.textContent = `${totalDone}/${this.dailyMin}`;
+      this.singDoneCount.textContent = `${totalDone} de ${this.dailyMin}`;
     }
 
     // Debug: siempre actualizar con el último análisis (incluye reintentos)
@@ -2974,13 +3815,18 @@ class TrinoShell {
       </div>`;
 
     // ── Sección por nota ──────────────────────────────────────────────────────
+    const fmtGradeEs = (g) => {
+      if (g === 'malo') return 'fallido';
+      if (g === 'casi') return 'regular';
+      return g ?? '—';
+    };
     const noteSection = (tag, noteName, det, tonal, analysis) => {
       const voiceType = tonal.isVibrato ? 'vibrato' : tonal.isUnstable ? 'inestable' : 'plana';
       const peaksStr = (analysis?.peaks || [])
         .map(p => `${fmtC(p.cents)}@f${p.frameIdx + 1}`).join(' · ') || '—';
       return `
         <div class="dbg-section">
-          <div class="dbg-section-title">${tag}: ${noteName} — Grade: <strong>${det?.grade ?? '—'}</strong></div>
+          <div class="dbg-section-title">${tag}: ${noteName} — Calif.: <strong>${fmtGradeEs(det?.grade)}</strong></div>
           <div class="dbg-kv-grid">
             <span class="dbg-k">badPct</span>       <span class="dbg-v">${pct(det?._dbg?.badPct)}</span>
             <span class="dbg-k">goodPct</span>      <span class="dbg-v">${pct(det?._dbg?.goodPct)}</span>
@@ -3001,7 +3847,7 @@ class TrinoShell {
     };
 
     const fullHtml =
-      `<div class="dbg-header-line">Ejercicio: <strong>${exerciseGrade.toUpperCase()}</strong></div>` +
+      `<div class="dbg-header-line">Ejercicio: <strong>${fmtGradeEs(exerciseGrade).toUpperCase()}</strong></div>` +
       segHtml +
       `<div class="dbg-notes-grid">` +
       noteSection('N1 (1ª Nota)', note1Name, det1, tonal1, dbg.analysis1) +
@@ -3032,7 +3878,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=27', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=32', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>
@@ -3468,6 +4314,10 @@ class TrinoShell {
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', () => {
+    window.trinoShell = new TrinoShell();
+  });
+} else {
   window.trinoShell = new TrinoShell();
-});
+}
