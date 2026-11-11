@@ -4,7 +4,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0032';
+const APP_VERSION = 'v1.0.0033';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -256,6 +256,7 @@ const TRINO_MAIL_WEBHOOK_URL =
 class TrinoShell {
   constructor() {
     this.currentView = 'home';
+    this.exerciseStarted = false;
     this.audioCtx = null;
     this.supabase = this.initSupabaseClient();
     this.currentUser = this.loadCurrentUser();
@@ -312,7 +313,6 @@ class TrinoShell {
 
   cacheDom() {
     this.brandBtn = document.getElementById('brand-home-btn');
-    this.sectionBadge = document.getElementById('top-section-badge');
     this.versionBadge = document.getElementById('app-version-badge');
     this.menuBtn = document.getElementById('menu-toggle-btn');
     this.menuDrawer = document.getElementById('menu-drawer');
@@ -349,6 +349,7 @@ class TrinoShell {
     this.exDateLabel = document.getElementById('ex-date-label');
     this.exDoneCount = document.getElementById('ex-done-count');
     this.exAnswersContainer = document.getElementById('ex-answers-container');
+    this.mysteryNotesRow = document.querySelector('.mystery-notes-row');
     this.mysteryNote1 = document.getElementById('mystery-note-1');
     this.mysteryNote2 = document.getElementById('mystery-note-2');
     this.sessionLogWrapper = document.getElementById('session-log-wrapper');
@@ -361,6 +362,7 @@ class TrinoShell {
     this.singIntervalName = document.getElementById('sing-interval-name');
     this.singBpmLabel = document.getElementById('sing-bpm-label');
     this.singPhaseBadge = document.getElementById('sing-phase-badge');
+    this.singStaffCanvasBox = document.querySelector('.staff-canvas-box');
     this.singStaffCanvas = document.getElementById('sing-staff-canvas');
     this.singFeedbackText = document.getElementById('sing-feedback-text');
     this.singSessionLogWrapper = document.getElementById('sing-session-log-wrapper');
@@ -368,18 +370,12 @@ class TrinoShell {
     this.singDebugPanel = document.getElementById('sing-debug-panel');
     this.singDebugBody  = document.getElementById('sing-debug-body');
     this.btnDebugModal  = document.getElementById('btn-debug-modal');
-    this.btnDebugPopup  = document.getElementById('btn-debug-popup');
+    this.menuDebugPopupBtn = document.getElementById('menu-debug-popup-btn');
     this.debugLargeModal = document.getElementById('debug-large-modal');
     this.debugLargeBody  = document.getElementById('debug-large-body');
     this.btnDebugModalClose = document.getElementById('btn-debug-modal-close');
     this.btnDebugPopupFromModal = document.getElementById('btn-debug-popup-from-modal');
     this.debugPopupWin = null;
-
-    // Botones en línea "Comenzar" (donde luego va la tabla de sesión)
-    this.exInlineStartBox = document.getElementById('ex-inline-start-box');
-    this.btnStartIntervals = document.getElementById('btn-start-intervals');
-    this.singInlineStartBox = document.getElementById('sing-inline-start-box');
-    this.btnStartSinging = document.getElementById('btn-start-singing');
 
     // Modal BPM
     this.bpmModal = document.getElementById('bpm-modal');
@@ -401,7 +397,6 @@ class TrinoShell {
     this.homeGuestBox = document.getElementById('home-guest-box');
     this.homeUserBox = document.getElementById('home-user-box');
     this.homeUserSubtitle = document.getElementById('home-user-subtitle');
-    this.btnOpenAuthModal = document.getElementById('btn-open-auth-modal');
     this.btnSettingsAuthAction = document.getElementById('btn-settings-auth-action');
     this.settingsAuthStatusText = document.getElementById('settings-auth-status-text');
 
@@ -837,20 +832,8 @@ class TrinoShell {
       });
     }
 
-    if (this.btnStartIntervals) {
-      this.btnStartIntervals.addEventListener('click', () => {
-        if (this.exInlineStartBox) this.exInlineStartBox.classList.add('hidden');
-        this.schedulePlayAfterOneSecond();
-      });
-    }
-
-    if (this.btnStartSinging) {
-      this.btnStartSinging.addEventListener('click', async () => {
-        if (this.singInlineStartBox) this.singInlineStartBox.classList.add('hidden');
-        await this.ensureMicStreamReady();
-        this.schedulePlayAfterOneSecond();
-      });
-    }
+    this.mysteryNote1?.addEventListener('click', () => this.playMysteryNote(0));
+    this.mysteryNote2?.addEventListener('click', () => this.playMysteryNote(1));
 
     // Abrir y controlar el Pop-up de BPM
     if (this.singBpmLabel) {
@@ -923,8 +906,11 @@ class TrinoShell {
         }
       });
     }
-    if (this.btnDebugPopup) {
-      this.btnDebugPopup.addEventListener('click', () => this.openDebugPopupWindow());
+    if (this.menuDebugPopupBtn) {
+      this.menuDebugPopupBtn.addEventListener('click', () => {
+        this.menuDrawer.classList.add('hidden');
+        this.openDebugPopupWindow();
+      });
     }
     if (this.btnDebugPopupFromModal) {
       this.btnDebugPopupFromModal.addEventListener('click', () => this.openDebugPopupWindow());
@@ -944,8 +930,10 @@ class TrinoShell {
     }
 
     // Eventos de Registro y Validación de 3 Notas
-    if (this.btnOpenAuthModal) {
-      this.btnOpenAuthModal.addEventListener('click', () => this.openAuthModal());
+    if (this.bottomZone) {
+      this.bottomZone.addEventListener('click', (event) => {
+        if (event.target.closest('#btn-open-auth-modal')) this.openAuthModal();
+      });
     }
     if (this.btnSettingsAuthAction) {
       this.btnSettingsAuthAction.addEventListener('click', () => {
@@ -1087,6 +1075,7 @@ class TrinoShell {
     if (this.menuLogoutBtn) {
       this.menuLogoutBtn.classList.toggle('hidden', !isVerified);
     }
+    if (this.currentView === 'home') this.renderBottomCommands('home');
   }
 
   openAuthModal() {
@@ -1454,16 +1443,14 @@ class TrinoShell {
     if (!level) return;
 
     this.activeModule = 'intervals';
+    this.exerciseStarted = false;
     this.activeLevel = level;
     this.sessionLog = this.getLevelDayLog('intervals', levelId);
     this.renderSessionLog();
     this.generateNextQuestion();
     this.updateExerciseUi();
     this.navigateTo('interval-exercise');
-
-    if (this.exInlineStartBox) {
-      this.exInlineStartBox.classList.remove('hidden');
-    }
+    this.syncExerciseAvailability();
   }
 
   startSingingLevel(levelId) {
@@ -1471,16 +1458,21 @@ class TrinoShell {
     if (!level) return;
 
     this.activeModule = 'singing';
+    this.exerciseStarted = false;
     this.activeLevel = level;
     this.singSessionLog = this.getLevelDayLog('singing', levelId);
     this.renderSingSessionLog();
     this.generateNextQuestion();
     this.updateSingingExerciseUi();
     this.navigateTo('singing-exercise');
+    this.syncExerciseAvailability();
+  }
 
-    if (this.singInlineStartBox) {
-      this.singInlineStartBox.classList.remove('hidden');
-    }
+  syncExerciseAvailability() {
+    const isStarted = this.exerciseStarted;
+    this.mysteryNotesRow?.classList.toggle('hidden', !isStarted || this.activeModule !== 'intervals');
+    this.exAnswersContainer?.classList.toggle('hidden', !isStarted || this.activeModule !== 'intervals');
+    this.singStaffCanvasBox?.classList.toggle('hidden', !isStarted || this.activeModule !== 'singing');
   }
 
   generateNextQuestion() {
@@ -1692,6 +1684,22 @@ class TrinoShell {
       this.mysteryNote2.textContent = '?';
       this.mysteryNote2.classList.remove('note-revealed', 'note-wrong');
     }
+  }
+
+  async playMysteryNote(noteIndex) {
+    if (!this.currentQuestion) return;
+    await this.ensureAudioReady();
+
+    const noteElement = noteIndex === 0 ? this.mysteryNote1 : this.mysteryNote2;
+    const midi = noteIndex === 0 ? this.currentQuestion.midi1 : this.currentQuestion.midi2;
+    const frequency = 440 * Math.pow(2, (midi - 69) / 12);
+
+    this.clearNoteAnimTimers();
+    noteElement?.classList.add('note-playing');
+    this.playTone(frequency, this.audioCtx.currentTime, 0.65);
+    this.noteAnimTimers.push(setTimeout(() => {
+      noteElement?.classList.remove('note-playing');
+    }, 650));
   }
 
   revealMysteryNotes() {
@@ -1968,8 +1976,17 @@ class TrinoShell {
   renderLogTable(wrapperEl, tbodyEl, list, isSinging = false) {
     if (!wrapperEl || !tbodyEl) return;
     if (!Array.isArray(list) || list.length === 0) {
-      wrapperEl.classList.add('hidden');
-      tbodyEl.innerHTML = '';
+      const emptyHeaders = isSinging
+        ? `<tr class="log-col-headers">
+             <th>#</th><th>Nota</th><th></th><th>Centro tonal</th><th>Voz</th><th>Gli</th><th></th>
+           </tr>`
+        : `<tr class="log-col-headers">
+             <th>#</th><th>Notas</th><th>Tu respuesta</th><th></th>
+           </tr>`;
+      const colSpan = isSinging ? 7 : 4;
+      tbodyEl.innerHTML = `${emptyHeaders}
+        <tr class="log-empty-row"><td colspan="${colSpan}">Aún no hay ejercicios registrados.</td></tr>`;
+      wrapperEl.classList.remove('hidden');
       return;
     }
 
@@ -3878,7 +3895,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=32', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=33', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>
@@ -4261,7 +4278,6 @@ class TrinoShell {
       requestAnimationFrame(() => this.drawGrandStaff(null, []));
     }
 
-    this.sectionBadge.textContent = VIEWS[viewKey].badge;
     document.querySelectorAll('[data-target]').forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-target') === viewKey);
     });
@@ -4271,7 +4287,12 @@ class TrinoShell {
 
   renderBottomCommands(viewKey) {
     if (viewKey === 'home') {
-      this.bottomZone.innerHTML = '';
+      this.bottomZone.innerHTML = this.currentUser?.verificado ? '' : `
+        <div class="auth-bottom-cta">
+          <p class="auth-bottom-copy">Al activar tu cuenta podrás guardar tu historial y consultar tus estadísticas.</p>
+          <button type="button" class="auth-activate-btn" id="btn-open-auth-modal">Activar cuenta</button>
+        </div>
+      `;
       return;
     }
 
@@ -4279,24 +4300,27 @@ class TrinoShell {
       const backTarget = viewKey === 'singing-exercise' ? 'singing' : 'intervals';
       this.bottomZone.innerHTML = `
         <button type="button" class="cmd-btn" id="cmd-back-levels">← Niveles</button>
-        <button type="button" class="cmd-btn" id="cmd-play-interval" aria-label="Reintentar ejercicio" title="Reintentar ejercicio">↻ Reintentar</button>
-        <button type="button" class="cmd-btn cmd-btn-primary" id="cmd-next-interval">Siguiente ⏭</button>
+        ${this.exerciseStarted ? '<button type="button" class="cmd-btn" id="cmd-play-interval" aria-label="Repetir ejercicio" title="Repetir ejercicio">↻ Repetir</button>' : ''}
+        <button type="button" class="cmd-btn ${this.exerciseStarted ? 'cmd-btn-primary' : 'cmd-btn-start'}" id="cmd-next-interval">${this.exerciseStarted ? 'Siguiente ⏭' : 'Comenzar'}</button>
       `;
 
       document.getElementById('cmd-back-levels').addEventListener('click', () => {
         this.navigateTo(backTarget);
       });
 
-      document.getElementById('cmd-play-interval').addEventListener('click', () => {
-        if (this.exInlineStartBox) this.exInlineStartBox.classList.add('hidden');
-        if (this.singInlineStartBox) this.singInlineStartBox.classList.add('hidden');
+      document.getElementById('cmd-play-interval')?.addEventListener('click', () => {
         this.playCurrentInterval();
       });
 
-      document.getElementById('cmd-next-interval').addEventListener('click', () => {
-        if (this.exInlineStartBox) this.exInlineStartBox.classList.add('hidden');
-        if (this.singInlineStartBox) this.singInlineStartBox.classList.add('hidden');
-        this.generateNextQuestion();
+      document.getElementById('cmd-next-interval').addEventListener('click', async () => {
+        if (!this.exerciseStarted) {
+          this.exerciseStarted = true;
+          this.syncExerciseAvailability();
+          this.renderBottomCommands(viewKey);
+          if (this.activeModule === 'singing') await this.ensureMicStreamReady();
+        } else {
+          this.generateNextQuestion();
+        }
         this.schedulePlayAfterOneSecond();
       });
       return;

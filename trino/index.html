@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=32" />
+  <link rel="stylesheet" href="./css/styles.css?v=33" />
 </head>
 
 <body>
@@ -15,10 +15,8 @@
       <div class="app-brand" id="brand-home-btn" title="Ir al inicio">
         <div class="app-logo-dot">🎵</div>
         <span class="app-name">Trino</span>
-        <span class="section-indicator" id="top-section-badge">Inicio</span>
+        <span class="app-version" id="app-version-badge">v1.0.0033</span>
       </div>
-
-      <span class="app-version" id="app-version-badge">v1.0.0031</span>
 
       <button type="button" class="menu-btn" id="menu-toggle-btn" aria-label="Abrir menú">
         ☰
@@ -34,6 +32,10 @@
       <button type="button" class="menu-item" id="menu-about-btn">
         <span>Acerca de</span>
       </button>
+      <button type="button" class="menu-item" id="menu-debug-popup-btn">
+        <span>Abrir ventana de debug</span>
+        <span>↗</span>
+      </button>
       <button type="button" class="menu-item hidden" id="menu-logout-btn">
         <span>Cerrar sesión</span>
       </button>
@@ -48,12 +50,8 @@
           <h1 class="welcome-title" id="home-greeting-title">¡Bienvenido a Trino!</h1>
           <div id="home-guest-box" class="auth-home-box">
             <p class="welcome-text">
-              Si quieres puedes hacer los ejercicios libremente, pero si te registras tendrás la opción de guardar un
-              registro histórico de tus ejercicios y acceder a estadísticas de progreso.
+              Practica con Trino, entrena tu oído y tu voz, y mejora con ejercicios progresivos diseñados para cada nivel.
             </p>
-            <button type="button" class="auth-activate-btn" id="btn-open-auth-modal">
-              Activar registro
-            </button>
           </div>
           <div id="home-user-box" class="auth-home-box hidden">
             <p class="welcome-text" id="home-user-subtitle">
@@ -69,8 +67,8 @@
             <div class="module-info">
               <span class="module-tag">Módulo 1 · Oído</span>
               <h2 class="module-title">Reconocer Intervalos</h2>
-              <p class="module-desc">Escucha dos notas e identifica la distancia musical entre ellas.</p>
             </div>
+            <p class="module-desc">Escucha dos notas e identifica la distancia musical entre ellas.</p>
           </button>
 
           <!-- Módulo 2: Cantar Notas -->
@@ -79,8 +77,8 @@
             <div class="module-info">
               <span class="module-tag">Módulo 2 · Voz</span>
               <h2 class="module-title">Cantar Notas</h2>
-              <p class="module-desc">Entona las notas indicadas y revisa la precisión de tu afinación.</p>
             </div>
+            <p class="module-desc">Entona las notas indicadas y revisa la precisión de tu afinación.</p>
           </button>
         </div>
       </section>
@@ -112,18 +110,12 @@
         </p>
 
         <div class="mystery-notes-row" aria-live="polite">
-          <span class="mystery-note" id="mystery-note-1">?</span>
-          <span class="mystery-note" id="mystery-note-2">?</span>
+          <button type="button" class="mystery-note" id="mystery-note-1" aria-label="Escuchar primera nota">?</button>
+          <button type="button" class="mystery-note" id="mystery-note-2" aria-label="Escuchar segunda nota">?</button>
         </div>
 
         <div class="answers-grid" id="ex-answers-container">
           <!-- Alternativas de respuesta generadas dinámicamente -->
-        </div>
-
-        <div class="inline-start-box" id="ex-inline-start-box">
-          <button type="button" class="start-modal-btn" id="btn-start-intervals">
-            Comenzar
-          </button>
         </div>
 
         <div class="session-log-wrapper hidden" id="session-log-wrapper">
@@ -173,19 +165,6 @@
         </div>
 
         <p class="sing-feedback-text" id="sing-feedback-text"></p>
-
-        <div class="debug-btn-row">
-          <button type="button" class="debug-action-btn" id="btn-debug-popup"
-            title="Abrir análisis de debug en una ventana aparte">
-            🔬 Debug (ventana aparte)
-          </button>
-        </div>
-
-        <div class="inline-start-box" id="sing-inline-start-box">
-          <button type="button" class="start-modal-btn" id="btn-start-singing">
-            Comenzar
-          </button>
-        </div>
 
         <div class="session-log-wrapper hidden" id="sing-session-log-wrapper">
           <table class="session-log-table sing-log-table" aria-label="Historial de canto de la sesión">
@@ -404,7 +383,7 @@
         <!-- PASO 1: INGRESO DE NOMBRE Y CORREO -->
         <div id="auth-step-form" class="auth-step-container">
           <span class="level-info-modal-badge">Registro en Trino</span>
-          <h3 class="level-info-modal-title">Activar Registro</h3>
+          <h3 class="level-info-modal-title">Activar cuenta</h3>
 
           <div class="auth-input-group">
             <label for="auth-name-input" class="settings-label">Tu nombre</label>
@@ -484,7 +463,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=32"></script>
+  <script src="./js/app.js?v=33"></script>
 </body>
 
 </html>

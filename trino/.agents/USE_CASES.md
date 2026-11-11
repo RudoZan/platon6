@@ -22,3 +22,16 @@
    - `"Estabilidad / Vibrato"` (SD in cents during sustained phase).
    - `"Tiempo de ataque"` (*scooping* time to enter tolerance band).
    - *(When Engine 2 is active)* Vocal quality metrics: `Jitter`, `Shimmer`, `HNR`.
+
+## UC-05: Home, Modules & Account Activation
+1. Home module cards place the module title/tag at the upper left and the icon at the right; the description spans the full card width below both.
+2. Guest home copy invites practice and improvement. The fixed bottom bar explains history/statistics and opens account activation with `Activar cuenta`.
+3. The header shows the Trino version beside the app name; the changing section label is omitted.
+
+## UC-06: Exercise Start, Results & Session History
+1. Entering either exercise shows the level, completion count, and session-history table. If there are no results, the table shows its headers and an empty-state message.
+2. Before `Comenzar`, Module 1 hides its note markers and answer choices; Module 2 hides the staff. `Repetir` is unavailable before the first start.
+3. `Comenzar` is green. After starting, it becomes the blue `Siguiente` action and `Repetir` becomes available in the bottom bar.
+4. In Module 1, each mystery-note marker plays that note independently. The Repetir action replays the current interval; Siguiente generates another exercise.
+5. Session results use the five grade icons/colors. In Module 2, grade, tonal center, voice, and glissando indicators align one row per note.
+6. The floating debug window is opened from the three-line menu or the debug panel.
