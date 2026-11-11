@@ -19,3 +19,17 @@ flowchart LR
    - **Browser Worker (`js/pitch-worker.js`):** Runs off-main-thread time-domain pitch detection so UI never freezes.
    - **Local FastAPI (`backend/main.py`):** Exposes `GET /health` (CORS enabled for `localhost` / `127.0.0.1`) and `POST /analyze`.
 3. **Presentation Layer (`js/canvas-renderer.js` & `js/app.js`):** Consumes `AnalysisResult` agnostically, drawing the $\pm 100\text{ cents}$ canvas grid and metric cards.
+
+## 3. Current Static Training App Flow
+```mermaid
+flowchart LR
+  Home["Home module cards"] --> Levels["Module level list"]
+  Levels -->|Intervals| IntervalExercise["Sequential interval playback"]
+  Levels -->|Singing| SingingExercise["Staff playback + microphone capture"]
+  Levels -->|Chords| ChordExercise["Chord question + simultaneous playback"]
+  ChordExercise --> Answer["Answer evaluation"]
+  Answer --> ChordProgress["Chord-only progress and daily log"]
+  Settings["Independent goals and vocal range"] --> ChordProgress
+```
+- `js/app.js` owns routing and exercise state for all three modules. Chord content is defined by `CHORD_CATALOG` and `CHORD_LEVELS`; answer history is isolated from interval and singing progress.
+- `index.html` supplies separate level and exercise views for chords. `css/styles.css` provides the chord card accent and mobile vocal-range action row.

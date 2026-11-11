@@ -44,3 +44,13 @@
 5. The suggested level label stays left of the progress count. Eligible cards show `Hechas: Hoy x/meta Ayer y/meta`; this row is visible only for the suggested level or levels with activity today/yesterday.
 6. In both exercise views, the level header sits flush to the top and side edges. Instructions disappear after starting. Module 2 keeps the compact staff and response table; BPM is shown at the lower-left of the staff and can be changed by tapping there. Analysis details are not repeated below the staff.
 7. The Module 2 session history uses one HTML table row per sung note, with exercise index and exercise-grade cells spanning the note rows. Table headers use sentence case; tonal-center text wraps within its cell, and voice/glissando badges use `V`, `I`, and `G` with descriptive tooltips.
+
+## UC-08: Chord Recognition Practice
+1. The home screen opens Module 3, `Reconocimiento de acordes`, with 16 progressive levels: six dyad/interval levels, four triad levels, four seventh-chord levels, and two integration levels.
+2. Levels 1–6 identify two-note dyads; levels 7–16 identify triads and four-note chords. All notes in each question play simultaneously. Each question chooses a target type from the level and displays that level's answer choices.
+3. Every chord tone starts at the same `AudioContext` time. The user can replay the current question, retry after a wrong answer, or advance after a correct answer.
+4. The first submitted response is recorded once in the chord module's today/yesterday session history. Chord progress and stars use a separate storage key and daily goal from intervals and singing.
+
+## UC-09: Vocal Range Controls on Mobile
+1. The lowest- and highest-note selectors use the full width of their fields.
+2. Microphone detection and speaker preview buttons sit below each selector, with accessible labels and touch-sized targets. The settings view retains its `Configuración` heading without the redundant `Ajustes` eyebrow.

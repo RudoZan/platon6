@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=39" />
+  <link rel="stylesheet" href="./css/styles.css?v=40" />
 </head>
 
 <body>
@@ -79,6 +79,15 @@
               <h2 class="module-title">Cantar Notas</h2>
             </div>
             <p class="module-desc">Entona las notas indicadas y revisa la precisión de tu afinación.</p>
+          </button>
+
+          <button type="button" class="module-card" data-open-module="chords">
+            <div class="module-icon icon-chords">♫</div>
+            <div class="module-info">
+              <span class="module-tag">Módulo 3 · Armonía</span>
+              <h2 class="module-title">Reconocimiento de acordes</h2>
+            </div>
+            <p class="module-desc">Escucha notas simultáneas e identifica intervalos, tríadas y cuatríadas.</p>
           </button>
         </div>
       </section>
@@ -169,41 +178,71 @@
         </div>
       </section>
 
+      <section id="view-chords" class="hidden">
+        <div class="levels-header">
+          <h2 class="welcome-title">Módulo 3 - Reconocimiento de acordes</h2>
+        </div>
+        <div class="levels-list" id="chord-levels-list"></div>
+      </section>
+
+      <section id="view-chord-exercise" class="hidden">
+        <div class="exercise-header-card">
+          <div class="exercise-title-row">
+            <span class="exercise-level-name" id="chord-level-title">Díadas I</span>
+          </div>
+        </div>
+        <p class="exercise-prompt" id="chord-prompt-text">Escucha el acorde e identifica su tipo.</p>
+        <div class="answers-grid hidden" id="chord-answers-container"></div>
+        <div class="session-log-wrapper hidden" id="chord-session-log-wrapper">
+          <table class="session-log-table" aria-label="Historial de reconocimiento de acordes">
+            <tbody id="chord-session-log-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- VISTA: CONFIGURACIÓN -->
       <section id="view-settings" class="hidden">
         <div class="view-placeholder settings-panel">
-          <span class="welcome-badge">Ajustes</span>
           <h2 class="welcome-title">Configuración</h2>
 
           <!-- 1. Meta diaria -->
           <div class="settings-group">
             <span class="settings-group-title">Meta de Práctica</span>
             <div class="settings-field">
-              <label for="daily-min-select" class="settings-label">Mínimo diario por nivel</label>
-              <select id="daily-min-select" class="settings-select">
-                <option value="10">10 diarios</option>
-                <option value="20">20 diarios</option>
-                <option value="30">30 diarios</option>
-                <option value="40">40 diarios</option>
-                <option value="50">50 diarios</option>
-                <option value="60">60 diarios</option>
-                <option value="70">70 diarios</option>
-                <option value="80">80 diarios</option>
-                <option value="90">90 diarios</option>
-                <option value="100" selected>100 diarios</option>
-              </select>
+              <span class="settings-label">Metas independientes por tipo de ejercicio</span>
+              <div class="daily-goal-settings-grid">
+                <div class="daily-goal-setting">
+                  <span class="daily-goal-setting-label" id="daily-intervals-min-label">Reconocimiento de intervalos</span>
+                  <div class="settings-inline-row daily-goal-stepper" role="group" aria-labelledby="daily-intervals-min-label">
+                    <button type="button" class="bpm-step-btn" id="daily-intervals-min-decrease" aria-label="Reducir meta de intervalos">−</button>
+                    <output class="settings-val-badge" id="daily-intervals-min-value" aria-live="polite">100 diarios</output>
+                    <button type="button" class="bpm-step-btn" id="daily-intervals-min-increase" aria-label="Aumentar meta de intervalos">+</button>
+                  </div>
+                </div>
+                <div class="daily-goal-setting">
+                  <span class="daily-goal-setting-label" id="daily-singing-min-label">Cantar notas</span>
+                  <div class="settings-inline-row daily-goal-stepper" role="group" aria-labelledby="daily-singing-min-label">
+                    <button type="button" class="bpm-step-btn" id="daily-singing-min-decrease" aria-label="Reducir meta de canto">−</button>
+                    <output class="settings-val-badge" id="daily-singing-min-value" aria-live="polite">100 diarios</output>
+                    <button type="button" class="bpm-step-btn" id="daily-singing-min-increase" aria-label="Aumentar meta de canto">+</button>
+                  </div>
+                </div>
+                <div class="daily-goal-setting">
+                  <span class="daily-goal-setting-label" id="daily-chords-min-label">Reconocimiento de acordes</span>
+                  <div class="settings-inline-row daily-goal-stepper" role="group" aria-labelledby="daily-chords-min-label">
+                    <button type="button" class="bpm-step-btn" id="daily-chords-min-decrease" aria-label="Reducir meta de acordes">−</button>
+                    <output class="settings-val-badge" id="daily-chords-min-value" aria-live="polite">100 diarios</output>
+                    <button type="button" class="bpm-step-btn" id="daily-chords-min-increase" aria-label="Aumentar meta de acordes">+</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- 2. Rango vocal del usuario (Cantar Notas) -->
           <div class="settings-group">
             <span class="settings-group-title">Rango Vocal (Cantar Notas)</span>
-            <p class="settings-hint">
-              Define la nota más grave y más aguda que puedes cantar cómodamente.
-            </p>
-
             <div class="settings-field">
-              <label for="vocal-preset-select" class="settings-label">Registro vocal rápido</label>
               <select id="vocal-preset-select" class="settings-select">
                 <option value="40-64">Bajo (Mi2 – Mi4)</option>
                 <option value="43-67">Barítono (Sol2 – Sol4)</option>
@@ -218,23 +257,23 @@
             <div class="settings-range-grid">
               <div class="settings-field">
                 <label for="vocal-min-select" class="settings-label">Nota más grave</label>
-                <div class="settings-inline-row">
-                  <select id="vocal-min-select" class="settings-select"></select>
-                  <button type="button" class="settings-test-btn" id="btn-test-vocal-min"
-                    title="Escuchar nota más grave">🔊</button>
+                <select id="vocal-min-select" class="settings-select"></select>
+                <div class="vocal-range-actions">
                   <button type="button" class="settings-test-btn" id="btn-detect-vocal-min"
-                    title="Cantar tu nota más grave para detectarla">🎙️</button>
+                    title="Cantar tu nota más grave para detectarla" aria-label="Detectar nota más grave con el micrófono">🎙️</button>
+                  <button type="button" class="settings-test-btn" id="btn-test-vocal-min"
+                    title="Escuchar nota más grave" aria-label="Escuchar nota más grave">🔊</button>
                 </div>
               </div>
 
               <div class="settings-field">
                 <label for="vocal-max-select" class="settings-label">Nota más aguda</label>
-                <div class="settings-inline-row">
-                  <select id="vocal-max-select" class="settings-select"></select>
-                  <button type="button" class="settings-test-btn" id="btn-test-vocal-max"
-                    title="Escuchar nota más aguda">🔊</button>
+                <select id="vocal-max-select" class="settings-select"></select>
+                <div class="vocal-range-actions">
                   <button type="button" class="settings-test-btn" id="btn-detect-vocal-max"
-                    title="Cantar tu nota más aguda para detectarla">🎙️</button>
+                    title="Cantar tu nota más aguda para detectarla" aria-label="Detectar nota más aguda con el micrófono">🎙️</button>
+                  <button type="button" class="settings-test-btn" id="btn-test-vocal-max"
+                    title="Escuchar nota más aguda" aria-label="Escuchar nota más aguda">🔊</button>
                 </div>
               </div>
             </div>
@@ -468,7 +507,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=39"></script>
+  <script src="./js/app.js?v=40"></script>
 </body>
 
 </html>

@@ -1,10 +1,9 @@
 /**
- * app.js — Navegación móvil, Configuración de mínimo diario (10..100),
- * Módulo 1: Reconocer Intervalos y Módulo 2: Cantar Notas (Gran Pentagrama Sol/Fa de 2 compases).
+ * app.js — Navegación móvil, metas independientes y módulos de intervalos, canto y acordes.
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0039';
+const APP_VERSION = 'v1.0.0040';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -12,6 +11,8 @@ const VIEWS = {
   'interval-exercise': { id: 'view-interval-exercise', badge: 'Intervalos' },
   singing: { id: 'view-singing', badge: 'Cantar' },
   'singing-exercise': { id: 'view-singing-exercise', badge: 'Cantar' },
+  chords: { id: 'view-chords', badge: 'Acordes' },
+  'chord-exercise': { id: 'view-chord-exercise', badge: 'Acordes' },
   settings: { id: 'view-settings', badge: 'Ajustes' },
 };
 
@@ -38,6 +39,52 @@ const INTERVAL_CATALOG = {
 
 const ALL_OCTAVE_INTERVALS = [
   '1J', '2m', '2M', '3m', '3M', '4J', '4A', '5J', '6m', '6M', '7m', '7M', '8J',
+];
+
+const CHORD_CATALOG = {
+  unison: { label: 'Unísono', intervals: [0, 0] },
+  octave: { label: 'Octava justa', intervals: [0, 12] },
+  majorSecond: { label: '2ª mayor', intervals: [0, 2] },
+  minorSecond: { label: '2ª menor', intervals: [0, 1] },
+  majorThird: { label: '3ª mayor', intervals: [0, 4] },
+  minorThird: { label: '3ª menor', intervals: [0, 3] },
+  perfectFourth: { label: '4ª justa', intervals: [0, 5] },
+  tritone: { label: 'Tritono', intervals: [0, 6] },
+  perfectFifth: { label: '5ª justa', intervals: [0, 7] },
+  minorSixth: { label: '6ª menor', intervals: [0, 8] },
+  majorSixth: { label: '6ª mayor', intervals: [0, 9] },
+  minorSeventh: { label: '7ª menor', intervals: [0, 10] },
+  majorSeventh: { label: '7ª mayor', intervals: [0, 11] },
+  major: { label: 'Mayor', intervals: [0, 4, 7] },
+  minor: { label: 'Menor', intervals: [0, 3, 7] },
+  augmented: { label: 'Aumentado', intervals: [0, 4, 8] },
+  diminished: { label: 'Disminuido', intervals: [0, 3, 6] },
+  sus2: { label: 'Sus2', intervals: [0, 2, 7] },
+  sus4: { label: 'Sus4', intervals: [0, 5, 7] },
+  dominantSeventh: { label: 'Séptima dominante', intervals: [0, 4, 7, 10] },
+  majorSeventhChord: { label: 'Séptima mayor', intervals: [0, 4, 7, 11] },
+  minorSeventhChord: { label: 'Séptima menor', intervals: [0, 3, 7, 10] },
+  diminishedSeventh: { label: 'Séptima disminuida', intervals: [0, 3, 6, 9] },
+  halfDiminishedSeventh: { label: 'Séptima semidisminuida', intervals: [0, 3, 6, 10] },
+};
+
+const CHORD_LEVELS = [
+  { id: 1, block: 1, title: 'Díadas I · Octavas, terceras y segundas mayores', desc: 'Reconoce octavas, terceras mayores y segundas mayores.', options: ['octave', 'majorThird', 'majorSecond'] },
+  { id: 2, block: 1, title: 'Díadas II · Octavas, quintas y cuartas justas', desc: 'Distingue octavas, quintas justas y cuartas justas.', options: ['octave', 'perfectFifth', 'perfectFourth'] },
+  { id: 3, block: 1, title: 'Díadas III · Octavas, sextas y séptimas mayores', desc: 'Reconoce octavas, sextas y séptimas mayores.', options: ['octave', 'majorSixth', 'majorSeventh'] },
+  { id: 4, block: 2, title: 'Díadas IV · Segundas y terceras', desc: 'Compara segundas y terceras mayores y menores.', options: ['majorSecond', 'minorSecond', 'majorThird', 'minorThird'] },
+  { id: 5, block: 2, title: 'Díadas V · Sextas y séptimas', desc: 'Compara sextas y séptimas mayores y menores.', options: ['majorSixth', 'minorSixth', 'majorSeventh', 'minorSeventh'] },
+  { id: 6, block: 2, title: 'Díadas VI · Repaso de una octava', desc: 'Repasa todos los intervalos desde unísono hasta octava.', options: ['unison', 'minorSecond', 'majorSecond', 'minorThird', 'majorThird', 'perfectFourth', 'tritone', 'perfectFifth', 'minorSixth', 'majorSixth', 'minorSeventh', 'majorSeventh', 'octave'] },
+  { id: 7, block: 2, title: 'Tríadas I · Mayores y menores', desc: 'Identifica tríadas mayores y menores en posición fundamental.', options: ['major', 'minor'] },
+  { id: 8, block: 3, title: 'Tríadas II · Aumentadas y disminuidas', desc: 'Distingue tríadas mayores, menores, aumentadas y disminuidas.', options: ['major', 'minor', 'augmented', 'diminished'] },
+  { id: 9, block: 3, title: 'Tríadas III · Sus2 y Sus4', desc: 'Compara tríadas mayores y menores con acordes suspendidos.', options: ['major', 'minor', 'sus2', 'sus4'] },
+  { id: 10, block: 3, title: 'Tríadas IV · Repaso completo', desc: 'Repasa todas las tríadas estudiadas.', options: ['major', 'minor', 'augmented', 'diminished', 'sus2', 'sus4'] },
+  { id: 11, block: 3, title: 'Cuatríadas I · Séptima dominante', desc: 'Reconoce la séptima dominante y distínguela de tríadas conocidas.', targets: ['dominantSeventh'], options: ['major', 'minor', 'dominantSeventh'] },
+  { id: 12, block: 4, title: 'Cuatríadas II · Séptimas mayores y menores', desc: 'Distingue acordes de séptima mayor y menor.', options: ['majorSeventhChord', 'minorSeventhChord'] },
+  { id: 13, block: 4, title: 'Cuatríadas III · Disminuidas', desc: 'Compara séptimas disminuidas y semidisminuidas.', options: ['diminishedSeventh', 'halfDiminishedSeventh'] },
+  { id: 14, block: 4, title: 'Cuatríadas IV · Repaso de séptimas', desc: 'Reconoce todos los tipos de séptima estudiados.', options: ['dominantSeventh', 'majorSeventhChord', 'minorSeventhChord', 'diminishedSeventh', 'halfDiminishedSeventh'] },
+  { id: 15, block: 4, title: 'Integración I · Tríadas y cuatríadas', desc: 'Mezcla las tríadas y cuatríadas de los niveles anteriores.', options: ['major', 'minor', 'augmented', 'diminished', 'sus2', 'sus4', 'dominantSeventh', 'majorSeventhChord', 'minorSeventhChord', 'diminishedSeventh', 'halfDiminishedSeventh'] },
+  { id: 16, block: 4, title: 'Integración II · Todos los acordes', desc: 'Reconoce díadas, tríadas y cuatríadas estudiadas.', options: Object.keys(CHORD_CATALOG) },
 ];
 
 // Notas naturales de inicio para los Bloques 2 y 3 (Do3 a Mi4: Do, Re, Mi, Fa, Sol, La, Si)
@@ -240,6 +287,7 @@ const SINGING_LEVELS = INTERVAL_LEVELS.map((lvl) => ({
 const STORAGE_KEY_SETTINGS = 'trino_settings_v2';
 const STORAGE_KEY_PROGRESS = 'trino_interval_progress_v1';
 const STORAGE_KEY_SING_PROGRESS = 'trino_singing_progress_v1';
+const STORAGE_KEY_CHORD_PROGRESS = 'trino_chord_progress_v1';
 const STORAGE_KEY_USER = 'trino_user_v1';
 const STORAGE_KEY_DAY_LOGS = 'trino_day_logs_v1';
 
@@ -265,6 +313,9 @@ class TrinoShell {
 
     // Configuración (mínimo diario, rango vocal y volúmenes)
     this.dailyMin = this.loadDailyMin();
+    this.dailyIntervalsMin = this.loadDailyMin('dailyIntervalsMin');
+    this.dailySingingMin = this.loadDailyMin('dailySingingMin');
+    this.dailyChordsMin = this.loadDailyMin('dailyChordsMin');
     const vocalRange = this.loadVocalRange();
     this.vocalMinMidi = vocalRange.min;
     this.vocalMaxMidi = vocalRange.max;
@@ -273,6 +324,7 @@ class TrinoShell {
     this.clickVolume = vols.click;
     this.progress = this.loadProgress(STORAGE_KEY_PROGRESS);
     this.singProgress = this.loadProgress(STORAGE_KEY_SING_PROGRESS);
+    this.chordProgress = this.loadProgress(STORAGE_KEY_CHORD_PROGRESS);
     this.dayLogs = this.loadDayLogs();
 
     // Estado de ejercicio activo
@@ -284,6 +336,7 @@ class TrinoShell {
     this.noteAnimTimers = [];
     this.sessionLog = [];
     this.singSessionLog = [];
+    this.chordSessionLog = [];
 
     // Secuencia y grabación para Cantar Notas
     this.singBpm = this.loadSingBpm();
@@ -304,6 +357,7 @@ class TrinoShell {
     this.syncAuthUi();
     this.renderIntervalLevels();
     this.renderSingingLevels();
+    this.renderChordLevels();
     this.syncVersionBadge();
     this.navigateTo('home');
     if (this.currentUser?.verificado) {
@@ -320,7 +374,16 @@ class TrinoShell {
 
     this.intervalsLevelsList = document.getElementById('intervals-levels-list');
     this.singingLevelsList = document.getElementById('singing-levels-list');
-    this.dailyMinSelect = document.getElementById('daily-min-select');
+    this.chordLevelsList = document.getElementById('chord-levels-list');
+    this.dailyIntervalsMinValue = document.getElementById('daily-intervals-min-value');
+    this.dailyIntervalsMinDecrease = document.getElementById('daily-intervals-min-decrease');
+    this.dailyIntervalsMinIncrease = document.getElementById('daily-intervals-min-increase');
+    this.dailySingingMinValue = document.getElementById('daily-singing-min-value');
+    this.dailySingingMinDecrease = document.getElementById('daily-singing-min-decrease');
+    this.dailySingingMinIncrease = document.getElementById('daily-singing-min-increase');
+    this.dailyChordsMinValue = document.getElementById('daily-chords-min-value');
+    this.dailyChordsMinDecrease = document.getElementById('daily-chords-min-decrease');
+    this.dailyChordsMinIncrease = document.getElementById('daily-chords-min-increase');
     this.vocalPresetSelect = document.getElementById('vocal-preset-select');
     this.vocalMinSelect = document.getElementById('vocal-min-select');
     this.vocalMaxSelect = document.getElementById('vocal-max-select');
@@ -360,6 +423,11 @@ class TrinoShell {
     this.singFeedbackText = document.getElementById('sing-feedback-text');
     this.singSessionLogWrapper = document.getElementById('sing-session-log-wrapper');
     this.singSessionLogTbody = document.getElementById('sing-session-log-tbody');
+    this.chordLevelTitle = document.getElementById('chord-level-title');
+    this.chordPromptText = document.getElementById('chord-prompt-text');
+    this.chordAnswersContainer = document.getElementById('chord-answers-container');
+    this.chordSessionLogWrapper = document.getElementById('chord-session-log-wrapper');
+    this.chordSessionLogTbody = document.getElementById('chord-session-log-tbody');
     this.singDebugPanel = document.getElementById('sing-debug-panel');
     this.singDebugBody  = document.getElementById('sing-debug-body');
     this.btnDebugModal  = document.getElementById('btn-debug-modal');
@@ -466,12 +534,12 @@ class TrinoShell {
   loadDayLogs() {
     const today = this.getTodayKey();
     const yesterday = this.getYesterdayKey();
-    const cleanStore = { intervals: {}, singing: {} };
+    const cleanStore = { intervals: {}, singing: {}, chords: {} };
     try {
       const raw = localStorage.getItem(STORAGE_KEY_DAY_LOGS);
       if (raw) {
         const parsed = JSON.parse(raw);
-        ['intervals', 'singing'].forEach((mod) => {
+        ['intervals', 'singing', 'chords'].forEach((mod) => {
           const modObj = parsed?.[mod] || {};
           Object.keys(modObj).forEach((lvlId) => {
             const arr = Array.isArray(modObj[lvlId]) ? modObj[lvlId] : [];
@@ -490,7 +558,7 @@ class TrinoShell {
     const today = this.getTodayKey();
     const yesterday = this.getYesterdayKey();
     try {
-      ['intervals', 'singing'].forEach((mod) => {
+      ['intervals', 'singing', 'chords'].forEach((mod) => {
         const modObj = this.dayLogs[mod] || {};
         Object.keys(modObj).forEach((lvlId) => {
           modObj[lvlId] = (modObj[lvlId] || []).filter(
@@ -513,19 +581,47 @@ class TrinoShell {
     return this.dayLogs[moduleType][levelId];
   }
 
+  getDailyTypeCounts(moduleType) {
+    const today = this.getTodayKey();
+    const yesterday = this.getYesterdayKey();
+    const progressStore = moduleType === 'singing'
+      ? this.singProgress
+      : moduleType === 'chords' ? this.chordProgress : this.progress;
+    const levelStats = progressStore.levels || {};
+    const levelLogs = this.dayLogs[moduleType] || {};
+    const levelIds = new Set([...Object.keys(levelStats), ...Object.keys(levelLogs)]);
+    let todayDone = 0;
+    let yesterdayDone = 0;
+
+    levelIds.forEach((levelId) => {
+      const stats = levelStats[levelId] || {};
+      const entries = levelLogs[levelId] || [];
+      const loggedToday = entries.filter((entry) => entry.date === today).length;
+      const loggedYesterday = entries.filter((entry) => entry.date === yesterday).length;
+      const storedToday = progressStore.date === today
+        ? (Number(stats.good) || 0) + (Number(stats.bad) || 0)
+        : 0;
+      todayDone += Math.max(loggedToday, storedToday);
+      yesterdayDone += loggedYesterday;
+    });
+
+    return { todayDone, yesterdayDone };
+  }
+
   pushLevelDayLog(moduleType, levelId, entry) {
     const list = this.getLevelDayLog(moduleType, levelId);
     list.unshift(entry);
     this.saveDayLogs();
   }
 
-  loadDailyMin() {
+  loadDailyMin(settingKey = 'dailyMin') {
     try {
       const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
       if (raw) {
         const parsed = JSON.parse(raw);
-        const val = parseInt(parsed.dailyMin, 10);
-        if (val >= 10 && val <= 100 && val % 10 === 0) return val;
+        const storedValue = parsed[settingKey] ?? (settingKey !== 'dailyMin' ? parsed.dailyMin : undefined);
+        const val = parseInt(storedValue, 10);
+        if (val >= 10 && val <= 200 && val % 10 === 0) return val;
       }
     } catch (_) {}
     return 100;
@@ -534,6 +630,9 @@ class TrinoShell {
   getCurrentConfigObject() {
     return {
       dailyMin: this.dailyMin,
+      dailyIntervalsMin: this.dailyIntervalsMin,
+      dailySingingMin: this.dailySingingMin,
+      dailyChordsMin: this.dailyChordsMin,
       singBpm: this.singBpm,
       vocalMinMidi: this.vocalMinMidi,
       vocalMaxMidi: this.vocalMaxMidi,
@@ -556,8 +655,10 @@ class TrinoShell {
     }
   }
 
-  saveDailyMin(val) {
-    this.dailyMin = val;
+  saveDailyMin(moduleType, val) {
+    if (moduleType === 'singing') this.dailySingingMin = val;
+    else if (moduleType === 'chords') this.dailyChordsMin = val;
+    else this.dailyIntervalsMin = val;
     this.saveAllSettings();
   }
 
@@ -636,11 +737,14 @@ class TrinoShell {
     try {
       localStorage.setItem(STORAGE_KEY_PROGRESS, JSON.stringify(this.progress));
       localStorage.setItem(STORAGE_KEY_SING_PROGRESS, JSON.stringify(this.singProgress));
+      localStorage.setItem(STORAGE_KEY_CHORD_PROGRESS, JSON.stringify(this.chordProgress));
     } catch (_) {}
   }
 
   getLevelStats(levelId, moduleType = 'intervals') {
-    const store = moduleType === 'singing' ? this.singProgress : this.progress;
+    const store = moduleType === 'singing'
+      ? this.singProgress
+      : moduleType === 'chords' ? this.chordProgress : this.progress;
     if (!store.levels[levelId]) {
       store.levels[levelId] = { good: 0, bad: 0, stars: 0 };
     }
@@ -648,9 +752,15 @@ class TrinoShell {
   }
 
   syncSettingsUi() {
-    if (this.dailyMinSelect) {
-      this.dailyMinSelect.value = String(this.dailyMin);
-    }
+    if (this.dailyIntervalsMinValue) this.dailyIntervalsMinValue.textContent = `${this.dailyIntervalsMin} diarios`;
+    if (this.dailyIntervalsMinDecrease) this.dailyIntervalsMinDecrease.disabled = this.dailyIntervalsMin <= 10;
+    if (this.dailyIntervalsMinIncrease) this.dailyIntervalsMinIncrease.disabled = this.dailyIntervalsMin >= 200;
+    if (this.dailySingingMinValue) this.dailySingingMinValue.textContent = `${this.dailySingingMin} diarios`;
+    if (this.dailySingingMinDecrease) this.dailySingingMinDecrease.disabled = this.dailySingingMin <= 10;
+    if (this.dailySingingMinIncrease) this.dailySingingMinIncrease.disabled = this.dailySingingMin >= 200;
+    if (this.dailyChordsMinValue) this.dailyChordsMinValue.textContent = `${this.dailyChordsMin} diarios`;
+    if (this.dailyChordsMinDecrease) this.dailyChordsMinDecrease.disabled = this.dailyChordsMin <= 10;
+    if (this.dailyChordsMinIncrease) this.dailyChordsMinIncrease.disabled = this.dailyChordsMin >= 200;
 
     // Poblar selectores de nota mínima y máxima si aún están vacíos (Do2=36 a Do6=84)
     if (this.vocalMinSelect && this.vocalMinSelect.options.length === 0) {
@@ -709,15 +819,22 @@ class TrinoShell {
       });
     });
 
-    if (this.dailyMinSelect) {
-      this.dailyMinSelect.addEventListener('change', () => {
-        const val = parseInt(this.dailyMinSelect.value, 10);
-        this.saveDailyMin(val);
-        this.syncSettingsUi();
-        this.renderIntervalLevels();
-        this.renderSingingLevels();
-      });
-    }
+    const adjustDailyGoal = (moduleType, amount) => {
+      const currentGoal = moduleType === 'singing'
+        ? this.dailySingingMin
+        : moduleType === 'chords' ? this.dailyChordsMin : this.dailyIntervalsMin;
+      this.saveDailyMin(moduleType, Math.max(10, Math.min(200, currentGoal + amount)));
+      this.syncSettingsUi();
+      this.renderIntervalLevels();
+      this.renderSingingLevels();
+      this.renderChordLevels();
+    };
+    this.dailyIntervalsMinDecrease?.addEventListener('click', () => adjustDailyGoal('intervals', -10));
+    this.dailyIntervalsMinIncrease?.addEventListener('click', () => adjustDailyGoal('intervals', 10));
+    this.dailySingingMinDecrease?.addEventListener('click', () => adjustDailyGoal('singing', -10));
+    this.dailySingingMinIncrease?.addEventListener('click', () => adjustDailyGoal('singing', 10));
+    this.dailyChordsMinDecrease?.addEventListener('click', () => adjustDailyGoal('chords', -10));
+    this.dailyChordsMinIncrease?.addEventListener('click', () => adjustDailyGoal('chords', 10));
 
     // Eventos de rango vocal y volúmenes en Configuración
     if (this.vocalPresetSelect) {
@@ -825,12 +942,13 @@ class TrinoShell {
     this.mysteryNote2?.addEventListener('click', () => this.playMysteryNote(1));
 
     if (this.singStaffCanvas) {
-      this.singStaffCanvas.addEventListener('click', (e) => {
+      this.singStaffCanvas.addEventListener('click', async (e) => {
         const rect = this.singStaffCanvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         const canvasHeight = this.singStaffCanvas.clientHeight;
-        if (x <= 105 && y >= canvasHeight - 34) {
+        const notePlayed = await this.playStaffNoteAtPoint(x, y);
+        if (!notePlayed && x <= 105 && y >= canvasHeight - 34) {
           this.openBpmModal();
         }
       });
@@ -1305,7 +1423,19 @@ class TrinoShell {
 
   applyCloudConfig(cfg) {
     if (!cfg || typeof cfg !== 'object') return;
-    if (cfg.dailyMin >= 10 && cfg.dailyMin <= 100) this.dailyMin = cfg.dailyMin;
+    if (cfg.dailyMin >= 10 && cfg.dailyMin <= 200 && cfg.dailyMin % 10 === 0) this.dailyMin = cfg.dailyMin;
+    const cloudIntervalsMin = cfg.dailyIntervalsMin ?? cfg.dailyMin;
+    const cloudSingingMin = cfg.dailySingingMin ?? cfg.dailyMin;
+    const cloudChordsMin = cfg.dailyChordsMin ?? cfg.dailyMin;
+    if (cloudIntervalsMin >= 10 && cloudIntervalsMin <= 200 && cloudIntervalsMin % 10 === 0) {
+      this.dailyIntervalsMin = cloudIntervalsMin;
+    }
+    if (cloudSingingMin >= 10 && cloudSingingMin <= 200 && cloudSingingMin % 10 === 0) {
+      this.dailySingingMin = cloudSingingMin;
+    }
+    if (cloudChordsMin >= 10 && cloudChordsMin <= 200 && cloudChordsMin % 10 === 0) {
+      this.dailyChordsMin = cloudChordsMin;
+    }
     if (cfg.singBpm >= 40 && cfg.singBpm <= 140) this.singBpm = cfg.singBpm;
     if (cfg.vocalMinMidi >= 36 && cfg.vocalMaxMidi <= 84) {
       this.vocalMinMidi = cfg.vocalMinMidi;
@@ -1317,6 +1447,7 @@ class TrinoShell {
     this.syncSettingsUi();
     this.renderIntervalLevels();
     this.renderSingingLevels();
+    this.renderChordLevels();
   }
 
   async syncFromCloudOnLoad() {
@@ -1354,9 +1485,31 @@ class TrinoShell {
     if (!containerEl) return;
     this.syncSettingsUi();
 
+    const dailyGoal = moduleType === 'singing'
+      ? this.dailySingingMin
+      : moduleType === 'chords' ? this.dailyChordsMin : this.dailyIntervalsMin;
+    const { todayDone: typeTodayDone, yesterdayDone: typeYesterdayDone } = this.getDailyTypeCounts(moduleType);
+    const typeGoalMet = typeTodayDone >= dailyGoal;
+    const goalProgress = Math.min(100, Math.round((typeTodayDone / dailyGoal) * 100));
+    const typeLabel = moduleType === 'singing'
+      ? 'Canto'
+      : moduleType === 'chords' ? 'Reconocimiento de acordes' : 'Reconocimiento de intervalos';
+    const dailyGoalHtml = `
+      <div class="daily-goal-summary">
+        <div class="daily-goal-summary-head">
+          <span class="daily-goal-summary-title">Meta diaria · ${typeLabel}</span>
+          <span class="daily-goal-summary-count">Hoy ${typeTodayDone}/${dailyGoal}${typeGoalMet ? ' · Cumplida' : ''}</span>
+        </div>
+        <div class="daily-goal-progress" role="progressbar" aria-label="Progreso diario de ${typeLabel}" aria-valuemin="0" aria-valuemax="${dailyGoal}" aria-valuenow="${Math.min(typeTodayDone, dailyGoal)}">
+          <div class="daily-goal-progress-fill" style="width:${goalProgress}%"></div>
+        </div>
+        <span class="daily-goal-yesterday">Ayer ${typeYesterdayDone}</span>
+      </div>
+    `;
+
     let suggestedAssigned = false;
 
-    containerEl.innerHTML = levelsArray
+    containerEl.innerHTML = dailyGoalHtml + levelsArray
       .map((lvl) => {
         const stats = this.getLevelStats(lvl.id, moduleType);
         const levelDescription = moduleType === 'singing'
@@ -1368,11 +1521,11 @@ class TrinoShell {
         const todayFromLog = dayEntries.filter((entry) => entry.date === todayKey).length;
         const yesterdayDone = dayEntries.filter((entry) => entry.date === yesterdayKey).length;
         const todayDone = Math.max(stats.good + stats.bad, todayFromLog);
-        const isDoneToday = todayDone >= this.dailyMin;
+        const isLevelDone = stats.stars > 0;
 
         let state = 'pending';
 
-        if (isDoneToday) {
+        if (isLevelDone) {
           state = 'done';
         } else if (!suggestedAssigned) {
           state = 'suggested';
@@ -1383,7 +1536,7 @@ class TrinoShell {
         const progressHtml = showProgress
           ? `<div class="level-status-row">
                ${state === 'suggested' ? '<span class="level-status-pill">Sugerido</span>' : '<span class="level-status-spacer" aria-hidden="true"></span>'}
-               <span class="level-progress-counts">Hechas: Hoy ${todayDone}/${this.dailyMin} Ayer ${yesterdayDone}/${this.dailyMin}</span>
+               <span class="level-progress-counts">Hoy ${todayDone} · Ayer ${yesterdayDone}</span>
              </div>`
           : '';
 
@@ -1419,6 +1572,8 @@ class TrinoShell {
         const id = parseInt(btn.getAttribute('data-level-id'), 10);
         if (moduleType === 'singing') {
           this.startSingingLevel(id);
+        } else if (moduleType === 'chords') {
+          this.startChordLevel(id);
         } else {
           this.startIntervalLevel(id);
         }
@@ -1432,6 +1587,10 @@ class TrinoShell {
 
   renderSingingLevels() {
     this.renderLevelList(this.singingLevelsList, SINGING_LEVELS, 'singing');
+  }
+
+  renderChordLevels() {
+    this.renderLevelList(this.chordLevelsList, CHORD_LEVELS, 'chords');
   }
 
   startIntervalLevel(levelId) {
@@ -1464,16 +1623,131 @@ class TrinoShell {
     this.syncExerciseAvailability();
   }
 
+  startChordLevel(levelId) {
+    const level = CHORD_LEVELS.find((item) => item.id === levelId);
+    if (!level) return;
+
+    this.activeModule = 'chords';
+    this.exerciseStarted = false;
+    this.activeLevel = level;
+    this.chordSessionLog = this.getLevelDayLog('chords', levelId);
+    this.renderLogTable(this.chordSessionLogWrapper, this.chordSessionLogTbody, this.chordSessionLog);
+    this.generateNextQuestion();
+    this.updateChordExerciseUi();
+    this.navigateTo('chord-exercise');
+    this.syncExerciseAvailability();
+  }
+
   syncExerciseAvailability() {
     const isStarted = this.exerciseStarted;
     this.exPromptText?.classList.toggle('hidden', isStarted);
     this.singPromptText?.classList.toggle('hidden', isStarted);
+    this.chordPromptText?.classList.toggle('hidden', isStarted);
     this.mysteryNotesRow?.classList.toggle('hidden', !isStarted || this.activeModule !== 'intervals');
     this.exAnswersContainer?.classList.toggle('hidden', !isStarted || this.activeModule !== 'intervals');
+    this.chordAnswersContainer?.classList.toggle('hidden', !isStarted || this.activeModule !== 'chords');
     this.singStaffCanvasBox?.classList.toggle('hidden', !isStarted || this.activeModule !== 'singing');
     if (isStarted && this.activeModule === 'singing') {
       requestAnimationFrame(() => this.drawGrandStaff(null, this.lastVoiceFrames));
     }
+  }
+
+  updateChordExerciseUi() {
+    if (!this.activeLevel || !this.chordAnswersContainer) return;
+    this.chordLevelTitle.textContent = this.activeLevel.title;
+    this.chordPromptText.textContent = this.activeLevel.id <= 6
+      ? 'Escucha las dos notas e identifica el intervalo.'
+      : 'Escucha las notas simultáneas e identifica el acorde.';
+    this.chordAnswersContainer.innerHTML = this.activeLevel.options
+      .map((chordId) => `
+        <button type="button" class="answer-btn" data-chord-key="${chordId}">
+          ${CHORD_CATALOG[chordId].label}
+        </button>
+      `)
+      .join('');
+
+    this.chordAnswersContainer.querySelectorAll('[data-chord-key]').forEach((button) => {
+      button.addEventListener('click', () => {
+        this.handleChordAnswerSelection(button, button.getAttribute('data-chord-key'));
+      });
+    });
+  }
+
+  generateNextChordQuestion() {
+    if (!this.activeLevel) return;
+    const targetTypes = this.activeLevel.targets || this.activeLevel.options;
+    const chordId = targetTypes[Math.floor(Math.random() * targetTypes.length)];
+    const chord = CHORD_CATALOG[chordId];
+    const maxInterval = Math.max(...chord.intervals);
+    const maxRoot = Math.min(72, 84 - maxInterval);
+    const rootMidi = 48 + Math.floor(Math.random() * (maxRoot - 48 + 1));
+
+    this.currentQuestion = {
+      chordId,
+      rootMidi,
+      chordMidis: chord.intervals.map((interval) => rootMidi + interval),
+      answered: false,
+    };
+    this.chordAnswersContainer?.querySelectorAll('.answer-btn').forEach((button) => {
+      button.classList.remove('flash-correct', 'flash-wrong');
+    });
+  }
+
+  async playChordQuestion() {
+    if (!this.currentQuestion?.chordMidis?.length) return;
+    await this.ensureAudioReady();
+    this.chordAnswersContainer?.querySelectorAll('.answer-btn').forEach((button) => {
+      if (button._flashTimeout) {
+        clearTimeout(button._flashTimeout);
+        button._flashTimeout = null;
+      }
+      button.classList.remove('flash-correct', 'flash-wrong');
+    });
+    const now = this.audioCtx.currentTime;
+    const duration = 1.25;
+    const gainScale = 1 / Math.sqrt(this.currentQuestion.chordMidis.length);
+    this.currentQuestion.chordMidis.forEach((midi) => {
+      const frequency = 440 * Math.pow(2, (midi - 69) / 12);
+      this.playTone(frequency, now, duration, gainScale);
+    });
+  }
+
+  async playStaffNoteAtPoint(x, y) {
+    if (!this.currentQuestion || !this.singStaffCanvas) return false;
+
+    const canvas = this.singStaffCanvas;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (!width || !height) return false;
+
+    const staffLeft = 2;
+    const m1Start = staffLeft + 38;
+    const barlineX = m1Start + (width - 2 - m1Start) / 2;
+    const measureWidth = (barlineX - m1Start) * 2;
+    const noteXs = [
+      m1Start + measureWidth * 0.125,
+      m1Start + measureWidth * 0.375,
+      barlineX + measureWidth * 0.125,
+      barlineX + measureWidth * 0.375,
+    ];
+    const noteMidis = [
+      this.currentQuestion.midi1,
+      this.currentQuestion.midi2,
+      this.currentQuestion.midi1,
+      this.currentQuestion.midi2,
+    ];
+    const noteIndex = noteXs.findIndex((noteX, index) => {
+      const step = this.midiToGrandStaffStep(noteMidis[index]).step;
+      const noteY = height / 2 - 4 - step * 5;
+      return Math.abs(x - noteX) <= 16 && Math.abs(y - noteY) <= 18;
+    });
+    if (noteIndex < 0) return false;
+
+    await this.ensureAudioReady();
+    const midi = noteMidis[noteIndex];
+    const frequency = 440 * Math.pow(2, (midi - 69) / 12);
+    this.playTone(frequency, this.audioCtx.currentTime, 0.65);
+    return true;
   }
 
   generateNextQuestion() {
@@ -1483,6 +1757,11 @@ class TrinoShell {
       this.autoNextTimer = null;
     }
     this.stopSingingSequence();
+
+    if (this.activeModule === 'chords') {
+      this.generateNextChordQuestion();
+      return;
+    }
 
     const opts = this.activeLevel.options;
     const randomKey = opts[Math.floor(Math.random() * opts.length)];
@@ -1755,6 +2034,10 @@ class TrinoShell {
 
   handleAnswerSelection(btnEl, selectedKey) {
     if (!this.activeLevel || !this.currentQuestion) return;
+    if (this.activeModule === 'chords') {
+      this.handleChordAnswerSelection(btnEl, selectedKey);
+      return;
+    }
     const stats = this.getLevelStats(this.activeLevel.id, 'intervals');
     const isCorrect = selectedKey === this.currentQuestion.targetIntervalKey;
     const colorClass = isCorrect ? 'flash-correct' : 'flash-wrong';
@@ -1820,6 +2103,59 @@ class TrinoShell {
         btnEl.classList.remove(colorClass);
         btnEl._flashTimeout = null;
       }, 1000);
+    }
+  }
+
+  handleChordAnswerSelection(button, selectedChordId) {
+    if (!this.activeLevel || !this.currentQuestion) return;
+    if (this.currentQuestion.answered) {
+      if (button === this.currentQuestion.firstButtonEl) return;
+      if (button._flashTimeout) clearTimeout(button._flashTimeout);
+      button.classList.add(selectedChordId === this.currentQuestion.chordId ? 'flash-correct' : 'flash-wrong');
+      button._flashTimeout = setTimeout(() => {
+        button.classList.remove('flash-correct', 'flash-wrong');
+        button._flashTimeout = null;
+      }, 1000);
+      return;
+    }
+    const stats = this.getLevelStats(this.activeLevel.id, 'chords');
+    const isCorrect = selectedChordId === this.currentQuestion.chordId;
+    button.classList.add(isCorrect ? 'flash-correct' : 'flash-wrong');
+    this.currentQuestion.answered = true;
+    this.currentQuestion.firstButtonEl = button;
+
+    if (isCorrect) stats.good += 1;
+    else stats.bad += 1;
+
+    const todayKey = this.getTodayKey();
+    const entries = this.getLevelDayLog('chords', this.activeLevel.id);
+    const todayCount = entries.filter((entry) => (entry.date || todayKey) === todayKey).length;
+    const chordNotes = this.currentQuestion.chordMidis.map((midi) => this.midiToNoteNameEs(midi));
+    this.pushLevelDayLog('chords', this.activeLevel.id, {
+      date: todayKey,
+      index: todayCount + 1,
+      notes: chordNotes.join(' - '),
+      answer: CHORD_CATALOG[selectedChordId]?.label || selectedChordId,
+      isCorrect,
+    });
+    this.chordSessionLog = this.getLevelDayLog('chords', this.activeLevel.id);
+    this.renderLogTable(this.chordSessionLogWrapper, this.chordSessionLogTbody, this.chordSessionLog);
+
+    const totalDone = stats.good + stats.bad;
+    if (totalDone >= this.dailyChordsMin) {
+      const ratio = totalDone > 0 ? stats.good / totalDone : 0;
+      const earnedStars = ratio >= 0.85 ? 3 : ratio >= 0.65 ? 2 : 1;
+      if (earnedStars > stats.stars) stats.stars = earnedStars;
+    }
+
+    this.saveProgress();
+    if (isCorrect) {
+      if (this.autoNextTimer) clearTimeout(this.autoNextTimer);
+      this.autoNextTimer = setTimeout(() => {
+        this.autoNextTimer = null;
+        this.generateNextQuestion();
+        this.schedulePlayAfterOneSecond();
+      }, 1600);
     }
   }
 
@@ -2862,8 +3198,7 @@ class TrinoShell {
 
         const absS = Math.abs(signedSemitones);
         const strokeColor =
-          absS <= 0.15 ? '#059669' :   // admirable (≤15c)
-          absS <= 0.40 ? '#10b981' :   // bueno/aceptable (≤40c)
+          absS <= 0.40 ? '#10b981' :   // admirable/bueno/aceptable (≤40c)
           absS <= 0.80 ? '#f59e0b' :   // casi (41-80c)
                          '#ef4444';    // malo (>80c)
 
@@ -3823,7 +4158,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=38', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=40', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>
@@ -3913,6 +4248,10 @@ class TrinoShell {
       this.startSingingSequence();
       return;
     }
+    if (this.activeModule === 'chords') {
+      this.playChordQuestion();
+      return;
+    }
 
     this.clearAnswerButtonColors();
     await this.ensureAudioReady();
@@ -3943,14 +4282,14 @@ class TrinoShell {
     );
   }
 
-  playTone(hz, startTime, duration) {
+  playTone(hz, startTime, duration, gainScale = 1) {
     const osc = this.audioCtx.createOscillator();
     const gain = this.audioCtx.createGain();
 
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(hz, startTime);
 
-    const peakGain = Math.max(0.01, ((this.noteVolume ?? 80) / 100) * 0.40);
+    const peakGain = Math.max(0.001, ((this.noteVolume ?? 80) / 100) * 0.40 * gainScale);
     gain.gain.setValueAtTime(0.0001, startTime);
     gain.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.03);
     gain.gain.setValueAtTime(peakGain, startTime + duration - 0.05);
@@ -4169,7 +4508,7 @@ class TrinoShell {
     }
 
     const isExerciseView =
-      viewKey === 'interval-exercise' || viewKey === 'singing-exercise';
+      viewKey === 'interval-exercise' || viewKey === 'singing-exercise' || viewKey === 'chord-exercise';
 
     if (!isExerciseView) {
       if (this.delayedPlayTimer) {
@@ -4193,6 +4532,8 @@ class TrinoShell {
       this.renderIntervalLevels();
     } else if (viewKey === 'singing') {
       this.renderSingingLevels();
+    } else if (viewKey === 'chords') {
+      this.renderChordLevels();
     }
 
     Object.keys(VIEWS).forEach((key) => {
@@ -4220,8 +4561,10 @@ class TrinoShell {
       return;
     }
 
-    if (viewKey === 'interval-exercise' || viewKey === 'singing-exercise') {
-      const backTarget = viewKey === 'singing-exercise' ? 'singing' : 'intervals';
+    if (viewKey === 'interval-exercise' || viewKey === 'singing-exercise' || viewKey === 'chord-exercise') {
+      const backTarget = viewKey === 'singing-exercise'
+        ? 'singing'
+        : viewKey === 'chord-exercise' ? 'chords' : 'intervals';
       this.bottomZone.innerHTML = `
         <button type="button" class="cmd-btn" id="cmd-back-levels">← Niveles</button>
         ${this.exerciseStarted ? '<button type="button" class="cmd-btn" id="cmd-play-interval" aria-label="Repetir ejercicio" title="Repetir ejercicio">↻ Repetir</button>' : ''}

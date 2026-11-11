@@ -57,3 +57,13 @@
   - `public.trino_modulo_intervalos`: Module 1 exercise/daily summary.
   - `public.trino_modulo_canto`: Exercise summary (`bueno`/`regular`/`malo`) + compact score JSON (numbered notes & rests, exact pitch+octave, musical figure/duration).
   - `public.trino_notas_cantadas` (shared across vocal modules): `modulo`, `ejercicio_id`, `numero_nota`, `nota_objetivo`, `nota_cantada`, `centro_tonal`, `tipo_voz` (`plana`/`vibrato`/`inestable`), `glisando` (`boolean`), `clasificacion` (`malo`/`regular`/`aceptable`/`bueno`/`admirable`).
+
+## 8. Chord Recognition Module
+- `CHORD_CATALOG` contains dyads, triads, and seventh chords as semitone offsets from a root. `CHORD_LEVELS` defines 16 levels: 6 dyad levels, 4 triad levels, 4 seventh-chord levels, and 2 mixed integration levels.
+- Dyads sound as ascending notes; triads and seventh chords sound simultaneously using Web Audio oscillators scheduled at one `AudioContext.currentTime`. Per-tone gain is scaled by `1 / sqrt(noteCount)`.
+- Each chord question stores its target ID, root MIDI, MIDI pitches, and answered state. Level options supply answer buttons; optional `targets` narrows generated questions while retaining distractor choices.
+- Chord outcomes are stored separately under `trino_chord_progress_v1`; day logs use the `chords` namespace in `trino_day_logs_v1`. The independent `dailyChordsMin` setting defaults to `100` and is bounded to `10..200` in increments of `10`.
+
+## 9. Independent Daily Goals & Settings Layout
+- Daily goals are independently persisted as `dailyIntervalsMin`, `dailySingingMin`, and `dailyChordsMin`; older `dailyMin` settings remain a migration/cloud fallback.
+- Vocal min/max MIDI selectors span their settings field. Microphone detection and speaker preview actions render on a separate row below each selector for mobile usability.
