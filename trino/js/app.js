@@ -4,7 +4,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0036';
+const APP_VERSION = 'v1.0.0037';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -3335,7 +3335,7 @@ class TrinoShell {
    *
    * Si tipo = vibrato o inestable → usa mediana (la oscilación no distorsiona el centro)
    * Sobre la mediana:
-   *   - Si NO es vibrato Y highPct ≥ 30% Y lowPct ≥ 30% → "(muy alto y muy bajo)"
+    *   - Si NO es vibrato Y highPct ≥ 30% Y lowPct ≥ 30% → "Muy irregular"
    *   - Si NO es vibrato Y highPct ≥ 30%                 → "Muy alto"
    *   - Si NO es vibrato Y lowPct  ≥ 30%                 → "Muy bajo"
    *   - Ninguno                                          → label normal de mediana
@@ -3366,7 +3366,7 @@ class TrinoShell {
       const lowPct   = signedList.filter((c) => c < -50).length / total;
 
       if (highPct >= 0.30 && lowPct >= 0.30) {
-        return { label: 'Muy alto y muy bajo', sungNote, isHighLow: true };
+        return { label: 'Muy irregular', sungNote, isHighLow: true };
       }
       if (highPct >= 0.30) {
         return { label: 'Muy alto', sungNote, isHighLow: true };
@@ -3888,7 +3888,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=36', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=37', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>

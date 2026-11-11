@@ -19,3 +19,4 @@
 17. **RT-17 (Account Activation Notice):** Clicking the home `Activar cuenta` button opens a modal stating activation is not yet available, does not open the registration form, and closes with its button or backdrop.
 18. **RT-18 (Compact Exercise View):** Exercise headers reach the top and side edges. After Comenzar, instructions disappear; the singing staff is compact, Click 1/2 labels are absent, and no duplicate analysis text appears under the staff.
 19. **RT-19 (Result Header Case):** Session table headers display sentence case (for example `Nota`, `Centro tonal`, `Voz`) rather than all-uppercase text.
+20. **RT-20 (Mixed High/Low Tonal Center):** When at least 30% of frames are very high and at least 30% are very low, show the concise label `Muy irregular` without changing the grade or detection thresholds.
