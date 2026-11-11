@@ -4,7 +4,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0037';
+const APP_VERSION = 'v1.0.0038';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -2057,13 +2057,13 @@ class TrinoShell {
               let voiceBadge = '&nbsp;';
               if (note?.voiceType === 'vibrato') {
                 const hzTxt = note.vibratoHz ? ` (${note.vibratoHz}Hz)` : '';
-                voiceBadge = `<span class="voice-badge badge-vibrato" title="Vibrato detectado${hzTxt}">Vib</span>`;
+                voiceBadge = `<span class="voice-badge badge-vibrato" title="Vibrato detectado${hzTxt}">V</span>`;
               } else if (note?.voiceType === 'inestable') {
-                voiceBadge = '<span class="voice-badge badge-unstable" title="Voz irregular detectada">Irr</span>';
+                voiceBadge = '<span class="voice-badge badge-unstable" title="Voz irregular detectada">I</span>';
               }
 
               const glissandoBadge = note?.glissando
-                ? '<span class="voice-badge badge-glissando" title="Glisando detectado">Gli</span>'
+                ? '<span class="voice-badge badge-glissando" title="Glisando detectado">G</span>'
                 : '&nbsp;';
               const firstRowCells = noteIndex === 0
                 ? `<td rowspan="${noteCount}">${item.index}</td>`
@@ -3888,7 +3888,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=37', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=38', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>

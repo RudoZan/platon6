@@ -38,8 +38,9 @@
 
 ## UC-07: Mobile Layout & Level Cards
 1. On mobile, the app frame fills the visible viewport; only the central content panel scrolls while the top and bottom bars remain fixed.
-2. Level cards place the stars on the same row as the level title. The description uses the full card width below.
-3. Level information is opened from the info button beside the active exercise title in either module, not from the level list.
-4. The suggested level label stays left of the progress count. Eligible cards show `Hechas: Hoy x/meta Ayer y/meta`; this row is visible only for the suggested level or levels with activity today/yesterday.
-5. In both exercise views, the level/date/completion header sits flush to the top and side edges. Instructions disappear after starting. Module 2 keeps only the compact staff and response table; analysis details are not repeated below the staff.
-6. The Module 2 session history uses one HTML table row per sung note, with exercise index and exercise-grade cells spanning the note rows. Table headers use sentence case and cells wrap within their assigned columns.
+2. Both exercise views extend to the frame's inner side edges; exercise headers and session tables are full-width, while prompts and controls retain side padding.
+3. Level cards place the stars on the same row as the level title. The description uses the full card width below.
+4. Level information is opened from the info button beside the active exercise title in either module, not from the level list.
+5. The suggested level label stays left of the progress count. Eligible cards show `Hechas: Hoy x/meta Ayer y/meta`; this row is visible only for the suggested level or levels with activity today/yesterday.
+6. In both exercise views, the level/date/completion header sits flush to the top and side edges. Instructions disappear after starting. Module 2 keeps only the compact staff and response table; analysis details are not repeated below the staff.
+7. The Module 2 session history uses one HTML table row per sung note, with exercise index and exercise-grade cells spanning the note rows. Table headers use sentence case; tonal-center text wraps within its cell, and voice/glissando badges use `V`, `I`, and `G` with descriptive tooltips.
