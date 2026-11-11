@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=38" />
+  <link rel="stylesheet" href="./css/styles.css?v=39" />
 </head>
 
 <body>
@@ -86,8 +86,7 @@
       <!-- VISTA: MÓDULO 1 (Reconocer Intervalos — Listado de Niveles) -->
       <section id="view-intervals" class="hidden">
         <div class="levels-header">
-          <h2 class="welcome-title">Reconocer Intervalos</h2>
-          <p class="welcome-text" id="intervals-daily-goal-text">Meta diaria por nivel: 100 ejercicios.</p>
+          <h2 class="welcome-title">Módulo 1 - Reconocer Intervalos</h2>
         </div>
 
         <div class="levels-list" id="intervals-levels-list">
@@ -101,10 +100,6 @@
           <div class="exercise-title-row">
             <span class="exercise-level-name" id="ex-level-title">Nivel 1</span>
             <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel" title="Ver información del nivel">i</button>
-          </div>
-          <div class="exercise-stats-line" id="ex-daily-counter">
-            <span class="stat-hoy" id="ex-date-label">Hoy</span>
-            <span class="stat-done">Completados <strong id="ex-done-count">0 de 100</strong></span>
           </div>
         </div>
 
@@ -131,8 +126,7 @@
       <!-- VISTA: MÓDULO 2 (Cantar Notas — Listado de Niveles) -->
       <section id="view-singing" class="hidden">
         <div class="levels-header">
-          <h2 class="welcome-title">Cantar Notas</h2>
-          <p class="welcome-text" id="singing-daily-goal-text">Meta diaria por nivel: 100 ejercicios.</p>
+          <h2 class="welcome-title">Módulo 2 - Cantar Notas</h2>
         </div>
 
         <div class="levels-list" id="singing-levels-list">
@@ -147,23 +141,11 @@
             <span class="exercise-level-name" id="sing-level-title">Nivel 1</span>
             <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel" title="Ver información del nivel">i</button>
           </div>
-          <div class="exercise-stats-line">
-            <span class="stat-hoy" id="sing-date-label">Hoy</span>
-            <span class="stat-done">Completados <strong id="sing-done-count">0 de 100</strong></span>
-          </div>
         </div>
 
         <p class="exercise-prompt" id="sing-prompt-text">
           Escucha el primer compás y cántalo en el segundo compás
         </p>
-
-        <div class="singing-meta-row">
-          <span class="singing-target-badge" id="sing-interval-name">Unísono</span>
-          <button type="button" class="singing-bpm-badge" id="sing-bpm-label" title="Cambiar BPM">
-            ♩ = 72 BPM
-          </button>
-          <span class="singing-phase-badge" id="sing-phase-badge">Listo</span>
-        </div>
 
         <!-- Gran Pentagrama (Sol y Fa) de 2 Compases + Indicador de Tiempo y Curva de Voz -->
         <div class="staff-canvas-box">
@@ -180,7 +162,6 @@
               <col class="sing-col-note-grade" />
               <col class="sing-col-tonal" />
               <col class="sing-col-voice" />
-              <col class="sing-col-glissando" />
               <col class="sing-col-exercise-grade" />
             </colgroup>
             <tbody id="sing-session-log-tbody"></tbody>
@@ -487,7 +468,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=38"></script>
+  <script src="./js/app.js?v=39"></script>
 </body>
 
 </html>

@@ -29,11 +29,11 @@
 3. The header shows the Trino version beside the app name; the changing section label is omitted.
 
 ## UC-06: Exercise Start, Results & Session History
-1. Entering either exercise shows the level, completion count, and session-history table. If there are no results, the table shows its headers and an empty-state message.
+1. Entering either exercise shows the level and session-history table without repeating daily date/completion counters. If there are no results, the table shows its headers and an empty-state message.
 2. Before `Comenzar`, Module 1 hides its note markers and answer choices; Module 2 hides the staff. `Repetir` is unavailable before the first start.
 3. `Comenzar` is green. After starting, it becomes the blue `Siguiente` action and `Repetir` becomes available in the bottom bar.
 4. In Module 1, each mystery-note marker plays that note independently. The Repetir action replays the current interval; Siguiente generates another exercise.
-5. Session results use the five grade icons/colors. In Module 2, grade, tonal center, voice, and glissando indicators align one row per note.
+5. Session results use the five grade icons/colors. The newest result row uses a dark green, orange, or red background according to its exercise grade. Both modules use matching dark-blue, edge-to-edge HOY/AYER bands and column headers. In Module 2, grade, tonal center, voice, and glissando indicators align one row per note; `V`, `I`, and `G` are plain colored letters in a shared voice column.
 6. The floating debug window is opened from the three-line menu or the debug panel.
 
 ## UC-07: Mobile Layout & Level Cards
@@ -42,5 +42,5 @@
 3. Level cards place the stars on the same row as the level title. The description uses the full card width below.
 4. Level information is opened from the info button beside the active exercise title in either module, not from the level list.
 5. The suggested level label stays left of the progress count. Eligible cards show `Hechas: Hoy x/meta Ayer y/meta`; this row is visible only for the suggested level or levels with activity today/yesterday.
-6. In both exercise views, the level/date/completion header sits flush to the top and side edges. Instructions disappear after starting. Module 2 keeps only the compact staff and response table; analysis details are not repeated below the staff.
+6. In both exercise views, the level header sits flush to the top and side edges. Instructions disappear after starting. Module 2 keeps the compact staff and response table; BPM is shown at the lower-left of the staff and can be changed by tapping there. Analysis details are not repeated below the staff.
 7. The Module 2 session history uses one HTML table row per sung note, with exercise index and exercise-grade cells spanning the note rows. Table headers use sentence case; tonal-center text wraps within its cell, and voice/glissando badges use `V`, `I`, and `G` with descriptive tooltips.

@@ -4,7 +4,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0038';
+const APP_VERSION = 'v1.0.0039';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -104,18 +104,18 @@ const LEVEL_4_RESTRICTED_PAIRS = {
 
 /**
  * Progresión pedagógica de 14 niveles en 4 bloques:
- * - Bloque 1 (Niveles 1–4): Pilares Mayores y Justos (100% notas naturales en ambas notas)
+ * - Bloque 1 (Niveles 1–4): Mayores y Justos (100% notas naturales en ambas notas)
  * - Bloque 2 (Niveles 5–7): Contraste Menor vs. Mayor (Tónicas naturales Do..Si, 2ª nota libre)
  * - Bloque 3 (Niveles 8–11): Intervalos Confusos y Amplios (Tónicas naturales Do..Si, 2ª nota libre)
  * - Bloque 4 (Niveles 12–14): Integración Total (Las 12 notas cromáticas en tónica y 2ª nota)
  */
 const INTERVAL_LEVELS = [
-  // Bloque 1: Pilares Mayores y Justos (ambas notas naturales)
+  // Bloque 1: Mayores y Justos (ambas notas naturales)
   {
     id: 1,
     block: 1,
     title: 'Nivel 1 · Unísono y 2ª Mayor',
-    desc: 'Base inicial: Unísono y 2ª Mayor con tónicas Do, Re y Sol (sin sostenidos).',
+    desc: 'Base inicial: Unísono y 2ª Mayor con tónicas Do, Re y Sol.',
     options: ['1J', '2M'],
     restrictedPairs: LEVEL_1_RESTRICTED_PAIRS,
   },
@@ -123,7 +123,7 @@ const INTERVAL_LEVELS = [
     id: 2,
     block: 1,
     title: 'Nivel 2 · Unísono, 2ª y 3ª Mayor',
-    desc: 'Pilares mayores cortos con tónicas Do, Re, Fa y Sol (sin sostenidos).',
+    desc: 'Mayores cortos con tónicas Do, Re, Fa y Sol.',
     options: ['1J', '2M', '3M'],
     restrictedPairs: LEVEL_2_3_RESTRICTED_PAIRS,
   },
@@ -131,15 +131,15 @@ const INTERVAL_LEVELS = [
     id: 3,
     block: 1,
     title: 'Nivel 3 · Unísono, 2ª M, 3ª M y 5ª Justa',
-    desc: 'Incorpora la 5ª Justa con tónicas Do, Re, Fa y Sol (sin sostenidos).',
+    desc: 'Incorpora la 5ª Justa con tónicas Do, Re, Fa y Sol.',
     options: ['1J', '2M', '3M', '5J'],
     restrictedPairs: LEVEL_2_3_RESTRICTED_PAIRS,
   },
   {
     id: 4,
     block: 1,
-    title: 'Nivel 4 · Pilares Mayores y Justos',
-    desc: 'Suma 4ª Justa y 8ª Justa con tónicas Do, Re, Mi, Fa, Sol y La (sin sostenidos).',
+    title: 'Nivel 4 · Mayores y Justos',
+    desc: 'Suma 4ª Justa y 8ª Justa con tónicas Do, Re, Mi, Fa, Sol y La.',
     options: ['1J', '2M', '3M', '4J', '5J', '8J'],
     restrictedPairs: LEVEL_4_RESTRICTED_PAIRS,
   },
@@ -233,7 +233,7 @@ const INTERVAL_LEVELS = [
 
 const SINGING_LEVELS = INTERVAL_LEVELS.map((lvl) => ({
   ...lvl,
-  title: lvl.title.replace(' · ', ' · Cantar '),
+  title: lvl.title.replace(' · ', ' · '),
   bpm: 72,
 }));
 
@@ -319,9 +319,7 @@ class TrinoShell {
     this.bottomZone = document.getElementById('bottom-commands');
 
     this.intervalsLevelsList = document.getElementById('intervals-levels-list');
-    this.dailyGoalText = document.getElementById('intervals-daily-goal-text');
     this.singingLevelsList = document.getElementById('singing-levels-list');
-    this.singingDailyGoalText = document.getElementById('singing-daily-goal-text');
     this.dailyMinSelect = document.getElementById('daily-min-select');
     this.vocalPresetSelect = document.getElementById('vocal-preset-select');
     this.vocalMinSelect = document.getElementById('vocal-min-select');
@@ -346,8 +344,6 @@ class TrinoShell {
 
     // Elementos de ejercicio de Reconocer Intervalos
     this.exLevelTitle = document.getElementById('ex-level-title');
-    this.exDateLabel = document.getElementById('ex-date-label');
-    this.exDoneCount = document.getElementById('ex-done-count');
     this.exAnswersContainer = document.getElementById('ex-answers-container');
     this.exPromptText = document.getElementById('ex-prompt-text');
     this.mysteryNotesRow = document.querySelector('.mystery-notes-row');
@@ -358,11 +354,6 @@ class TrinoShell {
 
     // Elementos de ejercicio de Cantar Notas
     this.singLevelTitle = document.getElementById('sing-level-title');
-    this.singDateLabel = document.getElementById('sing-date-label');
-    this.singDoneCount = document.getElementById('sing-done-count');
-    this.singIntervalName = document.getElementById('sing-interval-name');
-    this.singBpmLabel = document.getElementById('sing-bpm-label');
-    this.singPhaseBadge = document.getElementById('sing-phase-badge');
     this.singStaffCanvasBox = document.querySelector('.staff-canvas-box');
     this.singStaffCanvas = document.getElementById('sing-staff-canvas');
     this.singPromptText = document.getElementById('sing-prompt-text');
@@ -660,12 +651,6 @@ class TrinoShell {
     if (this.dailyMinSelect) {
       this.dailyMinSelect.value = String(this.dailyMin);
     }
-    if (this.dailyGoalText) {
-      this.dailyGoalText.textContent = `Meta diaria por nivel: ${this.dailyMin} ejercicios.`;
-    }
-    if (this.singingDailyGoalText) {
-      this.singingDailyGoalText.textContent = `Meta diaria por nivel: ${this.dailyMin} ejercicios.`;
-    }
 
     // Poblar selectores de nota mínima y máxima si aún están vacíos (Do2=36 a Do6=84)
     if (this.vocalMinSelect && this.vocalMinSelect.options.length === 0) {
@@ -839,20 +824,13 @@ class TrinoShell {
     this.mysteryNote1?.addEventListener('click', () => this.playMysteryNote(0));
     this.mysteryNote2?.addEventListener('click', () => this.playMysteryNote(1));
 
-    // Abrir y controlar el Pop-up de BPM
-    if (this.singBpmLabel) {
-      this.singBpmLabel.addEventListener('click', () => {
-        this.openBpmModal();
-      });
-    }
-
     if (this.singStaffCanvas) {
       this.singStaffCanvas.addEventListener('click', (e) => {
         const rect = this.singStaffCanvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        // Si toca arriba a la izquierda sobre "♩ = BPM" en el canvas
-        if (x <= 75 && y <= 24) {
+        const canvasHeight = this.singStaffCanvas.clientHeight;
+        if (x <= 105 && y >= canvasHeight - 34) {
           this.openBpmModal();
         }
       });
@@ -884,9 +862,6 @@ class TrinoShell {
       this.btnBpmConfirm.addEventListener('click', () => {
         const chosenBpm = parseInt(this.bpmRangeInput.value, 10) || 72;
         this.saveSingBpm(chosenBpm);
-        if (this.singBpmLabel) {
-          this.singBpmLabel.textContent = `♩ = ${this.singBpm} BPM`;
-        }
         this.bpmModal.classList.add('hidden');
         this.drawGrandStaff(null, this.lastVoiceFrames);
       });
@@ -1496,6 +1471,9 @@ class TrinoShell {
     this.mysteryNotesRow?.classList.toggle('hidden', !isStarted || this.activeModule !== 'intervals');
     this.exAnswersContainer?.classList.toggle('hidden', !isStarted || this.activeModule !== 'intervals');
     this.singStaffCanvasBox?.classList.toggle('hidden', !isStarted || this.activeModule !== 'singing');
+    if (isStarted && this.activeModule === 'singing') {
+      requestAnimationFrame(() => this.drawGrandStaff(null, this.lastVoiceFrames));
+    }
   }
 
   generateNextQuestion() {
@@ -1639,7 +1617,7 @@ class TrinoShell {
       const uniqueNoteNames = [...new Set(allMidis.map((m) => this.midiToNoteNameEs(m)))];
 
       rangeText = `${this.midiToNoteWithOctaveEs(minMidi)} a ${this.midiToNoteWithOctaveEs(maxMidi)} (Octavas 3 y 4 · Clave de Fa y Sol)`;
-      notesText = `Tónicas: ${uniqueTonicNames.join(', ')} · Notas usadas: solo naturales (${uniqueNoteNames.join(', ')}) sin sostenidos`;
+      notesText = `Tónicas: ${uniqueTonicNames.join(', ')} · Notas usadas: solo naturales (${uniqueNoteNames.join(', ')})`;
       pairsHtml = `
         <div class="level-info-section">
           <span class="level-info-label">Ejercicios posibles (${allMidis.length / 2} combinaciones)</span>
@@ -1755,14 +1733,7 @@ class TrinoShell {
 
   updateExerciseUi() {
     if (!this.activeLevel) return;
-    const stats = this.getLevelStats(this.activeLevel.id, 'intervals');
-    const totalDone = stats.good + stats.bad;
-
     this.exLevelTitle.textContent = this.activeLevel.title;
-    if (this.exDateLabel) {
-      this.exDateLabel.textContent = this.getFormattedSpanishDate();
-    }
-    this.exDoneCount.textContent = `${totalDone} de ${this.dailyMin}`;
 
     this.exAnswersContainer.innerHTML = this.activeLevel.options
       .map((key) => {
@@ -1837,7 +1808,6 @@ class TrinoShell {
       }
 
       this.saveProgress();
-      this.exDoneCount.textContent = `${totalDone} de ${this.dailyMin}`;
     } else {
       if (btnEl === this.currentQuestion.firstButtonEl) {
         return;
@@ -1935,6 +1905,7 @@ class TrinoShell {
             ${pNMalo > 0 ? `<div class="bar-seg seg-bad" style="width:${pNMalo}%"></div>` : ''}
           </div>
           <div class="day-voice-counts">
+            <span><strong>Voz </strong></span>
             <span>Glisandos: <strong>${cGli}</strong></span>
             <span>Sin vibrato: <strong>${cPlana}</strong></span>
             <span>Vibratos: <strong>${cVib}</strong></span>
@@ -1944,7 +1915,7 @@ class TrinoShell {
       }
     }
 
-    const colSpan = isSinging ? 7 : 4;
+    const colSpan = isSinging ? 6 : 4;
     const headersRowHtml = isSinging
       ? `<tr class="log-col-headers">
            <th>#</th>
@@ -1952,7 +1923,6 @@ class TrinoShell {
            <th></th>
            <th>Centro tonal</th>
            <th>Voz</th>
-           <th>Gli</th>
            <th></th>
          </tr>`
       : `<tr class="log-col-headers">
@@ -2001,12 +1971,12 @@ class TrinoShell {
     if (!Array.isArray(list) || list.length === 0) {
       const emptyHeaders = isSinging
         ? `<tr class="log-col-headers">
-             <th>#</th><th>Nota</th><th></th><th>Centro tonal</th><th>Voz</th><th>Gli</th><th></th>
+             <th>#</th><th>Nota</th><th></th><th>Centro tonal</th><th>Voz</th><th></th>
            </tr>`
         : `<tr class="log-col-headers">
              <th>#</th><th>Notas</th><th>Tu respuesta</th><th></th>
            </tr>`;
-      const colSpan = isSinging ? 7 : 4;
+      const colSpan = isSinging ? 6 : 4;
       tbodyEl.innerHTML = `${emptyHeaders}
         <tr class="log-empty-row"><td colspan="${colSpan}">Aún no hay ejercicios registrados.</td></tr>`;
       wrapperEl.classList.remove('hidden');
@@ -2038,6 +2008,10 @@ class TrinoShell {
     const renderRows = (items) =>
       items
         .map((item) => {
+          const latestRowClass = item === list[0]
+            ? `log-latest-entry log-latest-${item.exerciseGrade || (item.isCorrect ? 'bueno' : 'malo')}`
+            : '';
+
           if (isSinging) {
             const gl = gradeLabel[item.exerciseGrade] || gradeLabel.malo;
             const ns = Array.isArray(item.noteStats) ? item.noteStats : [];
@@ -2073,13 +2047,12 @@ class TrinoShell {
                 : '';
 
               return `
-                <tr>
+                <tr${latestRowClass ? ` class="${latestRowClass}"` : ''}>
                   ${firstRowCells}
                   <td class="log-notes-col">${targetNotes[noteIndex] || '&nbsp;'}</td>
                   <td class="log-note-grades">${noteGrade ? `<span class="note-grade-line ${noteGrade.cls}" title="${noteGrade.label}" aria-label="${noteGrade.label}">${noteGrade.icon}</span>` : '&nbsp;'}</td>
                   <td class="log-tonal-col">${tonalCenter}</td>
-                  <td class="log-voice-col">${voiceBadge}</td>
-                  <td class="log-gli-col">${glissandoBadge}</td>
+                  <td class="log-voice-col">${voiceBadge} ${glissandoBadge}</td>
                   ${exerciseGradeCell}
                 </tr>
               `;
@@ -2096,7 +2069,7 @@ class TrinoShell {
                  </span>
                </td>`;
           return `
-            <tr>
+            <tr${latestRowClass ? ` class="${latestRowClass}"` : ''}>
               <td>${item.index}</td>
               <td>${item.notes}</td>
               <td>${item.answer}</td>
@@ -2160,17 +2133,7 @@ class TrinoShell {
 
   updateSingingExerciseUi() {
     if (!this.activeLevel) return;
-    const stats = this.getLevelStats(this.activeLevel.id, 'singing');
-    const totalDone = stats.good + stats.bad;
-
     this.singLevelTitle.textContent = this.activeLevel.title;
-    if (this.singDateLabel) {
-      this.singDateLabel.textContent = this.getFormattedSpanishDate();
-    }
-    if (this.singBpmLabel) {
-      this.singBpmLabel.textContent = `♩ = ${this.singBpm} BPM`;
-    }
-    this.singDoneCount.textContent = `${totalDone} de ${this.dailyMin}`;
   }
 
   resetSingingQuestionUi() {
@@ -2180,14 +2143,6 @@ class TrinoShell {
     if (this.singDebugPanel) this.singDebugPanel.classList.add('hidden');
     if (!this.currentQuestion) return;
 
-    const { targetIntervalKey } = this.currentQuestion;
-    if (this.singIntervalName) {
-      this.singIntervalName.textContent = INTERVAL_CATALOG[targetIntervalKey]?.label || '';
-    }
-    if (this.singPhaseBadge) {
-      this.singPhaseBadge.textContent = 'Listo';
-      this.singPhaseBadge.classList.remove('phase-recording');
-    }
     if (this.singFeedbackText) {
       this.singFeedbackText.textContent = '';
       this.singFeedbackText.classList.add('hidden');
@@ -2263,28 +2218,11 @@ class TrinoShell {
     const preRollSec = 0.2;
     const m2DurationSec = 4 * beatSec;
     const recordStartDelayMs = Math.max(0, ((2 + 4) * beatSec - preRollSec) * 1000);
-    const m2BadgeDelayMs = Math.max(0, (2 + 4) * beatSec * 1000);
-
-    if (this.singPhaseBadge) {
-      this.singPhaseBadge.textContent = '2 Clicks...';
-      this.singPhaseBadge.classList.remove('phase-recording');
-    }
 
     this.singTimers.push(
       setTimeout(() => {
-        if (this.singPhaseBadge) {
-          this.singPhaseBadge.textContent = 'Compás 1 · Escucha';
-        }
-      }, 2 * beatSec * 1000),
-      setTimeout(() => {
         this.beginCompas2Recording(preRollSec, m2DurationSec);
-      }, recordStartDelayMs),
-      setTimeout(() => {
-        if (this.singPhaseBadge) {
-          this.singPhaseBadge.textContent = 'Compás 2 · ¡Canta!';
-          this.singPhaseBadge.classList.add('phase-recording');
-        }
-      }, m2BadgeDelayMs)
+      }, recordStartDelayMs)
     );
 
     // Animar la línea/punto de tiempo en los 2 compases (de beat 0 a beat 8)
@@ -2325,13 +2263,7 @@ class TrinoShell {
   }
 
   beginCompas2Recording(preRollSec, m2DurationSec) {
-    if (!this.mediaStream || !this.mediaStream.active) {
-      if (this.singPhaseBadge) {
-        this.singPhaseBadge.textContent = 'Sin micrófono';
-        this.singPhaseBadge.classList.remove('phase-recording');
-      }
-      return;
-    }
+    if (!this.mediaStream || !this.mediaStream.active) return;
 
     this.stopMicProcessor();
     this.isRecording = true;
@@ -2368,10 +2300,6 @@ class TrinoShell {
 
   finishCompas2Recording(chunks, totalSamples, sampleRate, preRollSec, m2DurationSec) {
     this.stopMicProcessor();
-    if (this.singPhaseBadge) {
-      this.singPhaseBadge.textContent = 'Análisis listo';
-      this.singPhaseBadge.classList.remove('phase-recording');
-    }
 
     const pcm = new Float32Array(totalSamples);
     let offset = 0;
@@ -2698,8 +2626,9 @@ class TrinoShell {
     if (!this.singStaffCanvas || !this.currentQuestion) return;
     const canvas = this.singStaffCanvas;
     const dpr = window.devicePixelRatio || 1;
-    const cssW = canvas.clientWidth || 420;
-    const cssH = canvas.clientHeight || 235;
+    const cssW = canvas.clientWidth;
+    const cssH = canvas.clientHeight;
+    if (!cssW || !cssH) return;
 
     if (canvas.width !== Math.round(cssW * dpr) || canvas.height !== Math.round(cssH * dpr)) {
       canvas.width = Math.round(cssW * dpr);
@@ -2732,17 +2661,24 @@ class TrinoShell {
     const botStaffTopY = stepToY(-2);    // La3 (5ª línea Fa)
     const botStaffBotY = stepToY(-10);   // Sol2 (1ª línea Fa)
 
-    // 1. Encabezado de los 2 compases y BPM
+    // 1. Encabezado de los 2 compases
     ctx.font = '600 10px Inter, sans-serif';
     ctx.fillStyle = '#111827';
-    ctx.textAlign = 'left';
-    ctx.fillText(`♩ = ${this.singBpm}`, staffLeft + 4, 13);
-
     ctx.textAlign = 'center';
     ctx.fillStyle = '#334155';
     ctx.fillText('Compás 1 (Escucha)', (m1Start + barlineX) / 2, 13);
     ctx.fillStyle = '#334155';
     ctx.fillText('Compás 2 (Canta)', (m2Start + staffRight) / 2, 13);
+
+    // BPM abajo a la izquierda; el símbolo de negra queda deliberadamente destacado.
+    const bpmBaseline = cssH - 4;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#111827';
+    ctx.font = '18px serif';
+    ctx.fillText('♩', staffLeft + 5, bpmBaseline);
+    ctx.font = '600 10px Inter, sans-serif';
+    ctx.fillText(`= ${this.singBpm} BPM`, staffLeft + 25, bpmBaseline - 2);
 
     // 2. Líneas del Pentagrama Superior (Clave de Sol: steps 2, 4, 6, 8, 10) en negro
     ctx.strokeStyle = '#111827';
@@ -3621,7 +3557,6 @@ class TrinoShell {
       }
 
       this.saveProgress();
-      this.singDoneCount.textContent = `${totalDone} de ${this.dailyMin}`;
     }
 
     // Debug: siempre actualizar con el último análisis (incluye reintentos)
@@ -4266,10 +4201,6 @@ class TrinoShell {
         el.classList.toggle('hidden', key !== viewKey);
       }
     });
-
-    if (viewKey === 'singing-exercise') {
-      requestAnimationFrame(() => this.drawGrandStaff(null, []));
-    }
 
     document.querySelectorAll('[data-target]').forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-target') === viewKey);

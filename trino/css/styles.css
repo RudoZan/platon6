@@ -364,7 +364,7 @@ body {
 }
 
 /* Colores por bloque pedagógico (1 a 4) en las tarjetas de nivel */
-/* Bloque 1: Pilares Mayores y Justos (Cian / Azul) */
+/* Bloque 1: Mayores y Justos (Cian / Azul) */
 .level-card.block-1 {
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(15, 23, 42, 0.78));
   border-color: rgba(56, 189, 248, 0.35);
@@ -558,17 +558,9 @@ body {
 .exercise-title-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
   gap: 0.5rem;
-}
-
-.exercise-stats-line {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.76rem;
-  font-weight: 600;
 }
 
 .stat-hoy {
@@ -644,47 +636,6 @@ body {
 }
 
 /* Elementos específicos de Cantar Notas */
-.singing-meta-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.45rem;
-  margin-bottom: 0.15rem;
-}
-
-.singing-bpm-badge {
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #fbbf24;
-  background: rgba(251, 191, 36, 0.14);
-  border: 1px solid rgba(251, 191, 36, 0.45);
-  padding: 0.22rem 0.7rem;
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.singing-bpm-badge:active {
-  transform: scale(0.96);
-}
-
-.singing-phase-badge {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.66rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  background: rgba(148, 163, 184, 0.12);
-  border: 1px solid var(--border-subtle);
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-}
-
-.singing-phase-badge.phase-recording {
-  color: #ffffff;
-  background: #dc2626;
-  border-color: #f87171;
-}
-
 .staff-canvas-box {
   width: 100%;
   background-color: #ffffff;
@@ -701,18 +652,6 @@ body {
   width: 100%;
   height: 165px;
   display: block;
-}
-
-.singing-target-badge {
-  align-self: center;
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 0.22rem 0.75rem;
-  border-radius: 999px;
-  background: rgba(56, 189, 248, 0.14);
-  color: var(--accent-primary);
-  border: 1px solid rgba(56, 189, 248, 0.35);
 }
 
 .singing-action-box {
@@ -870,10 +809,29 @@ body {
   border-bottom: 1px solid var(--border-subtle);
 }
 
+.session-log-table tr.log-col-headers th {
+  background: linear-gradient(180deg, #365b7d 0%, #294867 100%);
+  color: #f1f5f9;
+}
+
 .session-log-table td {
   padding: 0.25rem 0.28rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.08);
   color: var(--text-main);
+}
+
+.session-log-table tr.log-latest-admirable td,
+.session-log-table tr.log-latest-bueno td,
+.session-log-table tr.log-latest-aceptable td {
+  background-color: #123b2d;
+}
+
+.session-log-table tr.log-latest-casi td {
+  background-color: #422f13;
+}
+
+.session-log-table tr.log-latest-malo td {
+  background-color: #451d24;
 }
 
 .session-log-table .log-empty-row td {
@@ -885,8 +843,7 @@ body {
 .sing-log-table .log-notes-col,
 .sing-log-table .log-note-grades,
 .sing-log-table .log-tonal-col,
-.sing-log-table .log-voice-col,
-.sing-log-table .log-gli-col {
+.sing-log-table .log-voice-col {
   vertical-align: top;
   overflow-wrap: anywhere;
   line-height: 1.25;
@@ -900,8 +857,7 @@ body {
 .sing-col-note { width: 11%; }
 .sing-col-note-grade { width: 8%; }
 .sing-col-tonal { width: 39%; }
-.sing-col-voice { width: 12%; }
-.sing-col-glissando { width: 10%; }
+.sing-col-voice { width: 22%; }
 .sing-col-exercise-grade { width: 14%; }
 
 .sing-log-table th,
@@ -911,7 +867,6 @@ body {
 
 .sing-log-table td.log-note-grades,
 .sing-log-table td.log-voice-col,
-.sing-log-table td.log-gli-col,
 .sing-log-table td.log-grade {
   text-align: center;
 }
@@ -1207,6 +1162,11 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
+}
+
+.bottom-zone .cmd-btn {
+  padding-right: 0.35rem;
+  padding-left: 0.35rem;
 }
 
 .cmd-btn-primary {
@@ -1508,6 +1468,14 @@ body {
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.15);
   border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.sing-log-table .voice-badge {
+  padding: 0;
+  margin-left: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
 }
 
 /* ─── Panel de debug ─── */
@@ -2021,7 +1989,7 @@ body {
  * ========================================================================= */
 .day-divider-row td.day-divider-cell {
   padding: 0.45rem 0.5rem !important;
-  background-color: rgba(15, 23, 42, 0.92);
+  background-color: rgba(30, 41, 59, 0.82);
   border-top: 1px solid rgba(148, 163, 184, 0.25);
   border-bottom: 1px solid rgba(148, 163, 184, 0.25);
 }
@@ -2031,8 +1999,11 @@ body {
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  color: var(--accent-primary);
-  margin-bottom: 0.35rem;
+  padding: 0.22rem 0.45rem;
+  margin: 0 -0.5rem 0.35rem;
+  border-radius: 0;
+  background: linear-gradient(180deg, #365b7d 0%, #294867 100%);
+  color: #f1f5f9;
 }
 
 .day-summary-box {
@@ -2084,7 +2055,7 @@ body {
   justify-content: space-between;
   gap: 0.35rem;
   font-size: 0.6rem;
-  color: var(--text-muted);
+  color: #cbd5e1;
   padding-top: 0.1rem;
 }
 
