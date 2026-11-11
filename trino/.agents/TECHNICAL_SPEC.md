@@ -47,3 +47,13 @@
 - **Vocal Range (`vocalMinMidi`, `vocalMaxMidi`):** Presets (`Bajo`..`Soprano`) + individual `Do2..Do6` selectors with `🔊` tone preview and `🎙️` `2.5s` voice pitch detection (`detectVocalLimitByVoice`). Adapts Module 2 (`singing`) note generation to stay within `[vocalMinMidi, vocalMaxMidi]`.
 - **Live Microphone Tester (`toggleMicTester`):** Real-time RMS input bar + YIN live tuner (`note`, `Hz`, `cents`).
 - **Audio Volume (`noteVolume`, `clickVolume`):** `10%–100%` sliders with `🔊` preview for note synthesis and metronome clicks.
+
+## 7. Cloud Account & 3-Note Verification (Supabase)
+- **Home Greeting (`#view-home`):** Guest mode shows practice copy and a bottom-bar `Activar cuenta` action that currently opens an unavailable-activation notice; verified users see `¡Hola, (nombre)!`.
+- **3-Note Verification (`#auth-modal`):** Step 1 collects `nombre` + `email` (unique user identifier). Step 2 displays 7 natural note buttons (`Do..Si`) and 3 slots; auto-validates upon entering the 3rd note.
+- **Active Supabase Table (Phase 1 — User Registration):**
+  - `public.trino_usuarios`: `id` (`uuid` PK), `email` (`text` UNIQUE), `nombre` (`text`), `fecha_inicio` (`timestamptz`), `verificado` (`boolean`), `codigo_notas` (`text`), `configuracion` (`jsonb`: `{ dailyMin, singBpm, vocalMinMidi, vocalMaxMidi, noteVolume, clickVolume }`).
+- **Planned Module & Note Tables (Phase 2 — Pending Definition):**
+  - `public.trino_modulo_intervalos`: Module 1 exercise/daily summary.
+  - `public.trino_modulo_canto`: Exercise summary (`bueno`/`regular`/`malo`) + compact score JSON (numbered notes & rests, exact pitch+octave, musical figure/duration).
+  - `public.trino_notas_cantadas` (shared across vocal modules): `modulo`, `ejercicio_id`, `numero_nota`, `nota_objetivo`, `nota_cantada`, `centro_tonal`, `tipo_voz` (`plana`/`vibrato`/`inestable`), `glisando` (`boolean`), `clasificacion` (`malo`/`regular`/`aceptable`/`bueno`/`admirable`).

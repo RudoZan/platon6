@@ -15,3 +15,7 @@
 13. **RT-13 (Level Card Layout):** In both module lists, stars align horizontally with the level title and the description spans the card width beneath it.
 14. **RT-14 (Level Information Access):** Level lists have no info button. The info button beside each active exercise title opens the modal for the selected level and correct module.
 15. **RT-15 (Daily Level Counts):** Suggested label stays left while `Hechas: Hoy x/meta Ayer y/meta` aligns right. Show this row only for the suggested level or levels with today/yesterday activity; verify both modules and zero counts for inactive days.
+16. **RT-16 (Singing Table Rows):** Each sung note renders in its own `<tr>` with distinct cells; exercise index and overall grade use `rowspan`. Verify long tonal-center labels wrap within the cell without overlapping adjacent columns at mobile width.
+17. **RT-17 (Account Activation Notice):** Clicking the home `Activar cuenta` button opens a modal stating activation is not yet available, does not open the registration form, and closes with its button or backdrop.
+18. **RT-18 (Compact Exercise View):** Exercise headers reach the top and side edges. After Comenzar, instructions disappear; the singing staff is compact, Click 1/2 labels are absent, and no duplicate analysis text appears under the staff.
+19. **RT-19 (Result Header Case):** Session table headers display sentence case (for example `Nota`, `Centro tonal`, `Voz`) rather than all-uppercase text.

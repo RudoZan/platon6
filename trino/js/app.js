@@ -4,7 +4,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0035';
+const APP_VERSION = 'v1.0.0036';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -349,6 +349,7 @@ class TrinoShell {
     this.exDateLabel = document.getElementById('ex-date-label');
     this.exDoneCount = document.getElementById('ex-done-count');
     this.exAnswersContainer = document.getElementById('ex-answers-container');
+    this.exPromptText = document.getElementById('ex-prompt-text');
     this.mysteryNotesRow = document.querySelector('.mystery-notes-row');
     this.mysteryNote1 = document.getElementById('mystery-note-1');
     this.mysteryNote2 = document.getElementById('mystery-note-2');
@@ -364,6 +365,7 @@ class TrinoShell {
     this.singPhaseBadge = document.getElementById('sing-phase-badge');
     this.singStaffCanvasBox = document.querySelector('.staff-canvas-box');
     this.singStaffCanvas = document.getElementById('sing-staff-canvas');
+    this.singPromptText = document.getElementById('sing-prompt-text');
     this.singFeedbackText = document.getElementById('sing-feedback-text');
     this.singSessionLogWrapper = document.getElementById('sing-session-log-wrapper');
     this.singSessionLogTbody = document.getElementById('sing-session-log-tbody');
@@ -379,6 +381,8 @@ class TrinoShell {
 
     // Modal BPM
     this.bpmModal = document.getElementById('bpm-modal');
+    this.accountUnavailableModal = document.getElementById('account-unavailable-modal');
+    this.btnAccountUnavailableClose = document.getElementById('btn-account-unavailable-close');
     this.bpmModalValue = document.getElementById('bpm-modal-value');
     this.bpmRangeInput = document.getElementById('bpm-range-input');
     this.bpmMinusBtn = document.getElementById('bpm-minus-btn');
@@ -939,9 +943,18 @@ class TrinoShell {
     // Eventos de Registro y Validación de 3 Notas
     if (this.bottomZone) {
       this.bottomZone.addEventListener('click', (event) => {
-        if (event.target.closest('#btn-open-auth-modal')) this.openAuthModal();
+        if (!event.target.closest('#btn-open-auth-modal')) return;
+        this.accountUnavailableModal?.classList.remove('hidden');
       });
     }
+    this.btnAccountUnavailableClose?.addEventListener('click', () => {
+      this.accountUnavailableModal?.classList.add('hidden');
+    });
+    this.accountUnavailableModal?.addEventListener('click', (event) => {
+      if (event.target === this.accountUnavailableModal) {
+        this.accountUnavailableModal.classList.add('hidden');
+      }
+    });
     if (this.btnSettingsAuthAction) {
       this.btnSettingsAuthAction.addEventListener('click', () => {
         if (this.currentUser?.verificado) {
@@ -1371,6 +1384,9 @@ class TrinoShell {
     containerEl.innerHTML = levelsArray
       .map((lvl) => {
         const stats = this.getLevelStats(lvl.id, moduleType);
+        const levelDescription = moduleType === 'singing'
+          ? lvl.desc.replace(/\s*\(sin sostenidos\)/gi, '')
+          : lvl.desc;
         const todayKey = this.getTodayKey();
         const yesterdayKey = this.getYesterdayKey();
         const dayEntries = this.getLevelDayLog(moduleType, lvl.id);
@@ -1416,7 +1432,7 @@ class TrinoShell {
                 </div>
               </div>
               ${progressHtml}
-              <p class="level-desc">${lvl.desc}</p>
+              <p class="level-desc">${levelDescription}</p>
             </div>
           </button>
         `;
@@ -1475,6 +1491,8 @@ class TrinoShell {
 
   syncExerciseAvailability() {
     const isStarted = this.exerciseStarted;
+    this.exPromptText?.classList.toggle('hidden', isStarted);
+    this.singPromptText?.classList.toggle('hidden', isStarted);
     this.mysteryNotesRow?.classList.toggle('hidden', !isStarted || this.activeModule !== 'intervals');
     this.exAnswersContainer?.classList.toggle('hidden', !isStarted || this.activeModule !== 'intervals');
     this.singStaffCanvasBox?.classList.toggle('hidden', !isStarted || this.activeModule !== 'singing');
@@ -2023,59 +2041,49 @@ class TrinoShell {
           if (isSinging) {
             const gl = gradeLabel[item.exerciseGrade] || gradeLabel.malo;
             const ns = Array.isArray(item.noteStats) ? item.noteStats : [];
+            const targetNotes = String(item.notes || '').split(/<br\s*\/?>/i);
+            const noteCount = Math.max(ns.length, targetNotes.length, 1);
 
-            const califHtml = ns.length > 0
-              ? ns.map((n) => {
-                  const ng = noteGradeLabel[n.grade] || noteGradeLabel.malo;
-                  return `<span class="log-note-indicator"><span class="note-grade-line ${ng.cls}" title="${ng.label}" aria-label="${ng.label}">${ng.icon}</span></span>`;
-                }).join('')
-              : `<span class="log-note-indicator"><span class="note-grade-line ${gl.cls}" title="${gl.label}" aria-label="${gl.label}">${gl.icon}</span></span>`;
+            return Array.from({ length: noteCount }, (_, noteIndex) => {
+              const note = ns[noteIndex];
+              const noteGrade = note ? (noteGradeLabel[note.grade] || noteGradeLabel.malo) : null;
+              const rawLabel = (note?.label || '')
+                .replace('Casi perfecto', 'Casi centrado')
+                .replace('Perfecto', 'Centrado');
+              const tonalCenter = note?.sungNote && rawLabel !== 'Silencio'
+                ? `<strong>${note.sungNote}</strong> ${rawLabel}`
+                : rawLabel || '&nbsp;';
 
-            const cantadaHtml = ns.length > 0
-              ? ns.map((n) => {
-                  const rawLabel = (n.label || ' ')
-                    .replace('Casi perfecto', 'Casi centrado')
-                    .replace('Perfecto', 'Centrado');
-                  if (n.sungNote && rawLabel !== 'Silencio') {
-                    return `<span class="log-note-indicator"><strong>${n.sungNote}</strong> ${rawLabel}</span>`;
-                  }
-                  return `<span class="log-note-indicator">${rawLabel}</span>`;
-                }).join('')
-              : `<span class="log-note-indicator">${item.answer || ' '}</span>`;
+              let voiceBadge = '&nbsp;';
+              if (note?.voiceType === 'vibrato') {
+                const hzTxt = note.vibratoHz ? ` (${note.vibratoHz}Hz)` : '';
+                voiceBadge = `<span class="voice-badge badge-vibrato" title="Vibrato detectado${hzTxt}">Vib</span>`;
+              } else if (note?.voiceType === 'inestable') {
+                voiceBadge = '<span class="voice-badge badge-unstable" title="Voz irregular detectada">Irr</span>';
+              }
 
-            const vozHtml = ns.length > 0
-              ? ns.map((n) => {
-                  let badge = ' ';
-                  if (n.voiceType === 'vibrato') {
-                    const hzTxt = n.vibratoHz ? ` (${n.vibratoHz}Hz)` : '';
-                    badge = `<span class="voice-badge badge-vibrato" title="Vibrato detectado${hzTxt}">Vib</span>`;
-                  } else if (n.voiceType === 'inestable') {
-                    badge = `<span class="voice-badge badge-unstable" title="Voz irregular detectada">Irr</span>`;
-                  }
-                  return `<span class="log-note-indicator">${badge}</span>`;
-                }).join('')
-              : '<span class="log-note-indicator"> </span>';
+              const glissandoBadge = note?.glissando
+                ? '<span class="voice-badge badge-glissando" title="Glisando detectado">Gli</span>'
+                : '&nbsp;';
+              const firstRowCells = noteIndex === 0
+                ? `<td rowspan="${noteCount}">${item.index}</td>`
+                : '';
+              const exerciseGradeCell = noteIndex === 0
+                ? `<td class="log-grade ${gl.cls}" rowspan="${noteCount}" title="${gl.label}" aria-label="${gl.label}">${gl.icon}</td>`
+                : '';
 
-            const gliHtml = ns.length > 0
-              ? ns.map((n) => {
-                  const badge = n.glissando
-                    ? '<span class="voice-badge badge-glissando" title="Glisando detectado">Gli</span>'
-                    : ' ';
-                  return `<span class="log-note-indicator">${badge}</span>`;
-                }).join('')
-              : '<span class="log-note-indicator"> </span>';
-
-            return `
-              <tr>
-                <td>${item.index}</td>
-                <td class="log-notes-col">${item.notes}</td>
-                <td class="log-note-grades">${califHtml}</td>
-                <td class="log-tonal-col">${cantadaHtml}</td>
-                <td class="log-voice-col">${vozHtml}</td>
-                <td class="log-gli-col">${gliHtml}</td>
-                <td class="log-grade ${gl.cls}" title="${gl.label}" aria-label="${gl.label}">${gl.icon}</td>
-              </tr>
-            `;
+              return `
+                <tr>
+                  ${firstRowCells}
+                  <td class="log-notes-col">${targetNotes[noteIndex] || '&nbsp;'}</td>
+                  <td class="log-note-grades">${noteGrade ? `<span class="note-grade-line ${noteGrade.cls}" title="${noteGrade.label}" aria-label="${noteGrade.label}">${noteGrade.icon}</span>` : '&nbsp;'}</td>
+                  <td class="log-tonal-col">${tonalCenter}</td>
+                  <td class="log-voice-col">${voiceBadge}</td>
+                  <td class="log-gli-col">${glissandoBadge}</td>
+                  ${exerciseGradeCell}
+                </tr>
+              `;
+            }).join('');
           }
 
           const hasGrade = item.exerciseGrade !== undefined;
@@ -2137,6 +2145,7 @@ class TrinoShell {
     } catch (_) {
       if (this.singFeedbackText) {
         this.singFeedbackText.textContent = 'Permite el micrófono para grabar tu voz en el 2º compás.';
+        this.singFeedbackText.classList.remove('hidden');
       }
       return false;
     }
@@ -2181,6 +2190,7 @@ class TrinoShell {
     }
     if (this.singFeedbackText) {
       this.singFeedbackText.textContent = '';
+      this.singFeedbackText.classList.add('hidden');
     }
     this.drawGrandStaff(null, []);
   }
@@ -2226,6 +2236,7 @@ class TrinoShell {
     this.lastNoteDetails = null;
     if (this.singFeedbackText) {
       this.singFeedbackText.textContent = '';
+      this.singFeedbackText.classList.add('hidden');
     }
 
     await this.ensureAudioReady();
@@ -2732,15 +2743,6 @@ class TrinoShell {
     ctx.fillText('Compás 1 (Escucha)', (m1Start + barlineX) / 2, 13);
     ctx.fillStyle = '#334155';
     ctx.fillText('Compás 2 (Canta)', (m2Start + staffRight) / 2, 13);
-
-    // Si estamos en los 2 clicks previos (rawBeat entre -2 y 0), mostrar los 2 puntos de pulso arriba
-    if (rawBeat !== null && rawBeat < 0) {
-      const clickIdx = rawBeat < -1 ? 1 : 2;
-      ctx.fillStyle = '#d97706';
-      ctx.font = 'bold 11px Outfit, sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText(`Click ${clickIdx} / 2`, staffRight - 4, 13);
-    }
 
     // 2. Líneas del Pentagrama Superior (Clave de Sol: steps 2, 4, 6, 8, 10) en negro
     ctx.strokeStyle = '#111827';
@@ -3564,20 +3566,6 @@ class TrinoShell {
     // Texto con salto de línea por nota y badges (V), (I), (G) para la tabla de sesión y debajo del pentagrama
     const sungSummary = `${note1Name}: ${tonal1.label}${badge1}<br>${note2Name}: ${tonal2.label}${badge2}`;
 
-    if (this.singFeedbackText) {
-      const resultLine =
-        `${note1Name}: ${tonal1.label}${badge1}<br>` +
-        `${note2Name}: ${tonal2.label}${badge2}`;
-      if (this.currentQuestion.answered) {
-        this.singFeedbackText.innerHTML =
-          `<span class="feedback-retry">🔄 Este es un reintento (Los reintentos no se registran)</span>` +
-          `<span class="feedback-result">${resultLine}</span>`;
-      } else {
-        this.singFeedbackText.innerHTML =
-          `<span class="feedback-result">${resultLine}</span>`;
-      }
-    }
-
     const stats = this.getLevelStats(this.activeLevel.id, 'singing');
 
     if (!this.currentQuestion.answered) {
@@ -3900,7 +3888,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=35', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=36', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>

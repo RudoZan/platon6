@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=35" />
+  <link rel="stylesheet" href="./css/styles.css?v=36" />
 </head>
 
 <body>
@@ -15,7 +15,7 @@
       <div class="app-brand" id="brand-home-btn" title="Ir al inicio">
         <div class="app-logo-dot">🎵</div>
         <span class="app-name">Trino</span>
-        <span class="app-version" id="app-version-badge">v1.0.0035</span>
+        <span class="app-version" id="app-version-badge">v1.0.0036</span>
       </div>
 
       <button type="button" class="menu-btn" id="menu-toggle-btn" aria-label="Abrir menú">
@@ -170,10 +170,19 @@
           <canvas id="sing-staff-canvas" width="440" height="235"></canvas>
         </div>
 
-        <p class="sing-feedback-text" id="sing-feedback-text"></p>
+        <p class="sing-feedback-text hidden" id="sing-feedback-text"></p>
 
         <div class="session-log-wrapper hidden" id="sing-session-log-wrapper">
           <table class="session-log-table sing-log-table" aria-label="Historial de canto de la sesión">
+            <colgroup>
+              <col class="sing-col-index" />
+              <col class="sing-col-note" />
+              <col class="sing-col-note-grade" />
+              <col class="sing-col-tonal" />
+              <col class="sing-col-voice" />
+              <col class="sing-col-glissando" />
+              <col class="sing-col-exercise-grade" />
+            </colgroup>
             <tbody id="sing-session-log-tbody"></tbody>
           </table>
         </div>
@@ -342,6 +351,15 @@
       </div>
     </div>
 
+    <div class="start-modal-overlay hidden" id="account-unavailable-modal" role="dialog" aria-modal="true" aria-labelledby="account-unavailable-title">
+      <div class="start-modal-card account-unavailable-card">
+        <span class="account-unavailable-icon" aria-hidden="true">i</span>
+        <h3 class="level-info-modal-title" id="account-unavailable-title">Activación no disponible</h3>
+        <p class="welcome-text">La activación de cuentas aún no está habilitada.</p>
+        <button type="button" class="start-modal-btn" id="btn-account-unavailable-close">Entendido</button>
+      </div>
+    </div>
+
     <!-- POP-UP DE INFORMACIÓN DE NIVEL (INTERVALOS, RANGOS Y NOTAS) -->
     <div class="start-modal-overlay hidden" id="level-info-modal">
       <div class="start-modal-card level-info-modal-card">
@@ -469,7 +487,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=35"></script>
+  <script src="./js/app.js?v=36"></script>
 </body>
 
 </html>

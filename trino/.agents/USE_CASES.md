@@ -25,7 +25,7 @@
 
 ## UC-05: Home, Modules & Account Activation
 1. Home module cards place the module title/tag at the upper left and the icon at the right; the description spans the full card width below both.
-2. Guest home copy invites practice and improvement. The fixed bottom bar explains history/statistics and opens account activation with `Activar cuenta`.
+2. Guest home copy invites practice and improvement. The fixed bottom bar explains history/statistics; `Activar cuenta` opens a popup saying account activation is not yet available.
 3. The header shows the Trino version beside the app name; the changing section label is omitted.
 
 ## UC-06: Exercise Start, Results & Session History
@@ -41,3 +41,5 @@
 2. Level cards place the stars on the same row as the level title. The description uses the full card width below.
 3. Level information is opened from the info button beside the active exercise title in either module, not from the level list.
 4. The suggested level label stays left of the progress count. Eligible cards show `Hechas: Hoy x/meta Ayer y/meta`; this row is visible only for the suggested level or levels with activity today/yesterday.
+5. In both exercise views, the level/date/completion header sits flush to the top and side edges. Instructions disappear after starting. Module 2 keeps only the compact staff and response table; analysis details are not repeated below the staff.
+6. The Module 2 session history uses one HTML table row per sung note, with exercise index and exercise-grade cells spanning the note rows. Table headers use sentence case and cells wrap within their assigned columns.
