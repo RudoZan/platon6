@@ -38,5 +38,6 @@
 
 ## UC-07: Mobile Layout & Level Cards
 1. On mobile, the app frame fills the visible viewport; only the central content panel scrolls while the top and bottom bars remain fixed.
-2. Level cards place the stars on the same row as the level title. The status and description follow below, and the description uses the full card width.
+2. Level cards place the stars on the same row as the level title. The description uses the full card width below.
 3. Level information is opened from the info button beside the active exercise title in either module, not from the level list.
+4. The suggested level label stays left of the progress count. Eligible cards show `Hechas: Hoy x/meta Ayer y/meta`; this row is visible only for the suggested level or levels with activity today/yesterday.

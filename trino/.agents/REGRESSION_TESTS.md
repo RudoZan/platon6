@@ -14,3 +14,4 @@
 12. **RT-12 (Mobile Fixed Bars):** At a mobile viewport, scrolling long content moves only `.middle-zone`; top and bottom bars keep their viewport positions and the body does not scroll.
 13. **RT-13 (Level Card Layout):** In both module lists, stars align horizontally with the level title and the description spans the card width beneath it.
 14. **RT-14 (Level Information Access):** Level lists have no info button. The info button beside each active exercise title opens the modal for the selected level and correct module.
+15. **RT-15 (Daily Level Counts):** Suggested label stays left while `Hechas: Hoy x/meta Ayer y/meta` aligns right. Show this row only for the suggested level or levels with today/yesterday activity; verify both modules and zero counts for inactive days.

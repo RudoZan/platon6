@@ -434,6 +434,7 @@ body {
 }
 
 .level-status-pill {
+  flex: 0 0 auto;
   font-size: 0.60rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -455,6 +456,28 @@ body {
 .state-pending .level-status-pill {
   background: rgba(148, 163, 184, 0.15);
   color: var(--text-muted);
+}
+
+.level-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.level-status-spacer {
+  flex: 0 0 auto;
+}
+
+.level-progress-counts {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .level-desc {

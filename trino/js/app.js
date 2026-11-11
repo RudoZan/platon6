@@ -4,7 +4,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0034';
+const APP_VERSION = 'v1.0.0035';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -1371,20 +1371,30 @@ class TrinoShell {
     containerEl.innerHTML = levelsArray
       .map((lvl) => {
         const stats = this.getLevelStats(lvl.id, moduleType);
-        const totalDone = stats.good + stats.bad;
-        const isDoneToday = totalDone >= this.dailyMin;
+        const todayKey = this.getTodayKey();
+        const yesterdayKey = this.getYesterdayKey();
+        const dayEntries = this.getLevelDayLog(moduleType, lvl.id);
+        const todayFromLog = dayEntries.filter((entry) => entry.date === todayKey).length;
+        const yesterdayDone = dayEntries.filter((entry) => entry.date === yesterdayKey).length;
+        const todayDone = Math.max(stats.good + stats.bad, todayFromLog);
+        const isDoneToday = todayDone >= this.dailyMin;
 
         let state = 'pending';
-        let statusLabel = `Hechas: ${totalDone}/${this.dailyMin}`;
 
         if (isDoneToday) {
           state = 'done';
-          statusLabel = `Completado (${totalDone}/${this.dailyMin})`;
         } else if (!suggestedAssigned) {
           state = 'suggested';
           suggestedAssigned = true;
-          statusLabel = `Sugerido · ${totalDone}/${this.dailyMin}`;
         }
+
+        const showProgress = state === 'suggested' || todayDone > 0 || yesterdayDone > 0;
+        const progressHtml = showProgress
+          ? `<div class="level-status-row">
+               ${state === 'suggested' ? '<span class="level-status-pill">Sugerido</span>' : '<span class="level-status-spacer" aria-hidden="true"></span>'}
+               <span class="level-progress-counts">Hechas: Hoy ${todayDone}/${this.dailyMin} Ayer ${yesterdayDone}/${this.dailyMin}</span>
+             </div>`
+          : '';
 
         const starsHtml = [1, 2, 3]
           .map((n) =>
@@ -1405,7 +1415,7 @@ class TrinoShell {
                   ${starsHtml}
                 </div>
               </div>
-              <span class="level-status-pill">${statusLabel}</span>
+              ${progressHtml}
               <p class="level-desc">${lvl.desc}</p>
             </div>
           </button>
@@ -3890,7 +3900,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=34', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=35', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>
