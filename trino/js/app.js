@@ -4,7 +4,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0033';
+const APP_VERSION = 'v1.0.0034';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -928,6 +928,13 @@ class TrinoShell {
         }
       });
     }
+    document.querySelectorAll('[data-active-level-info]').forEach((infoBtn) => {
+      infoBtn.addEventListener('click', () => {
+        if (this.activeLevel && this.activeModule) {
+          this.openLevelInfoModal(this.activeLevel, this.activeModule);
+        }
+      });
+    });
 
     // Eventos de Registro y Validación de 3 Notas
     if (this.bottomZone) {
@@ -1394,29 +1401,17 @@ class TrinoShell {
             <div class="level-info">
               <div class="level-top-row">
                 <span class="level-title">${lvl.title}</span>
-                <span class="level-status-pill">${statusLabel}</span>
+                <div class="level-stars" aria-label="${stats.stars} de 3 estrellas">
+                  ${starsHtml}
+                </div>
               </div>
+              <span class="level-status-pill">${statusLabel}</span>
               <p class="level-desc">${lvl.desc}</p>
-            </div>
-            <div class="level-right-actions">
-              <div class="level-stars" aria-label="${stats.stars} de 3 estrellas">
-                ${starsHtml}
-              </div>
-              <span role="button" tabindex="0" class="level-info-btn" data-info-level-id="${lvl.id}" title="Ver intervalos, rango y notas del nivel" aria-label="Información del nivel">ℹ</span>
             </div>
           </button>
         `;
       })
       .join('');
-
-    containerEl.querySelectorAll('[data-info-level-id]').forEach((infoBtn) => {
-      infoBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = parseInt(infoBtn.getAttribute('data-info-level-id'), 10);
-        const lvl = levelsArray.find((l) => l.id === id);
-        if (lvl) this.openLevelInfoModal(lvl, moduleType);
-      });
-    });
 
     containerEl.querySelectorAll('[data-level-id]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -3895,7 +3890,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=33', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=34', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>

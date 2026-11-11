@@ -35,3 +35,8 @@
 4. In Module 1, each mystery-note marker plays that note independently. The Repetir action replays the current interval; Siguiente generates another exercise.
 5. Session results use the five grade icons/colors. In Module 2, grade, tonal center, voice, and glissando indicators align one row per note.
 6. The floating debug window is opened from the three-line menu or the debug panel.
+
+## UC-07: Mobile Layout & Level Cards
+1. On mobile, the app frame fills the visible viewport; only the central content panel scrolls while the top and bottom bars remain fixed.
+2. Level cards place the stars on the same row as the level title. The status and description follow below, and the description uses the full card width.
+3. Level information is opened from the info button beside the active exercise title in either module, not from the level list.

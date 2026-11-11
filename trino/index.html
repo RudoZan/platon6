@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=33" />
+  <link rel="stylesheet" href="./css/styles.css?v=34" />
 </head>
 
 <body>
@@ -15,7 +15,7 @@
       <div class="app-brand" id="brand-home-btn" title="Ir al inicio">
         <div class="app-logo-dot">🎵</div>
         <span class="app-name">Trino</span>
-        <span class="app-version" id="app-version-badge">v1.0.0033</span>
+        <span class="app-version" id="app-version-badge">v1.0.0034</span>
       </div>
 
       <button type="button" class="menu-btn" id="menu-toggle-btn" aria-label="Abrir menú">
@@ -98,7 +98,10 @@
       <!-- VISTA: EJERCICIO ACTIVO DE INTERVALOS -->
       <section id="view-interval-exercise" class="hidden">
         <div class="exercise-header-card">
-          <span class="exercise-level-name" id="ex-level-title">Nivel 1</span>
+          <div class="exercise-title-row">
+            <span class="exercise-level-name" id="ex-level-title">Nivel 1</span>
+            <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel" title="Ver información del nivel">i</button>
+          </div>
           <div class="exercise-stats-line" id="ex-daily-counter">
             <span class="stat-hoy" id="ex-date-label">Hoy</span>
             <span class="stat-done">Completados <strong id="ex-done-count">0 de 100</strong></span>
@@ -140,7 +143,10 @@
       <!-- VISTA: EJERCICIO ACTIVO DE CANTAR NOTAS -->
       <section id="view-singing-exercise" class="hidden">
         <div class="exercise-header-card">
-          <span class="exercise-level-name" id="sing-level-title">Nivel 1</span>
+          <div class="exercise-title-row">
+            <span class="exercise-level-name" id="sing-level-title">Nivel 1</span>
+            <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel" title="Ver información del nivel">i</button>
+          </div>
           <div class="exercise-stats-line">
             <span class="stat-hoy" id="sing-date-label">Hoy</span>
             <span class="stat-done">Completados <strong id="sing-done-count">0 de 100</strong></span>
@@ -463,7 +469,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=33"></script>
+  <script src="./js/app.js?v=34"></script>
 </body>
 
 </html>

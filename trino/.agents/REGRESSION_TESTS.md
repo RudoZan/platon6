@@ -11,3 +11,6 @@
 9. **RT-09 (Exercise Bottom Controls):** After starting, verify the green button becomes blue `Siguiente`, `Repetir` appears and replays the current exercise, and Siguiente generates the next question. In Module 1, each hidden-note button plays only its corresponding pitch.
 10. **RT-10 (Empty Session History):** With no current/yesterday results, both module tables remain visible with the correct column headers and an empty-state row spanning all columns.
 11. **RT-11 (Header Menu Debug):** The three-line menu opens the floating debug window and closes after selection; the removed inline debug button is absent.
+12. **RT-12 (Mobile Fixed Bars):** At a mobile viewport, scrolling long content moves only `.middle-zone`; top and bottom bars keep their viewport positions and the body does not scroll.
+13. **RT-13 (Level Card Layout):** In both module lists, stars align horizontally with the level title and the description spans the card width beneath it.
+14. **RT-14 (Level Information Access):** Level lists have no info button. The info button beside each active exercise title opens the modal for the selected level and correct module.

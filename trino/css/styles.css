@@ -29,11 +29,11 @@
 
 /* 1. Lienzo Exterior y Contenedor Principal (.mobile-frame) */
 body {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: stretch;
-  overflow-x: hidden;
+  overflow: hidden;
   background-color: var(--outer-bg);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--text-main);
@@ -44,8 +44,8 @@ body {
 .mobile-frame {
   width: 100%;
   max-width: 480px;
-  min-height: 100vh;
-  height: 100vh;
+  min-height: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -168,7 +168,10 @@ body {
 /* Zona 2: Media Flexible con Scroll y Trama Musical Tenue */
 .middle-zone {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 1.1rem 1rem;
   display: flex;
   flex-direction: column;
@@ -176,6 +179,13 @@ body {
   background-color: var(--frame-bg);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%2394a3b8' fill-opacity='0.055' font-family='serif' font-size='22'%3E%3Ctext x='16' y='34'%3E%E2%99%AA%3C/text%3E%3Ctext x='76' y='42'%3E%E2%99%AB%3C/text%3E%3Ctext x='42' y='86'%3E%E2%99%A9%3C/text%3E%3Ctext x='92' y='98'%3E%E2%99%AC%3C/text%3E%3C/g%3E%3C/svg%3E");
   background-repeat: repeat;
+}
+
+@supports (height: 100dvh) {
+  body,
+  .mobile-frame {
+    height: 100dvh;
+  }
 }
 
 /* Tarjeta de Bienvenida */
@@ -341,8 +351,7 @@ body {
   border-radius: 12px;
   padding: 0.85rem 0.95rem;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: stretch;
   gap: 0.75rem;
   text-align: left;
   cursor: pointer;
@@ -405,12 +414,16 @@ body {
   flex-direction: column;
   gap: 0.2rem;
   flex: 1;
+  width: 100%;
+  min-width: 0;
 }
 
 .level-top-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.45rem;
+  min-width: 0;
 }
 
 .level-title {
@@ -449,19 +462,13 @@ body {
   color: var(--text-muted);
 }
 
-.level-right-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-shrink: 0;
-}
-
 .level-stars {
   display: flex;
   align-items: center;
   gap: 0.15rem;
   font-size: 0.95rem;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .level-info-btn {
@@ -513,6 +520,12 @@ body {
   font-size: 0.94rem;
   font-weight: 700;
   color: var(--text-main);
+}
+
+.exercise-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .exercise-stats-line {
