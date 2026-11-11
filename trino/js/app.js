@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0041';
+const APP_VERSION = 'v1.0.0043';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -1652,7 +1652,7 @@ class TrinoShell {
     this.exerciseStarted = false;
     this.activeLevel = level;
     this.chordSessionLog = this.getLevelDayLog('chords', levelId);
-    this.renderLogTable(this.chordSessionLogWrapper, this.chordSessionLogTbody, this.chordSessionLog);
+    this.renderLogTable(this.chordSessionLogWrapper, this.chordSessionLogTbody, this.chordSessionLog, 'chords');
     this.generateNextQuestion();
     this.updateChordExerciseUi();
     this.navigateTo('chord-exercise');
@@ -1742,14 +1742,14 @@ class TrinoShell {
     if (!width || !height) return false;
 
     const staffLeft = 2;
+    const staffRight = width - 2;
     const m1Start = staffLeft + 38;
-    const barlineX = m1Start + (width - 2 - m1Start) / 2;
-    const measureWidth = (barlineX - m1Start) * 2;
+    const barlineX = m1Start + (staffRight - m1Start) / 2;
     const noteXs = [
-      m1Start + measureWidth * 0.125,
-      m1Start + measureWidth * 0.375,
-      barlineX + measureWidth * 0.125,
-      barlineX + measureWidth * 0.375,
+      m1Start + (barlineX - m1Start) * 0.125,
+      m1Start + (barlineX - m1Start) * 0.375,
+      barlineX + (staffRight - 4 - barlineX) * 0.125,
+      barlineX + (staffRight - 4 - barlineX) * 0.375,
     ];
     const noteMidis = [
       this.currentQuestion.midi1,
@@ -1757,11 +1757,15 @@ class TrinoShell {
       this.currentQuestion.midi1,
       this.currentQuestion.midi2,
     ];
-    const noteIndex = noteXs.findIndex((noteX, index) => {
+    const hitRadiusX = 24;
+    const hitRadiusY = 22;
+    const noteIndex = noteXs.reduce((nearestIndex, noteX, index) => {
       const step = this.midiToGrandStaffStep(noteMidis[index]).step;
       const noteY = height / 2 - 4 - step * 5;
-      return Math.abs(x - noteX) <= 16 && Math.abs(y - noteY) <= 18;
-    });
+      const distance = ((x - noteX) / hitRadiusX) ** 2 + ((y - noteY) / hitRadiusY) ** 2;
+      if (distance > 1 || distance >= nearestIndex.distance) return nearestIndex;
+      return { index, distance };
+    }, { index: -1, distance: Infinity }).index;
     if (noteIndex < 0) return false;
 
     await this.ensureAudioReady();
@@ -2161,7 +2165,7 @@ class TrinoShell {
       isCorrect,
     });
     this.chordSessionLog = this.getLevelDayLog('chords', this.activeLevel.id);
-    this.renderLogTable(this.chordSessionLogWrapper, this.chordSessionLogTbody, this.chordSessionLog);
+    this.renderLogTable(this.chordSessionLogWrapper, this.chordSessionLogTbody, this.chordSessionLog, 'chords');
 
     const totalDone = stats.good + stats.bad;
     if (totalDone >= this.dailyChordsMin) {
@@ -2183,14 +2187,14 @@ class TrinoShell {
   }
 
   renderSessionLog() {
-    this.renderLogTable(this.sessionLogWrapper, this.sessionLogTbody, this.sessionLog, false);
+    this.renderLogTable(this.sessionLogWrapper, this.sessionLogTbody, this.sessionLog, 'intervals');
   }
 
   renderSingSessionLog() {
-    this.renderLogTable(this.singSessionLogWrapper, this.singSessionLogTbody, this.singSessionLog, true);
+    this.renderLogTable(this.singSessionLogWrapper, this.singSessionLogTbody, this.singSessionLog, 'singing');
   }
 
-  buildDaySummaryHtml(dayLabel, items, isSinging) {
+  buildDaySummaryHtml(dayLabel, items, isSinging, dailyGoal) {
     const totalEx = items.length;
     if (totalEx === 0) return '';
 
@@ -2294,7 +2298,7 @@ class TrinoShell {
     return `
       <tr class="day-divider-row">
         <td colspan="${colSpan}" class="day-divider-cell">
-          <div class="day-divider-banner">--- ${dayLabel} ---</div>
+          <div class="day-divider-banner">${dayLabel}: Completado ${totalEx} de ${dailyGoal}</div>
           <div class="day-summary-box">
             <div class="day-summary-line">
               <span><strong>Ejercicios:</strong> ${totalEx}</span>
@@ -2325,8 +2329,12 @@ class TrinoShell {
     `;
   }
 
-  renderLogTable(wrapperEl, tbodyEl, list, isSinging = false) {
+  renderLogTable(wrapperEl, tbodyEl, list, moduleType = 'intervals') {
     if (!wrapperEl || !tbodyEl) return;
+    const isSinging = moduleType === 'singing';
+    const dailyGoal = moduleType === 'singing'
+      ? this.dailySingingMin
+      : moduleType === 'chords' ? this.dailyChordsMin : this.dailyIntervalsMin;
     if (!Array.isArray(list) || list.length === 0) {
       const emptyHeaders = isSinging
         ? `<tr class="log-col-headers">
@@ -2440,11 +2448,11 @@ class TrinoShell {
 
     let html = '';
     if (todayItems.length > 0) {
-      html += this.buildDaySummaryHtml('HOY', todayItems, isSinging);
+      html += this.buildDaySummaryHtml('HOY', todayItems, isSinging, dailyGoal);
       html += renderRows(todayItems);
     }
     if (yesterdayItems.length > 0) {
-      html += this.buildDaySummaryHtml('AYER', yesterdayItems, isSinging);
+      html += this.buildDaySummaryHtml('AYER', yesterdayItems, isSinging, dailyGoal);
       html += renderRows(yesterdayItems);
     }
 
