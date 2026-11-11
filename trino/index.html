@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=40" />
+  <link rel="stylesheet" href="./css/styles.css?v=41" />
 </head>
 
 <body>
@@ -65,7 +65,7 @@
           <button type="button" class="module-card" data-open-module="intervals">
             <div class="module-icon icon-intervals">👂</div>
             <div class="module-info">
-              <span class="module-tag">Módulo 1 · Oído</span>
+              <span class="module-tag" data-module-progress="intervals">MÓDULO 1 - Hoy 0/100</span>
               <h2 class="module-title">Reconocer Intervalos</h2>
             </div>
             <p class="module-desc">Escucha dos notas e identifica la distancia musical entre ellas.</p>
@@ -75,7 +75,7 @@
           <button type="button" class="module-card" data-open-module="singing">
             <div class="module-icon icon-singing">🎙️</div>
             <div class="module-info">
-              <span class="module-tag">Módulo 2 · Voz</span>
+              <span class="module-tag" data-module-progress="singing">MÓDULO 2 - Hoy 0/100</span>
               <h2 class="module-title">Cantar Notas</h2>
             </div>
             <p class="module-desc">Entona las notas indicadas y revisa la precisión de tu afinación.</p>
@@ -84,7 +84,7 @@
           <button type="button" class="module-card" data-open-module="chords">
             <div class="module-icon icon-chords">♫</div>
             <div class="module-info">
-              <span class="module-tag">Módulo 3 · Armonía</span>
+              <span class="module-tag" data-module-progress="chords">MÓDULO 3 - Hoy 0/100</span>
               <h2 class="module-title">Reconocimiento de acordes</h2>
             </div>
             <p class="module-desc">Escucha notas simultáneas e identifica intervalos, tríadas y cuatríadas.</p>
@@ -203,7 +203,10 @@
       <!-- VISTA: CONFIGURACIÓN -->
       <section id="view-settings" class="hidden">
         <div class="view-placeholder settings-panel">
-          <h2 class="welcome-title">Configuración</h2>
+          <div class="settings-header">
+            <h2 class="welcome-title">Configuración</h2>
+            <button type="button" class="settings-close-btn" data-target="home" aria-label="Cerrar configuración" title="Cerrar configuración">×</button>
+          </div>
 
           <!-- 1. Meta diaria -->
           <div class="settings-group">
@@ -507,7 +510,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=40"></script>
+  <script src="./js/app.js?v=41"></script>
 </body>
 
 </html>

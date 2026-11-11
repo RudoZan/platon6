@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0040';
+const APP_VERSION = 'v1.0.0041';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -358,6 +358,7 @@ class TrinoShell {
     this.renderIntervalLevels();
     this.renderSingingLevels();
     this.renderChordLevels();
+    this.updateHomeModuleProgress();
     this.syncVersionBadge();
     this.navigateTo('home');
     if (this.currentUser?.verificado) {
@@ -371,6 +372,7 @@ class TrinoShell {
     this.menuBtn = document.getElementById('menu-toggle-btn');
     this.menuDrawer = document.getElementById('menu-drawer');
     this.bottomZone = document.getElementById('bottom-commands');
+    this.homeModuleProgressLabels = document.querySelectorAll('[data-module-progress]');
 
     this.intervalsLevelsList = document.getElementById('intervals-levels-list');
     this.singingLevelsList = document.getElementById('singing-levels-list');
@@ -608,6 +610,23 @@ class TrinoShell {
     return { todayDone, yesterdayDone };
   }
 
+  updateHomeModuleProgress() {
+    const moduleGoals = {
+      intervals: this.dailyIntervalsMin,
+      singing: this.dailySingingMin,
+      chords: this.dailyChordsMin,
+    };
+
+    this.homeModuleProgressLabels?.forEach((label) => {
+      const moduleType = label.getAttribute('data-module-progress');
+      const goal = moduleGoals[moduleType];
+      if (!goal) return;
+      const { todayDone } = this.getDailyTypeCounts(moduleType);
+      const moduleNumber = moduleType === 'intervals' ? 1 : moduleType === 'singing' ? 2 : 3;
+      label.textContent = `MÓDULO ${moduleNumber} - Hoy ${todayDone}/${goal}`;
+    });
+  }
+
   pushLevelDayLog(moduleType, levelId, entry) {
     const list = this.getLevelDayLog(moduleType, levelId);
     list.unshift(entry);
@@ -828,6 +847,7 @@ class TrinoShell {
       this.renderIntervalLevels();
       this.renderSingingLevels();
       this.renderChordLevels();
+      this.updateHomeModuleProgress();
     };
     this.dailyIntervalsMinDecrease?.addEventListener('click', () => adjustDailyGoal('intervals', -10));
     this.dailyIntervalsMinIncrease?.addEventListener('click', () => adjustDailyGoal('intervals', 10));
@@ -1448,6 +1468,7 @@ class TrinoShell {
     this.renderIntervalLevels();
     this.renderSingingLevels();
     this.renderChordLevels();
+    this.updateHomeModuleProgress();
   }
 
   async syncFromCloudOnLoad() {
@@ -2091,6 +2112,7 @@ class TrinoShell {
       }
 
       this.saveProgress();
+      this.updateHomeModuleProgress();
     } else {
       if (btnEl === this.currentQuestion.firstButtonEl) {
         return;
@@ -2149,6 +2171,7 @@ class TrinoShell {
     }
 
     this.saveProgress();
+    this.updateHomeModuleProgress();
     if (isCorrect) {
       if (this.autoNextTimer) clearTimeout(this.autoNextTimer);
       this.autoNextTimer = setTimeout(() => {
@@ -3892,6 +3915,7 @@ class TrinoShell {
       }
 
       this.saveProgress();
+      this.updateHomeModuleProgress();
     }
 
     // Debug: siempre actualizar con el último análisis (incluye reintentos)
@@ -4158,7 +4182,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=40', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=41', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>

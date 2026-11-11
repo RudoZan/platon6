@@ -307,7 +307,7 @@ body {
 .module-tag {
   font-size: 0.62rem;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.04em;
   color: var(--accent-primary);
 }
@@ -989,6 +989,35 @@ body {
   gap: 0.75rem;
 }
 
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.settings-close-btn {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--frame-bg);
+  color: var(--text-main);
+  font: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.settings-close-btn:hover {
+  background: var(--card-hover);
+  border-color: var(--primary-light);
+}
+
 .settings-group {
   background-color: rgba(255, 255, 255, 0.025);
   border: 1px solid var(--border-subtle);
@@ -1028,6 +1057,12 @@ body {
 .settings-range-grid .settings-select {
   min-width: 0;
   font-size: 0.82rem;
+}
+
+#vocal-preset-select,
+#vocal-min-select,
+#vocal-max-select {
+  font-size: 0.74rem;
 }
 
 .vocal-range-actions {

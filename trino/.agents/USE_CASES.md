@@ -54,3 +54,8 @@
 ## UC-09: Vocal Range Controls on Mobile
 1. The lowest- and highest-note selectors use the full width of their fields.
 2. Microphone detection and speaker preview buttons sit below each selector, with accessible labels and touch-sized targets. The settings view retains its `Configuración` heading without the redundant `Ajustes` eyebrow.
+3. The preset, lowest-note, and highest-note controls use slightly compact text to fit their values on mobile.
+
+## UC-10: Home Progress & Settings Exit
+1. Each home module card shows `MÓDULO N - Hoy x/meta`, with today's count and that module's independent daily goal.
+2. The X button in the settings heading returns to Inicio.
