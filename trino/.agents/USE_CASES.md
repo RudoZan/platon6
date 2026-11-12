@@ -64,8 +64,8 @@
 
 ## UC-11: Voice Test (Module 4)
 1. The home card `MÓDULO 4 · Prueba de voz` opens a single screen without levels or history.
-2. A keyboard spans C2–C6 with note names on every key; ◀ ▶ buttons above scroll it. While a key is held its note sounds.
+2. A keyboard spans C2–C6 with note names on every key; ◀ ▶ buttons above scroll it. While a key is held its note sounds. Dragging sideways more than 10 px on a key scrolls the keyboard instead: the note stops and no recording happens.
 3. On release, the selected recording mode starts: no recording, 1–5 s, or until the first silence after sound is detected. A bar below the staff shows `Grabando x / n s` as a left-to-right progress fill.
 4. The whole recording is analyzed as one note with the singing analysis. The staff shows the target note, a dashed guide, and the sung pitch curve colored by deviation.
-5. The analysis area has three rows: target/sung note, tonal center and grade; percentage of frames per level (best at left); voice type and glissando. Pressing a key discards the previous result.
+5. The analysis area has three rows: target/sung note, tonal center and grade; percentage of frames per level (best at left); voice type, plus `Glisando detectado` only when detected. Pressing a key discards the previous result.
 6. Entering the module or changing the duration shows a bold two-line instruction in the analysis area; it disappears when a key is pressed or a result is shown.

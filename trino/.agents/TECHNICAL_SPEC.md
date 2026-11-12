@@ -73,5 +73,5 @@
 - Playback: `startHeldTone(hz)` sustains a triangle oscillator while the key is held (`noteVolume`), with a short release.
 - Recording (`#vt-record-select`): `none`, `1`–`5` seconds, or `silence`. Capture starts `150 ms` after release via `ScriptProcessor` using the shared mic stream. `silence` stops after `0.6 s` below RMS `0.015` once sound was heard, after `6 s` without sound, or at `10 s`.
 - Analysis: `extractMidiFrames` → `getNoteGradeFromFrames` + `buildNoteAnalysis` treat the whole take as one note (octave-folded cents). Frame buckets: admirable ≤15c, bueno ≤20c, aceptable ≤40c, regular ≤80c, fallido >80c; admirable/bueno hidden when 0 %.
-- Staff canvas: `230 px` high, `6.8 px` per diatonic step; sung pitch drawn at its real height via `voiceTestStepFloat`. No persistence or history; state lives in `this.voiceTest`.
-- Cache keys: HTML loads `styles.css?v=51` and `app.js?v=54`; `APP_VERSION` is `v1.0.0045`.
+- Staff canvas: `208 px` high, `6.0 px` per diatonic step; the recording bar overlays the analysis area; keyboard is `110 px` high with a dark-red `2 px` strip above the keys; sung pitch is drawn at its real height via `voiceTestStepFloat`. No persistence or history; state lives in `this.voiceTest`.
+- Cache keys: HTML loads `styles.css?v=53` and `app.js?v=58`; `APP_VERSION` is `v1.0.0045`.

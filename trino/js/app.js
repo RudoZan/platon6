@@ -4199,7 +4199,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=51', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=53', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>
@@ -4613,9 +4613,35 @@ class TrinoShell {
         try {
           keyEl.setPointerCapture(e.pointerId);
         } catch (_) {}
+        this.vtDrag = {
+          pointerId: e.pointerId,
+          startX: e.clientX,
+          startScroll: this.vtScroll.scrollLeft,
+          dragging: false,
+          keyEl,
+        };
         this.voiceTestPress(midi, keyEl);
       });
-      const release = () => this.voiceTestRelease(keyEl);
+      // Un desplazamiento horizontal mueve el teclado en lugar de tocar la nota
+      keyEl.addEventListener('pointermove', (e) => {
+        const drag = this.vtDrag;
+        if (!drag || drag.keyEl !== keyEl || drag.pointerId !== e.pointerId) return;
+        const dx = e.clientX - drag.startX;
+        if (!drag.dragging) {
+          if (Math.abs(dx) < 10) return;
+          drag.dragging = true;
+          this.voiceTestCancelPress();
+        }
+        this.vtScroll.scrollLeft = drag.startScroll - dx;
+      });
+      const release = () => {
+        const drag = this.vtDrag;
+        if (drag?.keyEl === keyEl) {
+          this.vtDrag = null;
+          if (drag.dragging) return;
+        }
+        this.voiceTestRelease(keyEl);
+      };
       keyEl.addEventListener('pointerup', release);
       keyEl.addEventListener('pointercancel', release);
       keyEl.addEventListener('lostpointercapture', release);
@@ -4751,7 +4777,7 @@ class TrinoShell {
     // Cada pulsación descarta el análisis anterior
     vt.midi = midi;
     vt.frames = null;
-    this.setVoiceTestResult(`Escuchando ${this.midiToEnglishName(midi)}…`);
+    this.setVoiceTestResult('');
     this.drawVoiceTestStaff();
 
     // Pide el micrófono al pulsar para que el permiso no interrumpa el canto
@@ -4760,6 +4786,20 @@ class TrinoShell {
     await this.ensureAudioReady();
     if (vt.pressId !== id || vt.activeKey !== keyEl) return;
     vt.tone = this.startHeldTone(440 * Math.pow(2, (midi - 69) / 12));
+  }
+
+  // Cancela la pulsación en curso sin grabar (p. ej. al arrastrar el teclado)
+  voiceTestCancelPress() {
+    const vt = this.voiceTest;
+    vt.pressId += 1;
+    this.stopVoiceTestTone();
+    this.stopVoiceTestRecording();
+    vt.activeKey?.classList.remove('active');
+    vt.activeKey = null;
+    vt.midi = null;
+    vt.frames = null;
+    this.drawVoiceTestStaff();
+    this.updateVoiceTestHint();
   }
 
   voiceTestRelease(keyEl) {
@@ -4942,7 +4982,7 @@ class TrinoShell {
         `<span class="vt-grade" style="background:${grade.bg}">${grade.icon}</span><strong>${grade.label}</strong>`;
       this.vtRows[1].innerHTML = pctHtml;
       this.vtRows[2].innerHTML =
-        `Voz: <strong>${voiceLabel}</strong> · <strong>${analysis.glissando ? 'Glisando' : 'Sin glisando'}</strong>`;
+        `Voz: <strong>${voiceLabel}</strong>${analysis.glissando ? ' · <strong>Glisando detectado</strong>' : ''}`;
     }
   }
 
@@ -4973,12 +5013,12 @@ class TrinoShell {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, cssW, cssH);
 
-    const hs = 6.8;
+    const hs = 6.0;
     const stepToY = (step) => cssH / 2 - step * hs;
     const left = 2;
     const right = cssW - 2;
-    const noteX = left + 72;
-    const curveStart = noteX + 30;
+    const noteX = left + 64;
+    const curveStart = noteX + 27;
     const curveEnd = right - 8;
 
     ctx.strokeStyle = '#111827';
@@ -4998,9 +5038,9 @@ class TrinoShell {
     ctx.fillStyle = '#000000';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.font = '46px serif';
+    ctx.font = '40px serif';
     ctx.fillText('𝄞', left + 4, stepToY(5));
-    ctx.font = '37px serif';
+    ctx.font = '33px serif';
     ctx.fillText('𝄢', left + 5, stepToY(-5));
 
     const vt = this.voiceTest;
@@ -5018,8 +5058,8 @@ class TrinoShell {
     if (pos.step >= -1 && pos.step <= 1) ledgers.push(0);
     ledgers.forEach((s) => {
       ctx.beginPath();
-      ctx.moveTo(noteX - 14, stepToY(s));
-      ctx.lineTo(noteX + 14, stepToY(s));
+      ctx.moveTo(noteX - 12, stepToY(s));
+      ctx.lineTo(noteX + 12, stepToY(s));
       ctx.stroke();
     });
 
@@ -5028,7 +5068,7 @@ class TrinoShell {
     ctx.rotate(-0.25);
     ctx.fillStyle = '#000000';
     ctx.beginPath();
-    ctx.ellipse(0, 0, 8.4, 6, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, 7.4, 5.3, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
@@ -5038,19 +5078,19 @@ class TrinoShell {
     ctx.lineWidth = 1.6;
     ctx.beginPath();
     if (stemUp) {
-      ctx.moveTo(noteX + 7.8, noteY);
-      ctx.lineTo(noteX + 7.8, noteY - 34);
+      ctx.moveTo(noteX + 6.9, noteY);
+      ctx.lineTo(noteX + 6.9, noteY - 30);
     } else {
-      ctx.moveTo(noteX - 7.8, noteY);
-      ctx.lineTo(noteX - 7.8, noteY + 34);
+      ctx.moveTo(noteX - 6.9, noteY);
+      ctx.lineTo(noteX - 6.9, noteY + 30);
     }
     ctx.stroke();
 
     if (pos.isSharp) {
       ctx.fillStyle = '#000000';
-      ctx.font = 'bold 16px sans-serif';
+      ctx.font = 'bold 14px sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText('♯', noteX - 12, noteY);
+      ctx.fillText('♯', noteX - 11, noteY);
     }
 
     // Línea guía de la nota objetivo
