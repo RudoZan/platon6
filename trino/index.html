@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=53" />
+  <link rel="stylesheet" href="./css/styles.css?v=56" />
 </head>
 
 <body>
@@ -212,19 +212,8 @@
       <!-- VISTA: MÓDULO 4 (Prueba de voz) -->
       <section id="view-voice-test" class="hidden">
         <div class="levels-header vt-header">
-          <h2 class="welcome-title">Módulo 4 <br> Prueba de voz</h2>
-          <div class="vt-record-field">
-            <label for="vt-record-select" class="settings-label">Duración de la grabación</label>
-            <select id="vt-record-select" class="settings-select">
-            <option value="none">No grabar</option>
-            <option value="1">Grabar 1 segundo</option>
-            <option value="2">Grabar 2 segundos</option>
-            <option value="3" selected>Grabar 3 segundos</option>
-            <option value="4">Grabar 4 segundos</option>
-            <option value="5">Grabar 5 segundos</option>
-            <option value="silence">Grabar hasta el primer silencio</option>
-          </select>
-          </div>
+          <h2 class="welcome-title">Módulo 4 · Prueba de voz</h2>
+          <button type="button" class="level-info-btn" id="vt-info-button" aria-label="Información del Módulo 4" title="Información del módulo">i</button>
         </div>
 
         <div class="voice-staff-box">
@@ -335,6 +324,15 @@
             <div class="settings-detect-status hidden" id="vocal-detect-status"></div>
           </div>
 
+          <div class="settings-group">
+            <span class="settings-group-title">Análisis de afinación</span>
+            <label class="settings-toggle-row" for="rectify-vibrato-input">
+              <input type="checkbox" id="rectify-vibrato-input" />
+              <span>Aplicar rectificación de vibrato al calificar</span>
+            </label>
+            <p class="settings-hint">Ajusta el efecto del vibrato según la regularidad de sus ciclos para calificar la afinación.</p>
+          </div>
+
           <!-- 3. Probador de Micrófono en vivo -->
           <div class="settings-group">
             <div class="settings-label-row">
@@ -443,6 +441,27 @@
           <h3 class="level-info-modal-title" id="level-info-modal-title">Nivel</h3>
         </div>
         <div class="level-info-modal-body" id="level-info-modal-body"></div>
+        <div class="level-info-modal-body hidden" id="vt-module-info">
+          <div class="level-info-section">
+            <span class="level-info-label">Prueba de voz</span>
+            <p class="level-info-value">Elige una nota en el teclado y cántala. Trino muestra la nota detectada, su centro tonal y la estabilidad de la voz.</p>
+          </div>
+          <div class="level-info-section">
+            <span class="level-info-label">Configuración del módulo</span>
+            <div class="vt-record-field">
+              <label for="vt-record-select" class="settings-label">Duración de la grabación</label>
+              <select id="vt-record-select" class="settings-select">
+                <option value="none">No grabar</option>
+                <option value="1">Grabar 1 segundo</option>
+                <option value="2">Grabar 2 segundos</option>
+                <option value="3" selected>Grabar 3 segundos</option>
+                <option value="4">Grabar 4 segundos</option>
+                <option value="5">Grabar 5 segundos</option>
+                <option value="silence">Grabar hasta el primer silencio</option>
+              </select>
+            </div>
+          </div>
+        </div>
         <button type="button" class="start-modal-btn" id="btn-level-info-close">
           Cerrar
         </button>
@@ -562,7 +581,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=58"></script>
+  <script src="./js/app.js?v=65"></script>
 </body>
 
 </html>

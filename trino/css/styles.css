@@ -305,6 +305,31 @@ body {
   gap: 0.5rem;
 }
 
+.vt-header .welcome-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.vt-debug-btn {
+  flex: 0 0 auto;
+  padding: 0.25rem 0.45rem;
+  font-size: 0.62rem;
+}
+
+.vt-debug-table .dbg-frame-cell {
+  min-width: 42px;
+  text-align: center;
+  font: 0.62rem 'Courier New', monospace;
+}
+
+.vt-debug-table .dbg-vt-peak {
+  outline: 1px solid #f8fafc;
+  outline-offset: -2px;
+}
+
 .vt-header .settings-select {
   width: 100%;
   min-width: 0;
@@ -432,6 +457,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+  background: linear-gradient(180deg, #365b7d 0%, #294867 100%);
 }
 
 .vt-scroll-btn {
@@ -1264,6 +1290,21 @@ body {
   font-size: 0.68rem;
   color: var(--text-muted);
   line-height: 1.35;
+}
+
+.settings-toggle-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: var(--text-main);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.settings-toggle-row input {
+  margin: 0.08rem 0 0;
+  accent-color: var(--accent-primary);
 }
 
 .settings-field {

@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0045';
+const APP_VERSION = 'v1.0.0048';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -25,6 +25,30 @@ const VOICE_TEST_MIN_MIDI = 36;
 const VOICE_TEST_MAX_MIDI = 84;
 const VT_WHITE_KEY_W = 46;
 const VT_BLACK_KEY_W = 30;
+
+const DEBUG_CENTS_BANDS = [
+  { label: '+100 o más', min: 100, max: null, bg: '#7f1d1d', fg: '#fca5a5' },
+  { label: '+81 a +99', min: 81, max: 100, bg: '#7f2827', fg: '#fca5a5' },
+  { label: '+61 a +80', min: 61, max: 81, bg: '#78350f', fg: '#fed7aa' },
+  { label: '+51 a +60', min: 51, max: 61, bg: '#854d0e', fg: '#fef3c7' },
+  { label: '+41 a +50', min: 41, max: 51, bg: '#713f12', fg: '#fef3c7' },
+  { label: '+31 a +40', min: 31, max: 41, bg: '#5f4515', fg: '#fef3c7' },
+  { label: '+21 a +30', min: 21, max: 31, bg: '#4b4818', fg: '#ecfccb' },
+  { label: '+16 a +20', min: 16, max: 21, bg: '#3f4a1b', fg: '#ecfccb' },
+  { label: '+11 a +15', min: 11, max: 16, bg: '#354b24', fg: '#dcfce7' },
+  { label: '+6 a +10', min: 6, max: 11, bg: '#28533c', fg: '#dcfce7' },
+  { label: '-5 a +5', min: -5, max: 6, bg: '#166534', fg: '#dcfce7' },
+  { label: '-10 a -6', min: -10, max: -5, bg: '#164e63', fg: '#bae6fd' },
+  { label: '-15 a -11', min: -15, max: -10, bg: '#16446a', fg: '#bae6fd' },
+  { label: '-20 a -16', min: -20, max: -15, bg: '#1e3a8a', fg: '#bfdbfe' },
+  { label: '-30 a -21', min: -30, max: -20, bg: '#263f82', fg: '#bfdbfe' },
+  { label: '-40 a -31', min: -40, max: -30, bg: '#2b477b', fg: '#bfdbfe' },
+  { label: '-50 a -41', min: -50, max: -40, bg: '#304d77', fg: '#bfdbfe' },
+  { label: '-60 a -51', min: -60, max: -50, bg: '#355474', fg: '#cbd5e1' },
+  { label: '-80 a -61', min: -80, max: -60, bg: '#3b5b73', fg: '#cbd5e1' },
+  { label: '-99 a -81', min: -99, max: -80, bg: '#416273', fg: '#cbd5e1' },
+  { label: '-100 o menos', min: null, max: -99, bg: '#476978', fg: '#e2e8f0' },
+];
 
 /**
  * Catálogo de intervalos en semitonos y su etiqueta en español.
@@ -330,6 +354,7 @@ class TrinoShell {
     const vols = this.loadVolumes();
     this.noteVolume = vols.note;
     this.clickVolume = vols.click;
+    this.rectifyVibratoEnabled = this.loadRectifyVibrato();
     this.progress = this.loadProgress(STORAGE_KEY_PROGRESS);
     this.singProgress = this.loadProgress(STORAGE_KEY_SING_PROGRESS);
     this.chordProgress = this.loadProgress(STORAGE_KEY_CHORD_PROGRESS);
@@ -415,6 +440,7 @@ class TrinoShell {
     this.clickVolumeInput = document.getElementById('click-volume-input');
     this.clickVolumeVal = document.getElementById('click-volume-val');
     this.btnTestClickVol = document.getElementById('btn-test-click-vol');
+    this.rectifyVibratoInput = document.getElementById('rectify-vibrato-input');
 
     // Elementos de ejercicio de Reconocer Intervalos
     this.exLevelTitle = document.getElementById('ex-level-title');
@@ -464,6 +490,7 @@ class TrinoShell {
     this.levelInfoModalModule = document.getElementById('level-info-modal-module');
     this.levelInfoModalTitle = document.getElementById('level-info-modal-title');
     this.levelInfoModalBody = document.getElementById('level-info-modal-body');
+    this.voiceTestInfoBody = document.getElementById('vt-module-info');
     this.btnLevelInfoClose = document.getElementById('btn-level-info-close');
 
     // Elementos de Bienvenida / Registro y Pop-up de 3 Notas
@@ -666,6 +693,7 @@ class TrinoShell {
       vocalMaxMidi: this.vocalMaxMidi,
       noteVolume: this.noteVolume,
       clickVolume: this.clickVolume,
+      rectifyVibrato: this.rectifyVibratoEnabled,
     };
   }
 
@@ -719,6 +747,14 @@ class TrinoShell {
       }
     } catch (_) {}
     return { note: 80, click: 90 };
+  }
+
+  loadRectifyVibrato() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
+      if (raw) return JSON.parse(raw).rectifyVibrato === true;
+    } catch (_) {}
+    return false;
   }
 
   loadSingBpm() {
@@ -780,6 +816,7 @@ class TrinoShell {
   }
 
   syncSettingsUi() {
+    if (this.rectifyVibratoInput) this.rectifyVibratoInput.checked = this.rectifyVibratoEnabled;
     if (this.dailyIntervalsMinValue) this.dailyIntervalsMinValue.textContent = `${this.dailyIntervalsMin} diarios`;
     if (this.dailyIntervalsMinDecrease) this.dailyIntervalsMinDecrease.disabled = this.dailyIntervalsMin <= 10;
     if (this.dailyIntervalsMinIncrease) this.dailyIntervalsMinIncrease.disabled = this.dailyIntervalsMin >= 200;
@@ -864,6 +901,11 @@ class TrinoShell {
     this.dailySingingMinIncrease?.addEventListener('click', () => adjustDailyGoal('singing', 10));
     this.dailyChordsMinDecrease?.addEventListener('click', () => adjustDailyGoal('chords', -10));
     this.dailyChordsMinIncrease?.addEventListener('click', () => adjustDailyGoal('chords', 10));
+
+    this.rectifyVibratoInput?.addEventListener('change', () => {
+      this.rectifyVibratoEnabled = this.rectifyVibratoInput.checked;
+      this.saveAllSettings();
+    });
 
     // Eventos de rango vocal y volúmenes en Configuración
     if (this.vocalPresetSelect) {
@@ -1472,6 +1514,7 @@ class TrinoShell {
     }
     if (cfg.noteVolume >= 10 && cfg.noteVolume <= 100) this.noteVolume = cfg.noteVolume;
     if (cfg.clickVolume >= 10 && cfg.clickVolume <= 100) this.clickVolume = cfg.clickVolume;
+    if (typeof cfg.rectifyVibrato === 'boolean') this.rectifyVibratoEnabled = cfg.rectifyVibrato;
     this.saveAllSettings();
     this.syncSettingsUi();
     this.renderIntervalLevels();
@@ -1889,6 +1932,8 @@ class TrinoShell {
   openLevelInfoModal(lvl, moduleType) {
     if (!this.levelInfoModal) return;
 
+    this.levelInfoModalBody?.classList.remove('hidden');
+    this.voiceTestInfoBody?.classList.add('hidden');
     const moduleLabel = moduleType === 'singing' ? 'Módulo 2 · Cantar Notas' : 'Módulo 1 · Reconocer Intervalos';
     if (this.levelInfoModalModule) this.levelInfoModalModule.textContent = moduleLabel;
     if (this.levelInfoModalTitle) this.levelInfoModalTitle.textContent = lvl.title;
@@ -2233,6 +2278,7 @@ class TrinoShell {
       let cPlana = 0;
       let cVib = 0;
       let cIrr = 0;
+      let cSinAnalisis = 0;
 
       items.forEach((it) => {
         const ns = Array.isArray(it.noteStats) ? it.noteStats : [];
@@ -2247,6 +2293,7 @@ class TrinoShell {
             if (n.glissando) cGli++;
             if (n.voiceType === 'vibrato') cVib++;
             else if (n.voiceType === 'inestable') cIrr++;
+            else if (n.voiceType === 'sin-analisis') cSinAnalisis++;
             else cPlana++;
           });
         }
@@ -2263,8 +2310,8 @@ class TrinoShell {
         notesSummaryHtml = `
           <div class="day-summary-line">
             <span><strong>Notas:</strong> ${totalNotes}</span>
-            <span class="sum-adm" title="Admirables" aria-label="Admirables: ${pNAdm}%">✦ ${pNAdm}%</span>
-            <span class="sum-bueno" title="Buenas" aria-label="Buenas: ${pNBueno}%">✓ ${pNBueno}%</span>
+            ${pNAdm > 0 ? `<span class="sum-adm" title="Admirables" aria-label="Admirables: ${pNAdm}%">✦ ${pNAdm}%</span>` : ''}
+            ${pNBueno > 0 ? `<span class="sum-bueno" title="Buenas" aria-label="Buenas: ${pNBueno}%">✓ ${pNBueno}%</span>` : ''}
             <span class="sum-acep" title="Aceptables" aria-label="Aceptables: ${pNAcep}%">⊙ ${pNAcep}%</span>
             <span class="sum-reg" title="Regulares" aria-label="Regulares: ${pNReg}%">≈ ${pNReg}%</span>
             <span class="sum-bad" title="Fallidas" aria-label="Fallidas: ${pNMalo}%">✕ ${pNMalo}%</span>
@@ -2282,6 +2329,7 @@ class TrinoShell {
             <span>Sin vibrato: <strong>${cPlana}</strong></span>
             <span>Vibratos: <strong>${cVib}</strong></span>
             <span>Irregulares: <strong>${cIrr}</strong></span>
+            ${cSinAnalisis ? `<span>Sin análisis: <strong>${cSinAnalisis}</strong></span>` : ''}
           </div>
         `;
       }
@@ -2312,8 +2360,8 @@ class TrinoShell {
             <div class="day-summary-line">
               <span><strong>Ejercicios:</strong> ${totalEx}</span>
               ${isSinging
-                 ? `<span class="sum-adm" title="Admirables" aria-label="Admirables: ${pAdmEx}%">✦ ${pAdmEx}%</span>
-                   <span class="sum-bueno" title="Buenos" aria-label="Buenos: ${pBuenoEx}%">✓ ${pBuenoEx}%</span>
+                 ? `${pAdmEx > 0 ? `<span class="sum-adm" title="Admirables" aria-label="Admirables: ${pAdmEx}%">✦ ${pAdmEx}%</span>` : ''}
+                   ${pBuenoEx > 0 ? `<span class="sum-bueno" title="Buenos" aria-label="Buenos: ${pBuenoEx}%">✓ ${pBuenoEx}%</span>` : ''}
                    <span class="sum-acep" title="Aceptables" aria-label="Aceptables: ${pAcepEx}%">⊙ ${pAcepEx}%</span>
                    <span class="sum-reg" title="Regulares" aria-label="Regulares: ${pRegEx}%">≈ ${pRegEx}%</span>
                    <span class="sum-bad" title="Fallidos" aria-label="Fallidos: ${pBadEx}%">✕ ${pBadEx}%</span>`
@@ -2400,7 +2448,7 @@ class TrinoShell {
               const rawLabel = (note?.label || '')
                 .replace('Casi perfecto', 'Casi centrado')
                 .replace('Perfecto', 'Centrado');
-              const tonalCenter = note?.sungNote && rawLabel !== 'Silencio'
+              const tonalCenter = note?.sungNote && rawLabel !== 'Silencio' && rawLabel !== 'Muy irregular'
                 ? `<strong>${note.sungNote}</strong> ${rawLabel}`
                 : rawLabel || '&nbsp;';
 
@@ -2722,6 +2770,7 @@ class TrinoShell {
     const makeTonal = (a) => ({
       label:      a.label,
       sungNote:   a.sungNote || null,
+      voiceType:  a.voiceType,
       isVibrato:  a.voiceType === 'vibrato',
       isUnstable: a.voiceType === 'inestable',
       vibratoHz:  a.vibratoHz,
@@ -2958,16 +3007,13 @@ class TrinoShell {
   }
 
   /**
-   * Calcula la mediana con signo de la desviación en cents (plegada por octava)
-   * para mostrar al usuario si cantó "alto" o "bajo".
+  * Calcula la mediana con signo de la desviación real en cents,
+  * incluida cualquier diferencia de octava.
    */
   getSignedMedianCents(midiFrames, targetMidi) {
     const voiced = midiFrames.filter((m) => m !== null);
     if (voiced.length === 0) return null;
-    const signed = voiced.map((m) => {
-      const ss = (((m - targetMidi) % 12) + 18) % 12 - 6;
-      return Math.round(ss * 100);
-    });
+    const signed = voiced.map((m) => this.getSignedCentsDiff(m, targetMidi));
     signed.sort((a, b) => a - b);
     return signed[Math.floor(signed.length / 2)];
   }
@@ -3229,8 +3275,8 @@ class TrinoShell {
         const targetPos = isFirstNote ? pos1 : pos2;
         const targetY = stepToY(targetPos.step);
 
-        // Desviación en semitonos plegada por octava para coincidir con el pentagrama donde está escrita la nota
-        const signedSemitones = (((f.midi - targetMidi) % 12) + 18) % 12 - 6;
+        // La posición se limita al pentagrama, pero la afinación conserva la octava real.
+        const signedSemitones = f.midi - targetMidi;
         const clamped = Math.max(-4, Math.min(4, signedSemitones));
 
         const x = m2Start + f.ratio * m2W;
@@ -3458,8 +3504,7 @@ class TrinoShell {
 
   getSignedCentsDiff(detectedMidi, targetMidi) {
     if (detectedMidi === null) return null;
-    const signedSemitones = (((detectedMidi - targetMidi) % 12) + 18) % 12 - 6;
-    return Math.round(signedSemitones * 100);
+    return Math.round((detectedMidi - targetMidi) * 100);
   }
 
   /**
@@ -3475,170 +3520,234 @@ class TrinoShell {
   }
 
   /**
-   * =========================================================================
-   * ANÁLISIS DE FORMA DE ONDA VOCAL — 3 etapas independientes
-   * =========================================================================
-   *
-   * Etapa 1: analyzeVoiceShape(midiFrames, targetMidi)
-   *   → Determina tipo de voz: 'plana' | 'vibrato' | 'inestable'
-   *   → Detecta glisando como flag independiente
-   *
-   * Etapa 2: analyzeTonalCenter(signedList, voiceShape)
-   *   → Calcula el label de afinación y si está muy alto/bajo
-   *
-   * Etapa 3: buildNoteAnalysis(midiFrames, targetMidi)
-   *   → Orquesta ambas etapas y devuelve el objeto completo
-   * =========================================================================
+   * Shared vocal analysis. `buildNoteAnalysis` computes the tonal median first,
+   * then passes the same center-relative, time-preserving frames to vibrato,
+   * irregularity, and glissando detection for Modules 2 and 4.
    */
-
-  /**
-   * Etapa 1 — Análisis de forma de onda.
-   *
-   * Paso A: ¿Justifica análisis de picos?
-   *   SD de los cents < FLAT_SD_THRESHOLD → voz plana, fin.
-   *
-   * Paso B: Detección de picos locales (máximos y mínimos).
-   *
-   * Paso C: Clasificación por periodicidad de los picos.
-   *   - Vibrato:   CV temporal ≤ 0.35  Y  frecuencia 4–8 Hz  Y  ≥ 3 ciclos
-   *   - Inestable: hay picos pero no cumple vibrato
-   *
-   * Paso D: Detección de glisando (independiente).
-   *   - Los primeros 20% de frames tienen desviación media > 50c
-   *     Y la media del último 30% está dentro de 30c → glisando detectado
-   *
-   * @returns {{ type: 'plana'|'vibrato'|'inestable', vibratoHz: number|null, glissando: boolean }}
-   */
-  analyzeVoiceShape(midiFrames, targetMidi) {
-    const HOP_SEC            = 0.02;
-    const FLAT_SD_THRESHOLD  = 35;   // cents — por debajo: micro-variación normal
-    const PEAK_MIN_EXCURSION = 20;   // cents — excursión mínima respecto al entorno para contar como pico
-    const VIBRATO_CV_MAX     = 0.35;
-    const VIBRATO_HZ_MIN     = 4;
-    const VIBRATO_HZ_MAX     = 8;
-    const VIBRATO_MIN_CYCLES = 3;
-
-    const voiced = midiFrames.filter((m) => m !== null);
-    if (voiced.length < 4) return { type: 'plana', vibratoHz: null, glissando: false, peaks: [], sd: 0 };
-
-    // Convertir a cents con signo (plegado por octava)
-    const cents = voiced.map((m) => {
-      const ss = (((m - targetMidi) % 12) + 18) % 12 - 6;
-      return ss * 100;
-    });
-
-    const mean = cents.reduce((s, c) => s + c, 0) / cents.length;
-    const sd = Math.sqrt(cents.reduce((s, c) => s + (c - mean) ** 2, 0) / cents.length);
-
-    // ── Encontrar picos locales (máximos y mínimos significativos) ─────────
-    const peakIndices = [];
-    const winRadius = 2; // ventana de ±2 frames (40ms) para evaluar prominencia local
-    for (let i = 1; i < cents.length - 1; i++) {
-      const curr = cents[i];
-      const prev = cents[i - 1];
-      const next = cents[i + 1];
-
-      // ¿Es extremo local inmediato?
-      const isLocalMax = curr >= prev && curr >= next && (curr > prev || curr > next);
-      const isLocalMin = curr <= prev && curr <= next && (curr < prev || curr < next);
-      if (!isLocalMax && !isLocalMin) continue;
-
-      // Verificar que sea el extremo dentro de ±winRadius y tenga excursión mínima
-      const wStart = Math.max(0, i - winRadius);
-      const wEnd   = Math.min(cents.length - 1, i + winRadius);
-      let wMin = Infinity;
-      let wMax = -Infinity;
-      for (let k = wStart; k <= wEnd; k++) {
-        if (cents[k] < wMin) wMin = cents[k];
-        if (cents[k] > wMax) wMax = cents[k];
-      }
-
-      const isProminentMax = isLocalMax && curr >= wMax && (curr - wMin >= PEAK_MIN_EXCURSION || Math.abs(curr - mean) >= PEAK_MIN_EXCURSION);
-      const isProminentMin = isLocalMin && curr <= wMin && (wMax - curr >= PEAK_MIN_EXCURSION || Math.abs(curr - mean) >= PEAK_MIN_EXCURSION);
-
-      if (isProminentMax || isProminentMin) {
-        // Evitar duplicar picos en mesetas contiguas (quedarse con el más extremo si están a 1 frame)
-        const lastIdx = peakIndices.length > 0 ? peakIndices[peakIndices.length - 1] : -99;
-        if (i - lastIdx <= 1) {
-          if (Math.abs(curr - mean) > Math.abs(cents[lastIdx] - mean)) {
-            peakIndices[peakIndices.length - 1] = i;
-          }
-        } else {
-          peakIndices.push(i);
-        }
-      }
-    }
-
-    const peakData  = peakIndices.map(i => ({ frameIdx: i, cents: Math.round(cents[i]) }));
-    const glissando = this._detectGlissando(cents);
-
-    // ── Paso A: ¿Justifica clasificación de vibrato/inestable por SD y cantidad de picos? ──
-    if (sd < FLAT_SD_THRESHOLD || peakIndices.length < 4) {
-      return {
-        type: 'plana',
-        vibratoHz: null,
-        glissando,
-        peaks: peakData,
-        sd: Math.round(sd),
-      };
-    }
-
-    // ── Paso C: Clasificar por periodicidad ───────────────────────────────
-    // Intervalos de tiempo entre picos consecutivos (en segundos)
-    const intervals = [];
-    for (let i = 1; i < peakIndices.length; i++) {
-      intervals.push((peakIndices[i] - peakIndices[i - 1]) * HOP_SEC);
-    }
-
-    const iMean = intervals.reduce((s, v) => s + v, 0) / intervals.length;
-    const iSd   = Math.sqrt(intervals.reduce((s, v) => s + (v - iMean) ** 2, 0) / intervals.length);
-    const cv    = iMean > 0 ? iSd / iMean : 1;
-
-    // Frecuencia estimada de oscilación
-    const freqHz = iMean > 0 ? 1 / iMean : 0;
-    const cycles = peakIndices.length / 2;
-
-    if (
-      cv <= VIBRATO_CV_MAX &&
-      freqHz >= VIBRATO_HZ_MIN &&
-      freqHz <= VIBRATO_HZ_MAX &&
-      cycles >= VIBRATO_MIN_CYCLES
-    ) {
-      return {
-        type: 'vibrato',
-        vibratoHz: Math.round(freqHz * 10) / 10,
-        glissando,
-        peaks: peakData,
-        sd: Math.round(sd),
-        cv: Math.round(cv * 100) / 100,
-        freqHz: Math.round(freqHz * 10) / 10,
-      };
-    }
-
-    return { type: 'inestable', vibratoHz: null, glissando,
-             peaks: peakData, sd: Math.round(sd),
-             cv: Math.round(cv * 100) / 100,
-             freqHz: Math.round(freqHz * 10) / 10 };
+  medianValue(values) {
+    if (!values.length) return null;
+    const sorted = [...values].sort((a, b) => a - b);
+    return sorted[Math.floor(sorted.length / 2)];
   }
 
-  /**
-   * Detecta glisando: los primeros 20% de frames tienen desviación media > 60c,
-   * el desplazamiento entre el ataque y la cola estabilizada supera los 60c,
-   * y la media del último 30% está dentro de ±30c del centro.
-   */
-  _detectGlissando(cents) {
-    if (cents.length < 10) return false;
-    const headEnd   = Math.floor(cents.length * 0.20);
-    const tailStart = Math.floor(cents.length * 0.70);
+  analyzeVoiceShape(midiFrames, targetMidi, centerMidi = null) {
+    const MIN_FRAMES = 18;
+    const MIN_PEAK_TO_PEAK_CENTS = 50;
+    const MIN_PEAK_PROMINENCE_CENTS = 20;
+    const MIN_VIBRATO_HZ = 4;
+    const MAX_VIBRATO_HZ = 8;
+    const MAX_PERIOD_CV = 0.35;
+    const HOP_SEC = 0.02;
+    const voiced = midiFrames
+      .map((midi, frameIdx) => midi === null ? null : { midi, frameIdx })
+      .filter(Boolean);
+    const detectedCenterMidi = centerMidi ?? this.medianValue(voiced.map((frame) => frame.midi));
+    const centeredCents = midiFrames.map((midi) =>
+      midi === null || detectedCenterMidi === null ? null : Math.round((midi - detectedCenterMidi) * 100)
+    );
 
-    const headSignedMean = cents.slice(0, headEnd).reduce((s, c) => s + c, 0) / headEnd;
-    const tailSignedMean = cents.slice(tailStart).reduce((s, c) => s + c, 0) / (cents.length - tailStart);
+    if (voiced.length < MIN_FRAMES) {
+      return {
+        type: 'sin-analisis',
+        vibratoHz: null,
+        glissando: false,
+        glissandoDebug: { detected: false, reason: 'menos de 18 frames con voz' },
+        peaks: [],
+        centeredCents,
+        sd: null,
+        cv: null,
+        freqHz: null,
+        periodsFrames: [],
+        cycles: 0,
+        sampleCount: voiced.length,
+      };
+    }
 
-    const headAbs  = Math.abs(headSignedMean);
-    const tailAbs  = Math.abs(tailSignedMean);
-    const slideMag = Math.abs(headSignedMean - tailSignedMean);
+    const voicedCents = centeredCents.filter((cents) => cents !== null);
+    const mean = voicedCents.reduce((sum, cents) => sum + cents, 0) / voicedCents.length;
+    const sd = Math.sqrt(voicedCents.reduce((sum, cents) => sum + (cents - mean) ** 2, 0) / voicedCents.length);
+    const smoothedCents = centeredCents.map((cents, frameIdx) => {
+      if (cents === null) return null;
+      const local = [frameIdx - 1, frameIdx, frameIdx + 1]
+        .filter((idx) => idx >= 0 && idx < centeredCents.length && centeredCents[idx] !== null)
+        .map((idx) => centeredCents[idx]);
+      return this.medianValue(local);
+    });
 
-    return headAbs > 60 && slideMag > 60 && tailAbs <= 30;
+    const segments = [];
+    let segment = [];
+    centeredCents.forEach((cents, frameIdx) => {
+      if (cents === null) {
+        if (segment.length) segments.push(segment);
+        segment = [];
+      } else {
+        segment.push({ frameIdx, cents });
+      }
+    });
+    if (segment.length) segments.push(segment);
+
+    const rawPeaks = [];
+    segments.forEach((frames, segmentIdx) => {
+      for (let i = 1; i < frames.length - 1; i++) {
+        const previous = frames[i - 1].cents;
+        const current = frames[i].cents;
+        const next = frames[i + 1].cents;
+        const isMax = current >= previous && current >= next && (current > previous || current > next);
+        const isMin = current <= previous && current <= next && (current < previous || current < next);
+        if (!isMax && !isMin) continue;
+
+        const window = frames.slice(Math.max(0, i - 2), Math.min(frames.length, i + 3));
+        const localMin = Math.min(...window.map((frame) => frame.cents));
+        const localMax = Math.max(...window.map((frame) => frame.cents));
+        const prominence = isMax ? current - localMin : localMax - current;
+        if (prominence < MIN_PEAK_PROMINENCE_CENTS && Math.abs(current) < MIN_PEAK_PROMINENCE_CENTS) continue;
+        rawPeaks.push({
+          frameIdx: frames[i].frameIdx,
+          cents: Math.round(current),
+          type: isMax ? 'max' : 'min',
+          segmentIdx,
+        });
+      }
+    });
+
+    const peaks = [];
+    rawPeaks.forEach((peak) => {
+      const previous = peaks[peaks.length - 1];
+      if (previous && previous.segmentIdx === peak.segmentIdx && previous.type === peak.type) {
+        const moreExtreme = peak.type === 'max' ? peak.cents > previous.cents : peak.cents < previous.cents;
+        if (moreExtreme) peaks[peaks.length - 1] = peak;
+      } else {
+        peaks.push(peak);
+      }
+    });
+
+    const alternatingRuns = [];
+    let run = [];
+    peaks.forEach((peak) => {
+      const previous = run[run.length - 1];
+      if (!previous || previous.segmentIdx !== peak.segmentIdx) {
+        if (run.length) alternatingRuns.push(run);
+        run = [peak];
+        return;
+      }
+      if (previous.type === peak.type) {
+        run = [peak];
+        return;
+      }
+      if (Math.abs(peak.cents - previous.cents) < MIN_PEAK_TO_PEAK_CENTS) {
+        if (run.length) alternatingRuns.push(run);
+        run = [peak];
+        return;
+      }
+      run.push(peak);
+    });
+    if (run.length) alternatingRuns.push(run);
+
+    const cycleCandidates = [];
+    alternatingRuns.forEach((peakRun) => {
+      if (peakRun.length < 7) return;
+      const periodsFrames = [];
+      for (let i = 0; i + 2 < peakRun.length; i += 2) {
+        periodsFrames.push(peakRun[i + 2].frameIdx - peakRun[i].frameIdx);
+      }
+      if (periodsFrames.length < 3) return;
+
+      const meanPeriodFrames = periodsFrames.reduce((sum, period) => sum + period, 0) / periodsFrames.length;
+      const periodSd = Math.sqrt(periodsFrames.reduce((sum, period) => sum + (period - meanPeriodFrames) ** 2, 0) / periodsFrames.length);
+      const cv = meanPeriodFrames > 0 ? periodSd / meanPeriodFrames : Infinity;
+      const frequencyHz = meanPeriodFrames > 0 ? 1 / (meanPeriodFrames * HOP_SEC) : 0;
+      if (frequencyHz >= MIN_VIBRATO_HZ && frequencyHz <= MAX_VIBRATO_HZ && cv <= MAX_PERIOD_CV) {
+        cycleCandidates.push({ peakRun, periodsFrames, cv, frequencyHz });
+      }
+    });
+
+    cycleCandidates.sort((a, b) => b.periodsFrames.length - a.periodsFrames.length || a.cv - b.cv);
+    const vibratoCandidate = cycleCandidates[0] || null;
+    const glissandoDebug = this._detectGlissando(midiFrames, detectedCenterMidi, smoothedCents);
+    const isVibrato = Boolean(vibratoCandidate);
+    const hasOscillation = peaks.length >= 2 && sd >= MIN_PEAK_PROMINENCE_CENTS;
+
+    return {
+      type: isVibrato ? 'vibrato' : hasOscillation ? 'inestable' : 'plana',
+      vibratoHz: vibratoCandidate ? Math.round(vibratoCandidate.frequencyHz * 10) / 10 : null,
+      glissando: glissandoDebug.detected,
+      glissandoDebug,
+      peaks: peaks.map(({ frameIdx, cents, type }) => ({ frameIdx, cents, type })),
+      centeredCents,
+      smoothedCents,
+      centerMidi: detectedCenterMidi,
+      sd: Math.round(sd),
+      cv: vibratoCandidate ? Math.round(vibratoCandidate.cv * 100) / 100 : null,
+      freqHz: vibratoCandidate ? Math.round(vibratoCandidate.frequencyHz * 10) / 10 : null,
+      periodsFrames: vibratoCandidate?.periodsFrames || [],
+      cycles: vibratoCandidate?.periodsFrames.length || 0,
+      vibratoPeaks: vibratoCandidate?.peakRun || [],
+      sampleCount: voiced.length,
+    };
+  }
+
+  _detectGlissando(midiFrames, centerMidi, smoothedCents = null) {
+    const MIN_VOICED_FRAMES = 20;
+    const START_DISTANCE_CENTS = 60;
+    const CENTER_TOLERANCE_CENTS = 30;
+    const SETTLE_FRAMES = 9;
+    const MAX_LOCAL_REVERSAL_CENTS = 15;
+    const MIN_PROGRESS_RATIO = 0.65;
+    const voicedCount = midiFrames.filter((midi) => midi !== null).length;
+    const fail = (reason, extra = {}) => ({ detected: false, reason, voicedCount, ...extra });
+
+    if (voicedCount < MIN_VOICED_FRAMES || centerMidi === null) {
+      return fail('menos de 20 frames con voz');
+    }
+
+    const centered = smoothedCents || midiFrames.map((midi) =>
+      midi === null ? null : Math.round((midi - centerMidi) * 100)
+    );
+    let lastVoiceFrame = centered.length - 1;
+    while (lastVoiceFrame >= 0 && centered[lastVoiceFrame] === null) lastVoiceFrame--;
+    if (lastVoiceFrame < SETTLE_FRAMES - 1) return fail('no hay tramo final suficiente');
+
+    let stableStart = lastVoiceFrame;
+    while (stableStart >= 0 && centered[stableStart] !== null && Math.abs(centered[stableStart]) <= CENTER_TOLERANCE_CENTS) {
+      stableStart--;
+    }
+    const stableFrames = lastVoiceFrame - stableStart;
+    stableStart++;
+    if (stableFrames < SETTLE_FRAMES) return fail('no se estabiliza al final', { stableFrames });
+
+    let startFrame = 0;
+    while (startFrame < centered.length && centered[startFrame] === null) startFrame++;
+    const startDistance = Math.abs(centered[startFrame] ?? 0);
+    if (startDistance < START_DISTANCE_CENTS) {
+      return fail('el comienzo no está suficientemente alejado', { startDistance, stableFrames });
+    }
+    if (stableStart - startFrame < 3) return fail('trayectoria demasiado corta', { startDistance, stableFrames });
+
+    let progressSteps = 0;
+    let totalSteps = 0;
+    for (let i = startFrame + 1; i <= stableStart; i++) {
+      if (centered[i] === null || centered[i - 1] === null) return fail('silencio interrumpe la trayectoria');
+      const previousDistance = Math.abs(centered[i - 1]);
+      const currentDistance = Math.abs(centered[i]);
+      if (currentDistance <= previousDistance + MAX_LOCAL_REVERSAL_CENTS) progressSteps++;
+      totalSteps++;
+    }
+    const progressRatio = totalSteps ? progressSteps / totalSteps : 0;
+    const netProgress = startDistance - Math.abs(centered[stableStart]);
+    const detected = netProgress >= START_DISTANCE_CENTS - CENTER_TOLERANCE_CENTS && progressRatio >= MIN_PROGRESS_RATIO;
+    return {
+      detected,
+      reason: detected ? 'trayectoria hacia el centro y asentamiento final' : 'trayectoria no converge lo suficiente',
+      voicedCount,
+      startFrame,
+      stableStart,
+      stableFrames,
+      startDistance: Math.round(startDistance),
+      endDistance: Math.round(Math.abs(centered[stableStart] ?? 0)),
+      netProgress: Math.round(netProgress),
+      progressRatio: Math.round(progressRatio * 100) / 100,
+      smoothedCents: centered,
+    };
   }
 
   /**
@@ -3653,41 +3762,32 @@ class TrinoShell {
    *
    * @returns {{ label: string, isHighLow: boolean }}
    */
-  analyzeTonalCenter(midiFrames, targetMidi, voiceShape) {
+  analyzeTonalCenter(midiFrames, targetMidi, voiceShape, centerMidi = null) {
     const voiced = midiFrames.filter((m) => m !== null);
     if (voiced.length === 0) return { label: 'Silencio', sungNote: null, isHighLow: false };
 
-    const sortedMidi = [...voiced].sort((a, b) => a - b);
-    const medianMidi = sortedMidi[Math.floor(sortedMidi.length / 2)];
+    const medianMidi = centerMidi ?? this.medianValue(voiced);
     const sungNote = this.midiToNoteNameEs(Math.round(medianMidi));
 
-    const signedList = voiced.map((m) => {
-      const ss = (((m - targetMidi) % 12) + 18) % 12 - 6;
-      return Math.round(ss * 100);
-    });
+    const signedList = voiced.map((m) => this.getSignedCentsDiff(m, targetMidi));
 
     const sorted = [...signedList].sort((a, b) => a - b);
     const medianSigned = sorted[Math.floor(sorted.length / 2)];
     const baseLabel = this.formatTonalCenterLabel(Math.abs(medianSigned), medianSigned);
 
-    // Solo aplicar análisis alto/bajo si NO es vibrato
-    if (voiceShape?.type !== 'vibrato') {
-      const total    = signedList.length;
-      const highPct  = signedList.filter((c) => c > 50).length / total;
-      const lowPct   = signedList.filter((c) => c < -50).length / total;
+    // “Muy irregular” describe una distribución a ambos lados del centro tonal.
+    if (voiceShape?.type !== 'vibrato' && voiceShape?.type !== 'sin-analisis') {
+      const centeredCents = voiced.map((midi) => Math.round((midi - medianMidi) * 100));
+      const total = centeredCents.length;
+      const highPct = centeredCents.filter((cents) => cents > 50).length / total;
+      const lowPct = centeredCents.filter((cents) => cents < -50).length / total;
 
       if (highPct >= 0.30 && lowPct >= 0.30) {
-        return { label: 'Muy irregular', sungNote, isHighLow: true };
-      }
-      if (highPct >= 0.30) {
-        return { label: 'Muy alto', sungNote, isHighLow: true };
-      }
-      if (lowPct >= 0.30) {
-        return { label: 'Muy bajo', sungNote, isHighLow: true };
+        return { label: 'Muy irregular', sungNote: null, isHighLow: true, medianSigned };
       }
     }
 
-    return { label: baseLabel, sungNote, isHighLow: false };
+    return { label: baseLabel, sungNote, isHighLow: false, medianSigned, medianMidi };
   }
 
   /**
@@ -3704,13 +3804,30 @@ class TrinoShell {
    * }}
    */
   buildNoteAnalysis(midiFrames, targetMidi) {
-    const voiceShape = this.analyzeVoiceShape(midiFrames, targetMidi);
-    const tonal      = this.analyzeTonalCenter(midiFrames, targetMidi, voiceShape);
+    const voiced = midiFrames.filter((midi) => midi !== null);
+    const centerMidi = this.medianValue(voiced);
+    const voiceShape = this.analyzeVoiceShape(midiFrames, targetMidi, centerMidi);
+    const tonal = this.analyzeTonalCenter(midiFrames, targetMidi, voiceShape, centerMidi);
+    const frameCentsTarget = midiFrames.map((midi) => midi === null ? null : this.getSignedCentsDiff(midi, targetMidi));
+    const rectification = voiceShape.type === 'vibrato'
+      ? this.rectifyVibratoCents(frameCentsTarget, voiceShape.vibratoPeaks)
+      : { values: [...frameCentsTarget], correctedFrames: 0 };
     return {
       voiceType:  voiceShape.type,
       vibratoHz:  voiceShape.vibratoHz,
       glissando:  voiceShape.glissando,
+      glissandoDebug: voiceShape.glissandoDebug,
       peaks:      voiceShape.peaks || [],
+      periodsFrames: voiceShape.periodsFrames || [],
+      cycles:      voiceShape.cycles || 0,
+      sampleCount: voiceShape.sampleCount || 0,
+      frameCentsTarget,
+      rectifiedCentsTarget: rectification.values,
+      rectifiedFrameCount: rectification.correctedFrames,
+      centeredCents: voiceShape.centeredCents || [],
+      smoothedCents: voiceShape.smoothedCents || [],
+      centerMidi,
+      medianSigned: tonal.medianSigned ?? null,
       sd:         voiceShape.sd,
       cv:         voiceShape.cv,
       freqHz:     voiceShape.freqHz,
@@ -3718,6 +3835,75 @@ class TrinoShell {
       sungNote:   tonal.sungNote,
       isHighLow:  tonal.isHighLow,
     };
+  }
+
+  rectifyVibratoCents(frameCents, peaks) {
+    const corrected = [...frameCents];
+    const contributions = new Array(frameCents.length).fill(0);
+    const counts = new Array(frameCents.length).fill(0);
+    let correctedFrames = 0;
+    const interpolate = (start, end, phase) => {
+      const position = start + (end - start) * phase;
+      const left = Math.floor(position);
+      const right = Math.ceil(position);
+      const leftValue = frameCents[left];
+      const rightValue = frameCents[right];
+      if (leftValue === null || rightValue === null || leftValue === undefined || rightValue === undefined) return null;
+      return left === right ? leftValue : leftValue + (rightValue - leftValue) * (position - left);
+    };
+
+    for (let peakIdx = 0; peakIdx + 2 < peaks.length; peakIdx += 2) {
+      const first = peaks[peakIdx];
+      const middle = peaks[peakIdx + 1];
+      const last = peaks[peakIdx + 2];
+      if (first.segmentIdx !== middle.segmentIdx || middle.segmentIdx !== last.segmentIdx) continue;
+      if (first.type !== last.type || first.type === middle.type) continue;
+      const firstHalfFrames = middle.frameIdx - first.frameIdx;
+      const secondHalfFrames = last.frameIdx - middle.frameIdx;
+      if (firstHalfFrames < 1 || secondHalfFrames < 1) continue;
+
+      const phaseSteps = Math.max(firstHalfFrames, secondHalfFrames);
+      const phaseValues = [];
+      let validCycle = true;
+      for (let step = 0; step <= phaseSteps; step++) {
+        const phase = step / phaseSteps;
+        const firstValue = interpolate(first.frameIdx, middle.frameIdx, phase);
+        const secondValue = interpolate(middle.frameIdx, last.frameIdx, phase);
+        if (firstValue === null || secondValue === null) {
+          validCycle = false;
+          break;
+        }
+        phaseValues.push((firstValue + secondValue) / 2);
+      }
+      if (!validCycle) continue;
+
+      for (let frameIdx = first.frameIdx; frameIdx <= middle.frameIdx; frameIdx++) {
+        const phase = (frameIdx - first.frameIdx) / firstHalfFrames;
+        const phasePosition = phase * phaseSteps;
+        const left = Math.floor(phasePosition);
+        const right = Math.ceil(phasePosition);
+        const value = left === right ? phaseValues[left] : phaseValues[left] + (phaseValues[right] - phaseValues[left]) * (phasePosition - left);
+        contributions[frameIdx] += value;
+        counts[frameIdx]++;
+      }
+      for (let frameIdx = middle.frameIdx; frameIdx <= last.frameIdx; frameIdx++) {
+        const phase = (frameIdx - middle.frameIdx) / secondHalfFrames;
+        const phasePosition = phase * phaseSteps;
+        const left = Math.floor(phasePosition);
+        const right = Math.ceil(phasePosition);
+        const value = left === right ? phaseValues[left] : phaseValues[left] + (phaseValues[right] - phaseValues[left]) * (phasePosition - left);
+        contributions[frameIdx] += value;
+        counts[frameIdx]++;
+      }
+    }
+
+    counts.forEach((count, frameIdx) => {
+      if (count > 0) {
+        corrected[frameIdx] = Math.round(contributions[frameIdx] / count);
+        correctedFrames++;
+      }
+    });
+    return { values: corrected, correctedFrames };
   }
 
   /**
@@ -3739,16 +3925,18 @@ class TrinoShell {
    * Levels: 'admirable' | 'bueno' | 'aceptable' | 'casi' | 'malo'
    */
   getNoteGradeFromFrames(midiFrames, targetMidi) {
-    const hopSec = 0.02;
     // Separar frames con pitch
     const voiced = midiFrames.filter((m) => m !== null);
     if (voiced.length < 2) return { grade: 'malo', medianCents: null, vibrato: { detected: false, freqHz: null } };
 
-    // Calcular desviación en cents para cada frame (plegada por octava)
-    const centsList = voiced.map((m) => {
-      const signedSemitones = (((m - targetMidi) % 12) + 18) % 12 - 6;
-      return Math.abs(Math.round(signedSemitones * 100));
-    });
+    const noteAnalysis = this.buildNoteAnalysis(midiFrames, targetMidi);
+    const rawSignedCents = midiFrames.map((midi) => midi === null ? null : this.getSignedCentsDiff(midi, targetMidi));
+    const rectified = this.rectifyVibratoEnabled && noteAnalysis.voiceType === 'vibrato' && noteAnalysis.rectifiedFrameCount > 0;
+    const signedCentsUsed = rectified ? noteAnalysis.rectifiedCentsTarget : rawSignedCents;
+    const centsList = signedCentsUsed.filter((cents) => cents !== null).map(Math.abs);
+
+    // Los buckets y la calificación usan la curva rectificada solo si se activó la opción.
+    const rawCentsList = voiced.map((m) => Math.abs(this.getSignedCentsDiff(m, targetMidi)));
 
     const total = centsList.length;
 
@@ -3765,8 +3953,6 @@ class TrinoShell {
     const goodPct  = goodCount  / total;
     const tightPct = tightCount / total;
 
-    // Detección de forma de voz integrada en buildNoteAnalysis
-    const noteAnalysis = this.buildNoteAnalysis(voiced.map((_, i) => voiced[i]), targetMidi);
     // Compatibilidad: exponer campo vibrato con la forma antigua para que el resto del código funcione
     const vibrato = noteAnalysis.voiceType === 'vibrato'
       ? { detected: true, freqHz: noteAnalysis.vibratoHz }
@@ -3786,7 +3972,16 @@ class TrinoShell {
       grade = 'casi';
     }
 
-    return { grade, medianCents, vibrato, _dbg: { total, badPct, goodPct, tightPct } };
+    return {
+      grade,
+      medianCents,
+      vibrato,
+      rectified,
+      centsList,
+      rawMedianCents: this.medianValue(rawCentsList),
+      rectifiedFrameCount: rectified ? noteAnalysis.rectifiedFrameCount : 0,
+      _dbg: { total, badPct, goodPct, tightPct },
+    };
   }
 
   /**
@@ -3797,14 +3992,15 @@ class TrinoShell {
     if (medianCents === null) return 'Silencio';
     const direction = signedMedianCents >= 0 ? 'alto' : 'bajo';
     const abs = Math.abs(signedMedianCents);
+    if (abs > 200) return `Muy ${direction}`;
+
     let level;
     if (abs <= 5)       level = 'Centrado';
     else if (abs <= 15) level = 'Casi centrado';
     else if (abs <= 30) level = `Leve ${direction}`;
-    else if (abs <= 60) level = direction.charAt(0).toUpperCase() + direction.slice(1);
+    else if (abs <= 50) level = direction.charAt(0).toUpperCase() + direction.slice(1);
     else                level = `Muy ${direction}`;
 
-    if (abs <= 5) return `(${signedMedianCents >= 0 ? '+' : ''}${signedMedianCents}c) ${level}`;
     return `(${signedMedianCents >= 0 ? '+' : ''}${signedMedianCents}c) ${level}`;
   }
 
@@ -3891,7 +4087,7 @@ class TrinoShell {
       const todayKey = this.getTodayKey();
       const todayCount = this.singSessionLog.filter((it) => (it.date || todayKey) === todayKey).length;
       const toVoiceType = (t) =>
-        t.isVibrato ? 'vibrato' : t.isUnstable || t.isHighLow ? 'inestable' : 'plana';
+        t.voiceType || (t.isVibrato ? 'vibrato' : t.isUnstable || t.isHighLow ? 'inestable' : 'plana');
 
       this.pushLevelDayLog('singing', this.activeLevel.id, {
         date: todayKey,
@@ -3954,28 +4150,10 @@ class TrinoShell {
 
     const frameCents = (midi, target) => {
       if (midi == null) return null;
-      const ss = (((midi - target) % 12) + 18) % 12 - 6;
-      return Math.round(ss * 100);
+      return this.getSignedCentsDiff(midi, target);
     };
 
-    // ── 15 filas simétricas ──────────────────────────────────────────────────
-    const ROWS = [
-      { label: '> +300c',       min:  300, max: null, bg: '#7f1d1d', fg: '#fca5a5' },
-      { label: '+200 a +300c',  min:  200, max:  300, bg: '#991b1b', fg: '#fca5a5' },
-      { label: '+100 a +200c',  min:  100, max:  200, bg: '#b91c1c', fg: '#fecaca' },
-      { label:  '+80 a +100c',  min:   80, max:  100, bg: '#c2410c', fg: '#fed7aa' },
-      { label:  '+40 a  +80c',  min:   40, max:   80, bg: '#d97706', fg: '#fef3c7' },
-      { label:  '+15 a  +40c',  min:   15, max:   40, bg: '#15803d', fg: '#bbf7d0' },
-      { label:  '+10 a  +15c',  min:   10, max:   15, bg: '#16a34a', fg: '#dcfce7' },
-      { label:     '±10c ✨',   min:  -10, max:   10, bg: '#14532d', fg: '#86efac' },
-      { label:  '-10 a  -15c',  min:  -15, max:  -10, bg: '#16a34a', fg: '#dcfce7' },
-      { label:  '-15 a  -40c',  min:  -40, max:  -15, bg: '#15803d', fg: '#bbf7d0' },
-      { label:  '-40 a  -80c',  min:  -80, max:  -40, bg: '#d97706', fg: '#fef3c7' },
-      { label:  '-80 a -100c',  min: -100, max:  -80, bg: '#c2410c', fg: '#fed7aa' },
-      { label: '-100 a -200c',  min: -200, max: -100, bg: '#b91c1c', fg: '#fecaca' },
-      { label: '-200 a -300c',  min: -300, max: -200, bg: '#991b1b', fg: '#fca5a5' },
-      { label:    '< -300c',    min: null, max: -300, bg: '#7f1d1d', fg: '#fca5a5' },
-    ];
+    const ROWS = DEBUG_CENTS_BANDS;
 
     const rowFor = (cents) => {
       if (cents == null) return -1;
@@ -4020,15 +4198,8 @@ class TrinoShell {
     const buildPeakSet = (analysis, range) => {
       if (!analysis?.peaks?.length || !range) return new Map();
       const map = new Map();
-      const segFrames = allFrames.slice(range.start, range.end + 1);
-      let vIdx = 0;
-      segFrames.forEach((f, i) => {
-        if (f !== null) {
-          analysis.peaks.forEach(p => {
-            if (p.frameIdx === vIdx) map.set(range.start + i, p.cents);
-          });
-          vIdx++;
-        }
+      analysis.peaks.forEach((peak) => {
+        if (peak.frameIdx >= range.start && peak.frameIdx <= range.end) map.set(peak.frameIdx, peak.cents);
       });
       return map;
     };
@@ -4069,7 +4240,7 @@ class TrinoShell {
     // 15 filas de contenido (muestra exactamente los frames que entran al análisis de N1 y N2)
     for (let r = 0; r < ROWS.length; r++) {
       const row       = ROWS[r];
-      const isCenterRow = r === 7;
+      const isCenterRow = r === rowFor(0);
       tableHtml += `<tr${isCenterRow ? ' class="dbg-center-row"' : ''}>`;
       tableHtml += `<td class="dbg-row-label">${row.label}</td>`;
 
@@ -4142,7 +4313,7 @@ class TrinoShell {
       return g ?? '—';
     };
     const noteSection = (tag, noteName, det, tonal, analysis) => {
-      const voiceType = tonal.isVibrato ? 'vibrato' : tonal.isUnstable ? 'inestable' : 'plana';
+      const voiceType = analysis?.voiceType || (tonal.isVibrato ? 'vibrato' : tonal.isUnstable ? 'inestable' : 'plana');
       const peaksStr = (analysis?.peaks || [])
         .map(p => `${fmtC(p.cents)}@f${p.frameIdx + 1}`).join(' · ') || '—';
       return `
@@ -4153,6 +4324,11 @@ class TrinoShell {
             <span class="dbg-k">goodPct</span>      <span class="dbg-v">${pct(det?._dbg?.goodPct)}</span>
             <span class="dbg-k">tightPct</span>     <span class="dbg-v">${pct(det?._dbg?.tightPct)}</span>
             <span class="dbg-k">medianCents</span>  <span class="dbg-v">${det?.medianCents ?? '—'}</span>
+            <span class="dbg-k">Rectificación</span> <span class="dbg-v">${det?.rectified ? `sí (${det.rectifiedFrameCount} frames)` : 'no'}</span>
+            <span class="dbg-k">Mediana abs. cruda</span> <span class="dbg-v">${det?.rawMedianCents ?? '—'}c</span>
+            <span class="dbg-k">Glisando diagnóstico</span> <span class="dbg-v">${analysis?.glissandoDebug?.reason || '—'}</span>
+            <span class="dbg-k">Glisando distancia</span> <span class="dbg-v">${analysis?.glissandoDebug?.startDistance == null ? '—' : `${analysis.glissandoDebug.startDistance}c → ${analysis.glissandoDebug.endDistance}c`}</span>
+            <span class="dbg-k">Glisando asentamiento</span> <span class="dbg-v">${analysis?.glissandoDebug?.stableFrames ?? 0} frames · progreso ${analysis?.glissandoDebug?.progressRatio == null ? '—' : Math.round(analysis.glissandoDebug.progressRatio * 100) + '%'}</span>
             <span class="dbg-k">Centro tonal</span> <span class="dbg-v">${tonal.label}</span>
             <span class="dbg-k">SD voz</span>       <span class="dbg-v">${analysis?.sd ?? '—'}c</span>
             <span class="dbg-k">Tipo de voz</span>  <span class="dbg-v">${voiceType}</span>
@@ -4199,7 +4375,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=53', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=56', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>
@@ -4566,6 +4742,13 @@ class TrinoShell {
     this.vtRecText = document.getElementById('vt-rec-text');
     this.vtRecordSelect = document.getElementById('vt-record-select');
     this.vtRangeLabel = document.getElementById('vt-range-label');
+    document.getElementById('vt-info-button')?.addEventListener('click', () => {
+      if (this.levelInfoModalModule) this.levelInfoModalModule.textContent = 'Módulo 4';
+      if (this.levelInfoModalTitle) this.levelInfoModalTitle.textContent = 'Prueba de voz';
+      this.levelInfoModalBody?.classList.add('hidden');
+      this.voiceTestInfoBody?.classList.remove('hidden');
+      this.levelInfoModal?.classList.remove('hidden');
+    });
     if (!this.vtKeyboard || !this.vtScroll) return;
 
     this.buildVoiceTestKeyboard();
@@ -4699,6 +4882,8 @@ class TrinoShell {
     this.updateVoiceTestRange();
     vt.midi = null;
     vt.frames = null;
+    this.lastDebugHtml = '';
+    if (this.debugLargeBody) this.debugLargeBody.innerHTML = '<p class="dbg-empty">Pulsa una nota y termina el análisis para ver sus frames.</p>';
     this.updateVoiceTestHint();
     this.drawVoiceTestStaff();
   }
@@ -4777,6 +4962,8 @@ class TrinoShell {
     // Cada pulsación descarta el análisis anterior
     vt.midi = midi;
     vt.frames = null;
+    this.lastDebugHtml = '';
+    if (this.debugLargeBody) this.debugLargeBody.innerHTML = '<p class="dbg-empty">El debug aparecerá al terminar el análisis.</p>';
     this.setVoiceTestResult('');
     this.drawVoiceTestStaff();
 
@@ -4933,6 +5120,8 @@ class TrinoShell {
     this.drawVoiceTestStaff();
 
     if (voiced.length < 2) {
+      const analysis = this.buildNoteAnalysis(frames, midi);
+      this.renderVoiceTestDebug(midi, frames, { grade: 'sin evaluación', rectified: false }, analysis);
       this.setVoiceTestResult('No se detectó voz. Inténtalo de nuevo.');
       return;
     }
@@ -4951,10 +5140,9 @@ class TrinoShell {
     };
     const grade = gradeInfo[note.grade] || gradeInfo.malo;
 
-    // Porcentaje de frames por nivel de desviación (cents)
+    // Los porcentajes reflejan la serie usada por la calificación.
     const buckets = { malo: 0, casi: 0, aceptable: 0, bueno: 0, admirable: 0 };
-    voiced.forEach((m) => {
-      const cents = Math.abs((((m - midi) % 12) + 18) % 12 - 6) * 100;
+    (note.centsList || voiced.map((m) => Math.abs(this.getSignedCentsDiff(m, midi)))).forEach((cents) => {
       if (cents <= 15) buckets.admirable++;
       else if (cents <= 20) buckets.bueno++;
       else if (cents <= 40) buckets.aceptable++;
@@ -4970,20 +5158,86 @@ class TrinoShell {
       })
       .join('');
 
-    const voiceLabel = analysis.voiceType === 'vibrato'
+    const voiceLabel = analysis.voiceType === 'sin-analisis'
+      ? 'Análisis insuficiente'
+      : analysis.voiceType === 'vibrato'
       ? `Vibrato${analysis.vibratoHz ? ` (${analysis.vibratoHz} Hz)` : ''}`
       : analysis.voiceType === 'inestable' ? 'Irregular' : 'Estable';
 
     if (this.vtRows) {
       this.vtResult?.classList.remove('vt-hint-mode');
+      // Con "Muy irregular" la nota detectada no es fiable, así que no se muestra
+      const sungPart = analysis.label === 'Muy irregular' ? '' : `${sungName} `;
       this.vtRows[0].innerHTML =
         `Nota: <strong>${this.midiToEnglishName(midi)}</strong>` +
-        ` · Centro tonal ${sungName} <strong>${analysis.label}</strong> : ` +
-        `<span class="vt-grade" style="background:${grade.bg}">${grade.icon}</span><strong>${grade.label}</strong>`;
+        ` · Centro tonal ${sungPart}<strong>${analysis.label}</strong> : ` +
+        `<span class="vt-grade" style="background:${grade.bg}" title="${grade.label}" aria-label="${grade.label}">${grade.icon}</span>`;
       this.vtRows[1].innerHTML = pctHtml;
       this.vtRows[2].innerHTML =
         `Voz: <strong>${voiceLabel}</strong>${analysis.glissando ? ' · <strong>Glisando detectado</strong>' : ''}`;
     }
+
+    this.renderVoiceTestDebug(midi, frames, note, analysis);
+  }
+
+  renderVoiceTestDebug(targetMidi, frames, grade, analysis) {
+    const fmtC = (cents) => cents == null ? '·' : `${cents > 0 ? '+' : ''}${cents}c`;
+    const rowFor = (cents) => DEBUG_CENTS_BANDS.findIndex(({ min, max }) =>
+      cents !== null && (min === null || cents >= min) && (max === null || cents < max)
+    );
+    const targetName = this.midiToEnglishName(targetMidi);
+    const centerCents = analysis.medianSigned;
+    const peakByFrame = new Map((analysis.peaks || []).map((peak) => [peak.frameIdx, peak]));
+    const tableRows = DEBUG_CENTS_BANDS.map((band, rowIndex) => {
+      const cells = frames.map((midi, frameIdx) => {
+        const cents = analysis.frameCentsTarget[frameIdx];
+        const peak = peakByFrame.get(frameIdx);
+        const active = rowFor(cents) === rowIndex;
+        const value = active ? fmtC(cents) : '';
+        const peakMark = peak ? ` · ${peak.type === 'max' ? 'máx' : 'mín'} centrado ${fmtC(peak.cents)}` : '';
+        const isSilence = cents === null;
+        const silenceMark = isSilence && rowIndex === DEBUG_CENTS_BANDS.findIndex((item) => item.label === '-5 a +5') ? '·' : '';
+        const style = active
+          ? `background:${band.bg};color:${band.fg};font-weight:700;`
+          : `background:${band.bg};color:transparent;`;
+        const title = isSilence ? `Frame ${frameIdx + 1}: sin voz detectada` : `Frame ${frameIdx + 1}: ${fmtC(cents)} respecto al objetivo${peakMark}`;
+        return `<td class="dbg-frame-cell${peak ? ' dbg-vt-peak' : ''}" title="${title}" style="${style}">${value || silenceMark || '&nbsp;'}</td>`;
+      }).join('');
+      return `<tr><th class="dbg-row-label" style="background:${band.bg};color:${band.fg}">${band.label}c</th>${cells}</tr>`;
+    }).join('');
+    const headers = frames.map((_, idx) => `<th class="dbg-frame-hdr">${idx + 1}</th>`).join('');
+    const peaksText = (analysis.peaks || []).map((peak) =>
+      `${peak.type === 'max' ? 'máx' : 'mín'} f${peak.frameIdx + 1} ${fmtC(peak.cents)}`
+    ).join(' · ') || 'ninguno';
+    const gliss = analysis.glissandoDebug || {};
+    const detailRows = [
+      ['Frames con voz', `${analysis.sampleCount}/${frames.length}`],
+      ['Centro tonal', `${fmtC(centerCents)} respecto a ${targetName}`],
+      ['Tipo vocal', analysis.voiceType],
+      ['Calificación', grade.grade],
+      ['Rectificación para calificar', grade.rectified ? `sí (${grade.rectifiedFrameCount} frames)` : 'no'],
+      ['Mediana absoluta sin rectificar', grade.rawMedianCents == null ? '—' : `${grade.rawMedianCents}c`],
+      ['Frecuencia vibrato', analysis.vibratoHz == null ? '—' : `${analysis.vibratoHz} Hz`],
+      ['Períodos (frames)', analysis.periodsFrames?.join(', ') || '—'],
+      ['CV períodos', analysis.cv == null ? '—' : analysis.cv],
+      ['Ciclos completos', analysis.cycles ?? 0],
+      ['Desviación estándar', analysis.sd == null ? '—' : `${analysis.sd}c`],
+      ['Picos respecto al centro', peaksText],
+      ['Glisando', gliss.detected ? 'detectado' : `no (${gliss.reason || 'sin datos'})`],
+      ['Inicio / asentamiento', gliss.startDistance == null ? '—' : `${gliss.startDistance}c → ${gliss.endDistance}c`],
+      ['Progreso hacia centro', gliss.progressRatio == null ? '—' : `${Math.round(gliss.progressRatio * 100)}%`],
+    ].map(([label, value]) => `<span class="dbg-k">${label}</span><span class="dbg-v">${value}</span>`).join('');
+
+    const html = `<div class="dbg-header-line">Módulo 4 · Nota objetivo: <strong>${targetName}</strong></div>
+      <section class="dbg-section">
+        <div class="dbg-section-title">Frames de voz · cents respecto a la nota objetivo (filas y colores de TablaDeValores)</div>
+        <div class="dbg-frame-scroll"><table class="dbg-frame-table vt-debug-table"><thead><tr><th class="dbg-row-label">Banda cents</th>${headers}</tr></thead><tbody>${tableRows}</tbody></table></div>
+      </section>
+      <section class="dbg-section"><div class="dbg-section-title">Análisis compartido de Módulos 2 y 4</div><div class="dbg-kv-grid">${detailRows}</div></section>`;
+
+    this.lastDebugHtml = html;
+    if (this.debugLargeBody) this.debugLargeBody.innerHTML = html;
+    this.syncDebugPopupWindow();
   }
 
   // Posición diatónica continua (0 = Do4) para dibujar la altura real cantada
@@ -5117,7 +5371,7 @@ class TrinoShell {
       }
       const x = curveStart + (frames.length > 1 ? i / (frames.length - 1) : 0) * (curveEnd - curveStart);
       const y = Math.max(4, Math.min(cssH - 4, stepToY(this.voiceTestStepFloat(m))));
-      const dev = Math.abs((((m - vt.midi) % 12) + 18) % 12 - 6);
+      const dev = Math.abs(m - vt.midi);
       const color = dev <= 0.4 ? '#10b981' : dev <= 0.8 ? '#f59e0b' : '#ef4444';
       if (prev) {
         ctx.strokeStyle = color;
