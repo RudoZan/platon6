@@ -16,6 +16,7 @@ Deferred/batch singing pitch analyzer (`8s` recording -> `< 1–3s` $f_0$ analys
 ## Current Implementation Note
 - The delivered static app also includes Module 1 interval recognition, Module 2 singing practice, and Module 3 chord recognition. `index.html`, `css/styles.css`, and `js/app.js` are the active files; the separate audio-capture/worker/backend files above remain planned, not present in the current app.
 - Module 3's 16 levels, simultaneous chord playback, answer evaluation, daily log, progress, and `dailyChordsMin` setting are implemented in `js/app.js` and `index.html`.
+- Module 4 (Prueba de voz) is a single keyboard screen with its own recording and single-note analysis; its logic lives in the `initVoiceTest`/`voiceTest*` methods of `js/app.js` and is documented in `TECHNICAL_SPEC.md` §10.
 
 ## Doc Index (Read on demand only)
 - **Living State (`platon6/sitio-web/trino/.agents/`):**

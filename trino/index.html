@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=41" />
+  <link rel="stylesheet" href="./css/styles.css?v=51" />
 </head>
 
 <body>
@@ -88,6 +88,15 @@
               <h2 class="module-title">Reconocimiento de acordes</h2>
             </div>
             <p class="module-desc">Escucha notas simultáneas e identifica intervalos, tríadas y cuatríadas.</p>
+          </button>
+
+          <button type="button" class="module-card" data-open-module="voice-test">
+            <div class="module-icon icon-voicetest">🎹</div>
+            <div class="module-info">
+              <span class="module-tag">MÓDULO 4</span>
+              <h2 class="module-title">Prueba de voz</h2>
+            </div>
+            <p class="module-desc">Toca una nota en el teclado, cántala y analiza tu afinación.</p>
           </button>
         </div>
       </section>
@@ -197,6 +206,47 @@
           <table class="session-log-table" aria-label="Historial de reconocimiento de acordes">
             <tbody id="chord-session-log-tbody"></tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- VISTA: MÓDULO 4 (Prueba de voz) -->
+      <section id="view-voice-test" class="hidden">
+        <div class="levels-header vt-header">
+          <h2 class="welcome-title">Módulo 4 <br> Prueba de voz</h2>
+          <div class="vt-record-field">
+            <label for="vt-record-select" class="settings-label">Duración de la grabación</label>
+            <select id="vt-record-select" class="settings-select">
+            <option value="none">No grabar</option>
+            <option value="1">Grabar 1 segundo</option>
+            <option value="2">Grabar 2 segundos</option>
+            <option value="3" selected>Grabar 3 segundos</option>
+            <option value="4">Grabar 4 segundos</option>
+            <option value="5">Grabar 5 segundos</option>
+            <option value="silence">Grabar hasta el primer silencio</option>
+          </select>
+          </div>
+        </div>
+
+        <div class="voice-staff-box">
+          <canvas id="voice-test-canvas" width="440" height="230"></canvas>
+        </div>
+        <div class="vt-rec-bar" id="vt-rec-bar">
+          <div class="vt-rec-fill" id="vt-rec-fill"></div>
+          <span class="vt-rec-text" id="vt-rec-text">Grabando</span>
+        </div>
+        <div class="vt-analysis" id="voice-test-result" aria-live="polite">
+          <p class="vt-row" id="vt-row-1"></p>
+          <p class="vt-row" id="vt-row-2"></p>
+          <p class="vt-row" id="vt-row-3"></p>
+        </div>
+
+        <div class="vt-keyboard-bar">
+          <button type="button" class="vt-scroll-btn" id="vt-scroll-left" aria-label="Desplazar teclado a la izquierda">◀</button>
+          <span class="vt-range-label" id="vt-range-label"></span>
+          <button type="button" class="vt-scroll-btn" id="vt-scroll-right" aria-label="Desplazar teclado a la derecha">▶</button>
+        </div>
+        <div class="vt-keyboard-scroll" id="vt-keyboard-scroll">
+          <div class="vt-keyboard" id="vt-keyboard"></div>
         </div>
       </section>
 
@@ -510,7 +560,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=43"></script>
+  <script src="./js/app.js?v=54"></script>
 </body>
 
 </html>

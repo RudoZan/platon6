@@ -67,3 +67,11 @@
 ## 9. Independent Daily Goals & Settings Layout
 - Daily goals are independently persisted as `dailyIntervalsMin`, `dailySingingMin`, and `dailyChordsMin`; older `dailyMin` settings remain a migration/cloud fallback.
 - Vocal min/max MIDI selectors span their settings field. Microphone detection and speaker preview actions render on a separate row below each selector for mobile usability.
+
+## 10. Voice Test Module (`#view-voice-test`)
+- Keyboard: `VOICE_TEST_MIN_MIDI=36` (C2) to `VOICE_TEST_MAX_MIDI=84` (C6), white keys `46 px`, black keys `30 px`; keys use pointer events with capture and release on `pointerup`/`pointercancel`/`lostpointercapture`/window blur.
+- Playback: `startHeldTone(hz)` sustains a triangle oscillator while the key is held (`noteVolume`), with a short release.
+- Recording (`#vt-record-select`): `none`, `1`–`5` seconds, or `silence`. Capture starts `150 ms` after release via `ScriptProcessor` using the shared mic stream. `silence` stops after `0.6 s` below RMS `0.015` once sound was heard, after `6 s` without sound, or at `10 s`.
+- Analysis: `extractMidiFrames` → `getNoteGradeFromFrames` + `buildNoteAnalysis` treat the whole take as one note (octave-folded cents). Frame buckets: admirable ≤15c, bueno ≤20c, aceptable ≤40c, regular ≤80c, fallido >80c; admirable/bueno hidden when 0 %.
+- Staff canvas: `230 px` high, `6.8 px` per diatonic step; sung pitch drawn at its real height via `voiceTestStepFloat`. No persistence or history; state lives in `this.voiceTest`.
+- Cache keys: HTML loads `styles.css?v=51` and `app.js?v=54`; `APP_VERSION` is `v1.0.0045`.

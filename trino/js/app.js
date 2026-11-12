@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0043';
+const APP_VERSION = 'v1.0.0045';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -14,9 +14,17 @@ const VIEWS = {
   chords: { id: 'view-chords', badge: 'Acordes' },
   'chord-exercise': { id: 'view-chord-exercise', badge: 'Acordes' },
   settings: { id: 'view-settings', badge: 'Ajustes' },
+  'voice-test': { id: 'view-voice-test', badge: 'Prueba de voz' },
 };
 
 const NOTE_NAMES_ES = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
+const NOTE_NAMES_EN = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+// Teclado de la Prueba de voz: C2 (36) a C6 (84)
+const VOICE_TEST_MIN_MIDI = 36;
+const VOICE_TEST_MAX_MIDI = 84;
+const VT_WHITE_KEY_W = 46;
+const VT_BLACK_KEY_W = 30;
 
 /**
  * Catálogo de intervalos en semitonos y su etiqueta en español.
@@ -353,6 +361,7 @@ class TrinoShell {
 
     this.cacheDom();
     this.bindEvents();
+    this.initVoiceTest();
     this.syncSettingsUi();
     this.syncAuthUi();
     this.renderIntervalLevels();
@@ -4190,7 +4199,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=41', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=51', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>
@@ -4530,6 +4539,562 @@ class TrinoShell {
     };
   }
 
+  /* =========================================================================
+   * MÓDULO 4: PRUEBA DE VOZ (teclado + grabación única + análisis de canto)
+   * ========================================================================= */
+
+  initVoiceTest() {
+    this.voiceTest = {
+      midi: null,
+      frames: null,
+      tone: null,
+      activeKey: null,
+      pressId: 0,
+      recToken: 0,
+      recording: false,
+      startTimer: null,
+      tickTimer: null,
+      scrollInitDone: false,
+    };
+    this.vtKeyboard = document.getElementById('vt-keyboard');
+    this.vtScroll = document.getElementById('vt-keyboard-scroll');
+    this.vtCanvas = document.getElementById('voice-test-canvas');
+    this.vtResult = document.getElementById('voice-test-result');
+    this.vtRows = [1, 2, 3].map((n) => document.getElementById(`vt-row-${n}`));
+    this.vtRecBar = document.getElementById('vt-rec-bar');
+    this.vtRecFill = document.getElementById('vt-rec-fill');
+    this.vtRecText = document.getElementById('vt-rec-text');
+    this.vtRecordSelect = document.getElementById('vt-record-select');
+    this.vtRangeLabel = document.getElementById('vt-range-label');
+    if (!this.vtKeyboard || !this.vtScroll) return;
+
+    this.buildVoiceTestKeyboard();
+    this.vtRecordSelect?.addEventListener('change', () => this.updateVoiceTestHint());
+    document.getElementById('vt-scroll-left')?.addEventListener('click', () => this.scrollVoiceTestKeyboard(-1));
+    document.getElementById('vt-scroll-right')?.addEventListener('click', () => this.scrollVoiceTestKeyboard(1));
+    this.vtScroll.addEventListener('scroll', () => this.updateVoiceTestRange());
+    this.vtKeyboard.addEventListener('contextmenu', (e) => e.preventDefault());
+    window.addEventListener('blur', () => this.releaseActiveVoiceTestKey());
+    window.addEventListener('resize', () => {
+      if (this.currentView === 'voice-test') this.drawVoiceTestStaff();
+    });
+    this.updateVoiceTestHint();
+  }
+
+  midiToEnglishName(midi) {
+    const rounded = Math.round(midi);
+    return `${NOTE_NAMES_EN[((rounded % 12) + 12) % 12]}${Math.floor(rounded / 12) - 1}`;
+  }
+
+  buildVoiceTestKeyboard() {
+    const blackPcs = [1, 3, 6, 8, 10];
+    this.vtWhiteMidis = [];
+    let html = '';
+
+    for (let m = VOICE_TEST_MIN_MIDI; m <= VOICE_TEST_MAX_MIDI; m++) {
+      const name = this.midiToEnglishName(m);
+      const whiteCount = this.vtWhiteMidis.length;
+      if (blackPcs.includes(m % 12)) {
+        const left = whiteCount * VT_WHITE_KEY_W - VT_BLACK_KEY_W / 2;
+        html += `<div class="vt-key vt-key-black" data-midi="${m}" style="left:${left}px;width:${VT_BLACK_KEY_W}px">${name}</div>`;
+      } else {
+        html += `<div class="vt-key vt-key-white" data-midi="${m}" style="left:${whiteCount * VT_WHITE_KEY_W}px;width:${VT_WHITE_KEY_W}px">${name}</div>`;
+        this.vtWhiteMidis.push(m);
+      }
+    }
+
+    this.vtKeyboard.style.width = `${this.vtWhiteMidis.length * VT_WHITE_KEY_W}px`;
+    this.vtKeyboard.innerHTML = html;
+
+    this.vtKeyboard.querySelectorAll('.vt-key').forEach((keyEl) => {
+      const midi = parseInt(keyEl.dataset.midi, 10);
+      keyEl.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        try {
+          keyEl.setPointerCapture(e.pointerId);
+        } catch (_) {}
+        this.voiceTestPress(midi, keyEl);
+      });
+      const release = () => this.voiceTestRelease(keyEl);
+      keyEl.addEventListener('pointerup', release);
+      keyEl.addEventListener('pointercancel', release);
+      keyEl.addEventListener('lostpointercapture', release);
+    });
+  }
+
+  scrollVoiceTestKeyboard(direction) {
+    this.vtScroll?.scrollBy({ left: direction * VT_WHITE_KEY_W * 5, behavior: 'smooth' });
+  }
+
+  updateVoiceTestRange() {
+    if (!this.vtScroll || !this.vtRangeLabel || !this.vtWhiteMidis?.length) return;
+    const last = this.vtWhiteMidis.length - 1;
+    const first = Math.min(last, Math.max(0, Math.round(this.vtScroll.scrollLeft / VT_WHITE_KEY_W)));
+    const end = Math.min(last, Math.max(first, Math.floor((this.vtScroll.scrollLeft + this.vtScroll.clientWidth) / VT_WHITE_KEY_W) - 1));
+    this.vtRangeLabel.textContent = `${this.midiToEnglishName(this.vtWhiteMidis[first])} – ${this.midiToEnglishName(this.vtWhiteMidis[end])}`;
+  }
+
+  getVoiceTestMode() {
+    return this.vtRecordSelect?.value || '3';
+  }
+
+  updateVoiceTestHint() {
+    if (!this.vtRows) return;
+    const mode = this.getVoiceTestMode();
+    let second = '';
+    if (mode === 'silence') {
+      second = 'Al soltarla, canta: la grabación termina cuando haces silencio.';
+    } else if (mode !== 'none') {
+      second = `Al soltarla tendrás ${mode} ${mode === '1' ? 'segundo' : 'segundos'} para cantar la nota.`;
+    }
+    // El mensaje comparte el espacio del análisis y lo reemplaza
+    this.vtResult?.classList.add('vt-hint-mode');
+    this.vtRows[0].textContent = 'Mientras presionas una tecla escucharás la nota.';
+    this.vtRows[1].textContent = second;
+    this.vtRows[2].textContent = '';
+  }
+
+  setVoiceTestResult(text) {
+    if (!this.vtRows) return;
+    this.vtResult?.classList.remove('vt-hint-mode');
+    this.vtRows[0].textContent = text;
+    this.vtRows[1].textContent = '';
+    this.vtRows[2].textContent = '';
+  }
+
+  onEnterVoiceTest() {
+    const vt = this.voiceTest;
+    if (!vt) return;
+    if (!vt.scrollInitDone && this.vtScroll?.clientWidth) {
+      // C3 queda al inicio de la parte visible
+      this.vtScroll.scrollLeft = 7 * VT_WHITE_KEY_W;
+      vt.scrollInitDone = true;
+    }
+    this.updateVoiceTestRange();
+    vt.midi = null;
+    vt.frames = null;
+    this.updateVoiceTestHint();
+    this.drawVoiceTestStaff();
+  }
+
+  stopVoiceTest() {
+    const vt = this.voiceTest;
+    if (!vt) return;
+    vt.pressId += 1;
+    this.stopVoiceTestRecording();
+    this.stopVoiceTestTone();
+    vt.activeKey?.classList.remove('active');
+    vt.activeKey = null;
+  }
+
+  stopVoiceTestTone() {
+    const vt = this.voiceTest;
+    vt.tone?.stop();
+    vt.tone = null;
+  }
+
+  stopVoiceTestRecording() {
+    const vt = this.voiceTest;
+    vt.recToken += 1;
+    if (vt.startTimer) {
+      clearTimeout(vt.startTimer);
+      vt.startTimer = null;
+    }
+    if (vt.tickTimer) {
+      clearInterval(vt.tickTimer);
+      vt.tickTimer = null;
+    }
+    this.vtRecBar?.classList.remove('active');
+    if (vt.recording) {
+      vt.recording = false;
+      this.stopMicProcessor();
+    }
+  }
+
+  // Tono sostenido mientras la tecla está pulsada
+  startHeldTone(hz) {
+    const ctx = this.audioCtx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const peak = Math.max(0.001, ((this.noteVolume ?? 80) / 100) * 0.40);
+    const t = ctx.currentTime;
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(hz, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(peak, t + 0.03);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+
+    return {
+      stop: () => {
+        const now = ctx.currentTime;
+        gain.gain.cancelScheduledValues(now);
+        gain.gain.setValueAtTime(peak, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+        osc.stop(now + 0.08);
+      },
+    };
+  }
+
+  async voiceTestPress(midi, keyEl) {
+    const vt = this.voiceTest;
+    this.stopVoiceTestRecording();
+    this.stopVoiceTestTone();
+    vt.activeKey?.classList.remove('active');
+    vt.activeKey = keyEl;
+    keyEl.classList.add('active');
+    vt.pressId += 1;
+    const id = vt.pressId;
+
+    // Cada pulsación descarta el análisis anterior
+    vt.midi = midi;
+    vt.frames = null;
+    this.setVoiceTestResult(`Escuchando ${this.midiToEnglishName(midi)}…`);
+    this.drawVoiceTestStaff();
+
+    // Pide el micrófono al pulsar para que el permiso no interrumpa el canto
+    if (this.getVoiceTestMode() !== 'none') this.ensureMicStreamReady();
+
+    await this.ensureAudioReady();
+    if (vt.pressId !== id || vt.activeKey !== keyEl) return;
+    vt.tone = this.startHeldTone(440 * Math.pow(2, (midi - 69) / 12));
+  }
+
+  voiceTestRelease(keyEl) {
+    const vt = this.voiceTest;
+    if (vt.activeKey !== keyEl) return;
+    keyEl.classList.remove('active');
+    vt.activeKey = null;
+    this.stopVoiceTestTone();
+
+    if (this.getVoiceTestMode() === 'none') {
+      this.setVoiceTestResult(`Nota ${this.midiToEnglishName(vt.midi)}.`);
+      return;
+    }
+
+    const midi = vt.midi;
+    vt.recToken += 1;
+    const token = vt.recToken;
+    this.setVoiceTestResult('Prepárate…');
+    // Pequeña pausa para no grabar la cola del tono
+    vt.startTimer = setTimeout(() => {
+      vt.startTimer = null;
+      this.startVoiceTestRecording(midi, token);
+    }, 150);
+  }
+
+  releaseActiveVoiceTestKey() {
+    const keyEl = this.voiceTest?.activeKey;
+    if (keyEl) this.voiceTestRelease(keyEl);
+  }
+
+  async startVoiceTestRecording(midi, token) {
+    const vt = this.voiceTest;
+    const ok = await this.ensureMicStreamReady();
+    if (vt.recToken !== token) return;
+    if (!ok) {
+      this.setVoiceTestResult('Permite el micrófono en tu navegador para grabar tu voz.');
+      return;
+    }
+    await this.ensureAudioReady();
+    if (vt.recToken !== token) return;
+
+    this.stopMicProcessor();
+    const mode = this.getVoiceTestMode();
+    const untilSilence = mode === 'silence';
+    const sampleRate = this.audioCtx.sampleRate;
+    const maxSec = untilSilence ? 10 : Number(mode);
+    const maxSamples = Math.round(maxSec * sampleRate);
+    const chunks = [];
+    let collected = 0;
+    let heardSound = false;
+    let silentSamples = 0;
+
+    vt.recording = true;
+    this.sourceNode = this.audioCtx.createMediaStreamSource(this.mediaStream);
+    this.processorNode = this.audioCtx.createScriptProcessor(2048, 1, 1);
+    const silentGain = this.audioCtx.createGain();
+    silentGain.gain.value = 0;
+    this.sourceNode.connect(this.processorNode);
+    this.processorNode.connect(silentGain);
+    silentGain.connect(this.audioCtx.destination);
+
+    const startMs = performance.now();
+    this.setVoiceTestResult('Canta ahora…');
+    const updateBar = () => {
+      const shown = Math.min((performance.now() - startMs) / 1000, maxSec);
+      if (this.vtRecFill) this.vtRecFill.style.width = `${(shown / maxSec) * 100}%`;
+      if (this.vtRecText) {
+        this.vtRecText.textContent = untilSilence
+          ? `Grabando ${shown.toFixed(1)} s`
+          : `Grabando ${shown.toFixed(1)} / ${maxSec} s`;
+      }
+    };
+    this.vtRecBar?.classList.add('active');
+    updateBar();
+    vt.tickTimer = setInterval(updateBar, 100);
+
+    this.processorNode.onaudioprocess = (e) => {
+      if (vt.recToken !== token || !vt.recording) return;
+      const input = e.inputBuffer.getChannelData(0);
+      chunks.push(new Float32Array(input));
+      collected += input.length;
+
+      let done = collected >= maxSamples;
+      if (untilSilence) {
+        let sumSq = 0;
+        for (let i = 0; i < input.length; i++) sumSq += input[i] * input[i];
+        const rms = Math.sqrt(sumSq / input.length);
+        if (rms >= 0.015) {
+          heardSound = true;
+          silentSamples = 0;
+        } else if (heardSound) {
+          silentSamples += input.length;
+        }
+        const silenceReached = heardSound && silentSamples >= 0.6 * sampleRate;
+        const noSoundTimeout = !heardSound && collected >= 6 * sampleRate;
+        done = done || silenceReached || noSoundTimeout;
+      }
+
+      if (done) this.finishVoiceTestRecording(chunks, sampleRate, midi, token, maxSamples);
+    };
+  }
+
+  finishVoiceTestRecording(chunks, sampleRate, midi, token, maxSamples) {
+    const vt = this.voiceTest;
+    if (vt.recToken !== token) return;
+    this.stopVoiceTestRecording();
+
+    const total = Math.min(chunks.reduce((sum, c) => sum + c.length, 0), maxSamples);
+    const pcm = new Float32Array(total);
+    let offset = 0;
+    for (const c of chunks) {
+      const len = Math.min(c.length, total - offset);
+      if (len <= 0) break;
+      pcm.set(c.subarray(0, len), offset);
+      offset += len;
+    }
+
+    this.setVoiceTestResult('Analizando…');
+    // Deja pintar el aviso antes del análisis, que es síncrono
+    setTimeout(() => {
+      if (vt.midi === midi && vt.recToken === token + 1) this.analyzeVoiceTest(pcm, sampleRate, midi);
+    }, 30);
+  }
+
+  analyzeVoiceTest(pcm, sampleRate, midi) {
+    const vt = this.voiceTest;
+    // Toda la grabación se evalúa como una sola nota
+    const frames = this.extractMidiFrames(pcm, sampleRate);
+    const voiced = frames.filter((m) => m !== null);
+    vt.frames = frames;
+    this.drawVoiceTestStaff();
+
+    if (voiced.length < 2) {
+      this.setVoiceTestResult('No se detectó voz. Inténtalo de nuevo.');
+      return;
+    }
+
+    const note = this.getNoteGradeFromFrames(frames, midi);
+    const analysis = this.buildNoteAnalysis(frames, midi);
+    const sorted = [...voiced].sort((a, b) => a - b);
+    const sungName = this.midiToEnglishName(sorted[Math.floor(sorted.length / 2)]);
+
+    const gradeInfo = {
+      admirable: { icon: '✦', label: 'Admirable', bg: '#10b981' },
+      bueno: { icon: '✓', label: 'Bueno', bg: '#34d399' },
+      aceptable: { icon: '⊙', label: 'Aceptable', bg: '#a3e635' },
+      casi: { icon: '≈', label: 'Regular', bg: '#f59e0b' },
+      malo: { icon: '✕', label: 'Fallido', bg: '#ef4444' },
+    };
+    const grade = gradeInfo[note.grade] || gradeInfo.malo;
+
+    // Porcentaje de frames por nivel de desviación (cents)
+    const buckets = { malo: 0, casi: 0, aceptable: 0, bueno: 0, admirable: 0 };
+    voiced.forEach((m) => {
+      const cents = Math.abs((((m - midi) % 12) + 18) % 12 - 6) * 100;
+      if (cents <= 15) buckets.admirable++;
+      else if (cents <= 20) buckets.bueno++;
+      else if (cents <= 40) buckets.aceptable++;
+      else if (cents <= 80) buckets.casi++;
+      else buckets.malo++;
+    });
+    const pctHtml = ['admirable', 'bueno', 'aceptable', 'casi', 'malo']
+      .map((g) => {
+        const pct = Math.round((buckets[g] / voiced.length) * 100);
+        // Admirable y bueno solo se muestran cuando tienen valor
+        if (pct === 0 && (g === 'admirable' || g === 'bueno')) return '';
+        return `<span class="vt-pct" style="color:${gradeInfo[g].bg}" title="${gradeInfo[g].label}" aria-label="${gradeInfo[g].label}: ${pct}%">${gradeInfo[g].icon} ${pct}%</span>`;
+      })
+      .join('');
+
+    const voiceLabel = analysis.voiceType === 'vibrato'
+      ? `Vibrato${analysis.vibratoHz ? ` (${analysis.vibratoHz} Hz)` : ''}`
+      : analysis.voiceType === 'inestable' ? 'Irregular' : 'Estable';
+
+    if (this.vtRows) {
+      this.vtResult?.classList.remove('vt-hint-mode');
+      this.vtRows[0].innerHTML =
+        `Nota: <strong>${this.midiToEnglishName(midi)}</strong>` +
+        ` · Centro tonal ${sungName} <strong>${analysis.label}</strong> : ` +
+        `<span class="vt-grade" style="background:${grade.bg}">${grade.icon}</span><strong>${grade.label}</strong>`;
+      this.vtRows[1].innerHTML = pctHtml;
+      this.vtRows[2].innerHTML =
+        `Voz: <strong>${voiceLabel}</strong> · <strong>${analysis.glissando ? 'Glisando' : 'Sin glisando'}</strong>`;
+    }
+  }
+
+  // Posición diatónica continua (0 = Do4) para dibujar la altura real cantada
+  voiceTestStepFloat(midi) {
+    const naturals = [0, 2, 4, 5, 7, 9, 11, 12];
+    const octave = Math.floor(midi / 12);
+    const pc = midi - octave * 12;
+    let i = 0;
+    while (i < 6 && pc >= naturals[i + 1]) i++;
+    return (octave - 5) * 7 + i + (pc - naturals[i]) / (naturals[i + 1] - naturals[i]);
+  }
+
+  drawVoiceTestStaff() {
+    const canvas = this.vtCanvas;
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth;
+    const cssH = canvas.clientHeight;
+    if (!cssW || !cssH) return;
+    if (canvas.width !== Math.round(cssW * dpr) || canvas.height !== Math.round(cssH * dpr)) {
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+    }
+
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, cssW, cssH);
+
+    const hs = 6.8;
+    const stepToY = (step) => cssH / 2 - step * hs;
+    const left = 2;
+    const right = cssW - 2;
+    const noteX = left + 72;
+    const curveStart = noteX + 30;
+    const curveEnd = right - 8;
+
+    ctx.strokeStyle = '#111827';
+    ctx.lineWidth = 1;
+    [2, 4, 6, 8, 10, -2, -4, -6, -8, -10].forEach((s) => {
+      ctx.beginPath();
+      ctx.moveTo(left, stepToY(s));
+      ctx.lineTo(right, stepToY(s));
+      ctx.stroke();
+    });
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(left, stepToY(10));
+    ctx.lineTo(left, stepToY(-10));
+    ctx.stroke();
+
+    ctx.fillStyle = '#000000';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = '46px serif';
+    ctx.fillText('𝄞', left + 4, stepToY(5));
+    ctx.font = '37px serif';
+    ctx.fillText('𝄢', left + 5, stepToY(-5));
+
+    const vt = this.voiceTest;
+    if (vt?.midi == null) return;
+
+    const pos = this.midiToGrandStaffStep(vt.midi);
+    const noteY = stepToY(pos.step);
+
+    // Líneas adicionales para notas fuera de los pentagramas
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.2;
+    const ledgers = [];
+    if (pos.step >= 12) for (let s = 12; s <= pos.step; s += 2) ledgers.push(s);
+    if (pos.step <= -12) for (let s = -12; s >= pos.step; s -= 2) ledgers.push(s);
+    if (pos.step >= -1 && pos.step <= 1) ledgers.push(0);
+    ledgers.forEach((s) => {
+      ctx.beginPath();
+      ctx.moveTo(noteX - 14, stepToY(s));
+      ctx.lineTo(noteX + 14, stepToY(s));
+      ctx.stroke();
+    });
+
+    ctx.save();
+    ctx.translate(noteX, noteY);
+    ctx.rotate(-0.25);
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 8.4, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Plica hacia el centro del sistema para que no se salga del lienzo
+    const stemUp = (pos.step >= 0 && pos.step < 6) || pos.step <= -6;
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    if (stemUp) {
+      ctx.moveTo(noteX + 7.8, noteY);
+      ctx.lineTo(noteX + 7.8, noteY - 34);
+    } else {
+      ctx.moveTo(noteX - 7.8, noteY);
+      ctx.lineTo(noteX - 7.8, noteY + 34);
+    }
+    ctx.stroke();
+
+    if (pos.isSharp) {
+      ctx.fillStyle = '#000000';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('♯', noteX - 12, noteY);
+    }
+
+    // Línea guía de la nota objetivo
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(noteX + 12, noteY);
+    ctx.lineTo(curveEnd, noteY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    const frames = vt.frames;
+    if (!Array.isArray(frames) || frames.length === 0) return;
+
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    let prev = null;
+    frames.forEach((m, i) => {
+      if (m === null) {
+        prev = null;
+        return;
+      }
+      const x = curveStart + (frames.length > 1 ? i / (frames.length - 1) : 0) * (curveEnd - curveStart);
+      const y = Math.max(4, Math.min(cssH - 4, stepToY(this.voiceTestStepFloat(m))));
+      const dev = Math.abs((((m - vt.midi) % 12) + 18) % 12 - 6);
+      const color = dev <= 0.4 ? '#10b981' : dev <= 0.8 ? '#f59e0b' : '#ef4444';
+      if (prev) {
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(prev.x, prev.y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      prev = { x, y };
+    });
+  }
+
   navigateTo(viewKey) {
     if (!VIEWS[viewKey]) return;
     this.currentView = viewKey;
@@ -4537,6 +5102,9 @@ class TrinoShell {
 
     if (viewKey !== 'settings') {
       this.stopSettingsMicTools();
+    }
+    if (viewKey !== 'voice-test') {
+      this.stopVoiceTest();
     }
 
     const isExerciseView =
@@ -4578,6 +5146,10 @@ class TrinoShell {
     document.querySelectorAll('[data-target]').forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-target') === viewKey);
     });
+
+    if (viewKey === 'voice-test') {
+      this.onEnterVoiceTest();
+    }
 
     this.renderBottomCommands(viewKey);
   }

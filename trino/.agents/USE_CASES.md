@@ -59,3 +59,13 @@
 ## UC-10: Home Progress & Settings Exit
 1. Each home module card shows `MÓDULO N - Hoy x/meta`, with today's count and that module's independent daily goal.
 2. The X button in the settings heading returns to Inicio.
+3. Response tables show `HOY: Completado x de meta` and `AYER: Completado x de meta` per day, using the module's own daily goal.
+4. In Module 2, tapping a staff note plays it; tap targets follow the drawn note positions and the nearest note wins.
+
+## UC-11: Voice Test (Module 4)
+1. The home card `MÓDULO 4 · Prueba de voz` opens a single screen without levels or history.
+2. A keyboard spans C2–C6 with note names on every key; ◀ ▶ buttons above scroll it. While a key is held its note sounds.
+3. On release, the selected recording mode starts: no recording, 1–5 s, or until the first silence after sound is detected. A bar below the staff shows `Grabando x / n s` as a left-to-right progress fill.
+4. The whole recording is analyzed as one note with the singing analysis. The staff shows the target note, a dashed guide, and the sung pitch curve colored by deviation.
+5. The analysis area has three rows: target/sung note, tonal center and grade; percentage of frames per level (best at left); voice type and glissando. Pressing a key discards the previous result.
+6. Entering the module or changing the duration shows a bold two-line instruction in the analysis area; it disappears when a key is pressed or a result is shown.
