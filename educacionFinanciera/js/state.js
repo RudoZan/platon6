@@ -259,7 +259,7 @@
         iconBox.onclick = null;
         iconBox.removeAttribute('title');
         iconBox.className = `hub-stage-header-icon dock-icon-box icon-${tabName}`;
-        const iconsMap = { banco: '🏦', inversiones: '💎', corredora: '📈', comercio: '🛍️', actividades: '🎟️', trabajo: '💼' };
+        const iconsMap = { banco: '🏦', inversiones: '📈', corredora: '🏠', comercio: '🛍️', actividades: '🎟️', trabajo: '💼' };
         iconBox.innerHTML = `<span>${iconsMap[tabName] || '📌'}</span>`;
       }
       if (titleElem) titleElem.innerText = data.title;

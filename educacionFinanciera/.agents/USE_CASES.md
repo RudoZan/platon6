@@ -49,3 +49,13 @@
 4. Cuenta 2 account actions separately change multifund, make an individual contribution, manage the monthly contribution, and cancel the account.
 5. Individual APV contributions require at least `$10.000`; Cuenta 2 contributions require at least `$5.000`. Both accept cash or an eligible bank account and update balances, contributed capital, and invested totals.
 6. Monthly contributions require a valid bank account and minimum monthly amount. Users can update an active amount or stop the monthly contribution using a separate action.
+
+## UC-09: Stocks and Index Funds in Other Investments
+1. Stock and index-fund cards display illustrative risk, minimum outlay and transaction costs. Index funds include five ETF examples and one separately identified traditional mutual fund.
+2. The index-fund simulator minimum is `$505.650 CLP` total, including `$5.650` reference costs. The mutual-fund transaction fee is an educational approximation, not a quoted administrator tariff.
+3. A purchase debits the selected cash or bank source and records the balance after transaction fees. Additional purchases of the same instrument consolidate into its existing position.
+4. An owned position offers partial or full sale; the shared modal displays the simulated commission and net proceeds, then credits the chosen destination.
+
+## UC-10: Digital Wallet in Other Investments
+1. Opening the remunerated wallet creates a liquid account with zero balance. Deposit, withdrawal and closure use the shared bank-account flows.
+2. Simulating a day credits rounded interest on the current balance and updates the accrued-interest and day counters. A legacy wallet investment position is migrated to the account once.

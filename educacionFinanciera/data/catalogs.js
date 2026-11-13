@@ -381,24 +381,24 @@
         ]
       },
       inversiones: {
-        title: "💎 Otras Inversiones",
+        title: "📈 Otros Instrumentos",
         subtitle: "Instrumentos y vehículos de inversión",
         sections: [
           { id: "apv", name: "Ahorro Previsional Voluntario (APV)", icon: "🧓", desc: "Ahorro para pensión con beneficio estatal (15% Régimen A o tributario B)." },
           { id: "cuenta2", name: "Ahorro Cuenta 2", icon: "📈", desc: "Inversión libre en multifondos AFP con bajas comisiones y hasta 24 giros/año." },
-          { id: "fraccionada", name: "Inversión Fraccionada", icon: "🏢", desc: "Compra fracciones de propiedades en renta desde montos accesibles." },
+          { id: "etf", name: "Fondos Indexados y ETF", icon: "🌐", desc: "ETFs y fondos mutuos que siguen índices locales e internacionales." },
           { id: "acciones", name: "Compra de Acciones", icon: "📉", desc: "Renta variable en Bolsa con dividendos, corretaje y alta volatilidad." },
           { id: "bonos_corp", name: "Bonos Corporativos", icon: "📜", desc: "Deuda emitida por empresas en UF con pago de interés periódico." },
-          { id: "bonos_estado", name: "Bonos del Estado", icon: "🇨🇱", desc: "Instrumentos soberanos de Tesorería / Banco Central de mínimo riesgo." },
-          { id: "etf", name: "Fondos Indexados (ETF)", icon: "🌐", desc: "Fondos cotizados en bolsa que replican índices globales a bajo costo." },
-          { id: "moneda_ext", name: "Compra/Venta Moneda Extranjera", icon: "💱", desc: "Dólares y Euros con tipo de cambio variable y diferencial (spread) cambiario." },
+          { id: "bonos_estado", name: "Bonos del Estado", icon: "🇨🇱", desc: "BTP/BTU, bonos del Banco Central y emisiones soberanas temáticas ESG." },
           { id: "cripto", name: "Compra/Venta Criptomonedas", icon: "🪙", desc: "Activos digitales descentralizados de extrema volatilidad y sin garantía CMF." },
-          { id: "billeteras", name: "Billeteras Electrónicas", icon: "📱", desc: "Cuentas digitales con rentabilidad diaria automática y liquidez inmediata." },
-          { id: "startups", name: "Participación en Startups", icon: "🚀", desc: "Capital de riesgo en empresas emergentes: alto potencial e iliquidez inicial." }
+          { id: "moneda_ext", name: "Compra/Venta Moneda Extranjera", icon: "💱", desc: "Dólares y Euros con tipo de cambio variable y diferencial (spread) cambiario." },
+          { id: "fraccionada", name: "Inversión Inmobiliaria Fraccionada", icon: "🏢", desc: "Compra fracciones de propiedades en renta desde montos accesibles." },
+          { id: "startups", name: "Participación en Startups", icon: "🚀", desc: "Capital de riesgo en empresas emergentes: alto potencial e iliquidez inicial." },
+          { id: "billeteras", name: "Billeteras Electrónicas", icon: "📱", desc: "Cuentas digitales con rentabilidad diaria automática y liquidez inmediata." }
         ]
       },
       corredora: {
-        title: "📈 Corredora",
+        title: "🏠 Corredora",
         subtitle: "Gestión inmobiliaria y corretaje de propiedades",
         sections: [
           { name: "Ventas Ofrecidas", icon: "🏷️", desc: "Vivienda, Bodega, Oficina, Local, Terreno, Estac." },

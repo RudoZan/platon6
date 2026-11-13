@@ -79,6 +79,15 @@
 - Monthly contribution activation/updates require a valid bank account and respect each product's minimum. Monthly settings can be stopped separately.
 - `syncInvestedTotal()` and the Other Investments summary include APV and Cuenta 2 balances.
 
+### Other Investments — Stocks, Index Funds & ETFs
+- The stock catalog contains ten anonymized examples with reference prices, whole-share reference lots and minimum outlays. The index category contains five ETF examples and one traditional index mutual fund; all use a simulated minimum total outlay of `$505.650 CLP`, including `$5.650` in reference costs.
+- `calculateOtherInvTransactionFee()` returns the configured reference fee at the reference transaction amount. Otherwise the stock-like fee is the greater of `$4.000` or 0.35% of the transaction amount, plus `$750` in exchange rights and 19% VAT, rounded to CLP. The Security mutual-fund fee is a simulator approximation, not an actual administrator tariff; TER and taxes are not periodically deducted.
+- Purchases debit the total outlay and create a position with net balance after entry fees. Repeated purchases of the same stock, bond, startup or index fund consolidate by category and item; the shared redemption flow calculates exit fees and transfers net proceeds to cash or a bank account.
+
+### Other Investments — Digital Wallet
+- The remunerated wallet is a liquid account in `state.bankAccounts`, opened at zero balance and managed through the shared deposit, withdrawal and closure flows. Legacy wallet investment positions migrate once to the account.
+- Daily simulated interest uses the effective daily rate `(1 + annualInterestRate) ** (1 / 365) - 1`, rounded to CLP on the current balance, and records accrued interest and simulated days.
+
 ## 3. Session Room ID & Supabase Tables
 - **Room ID:** `YYYYMM` + 4-digit code (`1000`–`9999`), e.g. `2026101042`.
 - **Tables:** `platon6_finanzas_sesiones`, `platon6_finanzas_respuestas`.

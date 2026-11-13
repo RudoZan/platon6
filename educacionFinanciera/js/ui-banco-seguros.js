@@ -397,8 +397,7 @@
 
       if (typeof updateHUD === 'function') updateHUD();
 
-      const currentSubView = destId.includes('ahorro') ? 'cuenta_ahorro' : 'cuenta_rut_vista';
-      renderBancoStage(currentSubView);
+      renderBankAccountAfterOperation(destAcc);
 
       alertUpcomingBankFeature('¡Depósito exitoso!', `Se han depositado $${amount.toLocaleString('es-CL')} en tu ${destAcc.name}.`);
     }
@@ -470,8 +469,7 @@
       closeBancoModal();
       if (typeof updateHUD === 'function') updateHUD();
 
-      const currentSubView = accId.includes('ahorro') ? 'cuenta_ahorro' : 'cuenta_rut_vista';
-      renderBancoStage(currentSubView);
+      renderBankAccountAfterOperation(acc);
 
       alertUpcomingBankFeature('¡Giro realizado!', `Se retiraron $${amount.toLocaleString('es-CL')} desde tu ${acc.name} hacia tu Dinero en Efectivo.`);
     }
@@ -593,10 +591,23 @@
 
       closeBancoModal();
 
-      renderBancoStage('main');
+      if (acc.type === 'digital_wallet' && typeof renderInversionesStage === 'function') {
+        renderInversionesStage('billeteras');
+      } else {
+        renderBancoStage('main');
+      }
       if (typeof updateHUD === 'function') updateHUD();
 
       alertUpcomingBankFeature(`Cuenta ${acc.name} cerrada`, `Se cerraron los productos asociados y se transfirieron $${balance.toLocaleString('es-CL')} a tu Dinero en Efectivo.`);
+    }
+
+    function renderBankAccountAfterOperation(account) {
+      if (account.type === 'digital_wallet' && typeof renderInversionesStage === 'function') {
+        renderInversionesStage('billeteras');
+        return;
+      }
+      const currentSubView = (account.id || '').includes('ahorro') ? 'cuenta_ahorro' : 'cuenta_rut_vista';
+      renderBancoStage(currentSubView);
     }
 
     // ==========================================================================
@@ -1760,7 +1771,7 @@
       ];
 
       const defaultSource = fundingOptions.find(o => o.balance >= fund.minAmount) || fundingOptions[0];
-      const defaultAmount = Math.max(fund.minAmount, Math.min(100000, defaultSource ? defaultSource.balance : fund.minAmount));
+      const defaultAmount = Number(fund.minAmount) || 5000;
       const estimatedShares = (defaultAmount / fund.initialSharePrice).toFixed(4);
 
       modalRoot.innerHTML = `
@@ -2345,7 +2356,7 @@
         }))
       ];
 
-      const defaultAmount = 100000;
+      const defaultAmount = Number(item.minAmount) || 5000;
       const defaultInterest = Math.round(defaultAmount * item.ratePeriod);
 
       modalRoot.innerHTML = `
