@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0065';
+const APP_VERSION = 'v1.0.0066';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -417,6 +417,7 @@ class TrinoShell {
     this.sessionLog = [];
     this.singSessionLog = [];
     this.chordSessionLog = [];
+    this.vtSessionLog = [];
 
     // Secuencia y grabación para Cantar Notas
     this.singBpm = this.loadSingBpm();
@@ -514,6 +515,8 @@ class TrinoShell {
     this.chordAnswersContainer = document.getElementById('chord-answers-container');
     this.chordSessionLogWrapper = document.getElementById('chord-session-log-wrapper');
     this.chordSessionLogTbody = document.getElementById('chord-session-log-tbody');
+    this.vtSessionLogWrapper = document.getElementById('vt-session-log-wrapper');
+    this.vtSessionLogTbody = document.getElementById('vt-session-log-tbody');
     this.singDebugPanel = document.getElementById('sing-debug-panel');
     this.singDebugBody = document.getElementById('sing-debug-body');
     this.btnDebugModal = document.getElementById('btn-debug-modal');
@@ -3255,9 +3258,14 @@ class TrinoShell {
     this.renderLogTable(this.singSessionLogWrapper, this.singSessionLogTbody, this.singSessionLog, 'singing');
   }
 
-  buildDaySummaryHtml(dayLabel, items, isSinging, dailyGoal) {
+  renderVoiceTestSessionLog() {
+    this.renderLogTable(this.vtSessionLogWrapper, this.vtSessionLogTbody, this.vtSessionLog, 'voiceTest');
+  }
+
+  buildDaySummaryHtml(dayLabel, items, isSinging, dailyGoal, moduleType = 'intervals') {
     const totalEx = items.length;
     if (totalEx === 0) return '';
+    const isVoiceTest = moduleType === 'voiceTest';
 
     const exerciseGrades = { admirable: 0, bueno: 0, aceptable: 0, casi: 0, malo: 0 };
     items.forEach((it) => {
@@ -3314,7 +3322,16 @@ class TrinoShell {
         const pNAdm = Math.round((nAdm / totalNotes) * 100);
         const pNMalo = Math.max(0, 100 - pNAdm - pNReg - pNAcep - pNBueno);
 
-        notesSummaryHtml = `
+        notesSummaryHtml = isVoiceTest
+          ? `
+          <div class="day-voice-counts">
+            <span><strong>Voz </strong></span>
+            <span>Glisandos: <strong>${cGli}</strong></span>
+            <span>Vibratos: <strong>${cVib}</strong></span>
+            <span>Irregulares: <strong>${cIrr}</strong></span>
+          </div>
+        `
+          : `
           <div class="day-summary-line">
             <span><strong>Notas:</strong> ${totalNotes}</span>
             ${pNAdm > 0 ? `<span class="sum-adm" title="Admirables" aria-label="Admirables: ${pNAdm}%">✦ ${pNAdm}%</span>` : ''}
@@ -3340,30 +3357,42 @@ class TrinoShell {
       }
     }
 
-    const colSpan = isSinging ? 6 : 4;
-    const headersRowHtml = isSinging
+    const colSpan = isVoiceTest ? 5 : isSinging ? 6 : 4;
+    const headersRowHtml = isVoiceTest
       ? `<tr class="log-col-headers">
            <th>#</th>
            <th>Nota</th>
-           <th></th>
            <th>Centro tonal</th>
            <th>Voz</th>
            <th></th>
          </tr>`
-      : `<tr class="log-col-headers">
-           <th>#</th>
-           <th>Notas</th>
-           <th>Tu respuesta</th>
-           <th></th>
-         </tr>`;
+      : isSinging
+        ? `<tr class="log-col-headers">
+             <th>#</th>
+             <th>Nota</th>
+             <th></th>
+             <th>Centro tonal</th>
+             <th>Voz</th>
+             <th></th>
+           </tr>`
+        : `<tr class="log-col-headers">
+             <th>#</th>
+             <th>Notas</th>
+             <th>Tu respuesta</th>
+             <th></th>
+           </tr>`;
+
+    const bannerText = isVoiceTest
+      ? `${dayLabel}: ${totalEx} ${totalEx === 1 ? 'nota' : 'notas'}`
+      : `${dayLabel}: Completado ${totalEx} de ${dailyGoal}`;
 
     return `
       <tr class="day-divider-row">
         <td colspan="${colSpan}" class="day-divider-cell">
-          <div class="day-divider-banner">${dayLabel}: Completado ${totalEx} de ${dailyGoal}</div>
+          <div class="day-divider-banner">${bannerText}</div>
           <div class="day-summary-box">
             <div class="day-summary-line">
-              <span><strong>Ejercicios:</strong> ${totalEx}</span>
+              <span><strong>${isVoiceTest ? 'Notas:' : 'Ejercicios:'}</strong> ${totalEx}</span>
               ${isSinging
         ? `${pAdmEx > 0 ? `<span class="sum-adm" title="Admirables" aria-label="Admirables: ${pAdmEx}%">✦ ${pAdmEx}%</span>` : ''}
                    ${pBuenoEx > 0 ? `<span class="sum-bueno" title="Buenos" aria-label="Buenos: ${pBuenoEx}%">✓ ${pBuenoEx}%</span>` : ''}
@@ -3416,19 +3445,24 @@ class TrinoShell {
 
   renderLogTable(wrapperEl, tbodyEl, list, moduleType = 'intervals') {
     if (!wrapperEl || !tbodyEl) return;
-    const isSinging = moduleType === 'singing';
-    const dailyGoal = moduleType === 'singing'
+    const isVoiceTest = moduleType === 'voiceTest';
+    const isSinging = moduleType === 'singing' || isVoiceTest;
+    const dailyGoal = isSinging
       ? this.dailySingingMin
       : moduleType === 'chords' ? this.dailyChordsMin : this.dailyIntervalsMin;
     if (!Array.isArray(list) || list.length === 0) {
-      const emptyHeaders = isSinging
+      const emptyHeaders = isVoiceTest
         ? `<tr class="log-col-headers">
-             <th>#</th><th>Nota</th><th></th><th>Centro tonal</th><th>Voz</th><th></th>
+             <th>#</th><th>Nota</th><th>Centro tonal</th><th>Voz</th><th></th>
            </tr>`
-        : `<tr class="log-col-headers">
-             <th>#</th><th>Notas</th><th>Tu respuesta</th><th></th>
-           </tr>`;
-      const colSpan = isSinging ? 6 : 4;
+        : isSinging
+          ? `<tr class="log-col-headers">
+               <th>#</th><th>Nota</th><th></th><th>Centro tonal</th><th>Voz</th><th></th>
+             </tr>`
+          : `<tr class="log-col-headers">
+               <th>#</th><th>Notas</th><th>Tu respuesta</th><th></th>
+             </tr>`;
+      const colSpan = isVoiceTest ? 5 : isSinging ? 6 : 4;
       tbodyEl.innerHTML = `${emptyHeaders}
         <tr class="log-empty-row"><td colspan="${colSpan}">Aún no hay ejercicios registrados.</td></tr>`;
       wrapperEl.classList.remove('hidden');
@@ -3459,16 +3493,21 @@ class TrinoShell {
 
     const renderRows = (items) =>
       items
-        .map((item) => {
+        .map((item, idxInDay) => {
+          const fallbackIdx = items.length - idxInDay;
+          const displayIdx = item.index ?? fallbackIdx;
+          const fallbackGrade = item.exerciseGrade || item.noteStats?.[0]?.grade || (item.isCorrect ? 'bueno' : 'malo');
           const latestRowClass = item === list[0]
-            ? `log-latest-entry log-latest-${item.exerciseGrade || (item.isCorrect ? 'bueno' : 'malo')}`
+            ? `log-latest-entry log-latest-${fallbackGrade}`
             : '';
 
           if (isSinging) {
-            const gl = gradeLabel[item.exerciseGrade] || gradeLabel.malo;
+            const gl = gradeLabel[fallbackGrade] || gradeLabel.malo;
             const ns = Array.isArray(item.noteStats) ? item.noteStats : [];
-            const targetNotes = String(item.notes || '').split(/<br\s*\/?>/i);
-            const noteCount = Math.max(ns.length, targetNotes.length, 1);
+            const targetNotes = item.notes
+              ? String(item.notes).split(/<br\s*\/?>/i)
+              : ns.map((n) => (Number.isFinite(n?.midi) ? this.midiToNoteWithOctaveEs(n.midi) : ''));
+            const noteCount = isVoiceTest ? 1 : Math.max(ns.length, targetNotes.length, 1);
 
             return Array.from({ length: noteCount }, (_, noteIndex) => {
               const note = ns[noteIndex];
@@ -3492,11 +3531,23 @@ class TrinoShell {
                 ? '<span class="voice-badge badge-glissando" title="Glisando detectado">G</span>'
                 : '&nbsp;';
               const firstRowCells = noteIndex === 0
-                ? `<td rowspan="${noteCount}">${item.index}</td>`
+                ? `<td rowspan="${noteCount}">${displayIdx}</td>`
                 : '';
               const exerciseGradeCell = noteIndex === 0
                 ? `<td class="log-grade ${gl.cls}" rowspan="${noteCount}" title="${gl.label}" aria-label="${gl.label}">${gl.icon}</td>`
                 : '';
+
+              if (isVoiceTest) {
+                return `
+                  <tr${latestRowClass ? ` class="${latestRowClass}"` : ''}>
+                    ${firstRowCells}
+                    <td class="log-notes-col">${targetNotes[noteIndex] || '&nbsp;'}</td>
+                    <td class="log-tonal-col">${tonalCenter}</td>
+                    <td class="log-voice-col">${voiceBadge} ${glissandoBadge}</td>
+                    ${exerciseGradeCell}
+                  </tr>
+                `;
+              }
 
               return `
                 <tr${latestRowClass ? ` class="${latestRowClass}"` : ''}>
@@ -3545,7 +3596,7 @@ class TrinoShell {
       const dayItems = groupsByDate.get(dKey) || [];
       if (dayItems.length > 0) {
         const bannerLabel = this.formatDateBannerLabel(dKey);
-        html += this.buildDaySummaryHtml(bannerLabel, dayItems, isSinging, dailyGoal);
+        html += this.buildDaySummaryHtml(bannerLabel, dayItems, isSinging, dailyGoal, moduleType);
         html += renderRows(dayItems);
       }
     });
@@ -6105,6 +6156,8 @@ class TrinoShell {
     if (this.debugLargeBody) this.debugLargeBody.innerHTML = '<p class="dbg-empty">Pulsa una nota y termina el análisis para ver sus frames.</p>';
     this.updateVoiceTestHint();
     this.drawVoiceTestStaff();
+    this.vtSessionLog = this.getLevelDayLog('voiceTest', '0');
+    this.renderVoiceTestSessionLog();
   }
 
   stopVoiceTest() {
@@ -6398,10 +6451,27 @@ class TrinoShell {
 
     const note = this.getNoteGradeFromFrames(frames, midi);
     const analysis = this.buildNoteAnalysis(frames, midi);
+    const todayKey = this.getTodayKey();
+    const existingList = this.getLevelDayLog('voiceTest', '0');
+    const todayCount = existingList.filter((it) => (it.date || todayKey) === todayKey).length;
     this.pushLevelDayLog('voiceTest', '0', {
-      date: this.getTodayKey(),
-      noteStats: [{ midi, grade: note.grade }],
+      date: todayKey,
+      index: todayCount + 1,
+      notes: this.midiToNoteWithOctaveEs(midi),
+      isCorrect: this.isNoteMatch(note.grade),
+      exerciseGrade: note.grade,
+      noteStats: [{
+        midi,
+        grade: note.grade,
+        sungNote: analysis.sungNote || null,
+        label: analysis.label,
+        voiceType: analysis.voiceType || 'plana',
+        vibratoHz: analysis.vibratoHz || null,
+        glissando: Boolean(analysis.glissando),
+      }],
     });
+    this.vtSessionLog = this.getLevelDayLog('voiceTest', '0');
+    this.renderVoiceTestSessionLog();
     const sorted = [...voiced].sort((a, b) => a - b);
     const sungName = this.midiToEnglishName(sorted[Math.floor(sorted.length / 2)]);
 

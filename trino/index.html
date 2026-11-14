@@ -15,7 +15,7 @@
       <div class="app-brand" id="brand-home-btn" title="Ir al inicio">
         <div class="app-logo-dot">🎵</div>
         <span class="app-name">Trino</span>
-        <span class="app-version" id="app-version-badge">v1.0.0065</span>
+        <span class="app-version" id="app-version-badge">v1.0.0066</span>
       </div>
 
       <button type="button" class="menu-btn" id="menu-toggle-btn" aria-label="Abrir menú">
@@ -254,6 +254,12 @@
         </div>
         <div class="vt-keyboard-scroll" id="vt-keyboard-scroll">
           <div class="vt-keyboard" id="vt-keyboard"></div>
+        </div>
+
+        <div class="session-log-wrapper hidden" id="vt-session-log-wrapper">
+          <table class="session-log-table sing-log-table" aria-label="Historial de prueba de voz">
+            <tbody id="vt-session-log-tbody"></tbody>
+          </table>
         </div>
       </section>
 
@@ -640,7 +646,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=82"></script>
+  <script src="./js/app.js?v=83"></script>
 </body>
 
 </html>
