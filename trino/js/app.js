@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0056';
+const APP_VERSION = 'v1.0.0064';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -68,10 +68,22 @@ const INTERVAL_CATALOG = {
   '7m': { label: '7ª Menor', semitones: 10 },
   '7M': { label: '7ª Mayor', semitones: 11 },
   '8J': { label: '8ª Justa', semitones: 12 },
+  '9m': { label: '9ª Menor', semitones: 13 },
+  '9M': { label: '9ª Mayor', semitones: 14 },
+  '10m': { label: '10ª Menor', semitones: 15 },
+  '10M': { label: '10ª Mayor', semitones: 16 },
+  '11J': { label: '11ª Justa', semitones: 17 },
+  '11A': { label: '11ª Aumentada', semitones: 18 },
+  '13m': { label: '13ª Menor', semitones: 20 },
+  '13M': { label: '13ª Mayor', semitones: 21 },
 };
 
 const ALL_OCTAVE_INTERVALS = [
   '1J', '2m', '2M', '3m', '3M', '4J', '4A', '5J', '6m', '6M', '7m', '7M', '8J',
+];
+
+const LEVEL_14_INTERVALS = [
+  '5J', '6m', '6M', '7m', '7M', '8J', '9m', '9M', '10m', '10M', '11J', '11A', '13m', '13M',
 ];
 
 const CHORD_CATALOG = {
@@ -314,9 +326,9 @@ const INTERVAL_LEVELS = [
   {
     id: 14,
     block: 4,
-    title: 'Nivel 14 · Todos los Intervalos (2 Octavas)',
-    desc: 'Los 13 intervalos con las 12 notas cromáticas a lo largo de 2 octavas (Do3–Do5).',
-    options: ALL_OCTAVE_INTERVALS,
+    title: 'Nivel 14 · De 5ª a 13ª (Intervalos Compuestos)',
+    desc: 'Desde 5ª Justa hasta 13ª Mayor (novenas, décimas, oncenas y trecenas) con las 12 notas cromáticas (Do3–Do5).',
+    options: LEVEL_14_INTERVALS,
     midiRange: { minStart: 48, maxEnd: 72, label: '2 Octavas (Do3 a Do5)' },
   },
 ];
@@ -375,6 +387,7 @@ class TrinoShell {
     this.singOnlyFirstNote = extraCfg.singOnlyFirstNote;
     this.intervalGoodDelay = extraCfg.intervalGoodDelay;
     this.intervalBadDelay = extraCfg.intervalBadDelay;
+    this.intervalTimeLimit = extraCfg.intervalTimeLimit;
     this.chordGoodDelay = extraCfg.chordGoodDelay;
     this.chordBadDelay = extraCfg.chordBadDelay;
     const progState = this.loadProgressiveState();
@@ -398,6 +411,8 @@ class TrinoShell {
     this.currentQuestion = null;
     this.delayedPlayTimer = null;
     this.autoNextTimer = null;
+    this.intervalAnswerTimeout = null;
+    this.intervalAnswerRaf = null;
     this.noteAnimTimers = [];
     this.sessionLog = [];
     this.singSessionLog = [];
@@ -476,6 +491,8 @@ class TrinoShell {
 
     // Elementos de ejercicio de Reconocer Intervalos
     this.exLevelTitle = document.getElementById('ex-level-title');
+    this.exTimeBarTrack = document.getElementById('ex-time-bar-track');
+    this.exTimeBarFill = document.getElementById('ex-time-bar-fill');
     this.exAnswersContainer = document.getElementById('ex-answers-container');
     this.exPromptText = document.getElementById('ex-prompt-text');
     this.mysteryNotesRow = document.querySelector('.mystery-notes-row');
@@ -559,12 +576,11 @@ class TrinoShell {
     this.aboutModalVersion = document.getElementById('about-modal-version');
     this.btnAboutClose = document.getElementById('btn-about-close');
 
-    // Vista Ver estadística
+    // Vista Estadística
     this.statsMainTitle = document.getElementById('stats-main-title');
     this.btnStatsClose = document.getElementById('btn-stats-close');
-    this.statsMenuPanel = document.getElementById('stats-menu-panel');
+    this.statsReportSelect = document.getElementById('stats-report-select');
     this.statsReportPanel = document.getElementById('stats-report-panel');
-    this.statsReportTitle = document.getElementById('stats-report-title');
     this.statsReportBody = document.getElementById('stats-report-body');
   }
 
@@ -681,29 +697,16 @@ class TrinoShell {
    * ========================================================================= */
 
   showStatsMenu() {
-    this.activeStatsReport = null;
-    if (this.statsMainTitle) this.statsMainTitle.textContent = 'Ver estadística';
-    this.statsMenuPanel?.classList.remove('hidden');
-    this.statsReportPanel?.classList.add('hidden');
-    if (this.currentView === 'stats') {
-      this.renderBottomCommands('stats');
-    }
+    const initialKey = this.statsReportSelect?.value || this.activeStatsReport || 'm1-abs';
+    this.openStatsReport(initialKey);
   }
 
   openStatsReport(reportKey) {
     this.activeStatsReport = reportKey;
-    this.statsMenuPanel?.classList.add('hidden');
-    this.statsReportPanel?.classList.remove('hidden');
-
-    const titles = {
-      'm1-abs': 'Módulo 1 · Intervalos absolutos',
-      'm1-notes': 'Módulo 1 · Intervalos por nota',
-      'm2-notes': 'Módulo 2 · Canto de Notas',
-      'm4-notes': 'Módulo 4 · Canto de Notas',
-    };
-    if (this.statsReportTitle) {
-      this.statsReportTitle.textContent = titles[reportKey] || 'Estadística';
+    if (this.statsReportSelect && this.statsReportSelect.value !== reportKey) {
+      this.statsReportSelect.value = reportKey;
     }
+    this.statsReportPanel?.classList.remove('hidden');
 
     if (this.statsReportBody) {
       if (reportKey === 'm1-abs') {
@@ -717,13 +720,38 @@ class TrinoShell {
       }
     }
 
-    this.renderBottomCommands('stats');
+    if (this.currentView === 'stats') {
+      this.renderBottomCommands('stats');
+    }
   }
 
   formatStatCell(val, colorCls) {
     const n = Number(val) || 0;
     if (n === 0) return `<td class="stats-val-zero">-</td>`;
     return `<td class="${colorCls}">${n}</td>`;
+  }
+
+  getStatsRowBgClass(goodCount, badCount, totalCount) {
+    if (totalCount < 20) return '';
+    if (badCount / totalCount > 0.20) return ' class="stats-row-bad"';
+    if (goodCount / totalCount >= 0.90) return ' class="stats-row-good"';
+    return '';
+  }
+
+  formatSingingGoodCell(admirable, bueno, aceptable) {
+    const nAdm = Number(admirable) || 0;
+    const nBueno = Number(bueno) || 0;
+    const nAcep = Number(aceptable) || 0;
+    const parts = [];
+    if (nAdm > 0) parts.push(`<span class="stats-val-adm">✦ ${nAdm}</span>`);
+    if (nBueno > 0) parts.push(`<span class="stats-val-bueno">✓ ${nBueno}</span>`);
+    parts.push(`<span class="stats-val-acep">⊙ ${nAcep > 0 ? nAcep : '-'}</span>`);
+    return `<td class="stats-cell-multi">${parts.join(' ')}</td>`;
+  }
+
+  formatSingingIconCell(val, icon, colorCls) {
+    const n = Number(val) || 0;
+    return `<td class="${colorCls}">${icon} ${n > 0 ? n : '-'}</td>`;
   }
 
   formatDateDdMmYyyy(dateKey) {
@@ -798,7 +826,9 @@ class TrinoShell {
         else if (lvlOpts.includes('8J') && !lvlOpts.includes('1J')) intervalKey = '8J';
         else intervalKey = '1J';
       } else {
-        intervalKey = Object.keys(INTERVAL_CATALOG).find(
+        intervalKey = lvlOpts.find(
+          (k) => INTERVAL_CATALOG[k] && (INTERVAL_CATALOG[k].semitones % 12) === diffPc
+        ) || Object.keys(INTERVAL_CATALOG).find(
           (k) => INTERVAL_CATALOG[k].semitones === diffPc
         ) || null;
       }
@@ -898,8 +928,10 @@ class TrinoShell {
       .map((key) => {
         const cat = INTERVAL_CATALOG[key];
         const entry = abs[key] || { good: 0, bad: 0 };
+        const total = (entry.good || 0) + (entry.bad || 0);
+        const rowCls = this.getStatsRowBgClass(entry.good || 0, entry.bad || 0, total);
         return `
-          <tr>
+          <tr${rowCls}>
             <td><strong>${cat.label}</strong></td>
             ${this.formatStatCell(entry.good, 'stats-val-good')}
             ${this.formatStatCell(entry.bad, 'stats-val-bad')}
@@ -950,8 +982,10 @@ class TrinoShell {
         const n1 = this.midiToNoteWithOctaveEs(it.midi1);
         const n2 = this.midiToNoteWithOctaveEs(it.midi2);
         const label = INTERVAL_CATALOG[it.intervalKey]?.label || it.intervalKey;
+        const total = (it.good || 0) + (it.bad || 0);
+        const rowCls = this.getStatsRowBgClass(it.good || 0, it.bad || 0, total);
         return `
-          <tr>
+          <tr${rowCls}>
             <td><strong>${n1}-${n2}</strong></td>
             <td>${label}</td>
             ${this.formatStatCell(it.good, 'stats-val-good')}
@@ -1007,14 +1041,14 @@ class TrinoShell {
       if (total === 0 && isSharp) continue;
 
       const noteLabel = this.midiToNoteWithOctaveEs(m);
+      const goodSum = (r.aceptable || 0) + (r.bueno || 0) + (r.admirable || 0);
+      const rowCls = this.getStatsRowBgClass(goodSum, r.malo || 0, total);
       rowsHtml.push(`
-        <tr>
+        <tr${rowCls}>
           <td><strong>${noteLabel}</strong></td>
-          ${this.formatStatCell(r.malo, 'stats-val-bad')}
-          ${this.formatStatCell(r.casi, 'stats-val-reg')}
-          ${this.formatStatCell(r.aceptable, 'stats-val-acep')}
-          ${this.formatStatCell(r.bueno, 'stats-val-good')}
-          ${this.formatStatCell(r.admirable, 'stats-val-adm')}
+          ${this.formatSingingGoodCell(r.admirable, r.bueno, r.aceptable)}
+          ${this.formatSingingIconCell(r.casi, '≈', 'stats-val-reg')}
+          ${this.formatSingingIconCell(r.malo, '✕', 'stats-val-bad')}
         </tr>
       `);
     }
@@ -1025,11 +1059,9 @@ class TrinoShell {
           <thead>
             <tr>
               <th>Nota</th>
-              <th>Fallidas</th>
-              <th>Regulares</th>
-              <th>Aceptables</th>
               <th>Buenas</th>
-              <th>Admirables</th>
+              <th>Regulares</th>
+              <th>Fallidas</th>
             </tr>
           </thead>
           <tbody>${rowsHtml.join('')}</tbody>
@@ -1193,6 +1225,7 @@ class TrinoShell {
       singOnlyFirstNote: this.singOnlyFirstNote,
       intervalGoodDelay: this.intervalGoodDelay,
       intervalBadDelay: this.intervalBadDelay,
+      intervalTimeLimit: this.intervalTimeLimit,
       chordGoodDelay: this.chordGoodDelay,
       chordBadDelay: this.chordBadDelay,
     };
@@ -1200,7 +1233,9 @@ class TrinoShell {
 
   loadModulePopupConfigs() {
     const validDelays = ['0', '1', '2', '3', 'none'];
+    const validTimeLimits = ['none', '1', '2', '3', '5', '10'];
     const normDelay = (val, defVal) => (validDelays.includes(String(val)) ? String(val) : defVal);
+    const normTimeLimit = (val, defVal) => (validTimeLimits.includes(String(val)) ? String(val) : defVal);
     try {
       const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
       if (raw) {
@@ -1211,6 +1246,7 @@ class TrinoShell {
           singOnlyFirstNote: parsed.singOnlyFirstNote === true,
           intervalGoodDelay: normDelay(parsed.intervalGoodDelay, '1'),
           intervalBadDelay: normDelay(parsed.intervalBadDelay, 'none'),
+          intervalTimeLimit: normTimeLimit(parsed.intervalTimeLimit, 'none'),
           chordGoodDelay: normDelay(parsed.chordGoodDelay, '1'),
           chordBadDelay: normDelay(parsed.chordBadDelay, 'none'),
         };
@@ -1221,6 +1257,7 @@ class TrinoShell {
       singOnlyFirstNote: false,
       intervalGoodDelay: '1',
       intervalBadDelay: 'none',
+      intervalTimeLimit: 'none',
       chordGoodDelay: '1',
       chordBadDelay: 'none',
     };
@@ -1710,19 +1747,14 @@ class TrinoShell {
     }
     if (this.btnStatsClose) {
       this.btnStatsClose.addEventListener('click', () => {
-        if (this.activeStatsReport) {
-          this.showStatsMenu();
-        } else {
-          this.navigateTo('home');
-        }
+        this.navigateTo('home');
       });
     }
-    document.querySelectorAll('[data-stats-report]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const rep = btn.getAttribute('data-stats-report');
-        if (rep) this.openStatsReport(rep);
+    if (this.statsReportSelect) {
+      this.statsReportSelect.addEventListener('change', () => {
+        this.openStatsReport(this.statsReportSelect.value);
       });
-    });
+    }
   }
 
   /* =========================================================================
@@ -2062,8 +2094,10 @@ class TrinoShell {
     if (cfg.singNotesCount >= 1 && cfg.singNotesCount <= 4) this.singNotesCount = cfg.singNotesCount;
     if (typeof cfg.singOnlyFirstNote === 'boolean') this.singOnlyFirstNote = cfg.singOnlyFirstNote;
     const validDelays = ['0', '1', '2', '3', 'none'];
+    const validTimeLimits = ['none', '1', '2', '3', '5', '10'];
     if (validDelays.includes(String(cfg.intervalGoodDelay))) this.intervalGoodDelay = String(cfg.intervalGoodDelay);
     if (validDelays.includes(String(cfg.intervalBadDelay))) this.intervalBadDelay = String(cfg.intervalBadDelay);
+    if (validTimeLimits.includes(String(cfg.intervalTimeLimit))) this.intervalTimeLimit = String(cfg.intervalTimeLimit);
     if (validDelays.includes(String(cfg.chordGoodDelay))) this.chordGoodDelay = String(cfg.chordGoodDelay);
     if (validDelays.includes(String(cfg.chordBadDelay))) this.chordBadDelay = String(cfg.chordBadDelay);
     this.saveAllSettings();
@@ -2282,7 +2316,14 @@ class TrinoShell {
     this.singPromptText?.classList.toggle('hidden', isStarted);
     this.chordPromptText?.classList.toggle('hidden', isStarted);
     this.mysteryNotesRow?.classList.toggle('hidden', !isStarted || this.activeModule !== 'intervals');
-    this.exAnswersContainer?.classList.toggle('hidden', !isStarted || this.activeModule !== 'intervals');
+    this.exTimeBarTrack?.classList.toggle('hidden', this.activeModule !== 'intervals');
+    if (this.activeModule === 'intervals' && !isStarted) {
+      this.stopIntervalAnswerTimer();
+    }
+    this.exAnswersContainer?.classList.toggle('hidden', this.activeModule !== 'intervals');
+    this.exAnswersContainer?.querySelectorAll('.answer-btn').forEach((btn) => {
+      btn.disabled = !isStarted;
+    });
     this.chordAnswersContainer?.classList.toggle('hidden', !isStarted || this.activeModule !== 'chords');
     this.singStaffCanvasBox?.classList.toggle('hidden', !isStarted || this.activeModule !== 'singing');
     if (isStarted && this.activeModule === 'singing') {
@@ -2530,6 +2571,7 @@ class TrinoShell {
       this.lastNoteDetails = null;
       this.resetSingingQuestionUi();
     } else {
+      this.stopIntervalAnswerTimer();
       this.clearAnswerButtonColors();
       this.resetMysteryNotes();
     }
@@ -2601,6 +2643,25 @@ class TrinoShell {
     } else if (moduleType === 'intervals' || moduleType === 'chords') {
       const goodVal = moduleType === 'chords' ? this.chordGoodDelay : this.intervalGoodDelay;
       const badVal = moduleType === 'chords' ? this.chordBadDelay : this.intervalBadDelay;
+      const timeLimitFieldHtml = moduleType === 'intervals'
+        ? `
+            <div class="level-info-config-field">
+              <label for="modal-time-limit-select">Responder contra el tiempo</label>
+              <select id="modal-time-limit-select" class="settings-select">
+                ${[
+            { val: 'none', label: 'Sin tiempo' },
+            { val: '1', label: '1 segundo' },
+            { val: '2', label: '2 segundos' },
+            { val: '3', label: '3 segundos' },
+            { val: '5', label: '5 segundos' },
+            { val: '10', label: '10 segundos' },
+          ]
+            .map((o) => `<option value="${o.val}"${String(this.intervalTimeLimit) === o.val ? ' selected' : ''}>${o.label}</option>`)
+            .join('')}
+              </select>
+            </div>
+          `
+        : '';
       configSectionHtml = `
         <div class="level-info-section">
           <span class="level-info-label">Configuración de avance de ejercicio</span>
@@ -2617,6 +2678,7 @@ class TrinoShell {
                 ${buildDelayOptionsHtml(badVal)}
               </select>
             </div>
+            ${timeLimitFieldHtml}
           </div>
         </div>
       `;
@@ -2766,6 +2828,7 @@ class TrinoShell {
     } else if (moduleType === 'intervals' || moduleType === 'chords') {
       const goodSelect = this.levelInfoModalBody.querySelector('#modal-good-delay-select');
       const badSelect = this.levelInfoModalBody.querySelector('#modal-bad-delay-select');
+      const timeLimitSelect = this.levelInfoModalBody.querySelector('#modal-time-limit-select');
       goodSelect?.addEventListener('change', () => {
         if (moduleType === 'chords') {
           this.chordGoodDelay = goodSelect.value;
@@ -2781,6 +2844,11 @@ class TrinoShell {
           this.intervalBadDelay = badSelect.value;
         }
         this.saveAllSettings();
+      });
+      timeLimitSelect?.addEventListener('change', () => {
+        this.intervalTimeLimit = timeLimitSelect.value;
+        this.saveAllSettings();
+        this.stopIntervalAnswerTimer();
       });
     }
   }
@@ -2870,11 +2938,25 @@ class TrinoShell {
     }
 
     const effectiveLevel = this.getEffectiveIntervalLevel();
+    const wideKeysByLevel = {
+      2: ['3M'],
+      5: ['1J'],
+      6: ['1J'],
+      7: ['1J'],
+      8: ['5J'],
+      9: ['5J'],
+      10: ['8J'],
+      11: ['5J', '8J'],
+      13: ['1J', '5J', '8J'],
+      14: ['5J', '8J'],
+    };
+    const wideSet = new Set(wideKeysByLevel[effectiveLevel.id] || []);
     this.exAnswersContainer.innerHTML = effectiveLevel.options
       .map((key) => {
         const item = INTERVAL_CATALOG[key];
+        const wideCls = wideSet.has(key) ? ' answer-btn-wide' : '';
         return `
-          <button type="button" class="answer-btn" data-answer-key="${key}">
+          <button type="button" class="answer-btn${wideCls}" data-answer-key="${key}"${this.exerciseStarted ? '' : ' disabled'}>
             ${item.label}
           </button>
         `;
@@ -2886,6 +2968,120 @@ class TrinoShell {
         this.handleAnswerSelection(btn, btn.getAttribute('data-answer-key'));
       });
     });
+  }
+
+  stopIntervalAnswerTimer() {
+    if (this.intervalAnswerTimeout) {
+      clearTimeout(this.intervalAnswerTimeout);
+      this.intervalAnswerTimeout = null;
+    }
+    if (this.intervalAnswerRaf) {
+      cancelAnimationFrame(this.intervalAnswerRaf);
+      this.intervalAnswerRaf = null;
+    }
+    if (this.exTimeBarFill) {
+      this.exTimeBarFill.style.width = '100%';
+      this.exTimeBarFill.style.backgroundColor = '#334155';
+    }
+  }
+
+  startIntervalAnswerTimer(delayAfterStartMs = 0) {
+    this.stopIntervalAnswerTimer();
+    if (this.activeModule !== 'intervals' || !this.exerciseStarted) return;
+    if (!this.currentQuestion || this.currentQuestion.answered) return;
+    const sec = Number(this.intervalTimeLimit);
+    if (this.intervalTimeLimit === 'none' || !Number.isFinite(sec) || sec <= 0) return;
+
+    const totalMs = sec * 1000;
+    if (this.exTimeBarFill) {
+      this.exTimeBarFill.style.width = '0%';
+      this.exTimeBarFill.style.backgroundColor = '#22c55e';
+    }
+
+    this.intervalAnswerTimeout = setTimeout(() => {
+      this.intervalAnswerTimeout = null;
+      if (!this.currentQuestion || this.currentQuestion.answered) return;
+      const startMs = performance.now();
+
+      const tick = (now) => {
+        if (!this.currentQuestion || this.currentQuestion.answered || this.activeModule !== 'intervals') {
+          return;
+        }
+        const elapsed = now - startMs;
+        const ratio = Math.min(1, Math.max(0, elapsed / totalMs));
+        if (this.exTimeBarFill) {
+          this.exTimeBarFill.style.width = `${(ratio * 100).toFixed(1)}%`;
+          this.exTimeBarFill.style.backgroundColor =
+            ratio < 0.5 ? '#22c55e' : ratio < 0.8 ? '#f59e0b' : '#ef4444';
+        }
+        if (ratio >= 1) {
+          this.intervalAnswerRaf = null;
+          this.handleIntervalAnswerTimeout();
+        } else {
+          this.intervalAnswerRaf = requestAnimationFrame(tick);
+        }
+      };
+
+      this.intervalAnswerRaf = requestAnimationFrame(tick);
+    }, delayAfterStartMs);
+  }
+
+  handleIntervalAnswerTimeout() {
+    if (!this.activeLevel || !this.currentQuestion || this.currentQuestion.answered) return;
+    this.stopIntervalAnswerTimer();
+    if (this.exTimeBarFill) {
+      this.exTimeBarFill.style.width = '100%';
+      this.exTimeBarFill.style.backgroundColor = '#ef4444';
+    }
+
+    const stats = this.getLevelStats(this.activeLevel.id, 'intervals');
+    this.currentQuestion.answered = true;
+    stats.bad += 1;
+
+    if (this.activeLevel.isProgressive) {
+      this.syncProgressiveDayState();
+      this.progressiveConsecutiveGood = 0;
+      this.progressiveAccumBad += 1;
+      if (this.progressiveAccumBad >= 10) {
+        this.progressiveAccumBad = 0;
+        if (this.progressiveSubLevelId >= 2) {
+          this.progressiveSubLevelId -= 1;
+          this.updateExerciseUi('down');
+        }
+      }
+      this.saveProgressiveState();
+    }
+
+    this.scheduleAutoNextByDelay(this.intervalBadDelay);
+
+    const note1 = this.midiToNoteNameEs(this.currentQuestion.midi1);
+    const note2 = this.midiToNoteNameEs(this.currentQuestion.midi2);
+    const todayKey = this.getTodayKey();
+    const todayCount = this.sessionLog.filter((it) => (it.date || todayKey) === todayKey).length;
+    this.pushLevelDayLog('intervals', this.activeLevel.id, {
+      date: todayKey,
+      index: todayCount + 1,
+      notes: `${note1} - ${note2}`,
+      midi1: this.currentQuestion.midi1,
+      midi2: this.currentQuestion.midi2,
+      intervalKey: this.currentQuestion.targetIntervalKey,
+      answer: 'Tiempo agotado',
+      isCorrect: false,
+    });
+    this.sessionLog = this.getLevelDayLog('intervals', this.activeLevel.id);
+    this.renderSessionLog();
+
+    const totalDone = stats.good + stats.bad;
+    if (totalDone >= this.dailyIntervalsMin) {
+      const ratio = totalDone > 0 ? stats.good / totalDone : 0;
+      const earnedStars = ratio >= 0.85 ? 3 : ratio >= 0.65 ? 2 : 1;
+      if (earnedStars > stats.stars) {
+        stats.stars = earnedStars;
+      }
+    }
+
+    this.saveProgress();
+    this.updateHomeModuleProgress();
   }
 
   scheduleAutoNextByDelay(delaySetting) {
@@ -2918,6 +3114,7 @@ class TrinoShell {
     }
 
     if (!this.currentQuestion.answered) {
+      this.stopIntervalAnswerTimer();
       this.currentQuestion.answered = true;
       this.currentQuestion.firstButtonEl = btnEl;
       this.currentQuestion.firstClass = colorClass;
@@ -3136,10 +3333,8 @@ class TrinoShell {
           <div class="day-voice-counts">
             <span><strong>Voz </strong></span>
             <span>Glisandos: <strong>${cGli}</strong></span>
-            <span>Sin vibrato: <strong>${cPlana}</strong></span>
             <span>Vibratos: <strong>${cVib}</strong></span>
             <span>Irregulares: <strong>${cIrr}</strong></span>
-            ${cSinAnalisis ? `<span>Sin análisis: <strong>${cSinAnalisis}</strong></span>` : ''}
           </div>
         `;
       }
@@ -5091,6 +5286,7 @@ class TrinoShell {
     const stats = this.getLevelStats(this.activeLevel.id, 'singing');
 
     if (!this.currentQuestion.answered) {
+      this.stopIntervalAnswerTimer();
       this.currentQuestion.answered = true;
 
       if (isCorrect) {
@@ -5515,6 +5711,10 @@ class TrinoShell {
         if (this.mysteryNote2) this.mysteryNote2.classList.remove('note-playing');
       }, 1300)
     );
+
+    if (!this.currentQuestion.answered) {
+      this.startIntervalAnswerTimer(1300);
+    }
   }
 
   playTone(hz, startTime, duration, gainScale = 1) {
@@ -6435,6 +6635,7 @@ class TrinoShell {
         clearTimeout(this.autoNextTimer);
         this.autoNextTimer = null;
       }
+      this.stopIntervalAnswerTimer();
       this.stopSingingSequence();
       if (viewKey !== 'settings') {
         this.releaseMicStream();
@@ -6480,16 +6681,6 @@ class TrinoShell {
           <button type="button" class="auth-activate-btn" id="btn-open-auth-modal">Activar cuenta</button>
         </div>
       `;
-      return;
-    }
-
-    if (viewKey === 'stats' && this.activeStatsReport) {
-      this.bottomZone.innerHTML = `
-        <button type="button" class="cmd-btn" id="cmd-back-stats-menu">← Volver a Estadísticas</button>
-      `;
-      document.getElementById('cmd-back-stats-menu')?.addEventListener('click', () => {
-        this.showStatsMenu();
-      });
       return;
     }
 

@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=61" />
+  <link rel="stylesheet" href="./css/styles.css?v=66" />
 </head>
 
 <body>
@@ -15,7 +15,7 @@
       <div class="app-brand" id="brand-home-btn" title="Ir al inicio">
         <div class="app-logo-dot">🎵</div>
         <span class="app-name">Trino</span>
-        <span class="app-version" id="app-version-badge">v1.0.0056</span>
+        <span class="app-version" id="app-version-badge">v1.0.0064</span>
       </div>
 
       <button type="button" class="menu-btn" id="menu-toggle-btn" aria-label="Abrir menú">
@@ -30,7 +30,7 @@
         <span>⚙️</span>
       </button>
       <button type="button" class="menu-item" data-target="stats">
-        <span>Ver estadística</span>
+        <span>Estadística</span>
         <span>📊</span>
       </button>
       <button type="button" class="menu-item" id="menu-about-btn">
@@ -132,6 +132,10 @@
         <div class="mystery-notes-row" aria-live="polite">
           <button type="button" class="mystery-note" id="mystery-note-1" aria-label="Escuchar primera nota">?</button>
           <button type="button" class="mystery-note" id="mystery-note-2" aria-label="Escuchar segunda nota">?</button>
+        </div>
+
+        <div class="ex-time-bar-track" id="ex-time-bar-track" aria-hidden="true">
+          <div class="ex-time-bar-fill" id="ex-time-bar-fill"></div>
         </div>
 
         <div class="answers-grid" id="ex-answers-container">
@@ -407,54 +411,24 @@
         </div>
       </section>
 
-      <!-- VISTA: VER ESTADÍSTICA -->
+      <!-- VISTA: ESTADÍSTICA -->
       <section id="view-stats" class="hidden">
         <div class="welcome-box settings-panel">
           <div class="settings-header">
-            <h1 class="welcome-title" id="stats-main-title">Ver estadística</h1>
+            <h1 class="welcome-title" id="stats-main-title">Estadística</h1>
             <button type="button" class="settings-close-btn" id="btn-stats-close" aria-label="Cerrar estadística" title="Cerrar estadística">×</button>
           </div>
 
-          <div id="stats-menu-panel" class="stats-menu-panel">
-            <div class="settings-group">
-              <span class="settings-group-title">Módulo 1</span>
-              <div class="stats-btn-list">
-                <button type="button" class="stats-option-btn" data-stats-report="m1-abs">
-                  <span>Ver estadística de Intervalos absolutos</span>
-                  <span>→</span>
-                </button>
-                <button type="button" class="stats-option-btn" data-stats-report="m1-notes">
-                  <span>Ver estadística de Intervalos por nota</span>
-                  <span>→</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="settings-group">
-              <span class="settings-group-title">Módulo 2</span>
-              <div class="stats-btn-list">
-                <button type="button" class="stats-option-btn" data-stats-report="m2-notes">
-                  <span>Ver estadística de canto de Notas</span>
-                  <span>→</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="settings-group">
-              <span class="settings-group-title">Módulo 4</span>
-              <div class="stats-btn-list">
-                <button type="button" class="stats-option-btn" data-stats-report="m4-notes">
-                  <span>Ver estadística de canto de Notas</span>
-                  <span>→</span>
-                </button>
-              </div>
-            </div>
+          <div class="stats-select-wrap">
+            <select id="stats-report-select" class="settings-select" aria-label="Seleccionar estadística">
+              <option value="m1-abs">Módulo 1 - Intervalos absolutos</option>
+              <option value="m1-notes">Módulo 1 - Intervalos por notas</option>
+              <option value="m2-notes">Módulo 2 - Canto por notas</option>
+              <option value="m4-notes">Módulo 4 - Canto por notas</option>
+            </select>
           </div>
 
-          <div id="stats-report-panel" class="stats-report-panel hidden">
-            <div class="stats-report-header">
-              <h2 class="stats-report-subtitle" id="stats-report-title">Estadística</h2>
-            </div>
+          <div id="stats-report-panel" class="stats-report-panel">
             <div id="stats-report-body" class="stats-report-body"></div>
           </div>
         </div>
@@ -639,7 +613,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=73"></script>
+  <script src="./js/app.js?v=81"></script>
 </body>
 
 </html>
