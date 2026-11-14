@@ -18,7 +18,7 @@
         job: 'Freelance / Trabajo dependiente',
         transport: 'City Car / Locomoción colectiva'
       },
-      cash: 450000, // Dinero físico en efectivo inicial (siempre presente)
+      cash: 5000000, // Dinero físico en efectivo inicial (siempre presente)
       bankAccounts: [], // Al partir no tiene cuentas bancarias contratadas (solo figuran si han sido contratadas)
       creditCard: null, // Al partir no tiene tarjeta de crédito contratada
       creditLine: null, // Al partir no tiene línea de crédito contratada

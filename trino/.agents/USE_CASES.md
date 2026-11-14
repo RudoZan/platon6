@@ -78,8 +78,9 @@
 7. Entering the module or changing the duration shows a bold two-line instruction in the analysis area; it disappears when a key is pressed or a result is shown.
 8. Modules 2 and 4 share voice-shape analysis: preserve silence-frame timing, calculate tonal median first, then detect vibrato/glissando relative to that center. Optional vibrato rectification affects only tuning grade, not the raw analysis or debug.
 
-## UC-13: Cumulative Statistics (`#view-stats`)
-1. The hamburger menu includes `Ver estadística`, opening `#view-stats` with four options: Module 1 (`Ver estadística de Intervalos absolutos`, `Ver estadística de Intervalos por nota`), Module 2 (`Ver estadística de canto de Notas`), and Module 4 (`Ver estadística de canto de Notas`).
-2. `Intervalos absolutos` displays all 13 intervals with `Buenas` and `Fallidas` counts (including `0`).
-3. `Intervalos por nota` displays only note pairs with recorded answers, ordered first by interval (`1J..8J`) and then by starting pitch with octave ascending.
-4. Module 2 and Module 4 `Canto de Notas` tables span from the lowest to the highest recorded note (with octave), keeping empty natural notes in between and omitting empty sharp notes.
+## UC-13: Cumulative Statistics (`#view-stats`) & Multi-Day Log
+1. `trino_day_logs_v1` retains up to 2,000 exercises per module across all dates. Response tables group days from newest to oldest, displaying `HOY` and `AYER` with their formatted date and older days as `Martes, 12/10/2026`.
+2. The hamburger menu includes `Ver estadística`, opening `#view-stats` (with its `×` button aligned on the right of the heading) and reading directly from `trino_day_logs_v1`.
+3. `Intervalos absolutos` displays all 13 intervals with `Buenas` and `Fallidas` counts (`-` for `0`).
+4. `Intervalos por nota` displays only note pairs with recorded answers, ordered first by interval (`1J..8J`) and then by starting pitch with octave ascending.
+5. Module 2 and Module 4 `Canto de Notas` tables span from the lowest to the highest recorded note (with octave), keeping empty natural notes in between and omitting empty sharp notes.

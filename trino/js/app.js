@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0053';
+const APP_VERSION = 'v1.0.0056';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -336,7 +336,7 @@ const STORAGE_KEY_CHORD_PROGRESS = 'trino_chord_progress_v1';
 const STORAGE_KEY_USER = 'trino_user_v1';
 const STORAGE_KEY_DAY_LOGS = 'trino_day_logs_v1';
 const STORAGE_KEY_PROG_STATE = 'trino_progressive_state_v1';
-const STORAGE_KEY_STATS = 'trino_stats_v1';
+const MAX_EXERCISES_PER_MODULE = 2000;
 
 const AUTH_NATURAL_NOTES = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
 const AUTH_NOTE_MIDI = { Do: 60, Re: 62, Mi: 64, Fa: 65, Sol: 67, La: 69, Si: 71 };
@@ -387,8 +387,10 @@ class TrinoShell {
     this.singProgress = this.loadProgress(STORAGE_KEY_SING_PROGRESS);
     this.chordProgress = this.loadProgress(STORAGE_KEY_CHORD_PROGRESS);
     this.dayLogs = this.loadDayLogs();
-    this.cumulativeStats = this.loadCumulativeStats();
     this.activeStatsReport = null;
+    try {
+      localStorage.removeItem('trino_stats_v1');
+    } catch (_) { }
 
     // Estado de ejercicio activo
     this.activeModule = null; // 'intervals' | 'singing'
@@ -675,64 +677,8 @@ class TrinoShell {
   }
 
   /* =========================================================================
-   * ESTADÍSTICA ACUMULADA (MÓDULOS 1, 2 Y 4)
+   * ESTADÍSTICA EN VIVO DESDE dayLogs (SIN DATOS DUPLICADOS)
    * ========================================================================= */
-
-  loadCumulativeStats() {
-    const empty = { m1Abs: {}, m1ByNote: {}, m2Notes: {}, m4Notes: {} };
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY_STATS);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') {
-          return {
-            m1Abs: parsed.m1Abs || {},
-            m1ByNote: parsed.m1ByNote || {},
-            m2Notes: parsed.m2Notes || {},
-            m4Notes: parsed.m4Notes || {},
-          };
-        }
-      }
-    } catch (_) { }
-    return empty;
-  }
-
-  saveCumulativeStats() {
-    try {
-      localStorage.setItem(STORAGE_KEY_STATS, JSON.stringify(this.cumulativeStats));
-    } catch (_) { }
-  }
-
-  recordM1Stat(midi1, midi2, intervalKey, isCorrect) {
-    if (!this.cumulativeStats) this.cumulativeStats = this.loadCumulativeStats();
-    const abs = this.cumulativeStats.m1Abs;
-    if (!abs[intervalKey]) abs[intervalKey] = { good: 0, bad: 0 };
-    if (isCorrect) abs[intervalKey].good += 1;
-    else abs[intervalKey].bad += 1;
-
-    const pairId = `${midi1}-${midi2}-${intervalKey}`;
-    const byNote = this.cumulativeStats.m1ByNote;
-    if (!byNote[pairId]) {
-      byNote[pairId] = { midi1, midi2, intervalKey, good: 0, bad: 0 };
-    }
-    if (isCorrect) byNote[pairId].good += 1;
-    else byNote[pairId].bad += 1;
-
-    this.saveCumulativeStats();
-  }
-
-  recordSingingNoteStat(moduleNum, midi, grade) {
-    if (midi == null) return;
-    if (!this.cumulativeStats) this.cumulativeStats = this.loadCumulativeStats();
-    const store = moduleNum === 4 ? this.cumulativeStats.m4Notes : this.cumulativeStats.m2Notes;
-    const key = String(Math.round(midi));
-    if (!store[key]) {
-      store[key] = { malo: 0, casi: 0, aceptable: 0, bueno: 0, admirable: 0 };
-    }
-    const g = ['malo', 'casi', 'aceptable', 'bueno', 'admirable'].includes(grade) ? grade : 'malo';
-    store[key][g] += 1;
-    this.saveCumulativeStats();
-  }
 
   showStatsMenu() {
     this.activeStatsReport = null;
@@ -765,9 +711,9 @@ class TrinoShell {
       } else if (reportKey === 'm1-notes') {
         this.statsReportBody.innerHTML = this.buildM1ByNoteTableHtml();
       } else if (reportKey === 'm2-notes') {
-        this.statsReportBody.innerHTML = this.buildSingingNotesTableHtml(this.cumulativeStats?.m2Notes || {});
+        this.statsReportBody.innerHTML = this.buildSingingNotesTableHtml('singing');
       } else if (reportKey === 'm4-notes') {
-        this.statsReportBody.innerHTML = this.buildSingingNotesTableHtml(this.cumulativeStats?.m4Notes || {});
+        this.statsReportBody.innerHTML = this.buildSingingNotesTableHtml('voiceTest');
       }
     }
 
@@ -780,8 +726,171 @@ class TrinoShell {
     return `<td class="${colorCls}">${n}</td>`;
   }
 
+  formatDateDdMmYyyy(dateKey) {
+    const parts = String(dateKey || '').split('-');
+    if (parts.length === 3) {
+      return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
+    }
+    return dateKey;
+  }
+
+  buildStatsPeriodFooterHtml(moduleKey) {
+    const modLogs = this.dayLogs?.[moduleKey] || {};
+    let totalEx = 0;
+    const dates = [];
+    const todayKey = this.getTodayKey();
+
+    Object.keys(modLogs).forEach((lvlId) => {
+      const list = Array.isArray(modLogs[lvlId]) ? modLogs[lvlId] : [];
+      list.forEach((it) => {
+        if (!it) return;
+        totalEx += 1;
+        dates.push(it.date || todayKey);
+      });
+    });
+
+    if (totalEx === 0) {
+      return `<p class="stats-period-footer">Sin ejercicios registrados aún.</p>`;
+    }
+
+    dates.sort();
+    const minDate = this.formatDateDdMmYyyy(dates[0]);
+    const maxDate = this.formatDateDdMmYyyy(dates[dates.length - 1]);
+    return `<p class="stats-period-footer">Estadística respecto de ${totalEx} ${totalEx === 1 ? 'ejercicio' : 'ejercicios'}.<br>Durante el periodo del ${minDate} al ${maxDate}</p>`;
+  }
+
+  /**
+   * Extrae { midi1, midi2, intervalKey, isCorrect } de cualquier registro de this.dayLogs.intervals,
+   * tanto si ya trae midi1/midi2/intervalKey como si proviene de registros anteriores con solo notes/answer.
+   */
+  resolveIntervalLogItem(item, levelId) {
+    if (!item) return null;
+    if (item.intervalKey && Number.isFinite(item.midi1) && Number.isFinite(item.midi2)) {
+      return {
+        midi1: item.midi1,
+        midi2: item.midi2,
+        intervalKey: item.intervalKey,
+        isCorrect: Boolean(item.isCorrect),
+      };
+    }
+
+    const parts = String(item.notes || '').split('-').map((s) => s.trim());
+    const n1Name = parts[0];
+    const n2Name = parts[1];
+    const pc1 = NOTE_NAMES_ES.indexOf(n1Name);
+    const pc2 = NOTE_NAMES_ES.indexOf(n2Name);
+    if (pc1 < 0 || pc2 < 0) return null;
+
+    const lvl = INTERVAL_LEVELS.find((l) => String(l.id) === String(levelId));
+    const lvlOpts = lvl?.options || Object.keys(INTERVAL_CATALOG);
+
+    let intervalKey = null;
+    if (item.isCorrect && item.answer) {
+      intervalKey = Object.keys(INTERVAL_CATALOG).find(
+        (k) => INTERVAL_CATALOG[k].label === item.answer
+      ) || null;
+    }
+
+    const diffPc = (pc2 - pc1 + 12) % 12;
+    if (!intervalKey) {
+      if (diffPc === 0) {
+        if (lvlOpts.includes('1J') && !lvlOpts.includes('8J')) intervalKey = '1J';
+        else if (lvlOpts.includes('8J') && !lvlOpts.includes('1J')) intervalKey = '8J';
+        else intervalKey = '1J';
+      } else {
+        intervalKey = Object.keys(INTERVAL_CATALOG).find(
+          (k) => INTERVAL_CATALOG[k].semitones === diffPc
+        ) || null;
+      }
+    }
+    if (!intervalKey) return null;
+
+    const semitones = INTERVAL_CATALOG[intervalKey]?.semitones ?? diffPc;
+    let midi1 = 60 + pc1; // Octava 4 por defecto para registros sin octava explícita
+    if (lvl?.restrictedPairs?.[intervalKey]) {
+      const pair = lvl.restrictedPairs[intervalKey].find(([m1]) => ((m1 % 12) + 12) % 12 === pc1);
+      if (pair) midi1 = pair[0];
+    }
+    const midi2 = midi1 + semitones;
+
+    return {
+      midi1,
+      midi2,
+      intervalKey,
+      isCorrect: Boolean(item.isCorrect),
+    };
+  }
+
+  collectM1StatsFromDayLogs() {
+    const m1Abs = {};
+    const m1ByNote = {};
+    const intervalsLog = this.dayLogs?.intervals || {};
+
+    Object.keys(intervalsLog).forEach((lvlId) => {
+      const list = Array.isArray(intervalsLog[lvlId]) ? intervalsLog[lvlId] : [];
+      list.forEach((item) => {
+        const resolved = this.resolveIntervalLogItem(item, lvlId);
+        if (!resolved) return;
+        const { midi1, midi2, intervalKey, isCorrect } = resolved;
+
+        if (!m1Abs[intervalKey]) m1Abs[intervalKey] = { good: 0, bad: 0 };
+        if (isCorrect) m1Abs[intervalKey].good += 1;
+        else m1Abs[intervalKey].bad += 1;
+
+        const pairId = `${midi1}-${midi2}-${intervalKey}`;
+        if (!m1ByNote[pairId]) {
+          m1ByNote[pairId] = { midi1, midi2, intervalKey, good: 0, bad: 0 };
+        }
+        if (isCorrect) m1ByNote[pairId].good += 1;
+        else m1ByNote[pairId].bad += 1;
+      });
+    });
+
+    return { m1Abs, m1ByNote };
+  }
+
+  collectSingingNotesFromDayLogs(moduleKey) {
+    const noteStore = {};
+    const modLogs = this.dayLogs?.[moduleKey] || {};
+
+    Object.keys(modLogs).forEach((lvlId) => {
+      const list = Array.isArray(modLogs[lvlId]) ? modLogs[lvlId] : [];
+      list.forEach((item) => {
+        const targetNames = String(item?.notes || '').split('<br>').map((s) => s.trim()).filter(Boolean);
+        const ns = Array.isArray(item?.noteStats) ? item.noteStats : [];
+        ns.forEach((nStat, idx) => {
+          let midi = Number.isFinite(nStat?.midi) ? Math.round(nStat.midi) : null;
+          if (midi === null) {
+            const tName = targetNames[idx];
+            const pc = NOTE_NAMES_ES.indexOf(tName);
+            if (pc >= 0) {
+              let oct = 4;
+              const mMatch = String(nStat?.sungNote || '').match(/(-?\d+)$/);
+              if (mMatch) {
+                const parsedOct = parseInt(mMatch[1], 10);
+                if (parsedOct >= 2 && parsedOct <= 6) oct = parsedOct;
+              }
+              midi = (oct + 1) * 12 + pc;
+            }
+          }
+          if (midi === null) return;
+          const key = String(midi);
+          if (!noteStore[key]) {
+            noteStore[key] = { malo: 0, casi: 0, aceptable: 0, bueno: 0, admirable: 0 };
+          }
+          const g = ['malo', 'casi', 'aceptable', 'bueno', 'admirable'].includes(nStat?.grade)
+            ? nStat.grade
+            : 'malo';
+          noteStore[key][g] += 1;
+        });
+      });
+    });
+
+    return noteStore;
+  }
+
   buildM1AbsTableHtml() {
-    const abs = this.cumulativeStats?.m1Abs || {};
+    const { m1Abs: abs } = this.collectM1StatsFromDayLogs();
     const orderedKeys = Object.keys(INTERVAL_CATALOG).sort(
       (a, b) => (INTERVAL_CATALOG[a].semitones ?? 0) - (INTERVAL_CATALOG[b].semitones ?? 0)
     );
@@ -812,11 +921,12 @@ class TrinoShell {
           <tbody>${rows}</tbody>
         </table>
       </div>
+      ${this.buildStatsPeriodFooterHtml('intervals')}
     `;
   }
 
   buildM1ByNoteTableHtml() {
-    const byNote = this.cumulativeStats?.m1ByNote || {};
+    const { m1ByNote: byNote } = this.collectM1StatsFromDayLogs();
     const intervalOrder = Object.keys(INTERVAL_CATALOG).sort(
       (a, b) => (INTERVAL_CATALOG[a].semitones ?? 0) - (INTERVAL_CATALOG[b].semitones ?? 0)
     );
@@ -824,7 +934,7 @@ class TrinoShell {
 
     const items = Object.values(byNote).filter((it) => it && (it.good || 0) + (it.bad || 0) > 0);
     if (items.length === 0) {
-      return `<div class="stats-table-wrap"><p class="stats-empty-msg">Sin registros aún.</p></div>`;
+      return `<div class="stats-table-wrap"><p class="stats-empty-msg">Sin registros aún.</p></div>${this.buildStatsPeriodFooterHtml('intervals')}`;
     }
 
     items.sort((a, b) => {
@@ -865,10 +975,12 @@ class TrinoShell {
           <tbody>${rows}</tbody>
         </table>
       </div>
+      ${this.buildStatsPeriodFooterHtml('intervals')}
     `;
   }
 
-  buildSingingNotesTableHtml(noteStore) {
+  buildSingingNotesTableHtml(moduleKey) {
+    const noteStore = this.collectSingingNotesFromDayLogs(moduleKey);
     const midisWithData = Object.keys(noteStore)
       .map((k) => parseInt(k, 10))
       .filter((m) => {
@@ -880,7 +992,7 @@ class TrinoShell {
       });
 
     if (midisWithData.length === 0) {
-      return `<div class="stats-table-wrap"><p class="stats-empty-msg">Sin registros aún.</p></div>`;
+      return `<div class="stats-table-wrap"><p class="stats-empty-msg">Sin registros aún.</p></div>${this.buildStatsPeriodFooterHtml(moduleKey)}`;
     }
 
     const minMidi = Math.min(...midisWithData);
@@ -923,26 +1035,52 @@ class TrinoShell {
           <tbody>${rowsHtml.join('')}</tbody>
         </table>
       </div>
+      ${this.buildStatsPeriodFooterHtml(moduleKey)}
     `;
   }
 
+  enforceModuleLogCap(modObj, maxCount = MAX_EXERCISES_PER_MODULE) {
+    if (!modObj || typeof modObj !== 'object') return;
+    const allRefs = [];
+    Object.keys(modObj).forEach((lvlId) => {
+      const arr = Array.isArray(modObj[lvlId]) ? modObj[lvlId] : [];
+      arr.forEach((item, pos) => {
+        if (item) {
+          allRefs.push({ lvlId, item, date: item.date || '0000-00-00', index: Number(item.index) || 0, pos });
+        }
+      });
+    });
+    if (allRefs.length <= maxCount) return;
+
+    // Ordenar del más reciente al más antiguo
+    allRefs.sort((a, b) => {
+      if (a.date !== b.date) return b.date.localeCompare(a.date);
+      if (a.pos !== b.pos) return a.pos - b.pos;
+      return b.index - a.index;
+    });
+
+    const keepSet = new Set(allRefs.slice(0, maxCount).map((r) => r.item));
+    Object.keys(modObj).forEach((lvlId) => {
+      modObj[lvlId] = (modObj[lvlId] || []).filter((it) => keepSet.has(it));
+      if (modObj[lvlId].length === 0) delete modObj[lvlId];
+    });
+  }
+
   loadDayLogs() {
-    const today = this.getTodayKey();
-    const yesterday = this.getYesterdayKey();
-    const cleanStore = { intervals: {}, singing: {}, chords: {} };
+    const cleanStore = { intervals: {}, singing: {}, chords: {}, voiceTest: {} };
     try {
       const raw = localStorage.getItem(STORAGE_KEY_DAY_LOGS);
       if (raw) {
         const parsed = JSON.parse(raw);
-        ['intervals', 'singing', 'chords'].forEach((mod) => {
+        ['intervals', 'singing', 'chords', 'voiceTest'].forEach((mod) => {
           const modObj = parsed?.[mod] || {};
           Object.keys(modObj).forEach((lvlId) => {
-            const arr = Array.isArray(modObj[lvlId]) ? modObj[lvlId] : [];
-            const filtered = arr.filter((it) => it && (it.date === today || it.date === yesterday));
-            if (filtered.length > 0) {
-              cleanStore[mod][lvlId] = filtered;
+            const arr = Array.isArray(modObj[lvlId]) ? modObj[lvlId].filter(Boolean) : [];
+            if (arr.length > 0) {
+              cleanStore[mod][lvlId] = arr;
             }
           });
+          this.enforceModuleLogCap(cleanStore[mod], MAX_EXERCISES_PER_MODULE);
         });
       }
     } catch (_) { }
@@ -950,29 +1088,29 @@ class TrinoShell {
   }
 
   saveDayLogs() {
-    const today = this.getTodayKey();
-    const yesterday = this.getYesterdayKey();
+    const modules = ['intervals', 'singing', 'chords', 'voiceTest'];
+    modules.forEach((mod) => {
+      if (!this.dayLogs[mod]) this.dayLogs[mod] = {};
+      this.enforceModuleLogCap(this.dayLogs[mod], MAX_EXERCISES_PER_MODULE);
+    });
     try {
-      ['intervals', 'singing', 'chords'].forEach((mod) => {
-        const modObj = this.dayLogs[mod] || {};
-        Object.keys(modObj).forEach((lvlId) => {
-          modObj[lvlId] = (modObj[lvlId] || []).filter(
-            (it) => it && (it.date === today || it.date === yesterday)
-          );
-        });
-      });
       localStorage.setItem(STORAGE_KEY_DAY_LOGS, JSON.stringify(this.dayLogs));
-    } catch (_) { }
+    } catch (_) {
+      // Fallback ante QuotaExceededError: recortar 10% más antiguo y reintentar
+      try {
+        modules.forEach((mod) => {
+          this.enforceModuleLogCap(this.dayLogs[mod], Math.floor(MAX_EXERCISES_PER_MODULE * 0.9));
+        });
+        localStorage.setItem(STORAGE_KEY_DAY_LOGS, JSON.stringify(this.dayLogs));
+      } catch (__) { }
+    }
   }
 
   getLevelDayLog(moduleType, levelId) {
-    const today = this.getTodayKey();
-    const yesterday = this.getYesterdayKey();
     if (!this.dayLogs[moduleType]) this.dayLogs[moduleType] = {};
-    const list = this.dayLogs[moduleType][levelId] || [];
-    this.dayLogs[moduleType][levelId] = list.filter(
-      (it) => it && (it.date === today || it.date === yesterday)
-    );
+    if (!Array.isArray(this.dayLogs[moduleType][levelId])) {
+      this.dayLogs[moduleType][levelId] = [];
+    }
     return this.dayLogs[moduleType][levelId];
   }
 
@@ -2822,18 +2960,15 @@ class TrinoShell {
 
       const note1 = this.midiToNoteNameEs(this.currentQuestion.midi1);
       const note2 = this.midiToNoteNameEs(this.currentQuestion.midi2);
-      this.recordM1Stat(
-        this.currentQuestion.midi1,
-        this.currentQuestion.midi2,
-        this.currentQuestion.targetIntervalKey,
-        isCorrect
-      );
       const todayKey = this.getTodayKey();
       const todayCount = this.sessionLog.filter((it) => (it.date || todayKey) === todayKey).length;
       this.pushLevelDayLog('intervals', this.activeLevel.id, {
         date: todayKey,
         index: todayCount + 1,
         notes: `${note1} - ${note2}`,
+        midi1: this.currentQuestion.midi1,
+        midi2: this.currentQuestion.midi2,
+        intervalKey: this.currentQuestion.targetIntervalKey,
         answer: INTERVAL_CATALOG[selectedKey]?.label || selectedKey,
         isCorrect,
       });
@@ -3061,6 +3196,29 @@ class TrinoShell {
     `;
   }
 
+  formatDateBannerLabel(dateKey) {
+    const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const parts = String(dateKey || '').split('-');
+    let formattedDate = dateKey;
+    if (parts.length === 3) {
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      const d = parseInt(parts[2], 10);
+      const dt = new Date(y, m - 1, d);
+      if (!Number.isNaN(dt.getTime())) {
+        const dayName = days[dt.getDay()];
+        const dd = String(d).padStart(2, '0');
+        const mm = String(m).padStart(2, '0');
+        formattedDate = `${dayName}, ${dd}/${mm}/${y}`;
+      }
+    }
+    const todayKey = this.getTodayKey();
+    const yesterdayKey = this.getYesterdayKey();
+    if (dateKey === todayKey) return `HOY · ${formattedDate}`;
+    if (dateKey === yesterdayKey) return `AYER · ${formattedDate}`;
+    return formattedDate;
+  }
+
   renderLogTable(wrapperEl, tbodyEl, list, moduleType = 'intervals') {
     if (!wrapperEl || !tbodyEl) return;
     const isSinging = moduleType === 'singing';
@@ -3178,15 +3336,24 @@ class TrinoShell {
         })
         .join('');
 
+    const groupsByDate = new Map();
+    list.forEach((it) => {
+      if (!it) return;
+      const dKey = it.date || todayKey;
+      if (!groupsByDate.has(dKey)) groupsByDate.set(dKey, []);
+      groupsByDate.get(dKey).push(it);
+    });
+
+    const sortedDates = Array.from(groupsByDate.keys()).sort((a, b) => b.localeCompare(a));
     let html = '';
-    if (todayItems.length > 0) {
-      html += this.buildDaySummaryHtml('HOY', todayItems, isSinging, dailyGoal);
-      html += renderRows(todayItems);
-    }
-    if (yesterdayItems.length > 0) {
-      html += this.buildDaySummaryHtml('AYER', yesterdayItems, isSinging, dailyGoal);
-      html += renderRows(yesterdayItems);
-    }
+    sortedDates.forEach((dKey) => {
+      const dayItems = groupsByDate.get(dKey) || [];
+      if (dayItems.length > 0) {
+        const bannerLabel = this.formatDateBannerLabel(dKey);
+        html += this.buildDaySummaryHtml(bannerLabel, dayItems, isSinging, dailyGoal);
+        html += renderRows(dayItems);
+      }
+    });
 
     if (!html) {
       wrapperEl.classList.add('hidden');
@@ -4937,18 +5104,14 @@ class TrinoShell {
       const toVoiceType = (t) =>
         t.voiceType || (t.isVibrato ? 'vibrato' : t.isUnstable || t.isHighLow ? 'inestable' : 'plana');
 
-      midis.forEach((m, idx) => {
-        this.recordSingingNoteStat(2, m, noteGrades[idx]);
-      });
-
       this.pushLevelDayLog('singing', this.activeLevel.id, {
         date: todayKey,
         index: todayCount + 1,
         notes: noteNames.join('<br>'),
-        answer: sungSummary,
         isCorrect,
         exerciseGrade,
-        noteStats: midis.map((_, i) => ({
+        noteStats: midis.map((m, i) => ({
+          midi: m,
           grade: noteGrades[i],
           sungNote: tonals[i].sungNote || null,
           label: tonals[i].label,
@@ -5983,7 +6146,10 @@ class TrinoShell {
 
     const note = this.getNoteGradeFromFrames(frames, midi);
     const analysis = this.buildNoteAnalysis(frames, midi);
-    this.recordSingingNoteStat(4, midi, note.grade);
+    this.pushLevelDayLog('voiceTest', '0', {
+      date: this.getTodayKey(),
+      noteStats: [{ midi, grade: note.grade }],
+    });
     const sorted = [...voiced].sort((a, b) => a - b);
     const sungName = this.midiToEnglishName(sorted[Math.floor(sorted.length / 2)]);
 

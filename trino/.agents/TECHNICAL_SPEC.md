@@ -85,11 +85,9 @@
 - Debug: Module 4 exposes the shared floating debug view. Its frame matrix uses the same 21 cents bands/colors as `docs/trino/TablaDeValores.md`, with one column per original frame, signed target cents in the active cell, peak markers, and analysis diagnostics.
 - Grade buckets: admirable ≤15c, bueno ≤20c, aceptable ≤40c, regular ≤80c, fallido >80c; admirable/bueno hidden when 0 %.
 - Staff canvas: `208 px` high, `6.0 px` per diatonic step; the recording bar overlays the analysis area; keyboard is `110 px` high with a dark-red `2 px` strip above the keys; sung pitch is drawn at its real height via `voiceTestStepFloat`.
-- Cache keys: HTML loads `styles.css?v=59` and `app.js?v=70`; `APP_VERSION` is `v1.0.0053`.
+- Cache keys: HTML loads `styles.css?v=61` and `app.js?v=72`; `APP_VERSION` is `v1.0.0055`.
 
-## 11. Cumulative Statistics View (`#view-stats`, `trino_stats_v1`)
-- Opened via `"Ver estadística"` in the top menu drawer (`#menu-drawer`). Zero values render as `-` (`formatStatCell`).
-- Stores cumulative browser statistics in `trino_stats_v1` (`m1Abs`, `m1ByNote`, `m2Notes`, `m4Notes`):
-  - **Module 1 — Intervalos absolutos:** Lists all 13 intervals (`1J..8J`) in ascending order regardless of whether they have data (`Intervalo | Buenas | Fallidas`).
-  - **Module 1 — Intervalos por nota:** Lists only recorded tonic+target pairs (`good + bad > 0`), sorted first by interval order (`1J..8J`) and then by tonic MIDI ascending (`Notas | Intervalo | Buenas | Fallidas`).
-  - **Module 2 & Module 4 — Canto de Notas:** Lists MIDI notes from the lowest recorded MIDI note to the highest recorded MIDI note; intermediate natural notes (`Do..Si`) with `0` count are included, while sharp notes (`#`) with `0` count are omitted. Columns: `Nota | Fallidas | Regulares | Aceptables | Buenas | Admirables`.
+## 11. Cumulative Statistics View & Multi-Day Log (`#view-stats`, `trino_day_logs_v1`)
+- `trino_day_logs_v1` stores exercise logs across all dates capped at **2,000 exercises per module** (`intervals`, `singing`, `chords`, `voiceTest`) with FIFO eviction of the oldest entries and a 10% trim fallback on `QuotaExceededError`.
+- Result tables group entries by `date` descending: `HOY` and `AYER` include the formatted date (`HOY · Sábado, 14/11/2026`, `AYER · Viernes, 13/11/2026`), while older dates show the capitalized weekday and date (`Martes, 12/10/2026`).
+- `"Ver estadística"` (`#view-stats`, with the `×` close button aligned to the right of the heading) reads directly from `this.dayLogs` (`trino_day_logs_v1`) without duplicate storage; zero values render as `-`, and a footer below each table displays `Estadística respecto de X ejercicios durante el periodo del DD/MM/YYYY al DD/MM/YYYY`.
