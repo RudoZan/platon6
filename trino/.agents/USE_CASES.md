@@ -55,7 +55,7 @@
 1. In Module 1 and Module 3, pressing `i` in the exercise header opens `#level-info-modal` with the level details plus two selectors for auto-advance wait time after a good answer (default `Esperar un segundo`) and after a failed answer (default `No avanzar`).
 2. In Module 2, pressing `i` opens `#level-info-modal` with a configuration section to select the number of notes per measure (`1`, `2` [default], `3`, or `4`) and the checkbox `Solo tocar la primera nota` (plays only note 1 in Compás 1 while keeping all notes active for singing in Compás 2).
 3. In Module 2, the grand staff extends edge-to-edge horizontally, and the overall exercise grade icon is rendered on the central barline between Compás 1 and Compás 2.
-4. Module 1 includes `Nivel Progresivo` before Level 1. It starts at `Nivel Progresivo - (N1)`, advances one level (`N2..N14`) after 10 consecutive good answers (highlighting `(N#)` in bright green), and steps back one level (if at `N2` or above) every 10 accumulated failed answers (highlighting `(N#)` in bright red).
+4. Module 1 includes `Nivel Progresivo` before Level 1. It starts at `Nivel Progresivo - (N1)`, persists across sessions during the same day, and resets only from one day to the next at `02:00 AM` local time. It advances one level (`N2..N14`) after 10 consecutive good answers (highlighting `(N#)` in bright green), and steps back one level (if at `N2` or above) every 10 accumulated failed answers (highlighting `(N#)` in bright red).
 
 ## UC-09: Vocal Range Controls on Mobile
 1. The lowest- and highest-note selectors use the full width of their fields.
@@ -77,3 +77,9 @@
 6. A Debug button opens the shared floating debug view with one column per original recording frame, 21 cents-band rows colored like `TablaDeValores.md`, signed cents in the active cell, peaks, center-relative analysis, vibrato periods/CV, glissando diagnostics, and rectification state.
 7. Entering the module or changing the duration shows a bold two-line instruction in the analysis area; it disappears when a key is pressed or a result is shown.
 8. Modules 2 and 4 share voice-shape analysis: preserve silence-frame timing, calculate tonal median first, then detect vibrato/glissando relative to that center. Optional vibrato rectification affects only tuning grade, not the raw analysis or debug.
+
+## UC-13: Cumulative Statistics (`#view-stats`)
+1. The hamburger menu includes `Ver estadística`, opening `#view-stats` with four options: Module 1 (`Ver estadística de Intervalos absolutos`, `Ver estadística de Intervalos por nota`), Module 2 (`Ver estadística de canto de Notas`), and Module 4 (`Ver estadística de canto de Notas`).
+2. `Intervalos absolutos` displays all 13 intervals with `Buenas` and `Fallidas` counts (including `0`).
+3. `Intervalos por nota` displays only note pairs with recorded answers, ordered first by interval (`1J..8J`) and then by starting pitch with octave ascending.
+4. Module 2 and Module 4 `Canto de Notas` tables span from the lowest to the highest recorded note (with octave), keeping empty natural notes in between and omitting empty sharp notes.

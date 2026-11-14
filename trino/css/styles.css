@@ -2561,3 +2561,127 @@ body {
 .day-voice-counts strong {
   color: var(--text-main);
 }
+
+/* =========================================================================
+ * VISTA DE ESTADÍSTICA (#view-stats)
+ * ========================================================================= */
+.stats-btn-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.stats-option-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.stats-option-btn:hover,
+.stats-option-btn:active {
+  background: rgba(14, 165, 233, 0.16);
+  border-color: rgba(56, 189, 248, 0.55);
+}
+
+.stats-report-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.stats-report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.stats-report-subtitle {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.stats-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.stats-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+.stats-data-table th {
+  background: #172554;
+  color: #e2e8f0;
+  font-weight: 700;
+  padding: 0.42rem 0.45rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.stats-data-table th:first-child,
+.stats-data-table td:first-child {
+  text-align: left;
+  padding-left: 0.65rem;
+}
+
+.stats-data-table td {
+  padding: 0.38rem 0.45rem;
+  text-align: center;
+  color: #f1f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.stats-data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.stats-val-good {
+  color: #4ade80;
+  font-weight: 700;
+}
+
+.stats-val-bad {
+  color: #f87171;
+  font-weight: 700;
+}
+
+.stats-val-reg {
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.stats-val-acep {
+  color: #a3e635;
+  font-weight: 700;
+}
+
+.stats-val-adm {
+  color: #2dd4bf;
+  font-weight: 700;
+}
+
+.stats-empty-msg {
+  padding: 1rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}

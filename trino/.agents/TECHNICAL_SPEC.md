@@ -25,7 +25,7 @@
 - `metrics`: `{ tuningAccuracyPct, meanTendencyCents, stabilitySdCents, attackTimeMs, vocalQuality?: { jitterPct, shimmerPct, hnrDb } }`
 
 ## 5. Pedagogical Progression (`INTERVAL_LEVELS` & `SINGING_LEVELS`)
-- **Module 1 `Nivel Progresivo` (`id: 0`):** Listed before Level 1 in Module 1 only. Starts at `N1` (`Nivel Progresivo - (N1)`). Advances `+1` sub-level (`N2..N14`) on every `10` consecutive good answers (flashing `(N#)` in bright green) and drops `-1` sub-level (down to `N1`) on every `10` accumulated failed answers (flashing `(N#)` in bright red).
+- **Module 1 `Nivel Progresivo` (`id: 0`):** Listed before Level 1 in Module 1 only. Starts at `N1` (`Nivel Progresivo - (N1)`), persisted in `trino_progressive_state_v1`, and resets only from one day to the next at `02:00 AM` local time (`Date.now() - 2h`). Advances `+1` sub-level (`N2..N14`) on every `10` consecutive good answers (flashing `(N#)` in bright green) and drops `-1` sub-level (down to `N1`) on every `10` accumulated failed answers (flashing `(N#)` in bright red).
 - **Module 2 Multi-Note Generation (`singNotesCount = 1..4`, default `2`, `singOnlyFirstNote = boolean`, default `false`):** Configured via the `i` level info modal. Beat 1 is the level's tonic (`midi1`); each additional note (`2..singNotesCount`) picks an allowed interval from the level measured relative to `midi1` (notes may repeat); remaining beats (`singNotesCount + 1 .. 4`) are quarter rests. When `singOnlyFirstNote` is enabled, Compás 1 plays only beat 1 (`midi1`), while Compás 2 records, segments, and grades all `singNotesCount` notes. The staff spans edge-to-edge and places the overall exercise grade icon on the center barline between Compás 1 and Compás 2.
 - **Module 1 & Module 3 Auto-Advance Delays (`goodDelaySec`, `badDelaySec`):** Configured in the `i` level info modal (`0` = `Avanzar de inmediato`, `1` = `Esperar un segundo` [default for good answer], `2` = `Esperar 2 segundos`, `3` = `Esperar 3 segundos`, `'none'` = `No avanzar` [default for failed answer]).
 
@@ -84,5 +84,12 @@
 - Optional `rectifyVibrato` setting (default off) aligns opposite cycle halves by phase and averages their cents relative to target. When enabled with detected vibrato, only tuning grade/buckets use the rectified series; tonal center, voice-shape detections, and debug retain raw data.
 - Debug: Module 4 exposes the shared floating debug view. Its frame matrix uses the same 21 cents bands/colors as `docs/trino/TablaDeValores.md`, with one column per original frame, signed target cents in the active cell, peak markers, and analysis diagnostics.
 - Grade buckets: admirable ≤15c, bueno ≤20c, aceptable ≤40c, regular ≤80c, fallido >80c; admirable/bueno hidden when 0 %.
-- Staff canvas: `208 px` high, `6.0 px` per diatonic step; the recording bar overlays the analysis area; keyboard is `110 px` high with a dark-red `2 px` strip above the keys; sung pitch is drawn at its real height via `voiceTestStepFloat`. No persistence or history; state lives in `this.voiceTest`.
-- Cache keys: HTML loads `styles.css?v=57` and `app.js?v=67`; `APP_VERSION` is `v1.0.0050`.
+- Staff canvas: `208 px` high, `6.0 px` per diatonic step; the recording bar overlays the analysis area; keyboard is `110 px` high with a dark-red `2 px` strip above the keys; sung pitch is drawn at its real height via `voiceTestStepFloat`.
+- Cache keys: HTML loads `styles.css?v=58` and `app.js?v=69`; `APP_VERSION` is `v1.0.0052`.
+
+## 11. Cumulative Statistics View (`#view-stats`, `trino_stats_v1`)
+- Opened via `"Ver estadística"` in the top menu drawer (`#menu-drawer`).
+- Stores cumulative browser statistics in `trino_stats_v1` (`m1Abs`, `m1ByNote`, `m2Notes`, `m4Notes`):
+  - **Module 1 — Intervalos absolutos:** Lists all 13 intervals (`1J..8J`) in ascending order regardless of whether they have data (`Intervalo | Buenas | Fallidas`).
+  - **Module 1 — Intervalos por nota:** Lists only recorded tonic+target pairs (`good + bad > 0`), sorted first by interval order (`1J..8J`) and then by tonic MIDI ascending (`Notas | Intervalo | Buenas | Fallidas`).
+  - **Module 2 & Module 4 — Canto de Notas:** Lists MIDI notes from the lowest recorded MIDI note to the highest recorded MIDI note; intermediate natural notes (`Do..Si`) with `0` count are included, while sharp notes (`#`) with `0` count are omitted. Columns: `Nota | Fallidas | Regulares | Aceptables | Buenas | Admirables`.

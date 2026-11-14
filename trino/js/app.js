@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0050';
+const APP_VERSION = 'v1.0.0052';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -14,6 +14,7 @@ const VIEWS = {
   chords: { id: 'view-chords', badge: 'Acordes' },
   'chord-exercise': { id: 'view-chord-exercise', badge: 'Acordes' },
   settings: { id: 'view-settings', badge: 'Ajustes' },
+  stats: { id: 'view-stats', badge: 'Estadística' },
   'voice-test': { id: 'view-voice-test', badge: 'Prueba de voz' },
 };
 
@@ -334,6 +335,8 @@ const STORAGE_KEY_SING_PROGRESS = 'trino_singing_progress_v1';
 const STORAGE_KEY_CHORD_PROGRESS = 'trino_chord_progress_v1';
 const STORAGE_KEY_USER = 'trino_user_v1';
 const STORAGE_KEY_DAY_LOGS = 'trino_day_logs_v1';
+const STORAGE_KEY_PROG_STATE = 'trino_progressive_state_v1';
+const STORAGE_KEY_STATS = 'trino_stats_v1';
 
 const AUTH_NATURAL_NOTES = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
 const AUTH_NOTE_MIDI = { Do: 60, Re: 62, Mi: 64, Fa: 65, Sol: 67, La: 69, Si: 71 };
@@ -374,14 +377,18 @@ class TrinoShell {
     this.intervalBadDelay = extraCfg.intervalBadDelay;
     this.chordGoodDelay = extraCfg.chordGoodDelay;
     this.chordBadDelay = extraCfg.chordBadDelay;
-    this.progressiveSubLevelId = 1;
-    this.progressiveConsecutiveGood = 0;
-    this.progressiveAccumBad = 0;
+    const progState = this.loadProgressiveState();
+    this.progressiveDayKey = progState.dayKey;
+    this.progressiveSubLevelId = progState.subLevelId;
+    this.progressiveConsecutiveGood = progState.consecutiveGood;
+    this.progressiveAccumBad = progState.accumBad;
     this.progressiveFlashTimer = null;
     this.progress = this.loadProgress(STORAGE_KEY_PROGRESS);
     this.singProgress = this.loadProgress(STORAGE_KEY_SING_PROGRESS);
     this.chordProgress = this.loadProgress(STORAGE_KEY_CHORD_PROGRESS);
     this.dayLogs = this.loadDayLogs();
+    this.cumulativeStats = this.loadCumulativeStats();
+    this.activeStatsReport = null;
 
     // Estado de ejercicio activo
     this.activeModule = null; // 'intervals' | 'singing'
@@ -549,6 +556,14 @@ class TrinoShell {
     this.aboutModal = document.getElementById('about-modal');
     this.aboutModalVersion = document.getElementById('about-modal-version');
     this.btnAboutClose = document.getElementById('btn-about-close');
+
+    // Vista Ver estadística
+    this.statsMainTitle = document.getElementById('stats-main-title');
+    this.btnStatsClose = document.getElementById('btn-stats-close');
+    this.statsMenuPanel = document.getElementById('stats-menu-panel');
+    this.statsReportPanel = document.getElementById('stats-report-panel');
+    this.statsReportTitle = document.getElementById('stats-report-title');
+    this.statsReportBody = document.getElementById('stats-report-body');
   }
 
   syncVersionBadge() {
@@ -590,6 +605,319 @@ class TrinoShell {
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
+  }
+
+  /**
+   * Clave de día exclusiva para el Nivel Progresivo: el cambio de día ocurre a las 02:00 AM.
+   * Restamos 2 horas a la hora actual para que entre las 00:00 y 01:59 AM siga contando como el mismo día.
+   */
+  getProgressiveDayKey() {
+    const shifted = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    const y = shifted.getFullYear();
+    const m = String(shifted.getMonth() + 1).padStart(2, '0');
+    const d = String(shifted.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  loadProgressiveState() {
+    const currentDayKey = this.getProgressiveDayKey();
+    const maxSubLevelId = Math.max(...INTERVAL_LEVELS.filter((l) => !l.isProgressive).map((l) => l.id));
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_PROG_STATE);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.dayKey === currentDayKey) {
+          const subId = parseInt(parsed.subLevelId, 10);
+          const cGood = parseInt(parsed.consecutiveGood, 10);
+          const aBad = parseInt(parsed.accumBad, 10);
+          return {
+            dayKey: currentDayKey,
+            subLevelId: subId >= 1 && subId <= maxSubLevelId ? subId : 1,
+            consecutiveGood: cGood >= 0 && cGood < 10 ? cGood : 0,
+            accumBad: aBad >= 0 && aBad < 10 ? aBad : 0,
+          };
+        }
+      }
+    } catch (_) { }
+    return {
+      dayKey: currentDayKey,
+      subLevelId: 1,
+      consecutiveGood: 0,
+      accumBad: 0,
+    };
+  }
+
+  saveProgressiveState() {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY_PROG_STATE,
+        JSON.stringify({
+          dayKey: this.progressiveDayKey,
+          subLevelId: this.progressiveSubLevelId,
+          consecutiveGood: this.progressiveConsecutiveGood,
+          accumBad: this.progressiveAccumBad,
+        })
+      );
+    } catch (_) { }
+  }
+
+  syncProgressiveDayState() {
+    const currentDayKey = this.getProgressiveDayKey();
+    if (this.progressiveDayKey !== currentDayKey) {
+      this.progressiveDayKey = currentDayKey;
+      this.progressiveSubLevelId = 1;
+      this.progressiveConsecutiveGood = 0;
+      this.progressiveAccumBad = 0;
+      this.saveProgressiveState();
+      return true;
+    }
+    return false;
+  }
+
+  /* =========================================================================
+   * ESTADÍSTICA ACUMULADA (MÓDULOS 1, 2 Y 4)
+   * ========================================================================= */
+
+  loadCumulativeStats() {
+    const empty = { m1Abs: {}, m1ByNote: {}, m2Notes: {}, m4Notes: {} };
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_STATS);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          return {
+            m1Abs: parsed.m1Abs || {},
+            m1ByNote: parsed.m1ByNote || {},
+            m2Notes: parsed.m2Notes || {},
+            m4Notes: parsed.m4Notes || {},
+          };
+        }
+      }
+    } catch (_) { }
+    return empty;
+  }
+
+  saveCumulativeStats() {
+    try {
+      localStorage.setItem(STORAGE_KEY_STATS, JSON.stringify(this.cumulativeStats));
+    } catch (_) { }
+  }
+
+  recordM1Stat(midi1, midi2, intervalKey, isCorrect) {
+    if (!this.cumulativeStats) this.cumulativeStats = this.loadCumulativeStats();
+    const abs = this.cumulativeStats.m1Abs;
+    if (!abs[intervalKey]) abs[intervalKey] = { good: 0, bad: 0 };
+    if (isCorrect) abs[intervalKey].good += 1;
+    else abs[intervalKey].bad += 1;
+
+    const pairId = `${midi1}-${midi2}-${intervalKey}`;
+    const byNote = this.cumulativeStats.m1ByNote;
+    if (!byNote[pairId]) {
+      byNote[pairId] = { midi1, midi2, intervalKey, good: 0, bad: 0 };
+    }
+    if (isCorrect) byNote[pairId].good += 1;
+    else byNote[pairId].bad += 1;
+
+    this.saveCumulativeStats();
+  }
+
+  recordSingingNoteStat(moduleNum, midi, grade) {
+    if (midi == null) return;
+    if (!this.cumulativeStats) this.cumulativeStats = this.loadCumulativeStats();
+    const store = moduleNum === 4 ? this.cumulativeStats.m4Notes : this.cumulativeStats.m2Notes;
+    const key = String(Math.round(midi));
+    if (!store[key]) {
+      store[key] = { malo: 0, casi: 0, aceptable: 0, bueno: 0, admirable: 0 };
+    }
+    const g = ['malo', 'casi', 'aceptable', 'bueno', 'admirable'].includes(grade) ? grade : 'malo';
+    store[key][g] += 1;
+    this.saveCumulativeStats();
+  }
+
+  showStatsMenu() {
+    this.activeStatsReport = null;
+    if (this.statsMainTitle) this.statsMainTitle.textContent = 'Ver estadística';
+    this.statsMenuPanel?.classList.remove('hidden');
+    this.statsReportPanel?.classList.add('hidden');
+    if (this.currentView === 'stats') {
+      this.renderBottomCommands('stats');
+    }
+  }
+
+  openStatsReport(reportKey) {
+    this.activeStatsReport = reportKey;
+    this.statsMenuPanel?.classList.add('hidden');
+    this.statsReportPanel?.classList.remove('hidden');
+
+    const titles = {
+      'm1-abs': 'Módulo 1 · Intervalos absolutos',
+      'm1-notes': 'Módulo 1 · Intervalos por nota',
+      'm2-notes': 'Módulo 2 · Canto de Notas',
+      'm4-notes': 'Módulo 4 · Canto de Notas',
+    };
+    if (this.statsReportTitle) {
+      this.statsReportTitle.textContent = titles[reportKey] || 'Estadística';
+    }
+
+    if (this.statsReportBody) {
+      if (reportKey === 'm1-abs') {
+        this.statsReportBody.innerHTML = this.buildM1AbsTableHtml();
+      } else if (reportKey === 'm1-notes') {
+        this.statsReportBody.innerHTML = this.buildM1ByNoteTableHtml();
+      } else if (reportKey === 'm2-notes') {
+        this.statsReportBody.innerHTML = this.buildSingingNotesTableHtml(this.cumulativeStats?.m2Notes || {});
+      } else if (reportKey === 'm4-notes') {
+        this.statsReportBody.innerHTML = this.buildSingingNotesTableHtml(this.cumulativeStats?.m4Notes || {});
+      }
+    }
+
+    this.renderBottomCommands('stats');
+  }
+
+  buildM1AbsTableHtml() {
+    const abs = this.cumulativeStats?.m1Abs || {};
+    const orderedKeys = Object.keys(INTERVAL_CATALOG).sort(
+      (a, b) => (INTERVAL_CATALOG[a].semitones ?? 0) - (INTERVAL_CATALOG[b].semitones ?? 0)
+    );
+    const rows = orderedKeys
+      .map((key) => {
+        const cat = INTERVAL_CATALOG[key];
+        const entry = abs[key] || { good: 0, bad: 0 };
+        return `
+          <tr>
+            <td><strong>${cat.label}</strong></td>
+            <td class="stats-val-good">${entry.good || 0}</td>
+            <td class="stats-val-bad">${entry.bad || 0}</td>
+          </tr>
+        `;
+      })
+      .join('');
+
+    return `
+      <div class="stats-table-wrap">
+        <table class="stats-data-table">
+          <thead>
+            <tr>
+              <th>Intervalo</th>
+              <th>Buenas</th>
+              <th>Fallidas</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  buildM1ByNoteTableHtml() {
+    const byNote = this.cumulativeStats?.m1ByNote || {};
+    const intervalOrder = Object.keys(INTERVAL_CATALOG).sort(
+      (a, b) => (INTERVAL_CATALOG[a].semitones ?? 0) - (INTERVAL_CATALOG[b].semitones ?? 0)
+    );
+    const orderIdx = new Map(intervalOrder.map((k, idx) => [k, idx]));
+
+    const items = Object.values(byNote).filter((it) => it && (it.good || 0) + (it.bad || 0) > 0);
+    if (items.length === 0) {
+      return `<div class="stats-table-wrap"><p class="stats-empty-msg">Sin registros aún.</p></div>`;
+    }
+
+    items.sort((a, b) => {
+      const ia = orderIdx.get(a.intervalKey) ?? 999;
+      const ib = orderIdx.get(b.intervalKey) ?? 999;
+      if (ia !== ib) return ia - ib;
+      if (a.midi1 !== b.midi1) return a.midi1 - b.midi1;
+      return (a.midi2 ?? a.midi1) - (b.midi2 ?? b.midi1);
+    });
+
+    const rows = items
+      .map((it) => {
+        const n1 = this.midiToNoteWithOctaveEs(it.midi1);
+        const n2 = this.midiToNoteWithOctaveEs(it.midi2);
+        const label = INTERVAL_CATALOG[it.intervalKey]?.label || it.intervalKey;
+        return `
+          <tr>
+            <td><strong>${n1}-${n2}</strong></td>
+            <td>${label}</td>
+            <td class="stats-val-good">${it.good || 0}</td>
+            <td class="stats-val-bad">${it.bad || 0}</td>
+          </tr>
+        `;
+      })
+      .join('');
+
+    return `
+      <div class="stats-table-wrap">
+        <table class="stats-data-table">
+          <thead>
+            <tr>
+              <th>Notas</th>
+              <th>Intervalo</th>
+              <th>Buenas</th>
+              <th>Fallidas</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  buildSingingNotesTableHtml(noteStore) {
+    const midisWithData = Object.keys(noteStore)
+      .map((k) => parseInt(k, 10))
+      .filter((m) => {
+        if (!Number.isFinite(m)) return false;
+        const r = noteStore[String(m)];
+        if (!r) return false;
+        const total = (r.malo || 0) + (r.casi || 0) + (r.aceptable || 0) + (r.bueno || 0) + (r.admirable || 0);
+        return total > 0;
+      });
+
+    if (midisWithData.length === 0) {
+      return `<div class="stats-table-wrap"><p class="stats-empty-msg">Sin registros aún.</p></div>`;
+    }
+
+    const minMidi = Math.min(...midisWithData);
+    const maxMidi = Math.max(...midisWithData);
+    const sharpPcs = [1, 3, 6, 8, 10];
+    const rowsHtml = [];
+
+    for (let m = minMidi; m <= maxMidi; m++) {
+      const r = noteStore[String(m)] || { malo: 0, casi: 0, aceptable: 0, bueno: 0, admirable: 0 };
+      const total = (r.malo || 0) + (r.casi || 0) + (r.aceptable || 0) + (r.bueno || 0) + (r.admirable || 0);
+      const isSharp = sharpPcs.includes(((m % 12) + 12) % 12);
+      if (total === 0 && isSharp) continue;
+
+      const noteLabel = this.midiToNoteWithOctaveEs(m);
+      rowsHtml.push(`
+        <tr>
+          <td><strong>${noteLabel}</strong></td>
+          <td class="stats-val-bad">${r.malo || 0}</td>
+          <td class="stats-val-reg">${r.casi || 0}</td>
+          <td class="stats-val-acep">${r.aceptable || 0}</td>
+          <td class="stats-val-good">${r.bueno || 0}</td>
+          <td class="stats-val-adm">${r.admirable || 0}</td>
+        </tr>
+      `);
+    }
+
+    return `
+      <div class="stats-table-wrap">
+        <table class="stats-data-table">
+          <thead>
+            <tr>
+              <th>Nota</th>
+              <th>Fallidas</th>
+              <th>Regulares</th>
+              <th>Aceptables</th>
+              <th>Buenas</th>
+              <th>Admirables</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml.join('')}</tbody>
+        </table>
+      </div>
+    `;
   }
 
   loadDayLogs() {
@@ -1236,6 +1564,21 @@ class TrinoShell {
         this.navigateTo('home');
       });
     }
+    if (this.btnStatsClose) {
+      this.btnStatsClose.addEventListener('click', () => {
+        if (this.activeStatsReport) {
+          this.showStatsMenu();
+        } else {
+          this.navigateTo('home');
+        }
+      });
+    }
+    document.querySelectorAll('[data-stats-report]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const rep = btn.getAttribute('data-stats-report');
+        if (rep) this.openStatsReport(rep);
+      });
+    });
   }
 
   /* =========================================================================
@@ -1749,9 +2092,7 @@ class TrinoShell {
     this.exerciseStarted = false;
     this.activeLevel = level;
     if (level.isProgressive) {
-      this.progressiveSubLevelId = 1;
-      this.progressiveConsecutiveGood = 0;
-      this.progressiveAccumBad = 0;
+      this.syncProgressiveDayState();
     }
     this.sessionLog = this.getLevelDayLog('intervals', levelId);
     this.renderSessionLog();
@@ -2164,7 +2505,7 @@ class TrinoShell {
       ? `
         <div class="level-info-section">
           <span class="level-info-label">Regla de progresión (Nivel actual: N${this.progressiveSubLevelId})</span>
-          <p class="level-info-value">Siempre inicia en el Nivel 1. Con 10 respuestas buenas seguidas avanza al siguiente nivel (hasta N14), y cada 10 respuestas fallidas acumuladas retrocede un nivel.</p>
+          <p class="level-info-value">Inicia en el Nivel 1 y se reinicia de un día para otro a las 2:00 AM. Con 10 respuestas buenas seguidas avanza al siguiente nivel (hasta N14), y cada 10 respuestas fallidas acumuladas retrocede un nivel.</p>
         </div>
       `
       : '';
@@ -2445,6 +2786,7 @@ class TrinoShell {
       }
 
       if (this.activeLevel.isProgressive) {
+        this.syncProgressiveDayState();
         const maxSubLevelId = Math.max(...INTERVAL_LEVELS.filter((l) => !l.isProgressive).map((l) => l.id));
         if (isCorrect) {
           this.progressiveConsecutiveGood += 1;
@@ -2466,6 +2808,7 @@ class TrinoShell {
             }
           }
         }
+        this.saveProgressiveState();
       }
 
       const delaySetting = isCorrect ? this.intervalGoodDelay : this.intervalBadDelay;
@@ -2473,6 +2816,12 @@ class TrinoShell {
 
       const note1 = this.midiToNoteNameEs(this.currentQuestion.midi1);
       const note2 = this.midiToNoteNameEs(this.currentQuestion.midi2);
+      this.recordM1Stat(
+        this.currentQuestion.midi1,
+        this.currentQuestion.midi2,
+        this.currentQuestion.targetIntervalKey,
+        isCorrect
+      );
       const todayKey = this.getTodayKey();
       const todayCount = this.sessionLog.filter((it) => (it.date || todayKey) === todayKey).length;
       this.pushLevelDayLog('intervals', this.activeLevel.id, {
@@ -4582,6 +4931,10 @@ class TrinoShell {
       const toVoiceType = (t) =>
         t.voiceType || (t.isVibrato ? 'vibrato' : t.isUnstable || t.isHighLow ? 'inestable' : 'plana');
 
+      midis.forEach((m, idx) => {
+        this.recordSingingNoteStat(2, m, noteGrades[idx]);
+      });
+
       this.pushLevelDayLog('singing', this.activeLevel.id, {
         date: todayKey,
         index: todayCount + 1,
@@ -5624,6 +5977,7 @@ class TrinoShell {
 
     const note = this.getNoteGradeFromFrames(frames, midi);
     const analysis = this.buildNoteAnalysis(frames, midi);
+    this.recordSingingNoteStat(4, midi, note.grade);
     const sorted = [...voiced].sort((a, b) => a - b);
     const sungName = this.midiToEnglishName(sorted[Math.floor(sorted.length / 2)]);
 
@@ -5924,6 +6278,8 @@ class TrinoShell {
       this.renderSingingLevels();
     } else if (viewKey === 'chords') {
       this.renderChordLevels();
+    } else if (viewKey === 'stats') {
+      this.showStatsMenu();
     }
 
     Object.keys(VIEWS).forEach((key) => {
@@ -5952,6 +6308,16 @@ class TrinoShell {
           <button type="button" class="auth-activate-btn" id="btn-open-auth-modal">Activar cuenta</button>
         </div>
       `;
+      return;
+    }
+
+    if (viewKey === 'stats' && this.activeStatsReport) {
+      this.bottomZone.innerHTML = `
+        <button type="button" class="cmd-btn" id="cmd-back-stats-menu">← Volver a Estadísticas</button>
+      `;
+      document.getElementById('cmd-back-stats-menu')?.addEventListener('click', () => {
+        this.showStatsMenu();
+      });
       return;
     }
 
