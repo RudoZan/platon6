@@ -24,7 +24,11 @@
 - `frames[]`: `{ t, hz, midi, cents, rms, voiced }`
 - `metrics`: `{ tuningAccuracyPct, meanTendencyCents, stabilitySdCents, attackTimeMs, vocalQuality?: { jitterPct, shimmerPct, hnrDb } }`
 
-## 5. 14-Level Pedagogical Progression (`INTERVAL_LEVELS` & `SINGING_LEVELS`)
+## 5. Pedagogical Progression (`INTERVAL_LEVELS` & `SINGING_LEVELS`)
+- **Module 1 `Nivel Progresivo` (`id: 0`):** Listed before Level 1 in Module 1 only. Starts at `N1` (`Nivel Progresivo - (N1)`). Advances `+1` sub-level (`N2..N14`) on every `10` consecutive good answers (flashing `(N#)` in bright green) and drops `-1` sub-level (down to `N1`) on every `10` accumulated failed answers (flashing `(N#)` in bright red).
+- **Module 2 Multi-Note Generation (`singNotesCount = 1..4`, default `2`, `singOnlyFirstNote = boolean`, default `false`):** Configured via the `i` level info modal. Beat 1 is the level's tonic (`midi1`); each additional note (`2..singNotesCount`) picks an allowed interval from the level measured relative to `midi1` (notes may repeat); remaining beats (`singNotesCount + 1 .. 4`) are quarter rests. When `singOnlyFirstNote` is enabled, Compás 1 plays only beat 1 (`midi1`), while Compás 2 records, segments, and grades all `singNotesCount` notes. The staff spans edge-to-edge and places the overall exercise grade icon on the center barline between Compás 1 and Compás 2.
+- **Module 1 & Module 3 Auto-Advance Delays (`goodDelaySec`, `badDelaySec`):** Configured in the `i` level info modal (`0` = `Avanzar de inmediato`, `1` = `Esperar un segundo` [default for good answer], `2` = `Esperar 2 segundos`, `3` = `Esperar 3 segundos`, `'none'` = `No avanzar` [default for failed answer]).
+
 | Block | Level | Intervals (`options`) | Tonic (`midi1`) & 2nd Note (`midi2`) Rule |
 |---|---|---|---|
 | **1. Major & Perfect Pillars** *(0% sharps in both notes)* | **1** | `1J`, `2M` | Tonics `Do, Re, Sol` (Octaves 3 & 4) → both notes natural (`Do–Do/Re`, `Re–Re/Mi`, `Sol–Sol/La`) |
@@ -58,8 +62,9 @@
   - `public.trino_modulo_canto`: Exercise summary (`bueno`/`regular`/`malo`) + compact score JSON (numbered notes & rests, exact pitch+octave, musical figure/duration).
   - `public.trino_notas_cantadas` (shared across vocal modules): `modulo`, `ejercicio_id`, `numero_nota`, `nota_objetivo`, `nota_cantada`, `centro_tonal`, `tipo_voz` (`plana`/`vibrato`/`inestable`), `glisando` (`boolean`), `clasificacion` (`malo`/`regular`/`aceptable`/`bueno`/`admirable`).
 
-## 8. Chord Recognition Module
+## 8. Chord Recognition Module (`Reconocer Acordes`)
 - `CHORD_CATALOG` contains dyads, triads, and seventh chords as semitone offsets from a root. `CHORD_LEVELS` defines 16 levels: 6 dyad levels, 4 triad levels, 4 seventh-chord levels, and 2 mixed integration levels.
+- Exercise header includes the `i` info button (`[data-active-level-info]`) opening `#level-info-modal` with chord types and auto-advance delay selectors (`goodDelaySec`, `badDelaySec`).
 - Dyads sound as ascending notes; triads and seventh chords sound simultaneously using Web Audio oscillators scheduled at one `AudioContext.currentTime`. Per-tone gain is scaled by `1 / sqrt(noteCount)`.
 - Each chord question stores its target ID, root MIDI, MIDI pitches, and answered state. Level options supply answer buttons; optional `targets` narrows generated questions while retaining distractor choices.
 - Chord outcomes are stored separately under `trino_chord_progress_v1`; day logs use the `chords` namespace in `trino_day_logs_v1`. The independent `dailyChordsMin` setting defaults to `100` and is bounded to `10..200` in increments of `10`.
@@ -80,4 +85,4 @@
 - Debug: Module 4 exposes the shared floating debug view. Its frame matrix uses the same 21 cents bands/colors as `docs/trino/TablaDeValores.md`, with one column per original frame, signed target cents in the active cell, peak markers, and analysis diagnostics.
 - Grade buckets: admirable ≤15c, bueno ≤20c, aceptable ≤40c, regular ≤80c, fallido >80c; admirable/bueno hidden when 0 %.
 - Staff canvas: `208 px` high, `6.0 px` per diatonic step; the recording bar overlays the analysis area; keyboard is `110 px` high with a dark-red `2 px` strip above the keys; sung pitch is drawn at its real height via `voiceTestStepFloat`. No persistence or history; state lives in `this.voiceTest`.
-- Cache keys: HTML loads `styles.css?v=56` and `app.js?v=65`; `APP_VERSION` is `v1.0.0048`.
+- Cache keys: HTML loads `styles.css?v=57` and `app.js?v=67`; `APP_VERSION` is `v1.0.0050`.

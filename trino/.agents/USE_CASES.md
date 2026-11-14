@@ -45,11 +45,17 @@
 6. In both exercise views, the level header sits flush to the top and side edges. Instructions disappear after starting. Module 2 keeps the compact staff and response table; BPM is shown at the lower-left of the staff and can be changed by tapping there. Analysis details are not repeated below the staff.
 7. The Module 2 session history uses one HTML table row per sung note, with exercise index and exercise-grade cells spanning the note rows. Table headers use sentence case; tonal-center text wraps within its cell, and voice/glissando badges use `V`, `I`, and `G` with descriptive tooltips.
 
-## UC-08: Chord Recognition Practice
-1. The home screen opens Module 3, `Reconocimiento de acordes`, with 16 progressive levels: six dyad/interval levels, four triad levels, four seventh-chord levels, and two integration levels.
+## UC-08: Chord Recognition Practice (`Reconocer Acordes`)
+1. The home screen opens Module 3, `Reconocer Acordes`, with 16 progressive levels: six dyad/interval levels, four triad levels, four seventh-chord levels, and two integration levels.
 2. Levels 1–6 identify two-note dyads; levels 7–16 identify triads and four-note chords. All notes in each question play simultaneously. Each question chooses a target type from the level and displays that level's answer choices.
-3. Every chord tone starts at the same `AudioContext` time. The user can replay the current question, retry after a wrong answer, or advance after a correct answer.
+3. Every chord tone starts at the same `AudioContext` time. The user can replay the current question, retry after a wrong answer, or advance automatically after a good/failed answer according to the delay configured in the `i` level info popup (`Avanzar de inmediato`, `Esperar un segundo` [default for good], `Esperar 2 segundos`, `Esperar 3 segundos`, `No avanzar` [default for failed]).
 4. The first submitted response is recorded once in the chord module's today/yesterday session history. Chord progress and stars use a separate storage key and daily goal from intervals and singing.
+
+## UC-12: Level Info Popup Configurations & Module 1 Progressive Level
+1. In Module 1 and Module 3, pressing `i` in the exercise header opens `#level-info-modal` with the level details plus two selectors for auto-advance wait time after a good answer (default `Esperar un segundo`) and after a failed answer (default `No avanzar`).
+2. In Module 2, pressing `i` opens `#level-info-modal` with a configuration section to select the number of notes per measure (`1`, `2` [default], `3`, or `4`) and the checkbox `Solo tocar la primera nota` (plays only note 1 in Compás 1 while keeping all notes active for singing in Compás 2).
+3. In Module 2, the grand staff extends edge-to-edge horizontally, and the overall exercise grade icon is rendered on the central barline between Compás 1 and Compás 2.
+4. Module 1 includes `Nivel Progresivo` before Level 1. It starts at `Nivel Progresivo - (N1)`, advances one level (`N2..N14`) after 10 consecutive good answers (highlighting `(N#)` in bright green), and steps back one level (if at `N2` or above) every 10 accumulated failed answers (highlighting `(N#)` in bright red).
 
 ## UC-09: Vocal Range Controls on Mobile
 1. The lowest- and highest-note selectors use the full width of their fields.

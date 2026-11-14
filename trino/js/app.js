@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0048';
+const APP_VERSION = 'v1.0.0050';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -189,6 +189,16 @@ const LEVEL_4_RESTRICTED_PAIRS = {
  * - Bloque 4 (Niveles 12–14): Integración Total (Las 12 notas cromáticas en tónica y 2ª nota)
  */
 const INTERVAL_LEVELS = [
+  // Nivel 0: Progresivo (solo Módulo 1)
+  {
+    id: 0,
+    block: 0,
+    isProgressive: true,
+    title: 'Nivel Progresivo',
+    desc: 'Comienza en el Nivel 1. Avanza de nivel al acumular respuestas buenas y retrocede de nivel al acumular respuestas fallidas.',
+    options: ['1J', '2M'],
+  },
+
   // Bloque 1: Mayores y Justos (ambas notas naturales)
   {
     id: 1,
@@ -310,11 +320,13 @@ const INTERVAL_LEVELS = [
   },
 ];
 
-const SINGING_LEVELS = INTERVAL_LEVELS.map((lvl) => ({
-  ...lvl,
-  title: lvl.title.replace(' · ', ' · '),
-  bpm: 72,
-}));
+const SINGING_LEVELS = INTERVAL_LEVELS
+  .filter((lvl) => !lvl.isProgressive)
+  .map((lvl) => ({
+    ...lvl,
+    title: lvl.title.replace(' · ', ' · '),
+    bpm: 72,
+  }));
 
 const STORAGE_KEY_SETTINGS = 'trino_settings_v2';
 const STORAGE_KEY_PROGRESS = 'trino_interval_progress_v1';
@@ -355,6 +367,17 @@ class TrinoShell {
     this.noteVolume = vols.note;
     this.clickVolume = vols.click;
     this.rectifyVibratoEnabled = this.loadRectifyVibrato();
+    const extraCfg = this.loadModulePopupConfigs();
+    this.singNotesCount = extraCfg.singNotesCount;
+    this.singOnlyFirstNote = extraCfg.singOnlyFirstNote;
+    this.intervalGoodDelay = extraCfg.intervalGoodDelay;
+    this.intervalBadDelay = extraCfg.intervalBadDelay;
+    this.chordGoodDelay = extraCfg.chordGoodDelay;
+    this.chordBadDelay = extraCfg.chordBadDelay;
+    this.progressiveSubLevelId = 1;
+    this.progressiveConsecutiveGood = 0;
+    this.progressiveAccumBad = 0;
+    this.progressiveFlashTimer = null;
     this.progress = this.loadProgress(STORAGE_KEY_PROGRESS);
     this.singProgress = this.loadProgress(STORAGE_KEY_SING_PROGRESS);
     this.chordProgress = this.loadProgress(STORAGE_KEY_CHORD_PROGRESS);
@@ -466,11 +489,11 @@ class TrinoShell {
     this.chordSessionLogWrapper = document.getElementById('chord-session-log-wrapper');
     this.chordSessionLogTbody = document.getElementById('chord-session-log-tbody');
     this.singDebugPanel = document.getElementById('sing-debug-panel');
-    this.singDebugBody  = document.getElementById('sing-debug-body');
-    this.btnDebugModal  = document.getElementById('btn-debug-modal');
+    this.singDebugBody = document.getElementById('sing-debug-body');
+    this.btnDebugModal = document.getElementById('btn-debug-modal');
     this.menuDebugPopupBtn = document.getElementById('menu-debug-popup-btn');
     this.debugLargeModal = document.getElementById('debug-large-modal');
-    this.debugLargeBody  = document.getElementById('debug-large-body');
+    this.debugLargeBody = document.getElementById('debug-large-body');
     this.btnDebugModalClose = document.getElementById('btn-debug-modal-close');
     this.btnDebugPopupFromModal = document.getElementById('btn-debug-popup-from-modal');
     this.debugPopupWin = null;
@@ -588,7 +611,7 @@ class TrinoShell {
           });
         });
       }
-    } catch (_) {}
+    } catch (_) { }
     return cleanStore;
   }
 
@@ -605,7 +628,7 @@ class TrinoShell {
         });
       });
       localStorage.setItem(STORAGE_KEY_DAY_LOGS, JSON.stringify(this.dayLogs));
-    } catch (_) {}
+    } catch (_) { }
   }
 
   getLevelDayLog(moduleType, levelId) {
@@ -678,7 +701,7 @@ class TrinoShell {
         const val = parseInt(storedValue, 10);
         if (val >= 10 && val <= 200 && val % 10 === 0) return val;
       }
-    } catch (_) {}
+    } catch (_) { }
     return 100;
   }
 
@@ -694,6 +717,40 @@ class TrinoShell {
       noteVolume: this.noteVolume,
       clickVolume: this.clickVolume,
       rectifyVibrato: this.rectifyVibratoEnabled,
+      singNotesCount: this.singNotesCount,
+      singOnlyFirstNote: this.singOnlyFirstNote,
+      intervalGoodDelay: this.intervalGoodDelay,
+      intervalBadDelay: this.intervalBadDelay,
+      chordGoodDelay: this.chordGoodDelay,
+      chordBadDelay: this.chordBadDelay,
+    };
+  }
+
+  loadModulePopupConfigs() {
+    const validDelays = ['0', '1', '2', '3', 'none'];
+    const normDelay = (val, defVal) => (validDelays.includes(String(val)) ? String(val) : defVal);
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const nCount = parseInt(parsed.singNotesCount, 10);
+        return {
+          singNotesCount: nCount >= 1 && nCount <= 4 ? nCount : 2,
+          singOnlyFirstNote: parsed.singOnlyFirstNote === true,
+          intervalGoodDelay: normDelay(parsed.intervalGoodDelay, '1'),
+          intervalBadDelay: normDelay(parsed.intervalBadDelay, 'none'),
+          chordGoodDelay: normDelay(parsed.chordGoodDelay, '1'),
+          chordBadDelay: normDelay(parsed.chordBadDelay, 'none'),
+        };
+      }
+    } catch (_) { }
+    return {
+      singNotesCount: 2,
+      singOnlyFirstNote: false,
+      intervalGoodDelay: '1',
+      intervalBadDelay: 'none',
+      chordGoodDelay: '1',
+      chordBadDelay: 'none',
     };
   }
 
@@ -701,13 +758,13 @@ class TrinoShell {
     const cfg = this.getCurrentConfigObject();
     try {
       localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(cfg));
-    } catch (_) {}
+    } catch (_) { }
     if (this.currentUser?.verificado && this.supabase) {
       this.supabase
         .from('trino_usuarios')
         .update({ configuracion: cfg })
         .eq('email', this.currentUser.email)
-        .then(() => {});
+        .then(() => { });
     }
   }
 
@@ -729,7 +786,7 @@ class TrinoShell {
           return { min, max };
         }
       }
-    } catch (_) {}
+    } catch (_) { }
     return { min: 48, max: 72 }; // Do3 a Do5 por defecto
   }
 
@@ -745,7 +802,7 @@ class TrinoShell {
           click: click >= 10 && click <= 100 ? click : 90,
         };
       }
-    } catch (_) {}
+    } catch (_) { }
     return { note: 80, click: 90 };
   }
 
@@ -753,7 +810,7 @@ class TrinoShell {
     try {
       const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
       if (raw) return JSON.parse(raw).rectifyVibrato === true;
-    } catch (_) {}
+    } catch (_) { }
     return false;
   }
 
@@ -765,7 +822,7 @@ class TrinoShell {
         const val = parseInt(parsed.singBpm, 10);
         if (val >= 40 && val <= 140) return val;
       }
-    } catch (_) {}
+    } catch (_) { }
     return 72;
   }
 
@@ -793,7 +850,7 @@ class TrinoShell {
         }
         return parsed;
       }
-    } catch (_) {}
+    } catch (_) { }
     return { date: today, levels: {} };
   }
 
@@ -802,7 +859,7 @@ class TrinoShell {
       localStorage.setItem(STORAGE_KEY_PROGRESS, JSON.stringify(this.progress));
       localStorage.setItem(STORAGE_KEY_SING_PROGRESS, JSON.stringify(this.singProgress));
       localStorage.setItem(STORAGE_KEY_CHORD_PROGRESS, JSON.stringify(this.chordProgress));
-    } catch (_) {}
+    } catch (_) { }
   }
 
   getLevelStats(levelId, moduleType = 'intervals') {
@@ -1198,7 +1255,7 @@ class TrinoShell {
           'sb_publishable_vmnxlj3GbQPYqoXSjoK4IA_WN37wTR8'
         );
       }
-    } catch (_) {}
+    } catch (_) { }
     return null;
   }
 
@@ -1211,7 +1268,7 @@ class TrinoShell {
           return parsed;
         }
       }
-    } catch (_) {}
+    } catch (_) { }
     return null;
   }
 
@@ -1223,7 +1280,7 @@ class TrinoShell {
       } else {
         localStorage.removeItem(STORAGE_KEY_USER);
       }
-    } catch (_) {}
+    } catch (_) { }
     this.syncAuthUi();
   }
 
@@ -1360,7 +1417,7 @@ class TrinoShell {
             .single();
           dbUser = inserted;
         }
-      } catch (_) {}
+      } catch (_) { }
     }
 
     const emailSent = await this.sendVerificationNotesEmail(email, nombre, notesArr);
@@ -1470,7 +1527,7 @@ class TrinoShell {
           .select()
           .single();
         if (data?.id) userId = data.id;
-      } catch (_) {}
+      } catch (_) { }
     }
 
     // Si era una cuenta existente con configuración guardada, aplicarla
@@ -1515,6 +1572,13 @@ class TrinoShell {
     if (cfg.noteVolume >= 10 && cfg.noteVolume <= 100) this.noteVolume = cfg.noteVolume;
     if (cfg.clickVolume >= 10 && cfg.clickVolume <= 100) this.clickVolume = cfg.clickVolume;
     if (typeof cfg.rectifyVibrato === 'boolean') this.rectifyVibratoEnabled = cfg.rectifyVibrato;
+    if (cfg.singNotesCount >= 1 && cfg.singNotesCount <= 4) this.singNotesCount = cfg.singNotesCount;
+    if (typeof cfg.singOnlyFirstNote === 'boolean') this.singOnlyFirstNote = cfg.singOnlyFirstNote;
+    const validDelays = ['0', '1', '2', '3', 'none'];
+    if (validDelays.includes(String(cfg.intervalGoodDelay))) this.intervalGoodDelay = String(cfg.intervalGoodDelay);
+    if (validDelays.includes(String(cfg.intervalBadDelay))) this.intervalBadDelay = String(cfg.intervalBadDelay);
+    if (validDelays.includes(String(cfg.chordGoodDelay))) this.chordGoodDelay = String(cfg.chordGoodDelay);
+    if (validDelays.includes(String(cfg.chordBadDelay))) this.chordBadDelay = String(cfg.chordBadDelay);
     this.saveAllSettings();
     this.syncSettingsUi();
     this.renderIntervalLevels();
@@ -1543,7 +1607,7 @@ class TrinoShell {
       if (userRow.configuracion) {
         this.applyCloudConfig(userRow.configuracion);
       }
-    } catch (_) {}
+    } catch (_) { }
   }
 
   openBpmModal() {
@@ -1566,7 +1630,7 @@ class TrinoShell {
     const goalProgress = Math.min(100, Math.round((typeTodayDone / dailyGoal) * 100));
     const typeLabel = moduleType === 'singing'
       ? 'Canto'
-      : moduleType === 'chords' ? 'Reconocimiento de acordes' : 'Reconocimiento de intervalos';
+      : moduleType === 'chords' ? 'Reconocer Acordes' : 'Reconocimiento de intervalos';
     const dailyGoalHtml = `
       <div class="daily-goal-summary">
         <div class="daily-goal-summary-head">
@@ -1600,7 +1664,7 @@ class TrinoShell {
 
         if (isLevelDone) {
           state = 'done';
-        } else if (!suggestedAssigned) {
+        } else if (!lvl.isProgressive && !suggestedAssigned) {
           state = 'suggested';
           suggestedAssigned = true;
         }
@@ -1621,7 +1685,7 @@ class TrinoShell {
           )
           .join('');
 
-        const blockNum = lvl.block || 1;
+        const blockNum = lvl.block ?? 1;
 
         return `
           <button type="button" class="level-card block-${blockNum} state-${state}" data-level-id="${lvl.id}">
@@ -1666,6 +1730,17 @@ class TrinoShell {
     this.renderLevelList(this.chordLevelsList, CHORD_LEVELS, 'chords');
   }
 
+  getEffectiveIntervalLevel() {
+    if (this.activeLevel?.isProgressive) {
+      return (
+        INTERVAL_LEVELS.find((l) => l.id === this.progressiveSubLevelId) ||
+        INTERVAL_LEVELS.find((l) => l.id === 1) ||
+        this.activeLevel
+      );
+    }
+    return this.activeLevel;
+  }
+
   startIntervalLevel(levelId) {
     const level = INTERVAL_LEVELS.find((l) => l.id === levelId);
     if (!level) return;
@@ -1673,6 +1748,11 @@ class TrinoShell {
     this.activeModule = 'intervals';
     this.exerciseStarted = false;
     this.activeLevel = level;
+    if (level.isProgressive) {
+      this.progressiveSubLevelId = 1;
+      this.progressiveConsecutiveGood = 0;
+      this.progressiveAccumBad = 0;
+    }
     this.sessionLog = this.getLevelDayLog('intervals', levelId);
     this.renderSessionLog();
     this.generateNextQuestion();
@@ -1793,22 +1873,28 @@ class TrinoShell {
     const height = canvas.clientHeight;
     if (!width || !height) return false;
 
-    const staffLeft = 2;
-    const staffRight = width - 2;
-    const m1Start = staffLeft + 38;
+    const staffLeft = 1;
+    const staffRight = width - 1;
+    const m1Start = staffLeft + 34;
     const barlineX = m1Start + (staffRight - m1Start) / 2;
-    const noteXs = [
-      m1Start + (barlineX - m1Start) * 0.125,
-      m1Start + (barlineX - m1Start) * 0.375,
-      barlineX + (staffRight - 4 - barlineX) * 0.125,
-      barlineX + (staffRight - 4 - barlineX) * 0.375,
-    ];
-    const noteMidis = [
-      this.currentQuestion.midi1,
-      this.currentQuestion.midi2,
-      this.currentQuestion.midi1,
-      this.currentQuestion.midi2,
-    ];
+    const m2End = staffRight - 4;
+    const midis = Array.isArray(this.currentQuestion.midis) && this.currentQuestion.midis.length > 0
+      ? this.currentQuestion.midis
+      : [this.currentQuestion.midi1, this.currentQuestion.midi2];
+
+    const noteXs = [];
+    const noteMidis = [];
+    midis.forEach((m, idx) => {
+      const frac = idx * 0.25 + 0.125;
+      noteXs.push(m1Start + (barlineX - m1Start) * frac);
+      noteMidis.push(m);
+    });
+    midis.forEach((m, idx) => {
+      const frac = idx * 0.25 + 0.125;
+      noteXs.push(barlineX + (m2End - barlineX) * frac);
+      noteMidis.push(m);
+    });
+
     const hitRadiusX = 24;
     const hitRadiusY = 22;
     const noteIndex = noteXs.reduce((nearestIndex, noteX, index) => {
@@ -1840,7 +1926,11 @@ class TrinoShell {
       return;
     }
 
-    const opts = this.activeLevel.options;
+    const effectiveLevel = this.activeModule === 'intervals'
+      ? this.getEffectiveIntervalLevel()
+      : this.activeLevel;
+
+    const opts = effectiveLevel.options;
     const randomKey = opts[Math.floor(Math.random() * opts.length)];
 
     let midi1;
@@ -1851,8 +1941,8 @@ class TrinoShell {
     const minAllowed = isSinging ? this.vocalMinMidi : 48;
     const maxAllowed = isSinging ? Math.max(minAllowed + semitones, this.vocalMaxMidi) : 72;
 
-    if (this.activeLevel.restrictedPairs && this.activeLevel.restrictedPairs[randomKey]) {
-      const basePairs = this.activeLevel.restrictedPairs[randomKey];
+    if (effectiveLevel.restrictedPairs && effectiveLevel.restrictedPairs[randomKey]) {
+      const basePairs = effectiveLevel.restrictedPairs[randomKey];
       // Si es el módulo de canto, adaptar los pares restringidos a las octavas del rango vocal del usuario
       const adaptedPairs = [];
       if (isSinging) {
@@ -1870,7 +1960,7 @@ class TrinoShell {
       const chosen = pairs[Math.floor(Math.random() * pairs.length)];
       midi1 = chosen[0];
       midi2 = chosen[1];
-    } else if (this.activeLevel.naturalTonicsOnly) {
+    } else if (effectiveLevel.naturalTonicsOnly) {
       const naturalPitches = [0, 2, 4, 5, 7, 9, 11]; // Do, Re, Mi, Fa, Sol, La, Si
       const maxStart = Math.max(minAllowed, maxAllowed - semitones);
       const validTonics = [];
@@ -1882,13 +1972,13 @@ class TrinoShell {
       const pool = validTonics.length > 0 ? validTonics : NATURAL_TONIC_MIDIS;
       midi1 = pool[Math.floor(Math.random() * pool.length)];
       midi2 = midi1 + semitones;
-    } else if (this.activeLevel.midiRange) {
+    } else if (effectiveLevel.midiRange) {
       const minStart = isSinging
-        ? Math.max(this.activeLevel.midiRange.minStart, minAllowed)
-        : this.activeLevel.midiRange.minStart;
+        ? Math.max(effectiveLevel.midiRange.minStart, minAllowed)
+        : effectiveLevel.midiRange.minStart;
       const effMaxEnd = isSinging
-        ? Math.min(this.activeLevel.midiRange.maxEnd, maxAllowed)
-        : this.activeLevel.midiRange.maxEnd;
+        ? Math.min(effectiveLevel.midiRange.maxEnd, maxAllowed)
+        : effectiveLevel.midiRange.maxEnd;
       const fallbackMin = effMaxEnd - semitones >= minStart ? minStart : minAllowed;
       const fallbackMax = effMaxEnd - semitones >= minStart ? effMaxEnd : maxAllowed;
       const maxStart = Math.max(fallbackMin, fallbackMax - semitones);
@@ -1900,9 +1990,51 @@ class TrinoShell {
       midi2 = midi1 + semitones;
     }
 
+    let midis = [midi1, midi2];
+    if (isSinging) {
+      const notesCount = Math.max(1, Math.min(4, this.singNotesCount || 2));
+      const pickNoteFromTonic = (tonicMidi) => {
+        if (effectiveLevel.restrictedPairs) {
+          const validSecondMidis = [];
+          opts.forEach((k) => {
+            const kPairs = effectiveLevel.restrictedPairs[k] || [];
+            kPairs.forEach(([p1, p2]) => {
+              for (const shift of [-24, -12, 0, 12, 24]) {
+                const s1 = p1 + shift;
+                const s2 = p2 + shift;
+                if (s1 === tonicMidi && s2 >= minAllowed && s2 <= Math.max(minAllowed + 12, this.vocalMaxMidi)) {
+                  validSecondMidis.push(s2);
+                }
+              }
+            });
+          });
+          if (validSecondMidis.length > 0) {
+            return validSecondMidis[Math.floor(Math.random() * validSecondMidis.length)];
+          }
+        }
+        const fittingKeys = opts.filter((k) => {
+          const st = INTERVAL_CATALOG[k]?.semitones ?? 0;
+          return tonicMidi + st <= Math.max(tonicMidi, this.vocalMaxMidi);
+        });
+        const keyPool = fittingKeys.length > 0 ? fittingKeys : opts;
+        const chosenKey = keyPool[Math.floor(Math.random() * keyPool.length)];
+        return tonicMidi + (INTERVAL_CATALOG[chosenKey]?.semitones ?? 0);
+      };
+
+      if (notesCount === 1) {
+        midis = [midi1];
+      } else {
+        midis = [midi1, midi2];
+        while (midis.length < notesCount) {
+          midis.push(pickNoteFromTonic(midi1));
+        }
+      }
+    }
+
     this.currentQuestion = {
-      midi1,
-      midi2,
+      midi1: midis[0],
+      midi2: midis[1] ?? midis[0],
+      midis,
       targetIntervalKey: randomKey,
       answered: false,
       firstButtonEl: null,
@@ -1934,12 +2066,111 @@ class TrinoShell {
 
     this.levelInfoModalBody?.classList.remove('hidden');
     this.voiceTestInfoBody?.classList.add('hidden');
-    const moduleLabel = moduleType === 'singing' ? 'Módulo 2 · Cantar Notas' : 'Módulo 1 · Reconocer Intervalos';
+    const moduleLabel = moduleType === 'singing'
+      ? 'Módulo 2 · Cantar Notas'
+      : moduleType === 'chords'
+        ? 'Módulo 3 · Reconocer Acordes'
+        : 'Módulo 1 · Reconocer Intervalos';
     if (this.levelInfoModalModule) this.levelInfoModalModule.textContent = moduleLabel;
-    if (this.levelInfoModalTitle) this.levelInfoModalTitle.textContent = lvl.title;
+    if (this.levelInfoModalTitle) {
+      this.levelInfoModalTitle.textContent = lvl.isProgressive
+        ? `${lvl.title} - (N${this.progressiveSubLevelId})`
+        : lvl.title;
+    }
+
+    const buildDelayOptionsHtml = (selectedVal) => {
+      const opts = [
+        { val: '0', label: 'Avanzar de inmediato' },
+        { val: '1', label: 'Esperar un segundo' },
+        { val: '2', label: 'Esperar 2 segundos' },
+        { val: '3', label: 'Esperar 3 segundos' },
+        { val: 'none', label: 'No avanzar' },
+      ];
+      return opts
+        .map((o) => `<option value="${o.val}"${String(selectedVal) === o.val ? ' selected' : ''}>${o.label}</option>`)
+        .join('');
+    };
+
+    let configSectionHtml = '';
+    if (moduleType === 'singing') {
+      const currCount = this.singNotesCount || 2;
+      configSectionHtml = `
+        <div class="level-info-section">
+          <span class="level-info-label">Configuración del módulo</span>
+          <div class="level-info-config-group">
+            <div class="level-info-config-field">
+              <label for="modal-sing-notes-count">Notas que se tocarán en el compás</label>
+              <select id="modal-sing-notes-count" class="settings-select">
+                ${[1, 2, 3, 4]
+          .map((n) => `<option value="${n}"${currCount === n ? ' selected' : ''}>${n}</option>`)
+          .join('')}
+              </select>
+            </div>
+            <label class="level-info-checkbox-row" for="modal-sing-only-first">
+              <input type="checkbox" id="modal-sing-only-first"${this.singOnlyFirstNote ? ' checked' : ''} />
+              <span>Solo tocar la primera nota</span>
+            </label>
+          </div>
+        </div>
+      `;
+    } else if (moduleType === 'intervals' || moduleType === 'chords') {
+      const goodVal = moduleType === 'chords' ? this.chordGoodDelay : this.intervalGoodDelay;
+      const badVal = moduleType === 'chords' ? this.chordBadDelay : this.intervalBadDelay;
+      configSectionHtml = `
+        <div class="level-info-section">
+          <span class="level-info-label">Configuración de avance de ejercicio</span>
+          <div class="level-info-config-group">
+            <div class="level-info-config-field">
+              <label for="modal-good-delay-select">Ante una respuesta buena</label>
+              <select id="modal-good-delay-select" class="settings-select">
+                ${buildDelayOptionsHtml(goodVal)}
+              </select>
+            </div>
+            <div class="level-info-config-field">
+              <label for="modal-bad-delay-select">Ante una respuesta fallida</label>
+              <select id="modal-bad-delay-select" class="settings-select">
+                ${buildDelayOptionsHtml(badVal)}
+              </select>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (moduleType === 'chords') {
+      const chordsListHtml = (lvl.options || [])
+        .map((key) => {
+          const cat = CHORD_CATALOG[key];
+          if (!cat) return `<li>${key}</li>`;
+          return `<li><strong>${cat.label}:</strong> [${cat.intervals.join(', ')}] semitonos</li>`;
+        })
+        .join('');
+      if (this.levelInfoModalBody) {
+        this.levelInfoModalBody.innerHTML = `
+          ${configSectionHtml}
+          <div class="level-info-section">
+            <span class="level-info-label">Tipos incluidos (${(lvl.options || []).length})</span>
+            <ul class="level-info-list">${chordsListHtml}</ul>
+          </div>
+        `;
+      }
+      this.bindLevelInfoModalControls(moduleType);
+      this.levelInfoModal.classList.remove('hidden');
+      return;
+    }
+
+    const effectiveLvl = lvl.isProgressive ? this.getEffectiveIntervalLevel() : lvl;
+    const progressiveExplainHtml = lvl.isProgressive
+      ? `
+        <div class="level-info-section">
+          <span class="level-info-label">Regla de progresión (Nivel actual: N${this.progressiveSubLevelId})</span>
+          <p class="level-info-value">Siempre inicia en el Nivel 1. Con 10 respuestas buenas seguidas avanza al siguiente nivel (hasta N14), y cada 10 respuestas fallidas acumuladas retrocede un nivel.</p>
+        </div>
+      `
+      : '';
 
     // 1. Intervalos incluidos
-    const intervalsListHtml = (lvl.options || [])
+    const intervalsListHtml = (effectiveLvl.options || [])
       .map((key) => {
         const cat = INTERVAL_CATALOG[key];
         if (!cat) return `<li>${key}</li>`;
@@ -1953,12 +2184,12 @@ class TrinoShell {
     let notesText = '';
     let pairsHtml = '';
 
-    if (lvl.restrictedPairs) {
+    if (effectiveLvl.restrictedPairs) {
       const allMidis = [];
       const tonicMidis = [];
       const pairItems = [];
-      (lvl.options || []).forEach((key) => {
-        const pairs = lvl.restrictedPairs[key] || [];
+      (effectiveLvl.options || []).forEach((key) => {
+        const pairs = effectiveLvl.restrictedPairs[key] || [];
         const cat = INTERVAL_CATALOG[key];
         const formattedPairs = pairs.map(([m1, m2]) => {
           allMidis.push(m1, m2);
@@ -1982,20 +2213,20 @@ class TrinoShell {
           <ul class="level-info-list">${pairItems.join('')}</ul>
         </div>
       `;
-    } else if (lvl.naturalTonicsOnly) {
-      const maxSemitones = Math.max(...(lvl.options || []).map((k) => INTERVAL_CATALOG[k]?.semitones || 0));
+    } else if (effectiveLvl.naturalTonicsOnly) {
+      const maxSemitones = Math.max(...(effectiveLvl.options || []).map((k) => INTERVAL_CATALOG[k]?.semitones || 0));
       const minMidi = NATURAL_TONIC_MIDIS[0]; // Do3
       const maxStartMidi = NATURAL_TONIC_MIDIS[NATURAL_TONIC_MIDIS.length - 1]; // Mi4
       const maxEndMidi = maxStartMidi + maxSemitones;
 
       rangeText = `Tónica entre ${this.midiToNoteWithOctaveEs(minMidi)} y ${this.midiToNoteWithOctaveEs(maxStartMidi)} · 2ª nota hasta ${this.midiToNoteWithOctaveEs(maxEndMidi)}`;
       notesText = `Tónica (1ª nota): solo escala de Do natural (Do, Re, Mi, Fa, Sol, La, Si) · 2ª nota: libre según el intervalo (incluye ♯)`;
-    } else if (lvl.midiRange) {
-      const { minStart, maxEnd, label } = lvl.midiRange;
+    } else if (effectiveLvl.midiRange) {
+      const { minStart, maxEnd, label } = effectiveLvl.midiRange;
       rangeText = `${label} · Desde ${this.midiToNoteWithOctaveEs(minStart)} hasta ${this.midiToNoteWithOctaveEs(maxEnd)}`;
       notesText = `Tónica y 2ª nota: las 12 notas cromáticas (${NOTE_NAMES_ES.join(', ')})`;
     } else {
-      const maxSemitones = Math.max(...(lvl.options || []).map((k) => INTERVAL_CATALOG[k]?.semitones || 0));
+      const maxSemitones = Math.max(...(effectiveLvl.options || []).map((k) => INTERVAL_CATALOG[k]?.semitones || 0));
       const minMidi = 48; // Do3
       const maxStartMidi = 63; // Re#4
       const maxEndMidi = maxStartMidi + maxSemitones;
@@ -2006,8 +2237,10 @@ class TrinoShell {
 
     if (this.levelInfoModalBody) {
       this.levelInfoModalBody.innerHTML = `
+        ${configSectionHtml}
+        ${progressiveExplainHtml}
         <div class="level-info-section">
-          <span class="level-info-label">Tipos de intervalos (${(lvl.options || []).length})</span>
+          <span class="level-info-label">Tipos de intervalos (${(effectiveLvl.options || []).length})</span>
           <ul class="level-info-list">${intervalsListHtml}</ul>
         </div>
         <div class="level-info-section">
@@ -2022,7 +2255,49 @@ class TrinoShell {
       `;
     }
 
+    this.bindLevelInfoModalControls(moduleType);
     this.levelInfoModal.classList.remove('hidden');
+  }
+
+  bindLevelInfoModalControls(moduleType) {
+    if (!this.levelInfoModalBody) return;
+    if (moduleType === 'singing') {
+      const countSelect = this.levelInfoModalBody.querySelector('#modal-sing-notes-count');
+      const onlyFirstChk = this.levelInfoModalBody.querySelector('#modal-sing-only-first');
+      countSelect?.addEventListener('change', () => {
+        const val = parseInt(countSelect.value, 10);
+        if (val >= 1 && val <= 4) {
+          this.singNotesCount = val;
+          this.saveAllSettings();
+          if (this.activeModule === 'singing') {
+            this.generateNextQuestion();
+          }
+        }
+      });
+      onlyFirstChk?.addEventListener('change', () => {
+        this.singOnlyFirstNote = Boolean(onlyFirstChk.checked);
+        this.saveAllSettings();
+      });
+    } else if (moduleType === 'intervals' || moduleType === 'chords') {
+      const goodSelect = this.levelInfoModalBody.querySelector('#modal-good-delay-select');
+      const badSelect = this.levelInfoModalBody.querySelector('#modal-bad-delay-select');
+      goodSelect?.addEventListener('change', () => {
+        if (moduleType === 'chords') {
+          this.chordGoodDelay = goodSelect.value;
+        } else {
+          this.intervalGoodDelay = goodSelect.value;
+        }
+        this.saveAllSettings();
+      });
+      badSelect?.addEventListener('change', () => {
+        if (moduleType === 'chords') {
+          this.chordBadDelay = badSelect.value;
+        } else {
+          this.intervalBadDelay = badSelect.value;
+        }
+        this.saveAllSettings();
+      });
+    }
   }
 
   clearNoteAnimTimers() {
@@ -2089,11 +2364,28 @@ class TrinoShell {
     }
   }
 
-  updateExerciseUi() {
+  updateExerciseUi(flashType = null) {
     if (!this.activeLevel) return;
-    this.exLevelTitle.textContent = this.activeLevel.title;
+    if (this.activeLevel.isProgressive) {
+      this.exLevelTitle.innerHTML = `${this.activeLevel.title} - <span class="prog-sublevel-badge" id="prog-sublevel-badge">(N${this.progressiveSubLevelId})</span>`;
+      if (flashType) {
+        const badgeEl = document.getElementById('prog-sublevel-badge');
+        if (badgeEl) {
+          if (this.progressiveFlashTimer) clearTimeout(this.progressiveFlashTimer);
+          const cls = flashType === 'up' ? 'flash-level-up' : 'flash-level-down';
+          badgeEl.classList.add(cls);
+          this.progressiveFlashTimer = setTimeout(() => {
+            badgeEl.classList.remove('flash-level-up', 'flash-level-down');
+            this.progressiveFlashTimer = null;
+          }, 1500);
+        }
+      }
+    } else {
+      this.exLevelTitle.textContent = this.activeLevel.title;
+    }
 
-    this.exAnswersContainer.innerHTML = this.activeLevel.options
+    const effectiveLevel = this.getEffectiveIntervalLevel();
+    this.exAnswersContainer.innerHTML = effectiveLevel.options
       .map((key) => {
         const item = INTERVAL_CATALOG[key];
         return `
@@ -2109,6 +2401,21 @@ class TrinoShell {
         this.handleAnswerSelection(btn, btn.getAttribute('data-answer-key'));
       });
     });
+  }
+
+  scheduleAutoNextByDelay(delaySetting) {
+    if (this.autoNextTimer) {
+      clearTimeout(this.autoNextTimer);
+      this.autoNextTimer = null;
+    }
+    if (delaySetting === 'none') return;
+    const sec = Number(delaySetting);
+    const waitMs = Number.isFinite(sec) && sec > 0 ? sec * 1000 : 120;
+    this.autoNextTimer = setTimeout(() => {
+      this.autoNextTimer = null;
+      this.generateNextQuestion();
+      this.playCurrentInterval();
+    }, waitMs);
   }
 
   handleAnswerSelection(btnEl, selectedKey) {
@@ -2133,17 +2440,36 @@ class TrinoShell {
 
       if (isCorrect) {
         stats.good += 1;
-        if (this.autoNextTimer) {
-          clearTimeout(this.autoNextTimer);
-        }
-        this.autoNextTimer = setTimeout(() => {
-          this.autoNextTimer = null;
-          this.generateNextQuestion();
-          this.schedulePlayAfterOneSecond();
-        }, 2000);
       } else {
         stats.bad += 1;
       }
+
+      if (this.activeLevel.isProgressive) {
+        const maxSubLevelId = Math.max(...INTERVAL_LEVELS.filter((l) => !l.isProgressive).map((l) => l.id));
+        if (isCorrect) {
+          this.progressiveConsecutiveGood += 1;
+          if (this.progressiveConsecutiveGood >= 10) {
+            this.progressiveConsecutiveGood = 0;
+            if (this.progressiveSubLevelId < maxSubLevelId) {
+              this.progressiveSubLevelId += 1;
+              this.updateExerciseUi('up');
+            }
+          }
+        } else {
+          this.progressiveConsecutiveGood = 0;
+          this.progressiveAccumBad += 1;
+          if (this.progressiveAccumBad >= 10) {
+            this.progressiveAccumBad = 0;
+            if (this.progressiveSubLevelId >= 2) {
+              this.progressiveSubLevelId -= 1;
+              this.updateExerciseUi('down');
+            }
+          }
+        }
+      }
+
+      const delaySetting = isCorrect ? this.intervalGoodDelay : this.intervalBadDelay;
+      this.scheduleAutoNextByDelay(delaySetting);
 
       const note1 = this.midiToNoteNameEs(this.currentQuestion.midi1);
       const note2 = this.midiToNoteNameEs(this.currentQuestion.midi2);
@@ -2161,7 +2487,7 @@ class TrinoShell {
 
       const totalDone = stats.good + stats.bad;
 
-      if (totalDone >= this.dailyMin) {
+      if (totalDone >= this.dailyIntervalsMin) {
         const ratio = totalDone > 0 ? stats.good / totalDone : 0;
         const earnedStars = ratio >= 0.85 ? 3 : ratio >= 0.65 ? 2 : 1;
         if (earnedStars > stats.stars) {
@@ -2230,14 +2556,8 @@ class TrinoShell {
 
     this.saveProgress();
     this.updateHomeModuleProgress();
-    if (isCorrect) {
-      if (this.autoNextTimer) clearTimeout(this.autoNextTimer);
-      this.autoNextTimer = setTimeout(() => {
-        this.autoNextTimer = null;
-        this.generateNextQuestion();
-        this.schedulePlayAfterOneSecond();
-      }, 1600);
-    }
+    const delaySetting = isCorrect ? this.chordGoodDelay : this.chordBadDelay;
+    this.scheduleAutoNextByDelay(delaySetting);
   }
 
   renderSessionLog() {
@@ -2360,22 +2680,22 @@ class TrinoShell {
             <div class="day-summary-line">
               <span><strong>Ejercicios:</strong> ${totalEx}</span>
               ${isSinging
-                 ? `${pAdmEx > 0 ? `<span class="sum-adm" title="Admirables" aria-label="Admirables: ${pAdmEx}%">✦ ${pAdmEx}%</span>` : ''}
+        ? `${pAdmEx > 0 ? `<span class="sum-adm" title="Admirables" aria-label="Admirables: ${pAdmEx}%">✦ ${pAdmEx}%</span>` : ''}
                    ${pBuenoEx > 0 ? `<span class="sum-bueno" title="Buenos" aria-label="Buenos: ${pBuenoEx}%">✓ ${pBuenoEx}%</span>` : ''}
                    <span class="sum-acep" title="Aceptables" aria-label="Aceptables: ${pAcepEx}%">⊙ ${pAcepEx}%</span>
                    <span class="sum-reg" title="Regulares" aria-label="Regulares: ${pRegEx}%">≈ ${pRegEx}%</span>
                    <span class="sum-bad" title="Fallidos" aria-label="Fallidos: ${pBadEx}%">✕ ${pBadEx}%</span>`
-                 : `<span class="sum-good" title="Buenos" aria-label="Buenos: ${pGoodEx}%">✓ ${pGoodEx}%</span>
+        : `<span class="sum-good" title="Buenos" aria-label="Buenos: ${pGoodEx}%">✓ ${pGoodEx}%</span>
                    <span class="sum-bad" title="Fallidos" aria-label="Fallidos: ${pBadEx}%">✕ ${pBadEx}%</span>`}
             </div>
             <div class="day-prop-bar" title="Proporción de ejercicios">
               ${isSinging
-                ? `${pAdmEx > 0 ? `<div class="bar-seg seg-adm" style="width:${pAdmEx}%"></div>` : ''}
+        ? `${pAdmEx > 0 ? `<div class="bar-seg seg-adm" style="width:${pAdmEx}%"></div>` : ''}
                    ${pBuenoEx > 0 ? `<div class="bar-seg seg-bueno" style="width:${pBuenoEx}%"></div>` : ''}
                    ${pAcepEx > 0 ? `<div class="bar-seg seg-acep" style="width:${pAcepEx}%"></div>` : ''}
                    ${pRegEx > 0 ? `<div class="bar-seg seg-reg" style="width:${pRegEx}%"></div>` : ''}
                    ${pBadEx > 0 ? `<div class="bar-seg seg-bad" style="width:${pBadEx}%"></div>` : ''}`
-                : `${pGoodEx > 0 ? `<div class="bar-seg seg-bueno" style="width:${pGoodEx}%"></div>` : ''}
+        : `${pGoodEx > 0 ? `<div class="bar-seg seg-bueno" style="width:${pGoodEx}%"></div>` : ''}
                    ${pBadEx > 0 ? `<div class="bar-seg seg-bad" style="width:${pBadEx}%"></div>` : ''}`}
             </div>
             ${notesSummaryHtml}
@@ -2409,18 +2729,18 @@ class TrinoShell {
 
     const gradeLabel = {
       admirable: { icon: '✦', label: 'Admirable', cls: 'grade-admirable' },
-      bueno:     { icon: '✓', label: 'Bueno', cls: 'grade-bueno' },
+      bueno: { icon: '✓', label: 'Bueno', cls: 'grade-bueno' },
       aceptable: { icon: '⊙', label: 'Aceptable', cls: 'grade-aceptable' },
-      casi:      { icon: '≈', label: 'Regular', cls: 'grade-casi' },
-      malo:      { icon: '✕', label: 'Fallido', cls: 'grade-malo' },
+      casi: { icon: '≈', label: 'Regular', cls: 'grade-casi' },
+      malo: { icon: '✕', label: 'Fallido', cls: 'grade-malo' },
     };
 
     const noteGradeLabel = {
       admirable: { icon: '✦', label: 'Admirable', cls: 'grade-admirable' },
-      bueno:     { icon: '✓', label: 'Buena', cls: 'grade-bueno' },
+      bueno: { icon: '✓', label: 'Buena', cls: 'grade-bueno' },
       aceptable: { icon: '⊙', label: 'Aceptable', cls: 'grade-aceptable' },
-      casi:      { icon: '≈', label: 'Regular', cls: 'grade-casi' },
-      malo:      { icon: '✕', label: 'Fallida', cls: 'grade-malo' },
+      casi: { icon: '≈', label: 'Regular', cls: 'grade-casi' },
+      malo: { icon: '✕', label: 'Fallida', cls: 'grade-malo' },
     };
 
     const todayKey = this.getTodayKey();
@@ -2590,13 +2910,13 @@ class TrinoShell {
       this.processorNode.onaudioprocess = null;
       try {
         this.processorNode.disconnect();
-      } catch (_) {}
+      } catch (_) { }
       this.processorNode = null;
     }
     if (this.sourceNode) {
       try {
         this.sourceNode.disconnect();
-      } catch (_) {}
+      } catch (_) { }
       this.sourceNode = null;
     }
   }
@@ -2604,7 +2924,7 @@ class TrinoShell {
   /**
    * Inicia la secuencia de 2 compases en 4/4:
    * - 2 clicks de cuenta previa (pulsos -2 y -1)
-   * - Compás 1 (pulsos 0..4): suenan 2 negras (midi1, midi2) + 2 silencios de negra
+   * - Compás 1 (pulsos 0..4): suenan N negras (o solo la 1ª si singOnlyFirstNote) + silencios restantes
    * - Compás 2 (pulsos 4..8): no suenan las notas, avanza el cursor y graba la voz
    */
   async startSingingSequence() {
@@ -2622,9 +2942,7 @@ class TrinoShell {
     await this.ensureMicStreamReady();
 
     const beatSec = 60 / this.singBpm; // ej. 72 BPM -> 0.8333s por negra
-    const { midi1, midi2 } = this.currentQuestion;
-    const hz1 = 440 * Math.pow(2, (midi1 - 69) / 12);
-    const hz2 = 440 * Math.pow(2, (midi2 - 69) / 12);
+    const midis = this.currentQuestion.midis || [this.currentQuestion.midi1, this.currentQuestion.midi2].filter((m) => m != null);
 
     const t0 = this.audioCtx.currentTime + 0.05;
 
@@ -2632,11 +2950,19 @@ class TrinoShell {
     this.playMetronomeClick(t0, true);
     this.playMetronomeClick(t0 + beatSec, true);
 
-    // 2. Compás 1 (empieza en t0 + 2 * beatSec): 2 negras y 2 silencios de negra
+    // 2. Compás 1 (empieza en t0 + 2 * beatSec): suenan las notas configuradas (o solo la 1ª)
     const m1Start = t0 + 2 * beatSec;
-    this.playTone(hz1, m1Start, beatSec * 0.9);
-    this.playTone(hz2, m1Start + beatSec, beatSec * 0.9);
-    // Pulsos 3 y 4 del Compás 1 son silencios de negra (no suenan)
+    if (this.singOnlyFirstNote) {
+      if (midis[0] != null) {
+        const hz0 = 440 * Math.pow(2, (midis[0] - 69) / 12);
+        this.playTone(hz0, m1Start, beatSec * 0.9);
+      }
+    } else {
+      midis.forEach((m, idx) => {
+        const hz = 440 * Math.pow(2, (m - 69) / 12);
+        this.playTone(hz, m1Start + idx * beatSec, beatSec * 0.9);
+      });
+    }
 
     // 3. Grabación de voz: comienza 200ms ANTES del Compás 2 para registrar si el usuario se adelanta al cantar
     const preRollSec = 0.2;
@@ -2736,66 +3062,78 @@ class TrinoShell {
     }
 
     const preRollSamples = Math.round(preRollSec * sampleRate);
-    const m2Samples      = Math.max(1, totalSamples - preRollSamples);
-    const { midi1, midi2 } = this.currentQuestion;
+    const midis = this.currentQuestion.midis || [this.currentQuestion.midi1, this.currentQuestion.midi2].filter((m) => m != null);
+    const noteCount = Math.max(1, Math.min(4, midis.length));
 
     // ── Extraer frames del compás 2 incluyendo el pre-roll que dibuja el pentagrama ──
     const earlyAllowance = preRollSamples;
-    const m2PcmStart     = 0;
-    const m2AllFrames    = this.extractMidiFrames(pcm.subarray(m2PcmStart), sampleRate);
+    const m2PcmStart = 0;
+    const m2AllFrames = this.extractMidiFrames(pcm.subarray(m2PcmStart), sampleRate);
 
     // Duración esperada de cada negra en frames (20ms/frame)
-    const noteDurSec    = m2DurationSec / 4;          // 4 pulsos por compás, solo usamos 2
+    const noteDurSec = m2DurationSec / 4;          // 4 pulsos por compás
     const noteDurFrames = Math.round(noteDurSec / 0.02);
-    const earlyFrames   = Math.round(earlyAllowance / (sampleRate * 0.02));
+    const earlyFrames = Math.round(earlyAllowance / (sampleRate * 0.02));
 
     // Pulsos esperados dentro de m2AllFrames (el compás 2 empieza en earlyFrames)
-    const pulse1Frame = earlyFrames;
-    const pulse2Frame = earlyFrames + noteDurFrames;
-    const pulse3Frame = earlyFrames + noteDurFrames * 2;   // límite máximo útil
+    const pulseFrames = [];
+    for (let i = 0; i <= noteCount; i++) {
+      pulseFrames.push(earlyFrames + noteDurFrames * i);
+    }
 
-    // ── Segmentar y mapear notas ──────────────────────────────────────────────
-    const segResult = this.segmentNotes(
-      m2AllFrames, pulse1Frame, pulse2Frame, pulse3Frame, noteDurFrames
-    );
-    const [midiFrames1, midiFrames2] = segResult.frames;
+    // ── Segmentar y mapear las N notas ────────────────────────────────────────
+    const segResult = noteCount === 2
+      ? this.segmentNotes(m2AllFrames, pulseFrames[0], pulseFrames[1], pulseFrames[2], noteDurFrames)
+      : this.segmentNotesMulti(m2AllFrames, pulseFrames, noteDurFrames, noteCount);
 
-    // ── Evaluación ────────────────────────────────────────────────────────────
-    const eval1 = this.getNoteGradeFromFrames(midiFrames1, midi1);
-    const eval2 = this.getNoteGradeFromFrames(midiFrames2, midi2);
+    const midiFramesList = segResult.frames;
 
-    const analysis1 = this.buildNoteAnalysis(midiFrames1, midi1);
-    const analysis2 = this.buildNoteAnalysis(midiFrames2, midi2);
-
+    // ── Evaluación de las N notas ─────────────────────────────────────────────
     const makeTonal = (a) => ({
-      label:      a.label,
-      sungNote:   a.sungNote || null,
-      voiceType:  a.voiceType,
-      isVibrato:  a.voiceType === 'vibrato',
+      label: a.label,
+      sungNote: a.sungNote || null,
+      voiceType: a.voiceType,
+      isVibrato: a.voiceType === 'vibrato',
       isUnstable: a.voiceType === 'inestable',
-      vibratoHz:  a.vibratoHz,
-      glissando:  a.glissando,
-      isHighLow:  a.isHighLow,
+      vibratoHz: a.vibratoHz,
+      glissando: a.glissando,
+      isHighLow: a.isHighLow,
     });
 
-    this.lastNoteGrades  = [eval1.grade, eval2.grade];
-    this.lastNoteDetails = [
-      { ...eval1, tonal: makeTonal(analysis1) },
-      { ...eval2, tonal: makeTonal(analysis2) },
-    ];
+    const evals = [];
+    const analyses = [];
+    const noteGrades = [];
+    const noteDetails = [];
+
+    for (let i = 0; i < noteCount; i++) {
+      const mFrames = midiFramesList[i] || [];
+      const targetMidi = midis[i];
+      const ev = this.getNoteGradeFromFrames(mFrames, targetMidi);
+      const an = this.buildNoteAnalysis(mFrames, targetMidi);
+      evals.push(ev);
+      analyses.push(an);
+      noteGrades.push(ev.grade);
+      noteDetails.push({ ...ev, tonal: makeTonal(an) });
+    }
+
+    this.lastNoteGrades = noteGrades;
+    this.lastNoteDetails = noteDetails;
 
     // Guardar datos de debug completos
     this.lastDebugData = {
       segmentation: segResult.dbg,
       allFrames: m2AllFrames,
-      midiFrames1,
-      midiFrames2,
+      midiFramesList,
+      midiFrames1: midiFramesList[0] || [],
+      midiFrames2: midiFramesList[1] || [],
       noteDurFrames,
-      pulse1: pulse1Frame,
-      pulse2: pulse2Frame,
-      pulse3: pulse3Frame,
-      analysis1,
-      analysis2,
+      pulseFrames,
+      pulse1: pulseFrames[0],
+      pulse2: pulseFrames[1] ?? (pulseFrames[0] + noteDurFrames),
+      pulse3: pulseFrames[2] ?? (pulseFrames[0] + noteDurFrames * 2),
+      analyses,
+      analysis1: analyses[0] || null,
+      analysis2: analyses[1] || null,
     };
 
     // Construir la curva del pentagrama exactamente con los mismos m2AllFrames analizados
@@ -2807,6 +3145,153 @@ class TrinoShell {
     });
     this.drawGrandStaff(null, this.lastVoiceFrames);
     this.evaluateSingingTake();
+  }
+
+  /**
+   * Segmenta los frames del compás 2 en N arrays de frames MIDI (para N = 1, 3 o 4 notas).
+   */
+  segmentNotesMulti(allFrames, pulseFrames, noteDurFrames, noteCount) {
+    const MIN_VOICED_PCT = 0.20;
+    const MERGE_GAP_MAX = 5;
+    const PITCH_MERGE_MAX = 150;
+    const PITCH_BREAK_MIN = 150;
+    const PITCH_BREAK_FRAMES = 3;
+
+    const segments = [];
+    let segStart = -1;
+    for (let i = 0; i < allFrames.length; i++) {
+      const voiced = allFrames[i] !== null;
+      if (voiced && segStart === -1) {
+        segStart = i;
+      } else if (!voiced && segStart !== -1) {
+        segments.push({ start: segStart, end: i - 1, frames: allFrames.slice(segStart, i) });
+        segStart = -1;
+      }
+      if (voiced && segStart !== -1 && i >= segStart + PITCH_BREAK_FRAMES) {
+        const recent = allFrames.slice(i - PITCH_BREAK_FRAMES, i).filter(Boolean);
+        if (recent.length >= 2 && allFrames[i] !== null) {
+          const recentMean = recent.reduce((s, v) => s + v, 0) / recent.length;
+          const diffCents = Math.abs((allFrames[i] - recentMean) * 100);
+          if (diffCents > PITCH_BREAK_MIN) {
+            segments.push({ start: segStart, end: i - 1, frames: allFrames.slice(segStart, i) });
+            segStart = i;
+          }
+        }
+      }
+    }
+    if (segStart !== -1) {
+      segments.push({ start: segStart, end: allFrames.length - 1, frames: allFrames.slice(segStart) });
+    }
+
+    const merged = [];
+    for (const seg of segments) {
+      if (merged.length === 0) { merged.push({ ...seg }); continue; }
+      const prev = merged[merged.length - 1];
+      const gap = seg.start - prev.end - 1;
+      if (gap <= MERGE_GAP_MAX) {
+        const prevMidi = prev.frames.filter(Boolean);
+        const currMidi = seg.frames.filter(Boolean);
+        if (prevMidi.length > 0 && currMidi.length > 0) {
+          const prevMean = prevMidi.reduce((s, v) => s + v, 0) / prevMidi.length;
+          const currMean = currMidi.reduce((s, v) => s + v, 0) / currMidi.length;
+          const diffCents = Math.abs((prevMean - currMean) * 100);
+          if (diffCents < PITCH_MERGE_MAX) {
+            const gap_nulls = new Array(gap).fill(null);
+            prev.frames = [...prev.frames, ...gap_nulls, ...seg.frames];
+            prev.end = seg.end;
+            continue;
+          }
+        }
+      }
+      merged.push({ ...seg });
+    }
+
+    const pulse1 = pulseFrames[0];
+    let globalShift = 0;
+    const firstOnset = merged.length > 0 ? merged[0].start : -1;
+    if (firstOnset > pulse1 + Math.round(0.2 / 0.02)) {
+      globalShift = firstOnset - pulse1;
+    }
+
+    const shiftedPulses = pulseFrames.map((p, idx) =>
+      idx === pulseFrames.length - 1
+        ? Math.min(p + globalShift, allFrames.length)
+        : Math.min(p + globalShift, allFrames.length)
+    );
+
+    if (noteCount === 1) {
+      if (merged.length >= 1) {
+        const seg = merged[0];
+        const f1 = this._framesForNote(seg.frames, noteDurFrames, MIN_VOICED_PCT);
+        return {
+          frames: [f1],
+          dbg: {
+            strategy: '1 nota (primer segmento)',
+            rawSegments: segments.length,
+            mergedSegments: merged.map((s) => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
+            globalShift,
+            noteRanges: [{ start: seg.start, end: seg.end }],
+            note1: { start: seg.start, end: seg.end },
+          },
+        };
+      }
+      const pStart = shiftedPulses[0];
+      const pEnd = shiftedPulses[1];
+      const f1 = this._framesForNote(allFrames.slice(pStart, pEnd), noteDurFrames, MIN_VOICED_PCT);
+      return {
+        frames: [f1],
+        dbg: {
+          strategy: 'fallback estricto 1 nota',
+          rawSegments: segments.length,
+          mergedSegments: [],
+          globalShift,
+          noteRanges: [{ start: pStart, end: pEnd - 1 }],
+          note1: { start: pStart, end: pEnd - 1 },
+        },
+      };
+    }
+
+    // Para 3 o 4 notas: si hay exactamente noteCount segmentos bien separados, usarlos; de lo contrario, mapear cada ventana de pulso ajustada
+    const framesOut = [];
+    const noteRanges = [];
+    if (merged.length === noteCount) {
+      for (let i = 0; i < noteCount; i++) {
+        const seg = merged[i];
+        framesOut.push(this._framesForNote(seg.frames, noteDurFrames, MIN_VOICED_PCT));
+        noteRanges.push({ start: seg.start, end: seg.end });
+      }
+      return {
+        frames: framesOut,
+        dbg: {
+          strategy: `${noteCount} segmentos directos`,
+          rawSegments: segments.length,
+          mergedSegments: merged.map((s) => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
+          globalShift,
+          noteRanges,
+          note1: noteRanges[0] || null,
+          note2: noteRanges[1] || null,
+        },
+      };
+    }
+
+    for (let i = 0; i < noteCount; i++) {
+      const pStart = shiftedPulses[i];
+      const pEnd = shiftedPulses[i + 1];
+      framesOut.push(this._framesForNote(allFrames.slice(pStart, pEnd), noteDurFrames, MIN_VOICED_PCT));
+      noteRanges.push({ start: pStart, end: Math.max(pStart, pEnd - 1) });
+    }
+    return {
+      frames: framesOut,
+      dbg: {
+        strategy: `ventanas de pulso (${noteCount} notas)`,
+        rawSegments: segments.length,
+        mergedSegments: merged.map((s) => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
+        globalShift,
+        noteRanges,
+        note1: noteRanges[0] || null,
+        note2: noteRanges[1] || null,
+      },
+    };
   }
 
   /**
@@ -2824,10 +3309,10 @@ class TrinoShell {
    * respecto a noteDurFrames.
    */
   segmentNotes(allFrames, pulse1, pulse2, pulse3, noteDurFrames) {
-    const MIN_VOICED_PCT   = 0.20;   // < 20% → no cantada
-    const MERGE_GAP_MAX    = 5;      // frames de silencio para fusionar (≈100ms)
-    const PITCH_MERGE_MAX  = 150;    // cents — diferencia máxima para fusionar
-    const PITCH_BREAK_MIN  = 150;    // cents — cambio brusco de pitch → nuevo segmento
+    const MIN_VOICED_PCT = 0.20;   // < 20% → no cantada
+    const MERGE_GAP_MAX = 5;      // frames de silencio para fusionar (≈100ms)
+    const PITCH_MERGE_MAX = 150;    // cents — diferencia máxima para fusionar
+    const PITCH_BREAK_MIN = 150;    // cents — cambio brusco de pitch → nuevo segmento
     const PITCH_BREAK_FRAMES = 3;    // en cuántos frames debe sostenerse el cambio
 
     // ── Paso 1: detectar segmentos de sonido ─────────────────────────────────
@@ -2847,7 +3332,7 @@ class TrinoShell {
         const recent = allFrames.slice(i - PITCH_BREAK_FRAMES, i).filter(Boolean);
         if (recent.length >= 2 && allFrames[i] !== null) {
           const recentMean = recent.reduce((s, v) => s + v, 0) / recent.length;
-          const diffCents  = Math.abs((allFrames[i] - recentMean) * 100);
+          const diffCents = Math.abs((allFrames[i] - recentMean) * 100);
           if (diffCents > PITCH_BREAK_MIN) {
             segments.push({ start: segStart, end: i - 1, frames: allFrames.slice(segStart, i) });
             segStart = i;
@@ -2864,7 +3349,7 @@ class TrinoShell {
     for (const seg of segments) {
       if (merged.length === 0) { merged.push({ ...seg }); continue; }
       const prev = merged[merged.length - 1];
-      const gap  = seg.start - prev.end - 1;
+      const gap = seg.start - prev.end - 1;
       if (gap <= MERGE_GAP_MAX) {
         // Comparar pitch medio
         const prevMidi = prev.frames.filter(Boolean);
@@ -2917,12 +3402,14 @@ class TrinoShell {
 
       const frames1 = this._framesForNote(seg1.frames, noteDurFrames, MIN_VOICED_PCT);
       const frames2 = this._framesForNote(seg2.frames, noteDurFrames, MIN_VOICED_PCT);
-      return { frames: [frames1, frames2], dbg: {
-        strategy: 'segmentos múltiples',
-        rawSegments: segments.length,
-        mergedSegments: merged.map(s => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
-        globalShift, note1: { start: seg1.start, end: seg1.end }, note2: { start: seg2.start, end: seg2.end },
-      }};
+      return {
+        frames: [frames1, frames2], dbg: {
+          strategy: 'segmentos múltiples',
+          rawSegments: segments.length,
+          mergedSegments: merged.map(s => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
+          globalShift, note1: { start: seg1.start, end: seg1.end }, note2: { start: seg2.start, end: seg2.end },
+        }
+      };
     }
 
     if (merged.length === 1) {
@@ -2951,26 +3438,30 @@ class TrinoShell {
       if (splitAt > 0) {
         const f1 = this._framesForNote(seg.frames.slice(0, splitAt), noteDurFrames, MIN_VOICED_PCT);
         const f2 = this._framesForNote(seg.frames.slice(splitAt), noteDurFrames, MIN_VOICED_PCT);
-        return { frames: [f1, f2], dbg: {
-          strategy: splitReason,
-          rawSegments: segments.length, mergedSegments: merged.map(s => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
-          globalShift, splitAt,
-          note1: { start: seg.start, end: seg.start + splitAt - 1 },
-          note2: { start: seg.start + splitAt, end: seg.end },
-        }};
+        return {
+          frames: [f1, f2], dbg: {
+            strategy: splitReason,
+            rawSegments: segments.length, mergedSegments: merged.map(s => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
+            globalShift, splitAt,
+            note1: { start: seg.start, end: seg.start + splitAt - 1 },
+            note2: { start: seg.start + splitAt, end: seg.end },
+          }
+        };
       }
     }
 
     // ── Paso 5: fallback estricto con desplazamiento ajustado ─────────────────
     const f1 = this._framesForNote(allFrames.slice(p1, p2), noteDurFrames, MIN_VOICED_PCT);
     const f2 = this._framesForNote(allFrames.slice(p2, p3), noteDurFrames, MIN_VOICED_PCT);
-    return { frames: [f1, f2], dbg: {
-      strategy: 'fallback estricto por tiempo',
-      rawSegments: segments.length, mergedSegments: merged.map(s => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
-      globalShift, p1, p2, p3,
-      note1: { start: p1, end: p2 - 1 },
-      note2: { start: p2, end: p3 - 1 },
-    }};
+    return {
+      frames: [f1, f2], dbg: {
+        strategy: 'fallback estricto por tiempo',
+        rawSegments: segments.length, mergedSegments: merged.map(s => ({ start: s.start, end: s.end, voiced: s.frames.filter(Boolean).length })),
+        globalShift, p1, p2, p3,
+        note1: { start: p1, end: p2 - 1 },
+        note2: { start: p2, end: p3 - 1 },
+      }
+    };
   }
 
   /**
@@ -3062,7 +3553,8 @@ class TrinoShell {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, cssW, cssH);
 
-    const { midi1, midi2 } = this.currentQuestion;
+    const midis = this.currentQuestion.midis || [this.currentQuestion.midi1, this.currentQuestion.midi2].filter((m) => m != null);
+    const midi1 = midis[0];
 
     // Geometría vertical del Gran Pentagrama
     // step = 0 (Do4) en el centro entre ambos pentagramas
@@ -3070,9 +3562,9 @@ class TrinoShell {
     const centerDo4Y = cssH / 2 - 4;
     const stepToY = (step) => centerDo4Y - step * halfSpace;
 
-    const staffLeft = 2;
-    const staffRight = cssW - 2;
-    const clefsWidth = 38;
+    const staffLeft = 1;
+    const staffRight = cssW - 1;
+    const clefsWidth = 34;
     const m1Start = staffLeft + clefsWidth;
     const totalMeasuresW = staffRight - m1Start;
     const barlineX = m1Start + totalMeasuresW / 2;
@@ -3152,9 +3644,8 @@ class TrinoShell {
     ctx.font = '27px serif';
     ctx.fillText('𝄢', staffLeft + 5, stepToY(-5));
 
-    // 6. Función para dibujar un compás (2 negras en pulsos 1 y 2 + 2 silencios de negra en pulsos 3 y 4)
-    const pos1 = this.midiToGrandStaffStep(midi1);
-    const pos2 = this.midiToGrandStaffStep(midi2);
+    // 6. Función para dibujar un compás (N negras + silencios de negra restantes hasta completar 4 pulsos)
+    const notePositions = midis.map((m) => this.midiToGrandStaffStep(m));
 
     const drawQuarterNote = (x, pos, color) => {
       const y = stepToY(pos.step);
@@ -3243,15 +3734,14 @@ class TrinoShell {
     }
 
     const drawMeasureContents = (mStart, mEnd, noteColor) => {
-      const b1X = getMeasureBeatX(mStart, mEnd, 0.00);
-      const b2X = getMeasureBeatX(mStart, mEnd, 0.25);
-      const b3X = getMeasureBeatX(mStart, mEnd, 0.50);
-      const b4X = getMeasureBeatX(mStart, mEnd, 0.75);
-
-      drawQuarterNote(b1X, pos1, noteColor);
-      drawQuarterNote(b2X, pos2, noteColor);
-      drawQuarterRest(b3X, restY);
-      drawQuarterRest(b4X, restY);
+      for (let bIdx = 0; bIdx < 4; bIdx++) {
+        const bX = getMeasureBeatX(mStart, mEnd, bIdx * 0.25);
+        if (bIdx < notePositions.length) {
+          drawQuarterNote(bX, notePositions[bIdx], noteColor);
+        } else {
+          drawQuarterRest(bX, restY);
+        }
+      }
     };
 
     drawMeasureContents(m1Start, barlineX, '#000000');
@@ -3270,9 +3760,9 @@ class TrinoShell {
           prevPt = null;
           return;
         }
-        const isFirstNote = f.ratio < 0.25;
-        const targetMidi = isFirstNote ? midi1 : midi2;
-        const targetPos = isFirstNote ? pos1 : pos2;
+        const beatSlot = Math.min(midis.length - 1, Math.max(0, Math.floor(f.ratio * 4)));
+        const targetMidi = midis[beatSlot];
+        const targetPos = notePositions[beatSlot];
         const targetY = stepToY(targetPos.step);
 
         // La posición se limita al pentagrama, pero la afinación conserva la octava real.
@@ -3285,8 +3775,8 @@ class TrinoShell {
         const absS = Math.abs(signedSemitones);
         const strokeColor =
           absS <= 0.40 ? '#10b981' :   // admirable/bueno/aceptable (≤40c)
-          absS <= 0.80 ? '#f59e0b' :   // casi (41-80c)
-                         '#ef4444';    // malo (>80c)
+            absS <= 0.80 ? '#f59e0b' :   // casi (41-80c)
+              '#ef4444';    // malo (>80c)
 
         if (prevPt) {
           ctx.strokeStyle = strokeColor;
@@ -3305,20 +3795,19 @@ class TrinoShell {
     }
 
     // 8. Íconos de evaluación debajo de cada nota cantada en el Compás 2 (5 niveles)
-    if (Array.isArray(this.lastNoteGrades) && this.lastNoteGrades.length === 2) {
+    if (Array.isArray(this.lastNoteGrades) && this.lastNoteGrades.length >= 1) {
       const m2End = staffRight - 4;
-      const noteXPositions = [
-        getMeasureBeatX(m2Start, m2End, 0.00),
-        getMeasureBeatX(m2Start, m2End, 0.25),
-      ];
+      const noteXPositions = this.lastNoteGrades.map((_, idx) =>
+        getMeasureBeatX(m2Start, m2End, idx * 0.25)
+      );
       const iconY = botStaffBotY + 15;
 
       const gradeStyles = {
         admirable: { bg: '#059669', border: '#34d399' },
-        bueno:     { bg: '#10b981', border: null },
+        bueno: { bg: '#10b981', border: null },
         aceptable: { bg: '#22c55e', border: null },
-        casi:      { bg: '#f59e0b', border: null },
-        malo:      { bg: '#ef4444', border: null },
+        casi: { bg: '#f59e0b', border: null },
+        malo: { bg: '#ef4444', border: null },
       };
 
       const drawGradeIcon = (grade, x, y, radius) => {
@@ -3396,20 +3885,29 @@ class TrinoShell {
         drawGradeIcon(gradeStyles[grade] ? grade : 'malo', x, iconY, 6.5);
       });
 
-      // Ícono del ejercicio completo (nivel más bajo) a la derecha
-      if (this.lastNoteGrades.length === 2) {
-        const exerciseGrade = this.worstGrade(this.lastNoteGrades[0], this.lastNoteGrades[1]);
-        const style = gradeStyles[exerciseGrade] || gradeStyles.malo;
-        const exX = staffRight - 10;
-        const exY = (topStaffTopY + botStaffBotY) / 2;
+      // Ícono del ejercicio completo (nivel más bajo) en el punto entre ambos compases (barlineX)
+      const exerciseGrade = this.lastNoteGrades.reduce(
+        (worst, g) => this.worstGrade(worst, g),
+        this.lastNoteGrades[0] || 'malo'
+      );
+      const style = gradeStyles[exerciseGrade] || gradeStyles.malo;
+      const exX = barlineX;
+      const exY = (topStaffTopY + botStaffBotY) / 2;
 
-        ctx.fillStyle = style.bg;
+      if (style.border) {
+        ctx.strokeStyle = style.border;
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(exX, exY, 11, 0, Math.PI * 2);
-        ctx.fill();
-
-        drawGradeIcon(gradeStyles[exerciseGrade] ? exerciseGrade : 'malo', exX, exY, 8);
+        ctx.arc(exX, exY, 13, 0, Math.PI * 2);
+        ctx.stroke();
       }
+
+      ctx.fillStyle = style.bg;
+      ctx.beginPath();
+      ctx.arc(exX, exY, 11, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawGradeIcon(gradeStyles[exerciseGrade] ? exerciseGrade : 'malo', exX, exY, 8);
     }
   }
 
@@ -3813,13 +4311,13 @@ class TrinoShell {
       ? this.rectifyVibratoCents(frameCentsTarget, voiceShape.vibratoPeaks)
       : { values: [...frameCentsTarget], correctedFrames: 0 };
     return {
-      voiceType:  voiceShape.type,
-      vibratoHz:  voiceShape.vibratoHz,
-      glissando:  voiceShape.glissando,
+      voiceType: voiceShape.type,
+      vibratoHz: voiceShape.vibratoHz,
+      glissando: voiceShape.glissando,
       glissandoDebug: voiceShape.glissandoDebug,
-      peaks:      voiceShape.peaks || [],
+      peaks: voiceShape.peaks || [],
       periodsFrames: voiceShape.periodsFrames || [],
-      cycles:      voiceShape.cycles || 0,
+      cycles: voiceShape.cycles || 0,
       sampleCount: voiceShape.sampleCount || 0,
       frameCentsTarget,
       rectifiedCentsTarget: rectification.values,
@@ -3828,12 +4326,12 @@ class TrinoShell {
       smoothedCents: voiceShape.smoothedCents || [],
       centerMidi,
       medianSigned: tonal.medianSigned ?? null,
-      sd:         voiceShape.sd,
-      cv:         voiceShape.cv,
-      freqHz:     voiceShape.freqHz,
-      label:      tonal.label,
-      sungNote:   tonal.sungNote,
-      isHighLow:  tonal.isHighLow,
+      sd: voiceShape.sd,
+      cv: voiceShape.cv,
+      freqHz: voiceShape.freqHz,
+      label: tonal.label,
+      sungNote: tonal.sungNote,
+      isHighLow: tonal.isHighLow,
     };
   }
 
@@ -3945,12 +4443,12 @@ class TrinoShell {
     const medianCents = sorted[Math.floor(sorted.length / 2)];
 
     // Distribución por zona
-    const badCount   = centsList.filter((c) => c > 80).length;
-    const goodCount  = centsList.filter((c) => c <= 40).length;
+    const badCount = centsList.filter((c) => c > 80).length;
+    const goodCount = centsList.filter((c) => c <= 40).length;
     const tightCount = centsList.filter((c) => c <= 15).length;
 
-    const badPct   = badCount   / total;
-    const goodPct  = goodCount  / total;
+    const badPct = badCount / total;
+    const goodPct = goodCount / total;
     const tightPct = tightCount / total;
 
     // Compatibilidad: exponer campo vibrato con la forma antigua para que el resto del código funcione
@@ -3995,11 +4493,11 @@ class TrinoShell {
     if (abs > 200) return `Muy ${direction}`;
 
     let level;
-    if (abs <= 5)       level = 'Centrado';
+    if (abs <= 5) level = 'Centrado';
     else if (abs <= 15) level = 'Casi centrado';
     else if (abs <= 30) level = `Leve ${direction}`;
     else if (abs <= 50) level = direction.charAt(0).toUpperCase() + direction.slice(1);
-    else                level = `Muy ${direction}`;
+    else level = `Muy ${direction}`;
 
     return `(${signedMedianCents >= 0 ? '+' : ''}${signedMedianCents}c) ${level}`;
   }
@@ -4041,21 +4539,16 @@ class TrinoShell {
 
   evaluateSingingTake() {
     if (!this.activeLevel || !this.currentQuestion) return;
-    const { midi1, midi2 } = this.currentQuestion;
+    const midis = this.currentQuestion.midis || [this.currentQuestion.midi1, this.currentQuestion.midi2].filter((m) => m != null);
+    const detList = this.lastNoteDetails || [];
+    const defaultTonal = { label: 'Silencio', sungNote: null, isVibrato: false, isUnstable: false, vibratoHz: null };
 
-    const [det1, det2] = this.lastNoteDetails || [];
-    const grade1 = det1?.grade || 'malo';
-    const grade2 = det2?.grade || 'malo';
-
-    // El ejercicio toma el nivel más bajo de todas las notas
-    const exerciseGrade = this.worstGrade(grade1, grade2);
+    const noteGrades = midis.map((_, i) => detList[i]?.grade || 'malo');
+    const exerciseGrade = noteGrades.reduce((worst, g) => this.worstGrade(worst, g), noteGrades[0] || 'malo');
     const isCorrect = this.isNoteMatch(exerciseGrade);
 
-    const note1Name = this.midiToNoteNameEs(midi1);
-    const note2Name = this.midiToNoteNameEs(midi2);
-
-    const tonal1 = det1?.tonal || { label: 'Silencio', sungNote: null, isVibrato: false, isUnstable: false, vibratoHz: null };
-    const tonal2 = det2?.tonal || { label: 'Silencio', sungNote: null, isVibrato: false, isUnstable: false, vibratoHz: null };
+    const noteNames = midis.map((m) => this.midiToNoteNameEs(m));
+    const tonals = midis.map((_, i) => detList[i]?.tonal || defaultTonal);
 
     // Badges Vib, Irr y Gli con tooltip
     const makeBadges = (tonal) => {
@@ -4068,10 +4561,10 @@ class TrinoShell {
         b += `<span class="voice-badge badge-glissando" title="Glisando detectado: la nota partió lejos y se niveló">Gli</span>`;
       return b;
     };
-    const badge1 = makeBadges(tonal1);
-    const badge2 = makeBadges(tonal2);
-    // Texto con salto de línea por nota y badges (V), (I), (G) para la tabla de sesión y debajo del pentagrama
-    const sungSummary = `${note1Name}: ${tonal1.label}${badge1}<br>${note2Name}: ${tonal2.label}${badge2}`;
+
+    const sungSummary = noteNames
+      .map((nName, i) => `${nName}: ${tonals[i].label}${makeBadges(tonals[i])}`)
+      .join('<br>');
 
     const stats = this.getLevelStats(this.activeLevel.id, 'singing');
 
@@ -4092,28 +4585,18 @@ class TrinoShell {
       this.pushLevelDayLog('singing', this.activeLevel.id, {
         date: todayKey,
         index: todayCount + 1,
-        notes: `${note1Name}<br>${note2Name}`,
+        notes: noteNames.join('<br>'),
         answer: sungSummary,
         isCorrect,
         exerciseGrade,
-        noteStats: [
-          {
-            grade: grade1,
-            sungNote: tonal1.sungNote || null,
-            label: tonal1.label,
-            voiceType: toVoiceType(tonal1),
-            vibratoHz: tonal1.vibratoHz || null,
-            glissando: Boolean(tonal1.glissando),
-          },
-          {
-            grade: grade2,
-            sungNote: tonal2.sungNote || null,
-            label: tonal2.label,
-            voiceType: toVoiceType(tonal2),
-            vibratoHz: tonal2.vibratoHz || null,
-            glissando: Boolean(tonal2.glissando),
-          },
-        ],
+        noteStats: midis.map((_, i) => ({
+          grade: noteGrades[i],
+          sungNote: tonals[i].sungNote || null,
+          label: tonals[i].label,
+          voiceType: toVoiceType(tonals[i]),
+          vibratoHz: tonals[i].vibratoHz || null,
+          glissando: Boolean(tonals[i].glissando),
+        })),
       });
       this.singSessionLog = this.getLevelDayLog('singing', this.activeLevel.id);
       this.renderSingSessionLog();
@@ -4132,20 +4615,28 @@ class TrinoShell {
     }
 
     // Debug: siempre actualizar con el último análisis (incluye reintentos)
-    this.renderDebugPanel(note1Name, note2Name, det1, det2, tonal1, tonal2, exerciseGrade);
+    this.renderDebugPanel(noteNames, detList, tonals, exerciseGrade);
   }
 
   /* =========================================================================
    * DEBUG PANEL
    * ========================================================================= */
 
-  renderDebugPanel(note1Name, note2Name, det1, det2, tonal1, tonal2, exerciseGrade) {
-    const dbg  = this.lastDebugData || {};
-    const seg  = dbg.segmentation  || {};
+  renderDebugPanel(noteNamesArg, detListArg, tonalsArg, exerciseGrade) {
+    const dbg = this.lastDebugData || {};
+    const seg = dbg.segmentation || {};
     const midiT = this.currentQuestion;
+    const midis = midiT?.midis || [midiT?.midi1, midiT?.midi2].filter((m) => m != null);
+    const noteNames = Array.isArray(noteNamesArg) ? noteNamesArg : midis.map((m) => this.midiToNoteNameEs(m));
+    const detList = Array.isArray(detListArg) ? detListArg : (this.lastNoteDetails || []);
+    const defaultTonal = { label: 'Silencio', sungNote: null, isVibrato: false, isUnstable: false, vibratoHz: null };
+    const tonals = Array.isArray(tonalsArg) ? tonalsArg : midis.map((_, i) => detList[i]?.tonal || defaultTonal);
+    const midiFramesList = dbg.midiFramesList || [dbg.midiFrames1 || [], dbg.midiFrames2 || []];
+    const analyses = dbg.analyses || [dbg.analysis1, dbg.analysis2];
+    const pulseFrames = dbg.pulseFrames || [dbg.pulse1, dbg.pulse2, dbg.pulse3].filter((p) => p != null);
 
     // ── Helpers ──────────────────────────────────────────────────────────────
-    const pct  = (v) => v != null ? (v * 100).toFixed(1) + '%' : '—';
+    const pct = (v) => v != null ? (v * 100).toFixed(1) + '%' : '—';
     const fmtC = (c) => c == null ? '·' : (c >= 0 ? `+${c}c` : `${c}c`);
 
     const frameCents = (midi, target) => {
@@ -4167,32 +4658,29 @@ class TrinoShell {
     };
 
     // ── Calcular rangos de columna para cada nota ─────────────────────────────
-    // Usamos los índices start/end del segmento de la segmentación
-    const segDbg   = seg;
-    const note1Range = segDbg.note1
-      ? { start: segDbg.note1.start, end: segDbg.note1.end }
-      : dbg.pulse1 != null
-        ? { start: dbg.pulse1, end: dbg.pulse2 - 1 }
-        : null;
-    const note2Range = segDbg.note2
-      ? { start: segDbg.note2.start, end: segDbg.note2.end }
-      : dbg.pulse2 != null
-        ? { start: dbg.pulse2, end: dbg.pulse2 + dbg.noteDurFrames - 1 }
-        : null;
+    const noteRanges = midis.map((_, i) => {
+      if (Array.isArray(seg.noteRanges) && seg.noteRanges[i]) {
+        return { start: seg.noteRanges[i].start, end: seg.noteRanges[i].end };
+      }
+      if (i === 0 && seg.note1) return { start: seg.note1.start, end: seg.note1.end };
+      if (i === 1 && seg.note2) return { start: seg.note2.start, end: seg.note2.end };
+      if (pulseFrames[i] != null) {
+        const pEnd = pulseFrames[i + 1] != null ? pulseFrames[i + 1] - 1 : pulseFrames[i] + (dbg.noteDurFrames || 40) - 1;
+        return { start: pulseFrames[i], end: pEnd };
+      }
+      return null;
+    });
 
     const inRange = (col, range) =>
       range && col >= range.start && col <= range.end;
 
     // ── Centro tonal por nota (mediana firmada en cents) y su fila en la tabla ─
     const allFrames = dbg.allFrames || [];
-    const cols      = allFrames.length;
-    const target1   = midiT?.midi1;
-    const target2   = midiT?.midi2;
-
-    const tonalCents1 = target1 != null ? this.getSignedMedianCents(dbg.midiFrames1 || [], target1) : null;
-    const tonalCents2 = target2 != null ? this.getSignedMedianCents(dbg.midiFrames2 || [], target2) : null;
-    const tonalRow1   = rowFor(tonalCents1);
-    const tonalRow2   = rowFor(tonalCents2);
+    const cols = allFrames.length;
+    const tonalCentsList = midis.map((tMidi, i) =>
+      tMidi != null ? this.getSignedMedianCents(midiFramesList[i] || [], tMidi) : null
+    );
+    const tonalRowList = tonalCentsList.map((tc) => rowFor(tc));
 
     // ── Peaks: mapear al índice de frame global en allFrames ─────────────────
     const buildPeakSet = (analysis, range) => {
@@ -4204,75 +4692,79 @@ class TrinoShell {
       return map;
     };
 
-    const peaks1 = buildPeakSet(dbg.analysis1, note1Range);
-    const peaks2 = buildPeakSet(dbg.analysis2, note2Range);
+    const peakSets = midis.map((_, i) => buildPeakSet(analyses[i], noteRanges[i]));
 
     let tableHtml = `<div class="dbg-frame-scroll"><table class="dbg-frame-table">`;
 
-    // Fila superior indicando qué nota se analiza realmente en cada columna (N1, N2 o sin nota)
+    // Fila superior indicando qué nota se analiza realmente en cada columna (N1..N4 o sin nota)
     tableHtml += `<tr><th class="dbg-row-label">Nota analizada</th>`;
     for (let c = 0; c < cols; c++) {
-      const isNote1Col = inRange(c, note1Range) && (dbg.midiFrames1 || []).length > 0;
-      const isNote2Col = inRange(c, note2Range) && (dbg.midiFrames2 || []).length > 0;
-      const hasVoiced  = allFrames[c] !== null;
-      if (isNote1Col && hasVoiced) {
-        tableHtml += `<th class="dbg-note-hdr dbg-note1-hdr">N1</th>`;
-      } else if (isNote2Col && hasVoiced) {
-        tableHtml += `<th class="dbg-note-hdr dbg-note2-hdr">N2</th>`;
+      const hasVoiced = allFrames[c] !== null;
+      let matchedNoteIdx = -1;
+      for (let i = 0; i < midis.length; i++) {
+        if (inRange(c, noteRanges[i]) && (midiFramesList[i] || []).length > 0) {
+          matchedNoteIdx = i;
+          break;
+        }
+      }
+      if (matchedNoteIdx >= 0 && hasVoiced) {
+        const hdrCls = matchedNoteIdx % 2 === 0 ? 'dbg-note1-hdr' : 'dbg-note2-hdr';
+        tableHtml += `<th class="dbg-note-hdr ${hdrCls}">N${matchedNoteIdx + 1}</th>`;
       } else {
         tableHtml += `<th class="dbg-note-hdr dbg-note-none">·</th>`;
       }
     }
     tableHtml += `</tr>`;
 
-    // Fila de encabezado con número de frame y marcadores de pulso (P1, P2, P3)
+    // Fila de encabezado con número de frame y marcadores de pulso
     tableHtml += `<tr><th class="dbg-row-label">Frame / Pulso</th>`;
     for (let c = 0; c < cols; c++) {
-      const isPulse1 = c === dbg.pulse1;
-      const isPulse2 = c === dbg.pulse2;
-      const isPulse3 = c === dbg.pulse3;
-      const cls = isPulse1 ? ' dbg-pulse1-hdr' : isPulse2 ? ' dbg-pulse2-hdr' : '';
-      const pTag = isPulse1 ? ' (P1)' : isPulse2 ? ' (P2)' : isPulse3 ? ' (S1)' : '';
+      const pIdx = pulseFrames.indexOf(c);
+      const isNotePulse = pIdx >= 0 && pIdx < midis.length;
+      const isEndPulse = pIdx === midis.length;
+      const cls = isNotePulse ? (pIdx % 2 === 0 ? ' dbg-pulse1-hdr' : ' dbg-pulse2-hdr') : '';
+      const pTag = isNotePulse ? ` (P${pIdx + 1})` : isEndPulse ? ' (Fin)' : '';
       tableHtml += `<th class="dbg-frame-hdr${cls}">${c + 1}${pTag}</th>`;
     }
     tableHtml += `</tr>`;
 
-    // 15 filas de contenido (muestra exactamente los frames que entran al análisis de N1 y N2)
+    // 15 filas de contenido
     for (let r = 0; r < ROWS.length; r++) {
-      const row       = ROWS[r];
+      const row = ROWS[r];
       const isCenterRow = r === rowFor(0);
       tableHtml += `<tr${isCenterRow ? ' class="dbg-center-row"' : ''}>`;
       tableHtml += `<td class="dbg-row-label">${row.label}</td>`;
 
       for (let c = 0; c < cols; c++) {
-        const isNote1Col = inRange(c, note1Range) && (dbg.midiFrames1 || []).length > 0;
-        const isNote2Col = inRange(c, note2Range) && (dbg.midiFrames2 || []).length > 0;
-        const targetMidi = isNote1Col ? target1 : isNote2Col ? target2 : null;
-        const cents      = targetMidi != null ? frameCents(allFrames[c], targetMidi) : null;
-        const activeRow  = rowFor(cents);
-        const isPeak     = (isNote1Col && peaks1.has(c)) || (isNote2Col && peaks2.has(c));
-        const hasNote    = (isNote1Col || isNote2Col) && cents !== null;
+        let matchedNoteIdx = -1;
+        for (let i = 0; i < midis.length; i++) {
+          if (inRange(c, noteRanges[i]) && (midiFramesList[i] || []).length > 0) {
+            matchedNoteIdx = i;
+            break;
+          }
+        }
+        const targetMidi = matchedNoteIdx >= 0 ? midis[matchedNoteIdx] : null;
+        const cents = targetMidi != null ? frameCents(allFrames[c], targetMidi) : null;
+        const activeRow = rowFor(cents);
+        const isPeak = matchedNoteIdx >= 0 && peakSets[matchedNoteIdx]?.has(c);
+        const hasNote = matchedNoteIdx >= 0 && cents !== null;
 
-        // Fondo de columna: negro si no hay nota analizada en esta columna
         let colBg = '#000000';
-        if (hasNote && isNote1Col) colBg = 'rgba(56,189,248,0.09)';
-        else if (hasNote && isNote2Col) colBg = 'rgba(167,139,250,0.09)';
+        if (hasNote) {
+          colBg = matchedNoteIdx % 2 === 0 ? 'rgba(56,189,248,0.09)' : 'rgba(167,139,250,0.09)';
+        }
 
         if (!hasNote) {
-          const silenceDot = allFrames[c] === null && (isNote1Col || isNote2Col) && r === 7 ? '·' : '';
+          const silenceDot = allFrames[c] === null && matchedNoteIdx >= 0 && r === 7 ? '·' : '';
           tableHtml += `<td class="dbg-frame-cell dbg-no-note">${silenceDot}</td>`;
         } else if (activeRow === r && cents !== null) {
-          // Celda activa con el valor del frame; entre paréntesis si es un pico detectado
           const display = isPeak ? `(${fmtC(cents)})` : fmtC(cents);
           const extraStyle = isPeak ? 'font-style:italic;' : '';
           tableHtml += `<td class="dbg-frame-cell dbg-active" style="background:${row.bg};color:${row.fg};${extraStyle}">${display}</td>`;
         } else {
-          // Celda vacía en columna con nota detectada: anotar tonalidad central en su fila correspondiente
           let content = '';
-          if (isNote1Col && r === tonalRow1 && tonalCents1 !== null) {
-            content = `<span class="dbg-tonal-hint">${fmtC(tonalCents1)}</span>`;
-          } else if (isNote2Col && r === tonalRow2 && tonalCents2 !== null) {
-            content = `<span class="dbg-tonal-hint">${fmtC(tonalCents2)}</span>`;
+          if (matchedNoteIdx >= 0 && r === tonalRowList[matchedNoteIdx] && tonalCentsList[matchedNoteIdx] !== null) {
+            content = `<span class="dbg-tonal-hint">${fmtC(tonalCentsList[matchedNoteIdx])}</span>`;
           }
           tableHtml += `<td class="dbg-frame-cell" style="background:${colBg}">${content}</td>`;
         }
@@ -4283,24 +4775,25 @@ class TrinoShell {
 
     // ── Sección de segmentación ───────────────────────────────────────────────
     const mergedStr = (seg.mergedSegments || [])
-      .map((s, i) => `seg${i+1}: frames ${s.start + 1}–${s.end + 1} (${s.voiced} con pitch)`)
+      .map((s, i) => `seg${i + 1}: frames ${s.start + 1}–${s.end + 1} (${s.voiced} con pitch)`)
       .join(' | ');
-    const n1RangeStr = note1Range && (dbg.midiFrames1 || []).length > 0
-      ? `frames ${note1Range.start + 1}–${note1Range.end + 1} (${(dbg.midiFrames1 || []).filter(m => m !== null).length} útiles)`
-      : 'Silencio (sin frames válidos)';
-    const n2RangeStr = note2Range && (dbg.midiFrames2 || []).length > 0
-      ? `frames ${note2Range.start + 1}–${note2Range.end + 1} (${(dbg.midiFrames2 || []).filter(m => m !== null).length} útiles)`
-      : 'Silencio (sin frames válidos)';
+    const noteRangeRowsHtml = midis.map((_, i) => {
+      const nr = noteRanges[i];
+      const mf = midiFramesList[i] || [];
+      const rStr = nr && mf.length > 0
+        ? `frames ${nr.start + 1}–${nr.end + 1} (${mf.filter((m) => m !== null).length} útiles)`
+        : 'Silencio (sin frames válidos)';
+      return `<span class="dbg-k">Nota ${i + 1} (N${i + 1})</span><span class="dbg-v">${rStr}</span>`;
+    }).join('');
+    const headerNotesLegend = noteNames.map((n, i) => `N${i + 1}=${n}`).join(' · ');
 
     const segHtml = `
       <div class="dbg-section">
-        <div class="dbg-section-title">Tabla de frames analizados (${cols} frames · N1=${note1Name} azul · N2=${note2Name} violeta · Negro=sin nota)</div>
+        <div class="dbg-section-title">Tabla de frames analizados (${cols} frames · ${headerNotesLegend})</div>
         ${tableHtml}
         <div class="dbg-kv-grid" style="margin-top:0.4rem">
           <span class="dbg-k">Estrategia</span><span class="dbg-v">${seg.strategy ?? '—'}</span>
-          <span class="dbg-k">Nota 1 (N1)</span><span class="dbg-v">${n1RangeStr}</span>
-          <span class="dbg-k">Nota 2 (N2)</span><span class="dbg-v">${n2RangeStr}</span>
-          <span class="dbg-k">Pulsos esperados</span><span class="dbg-v">P1=frame ${(dbg.pulse1 ?? 0) + 1} · P2=frame ${(dbg.pulse2 ?? 0) + 1} · S1=frame ${(dbg.pulse3 ?? 0) + 1}</span>
+          ${noteRangeRowsHtml}
           <span class="dbg-k">Desp. global</span><span class="dbg-v">${seg.globalShift != null ? seg.globalShift + ' frames (' + Math.round(seg.globalShift * 20) + 'ms)' : '0'}</span>
           <span class="dbg-k">Segmentos detectados</span><span class="dbg-v">${mergedStr || '—'}</span>
         </div>
@@ -4337,18 +4830,21 @@ class TrinoShell {
             <span class="dbg-k">Freq picos</span>   <span class="dbg-v">${analysis?.freqHz ?? '—'} Hz</span>
             <span class="dbg-k">Glisando</span>     <span class="dbg-v">${tonal.glissando ? 'sí' : 'no'}</span>
             <span class="dbg-k">isHighLow</span>    <span class="dbg-v">${tonal.isHighLow ? 'sí' : 'no'}</span>
-            <span class="dbg-k">Picos (${(analysis?.peaks||[]).length})</span>
+            <span class="dbg-k">Picos (${(analysis?.peaks || []).length})</span>
             <span class="dbg-v">${peaksStr}</span>
           </div>
         </div>`;
     };
 
+    const noteSectionsHtml = midis
+      .map((_, i) => noteSection(`N${i + 1} (${i + 1}ª Nota)`, noteNames[i], detList[i], tonals[i], analyses[i]))
+      .join('');
+
     const fullHtml =
       `<div class="dbg-header-line">Ejercicio: <strong>${fmtGradeEs(exerciseGrade).toUpperCase()}</strong></div>` +
       segHtml +
       `<div class="dbg-notes-grid">` +
-      noteSection('N1 (1ª Nota)', note1Name, det1, tonal1, dbg.analysis1) +
-      noteSection('N2 (2ª Nota)', note2Name, det2, tonal2, dbg.analysis2) +
+      noteSectionsHtml +
       `</div>`;
 
     this.lastDebugHtml = fullHtml;
@@ -4375,7 +4871,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=56', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=57', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>
@@ -4795,7 +5291,7 @@ class TrinoShell {
         e.preventDefault();
         try {
           keyEl.setPointerCapture(e.pointerId);
-        } catch (_) {}
+        } catch (_) { }
         this.vtDrag = {
           pointerId: e.pointerId,
           startX: e.clientX,
@@ -5161,8 +5657,8 @@ class TrinoShell {
     const voiceLabel = analysis.voiceType === 'sin-analisis'
       ? 'Análisis insuficiente'
       : analysis.voiceType === 'vibrato'
-      ? `Vibrato${analysis.vibratoHz ? ` (${analysis.vibratoHz} Hz)` : ''}`
-      : analysis.voiceType === 'inestable' ? 'Irregular' : 'Estable';
+        ? `Vibrato${analysis.vibratoHz ? ` (${analysis.vibratoHz} Hz)` : ''}`
+        : analysis.voiceType === 'inestable' ? 'Irregular' : 'Estable';
 
     if (this.vtRows) {
       this.vtResult?.classList.remove('vt-hint-mode');

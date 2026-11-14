@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=56" />
+  <link rel="stylesheet" href="./css/styles.css?v=57" />
 </head>
 
 <body>
@@ -15,7 +15,7 @@
       <div class="app-brand" id="brand-home-btn" title="Ir al inicio">
         <div class="app-logo-dot">🎵</div>
         <span class="app-name">Trino</span>
-        <span class="app-version" id="app-version-badge">v1.0.0038</span>
+        <span class="app-version" id="app-version-badge">v1.0.0050</span>
       </div>
 
       <button type="button" class="menu-btn" id="menu-toggle-btn" aria-label="Abrir menú">
@@ -85,7 +85,7 @@
             <div class="module-icon icon-chords">♫</div>
             <div class="module-info">
               <span class="module-tag" data-module-progress="chords">MÓDULO 3 - Hoy 0/100</span>
-              <h2 class="module-title">Reconocimiento de acordes</h2>
+              <h2 class="module-title">Reconocer Acordes</h2>
             </div>
             <p class="module-desc">Escucha notas simultáneas e identifica intervalos, tríadas y cuatríadas.</p>
           </button>
@@ -189,7 +189,7 @@
 
       <section id="view-chords" class="hidden">
         <div class="levels-header">
-          <h2 class="welcome-title">Módulo 3 - Reconocimiento de acordes</h2>
+          <h2 class="welcome-title">Módulo 3 - Reconocer Acordes</h2>
         </div>
         <div class="levels-list" id="chord-levels-list"></div>
       </section>
@@ -198,12 +198,13 @@
         <div class="exercise-header-card">
           <div class="exercise-title-row">
             <span class="exercise-level-name" id="chord-level-title">Díadas I</span>
+            <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel" title="Ver información del nivel">i</button>
           </div>
         </div>
         <p class="exercise-prompt" id="chord-prompt-text">Escucha el acorde e identifica su tipo.</p>
         <div class="answers-grid hidden" id="chord-answers-container"></div>
         <div class="session-log-wrapper hidden" id="chord-session-log-wrapper">
-          <table class="session-log-table" aria-label="Historial de reconocimiento de acordes">
+          <table class="session-log-table" aria-label="Historial de reconocer acordes">
             <tbody id="chord-session-log-tbody"></tbody>
           </table>
         </div>
@@ -272,7 +273,7 @@
                   </div>
                 </div>
                 <div class="daily-goal-setting">
-                  <span class="daily-goal-setting-label" id="daily-chords-min-label">Reconocimiento de acordes</span>
+                  <span class="daily-goal-setting-label" id="daily-chords-min-label">Reconocer Acordes</span>
                   <div class="settings-inline-row daily-goal-stepper" role="group" aria-labelledby="daily-chords-min-label">
                     <button type="button" class="bpm-step-btn" id="daily-chords-min-decrease" aria-label="Reducir meta de acordes">−</button>
                     <output class="settings-val-badge" id="daily-chords-min-value" aria-live="polite">100 diarios</output>
@@ -581,7 +582,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=65"></script>
+  <script src="./js/app.js?v=67"></script>
 </body>
 
 </html>
