@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0052';
+const APP_VERSION = 'v1.0.0053';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -774,6 +774,12 @@ class TrinoShell {
     this.renderBottomCommands('stats');
   }
 
+  formatStatCell(val, colorCls) {
+    const n = Number(val) || 0;
+    if (n === 0) return `<td class="stats-val-zero">-</td>`;
+    return `<td class="${colorCls}">${n}</td>`;
+  }
+
   buildM1AbsTableHtml() {
     const abs = this.cumulativeStats?.m1Abs || {};
     const orderedKeys = Object.keys(INTERVAL_CATALOG).sort(
@@ -786,8 +792,8 @@ class TrinoShell {
         return `
           <tr>
             <td><strong>${cat.label}</strong></td>
-            <td class="stats-val-good">${entry.good || 0}</td>
-            <td class="stats-val-bad">${entry.bad || 0}</td>
+            ${this.formatStatCell(entry.good, 'stats-val-good')}
+            ${this.formatStatCell(entry.bad, 'stats-val-bad')}
           </tr>
         `;
       })
@@ -838,8 +844,8 @@ class TrinoShell {
           <tr>
             <td><strong>${n1}-${n2}</strong></td>
             <td>${label}</td>
-            <td class="stats-val-good">${it.good || 0}</td>
-            <td class="stats-val-bad">${it.bad || 0}</td>
+            ${this.formatStatCell(it.good, 'stats-val-good')}
+            ${this.formatStatCell(it.bad, 'stats-val-bad')}
           </tr>
         `;
       })
@@ -892,11 +898,11 @@ class TrinoShell {
       rowsHtml.push(`
         <tr>
           <td><strong>${noteLabel}</strong></td>
-          <td class="stats-val-bad">${r.malo || 0}</td>
-          <td class="stats-val-reg">${r.casi || 0}</td>
-          <td class="stats-val-acep">${r.aceptable || 0}</td>
-          <td class="stats-val-good">${r.bueno || 0}</td>
-          <td class="stats-val-adm">${r.admirable || 0}</td>
+          ${this.formatStatCell(r.malo, 'stats-val-bad')}
+          ${this.formatStatCell(r.casi, 'stats-val-reg')}
+          ${this.formatStatCell(r.aceptable, 'stats-val-acep')}
+          ${this.formatStatCell(r.bueno, 'stats-val-good')}
+          ${this.formatStatCell(r.admirable, 'stats-val-adm')}
         </tr>
       `);
     }

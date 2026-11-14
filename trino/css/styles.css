@@ -2679,6 +2679,10 @@ body {
   font-weight: 700;
 }
 
+.stats-val-zero {
+  color: #64748b;
+}
+
 .stats-empty-msg {
   padding: 1rem;
   text-align: center;

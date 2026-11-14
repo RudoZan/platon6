@@ -85,10 +85,10 @@
 - Debug: Module 4 exposes the shared floating debug view. Its frame matrix uses the same 21 cents bands/colors as `docs/trino/TablaDeValores.md`, with one column per original frame, signed target cents in the active cell, peak markers, and analysis diagnostics.
 - Grade buckets: admirable ≤15c, bueno ≤20c, aceptable ≤40c, regular ≤80c, fallido >80c; admirable/bueno hidden when 0 %.
 - Staff canvas: `208 px` high, `6.0 px` per diatonic step; the recording bar overlays the analysis area; keyboard is `110 px` high with a dark-red `2 px` strip above the keys; sung pitch is drawn at its real height via `voiceTestStepFloat`.
-- Cache keys: HTML loads `styles.css?v=58` and `app.js?v=69`; `APP_VERSION` is `v1.0.0052`.
+- Cache keys: HTML loads `styles.css?v=59` and `app.js?v=70`; `APP_VERSION` is `v1.0.0053`.
 
 ## 11. Cumulative Statistics View (`#view-stats`, `trino_stats_v1`)
-- Opened via `"Ver estadística"` in the top menu drawer (`#menu-drawer`).
+- Opened via `"Ver estadística"` in the top menu drawer (`#menu-drawer`). Zero values render as `-` (`formatStatCell`).
 - Stores cumulative browser statistics in `trino_stats_v1` (`m1Abs`, `m1ByNote`, `m2Notes`, `m4Notes`):
   - **Module 1 — Intervalos absolutos:** Lists all 13 intervals (`1J..8J`) in ascending order regardless of whether they have data (`Intervalo | Buenas | Fallidas`).
   - **Module 1 — Intervalos por nota:** Lists only recorded tonic+target pairs (`good + bad > 0`), sorted first by interval order (`1J..8J`) and then by tonic MIDI ascending (`Notas | Intervalo | Buenas | Fallidas`).
