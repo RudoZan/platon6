@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.0.0064';
+const APP_VERSION = 'v1.0.0065';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -5947,6 +5947,7 @@ class TrinoShell {
       recToken: 0,
       recording: false,
       startTimer: null,
+      randomTimer: null,
       tickTimer: null,
       scrollInitDone: false,
     };
@@ -6110,6 +6111,10 @@ class TrinoShell {
     const vt = this.voiceTest;
     if (!vt) return;
     vt.pressId += 1;
+    if (vt.randomTimer) {
+      clearTimeout(vt.randomTimer);
+      vt.randomTimer = null;
+    }
     this.stopVoiceTestRecording();
     this.stopVoiceTestTone();
     vt.activeKey?.classList.remove('active');
@@ -6169,6 +6174,10 @@ class TrinoShell {
 
   async voiceTestPress(midi, keyEl) {
     const vt = this.voiceTest;
+    if (vt.randomTimer) {
+      clearTimeout(vt.randomTimer);
+      vt.randomTimer = null;
+    }
     this.stopVoiceTestRecording();
     this.stopVoiceTestTone();
     vt.activeKey?.classList.remove('active');
@@ -6233,6 +6242,49 @@ class TrinoShell {
   releaseActiveVoiceTestKey() {
     const keyEl = this.voiceTest?.activeKey;
     if (keyEl) this.voiceTestRelease(keyEl);
+  }
+
+  ensureVoiceTestKeyVisible(keyEl) {
+    if (!this.vtScroll || !keyEl) return;
+    const keyLeft = keyEl.offsetLeft;
+    const keyWidth = keyEl.offsetWidth || VT_WHITE_KEY_W;
+    const keyRight = keyLeft + keyWidth;
+    const viewLeft = this.vtScroll.scrollLeft;
+    const viewWidth = this.vtScroll.clientWidth;
+    const viewRight = viewLeft + viewWidth;
+    const pad = 8;
+
+    if (keyLeft >= viewLeft + pad && keyRight <= viewRight - pad) {
+      return;
+    }
+    let nextScroll = viewLeft;
+    if (keyLeft < viewLeft + pad) {
+      nextScroll = Math.max(0, keyLeft - VT_WHITE_KEY_W);
+    } else if (keyRight > viewRight - pad) {
+      nextScroll = Math.max(0, keyRight - viewWidth + VT_WHITE_KEY_W);
+    }
+    this.vtScroll.scrollTo({ left: nextScroll, behavior: 'smooth' });
+  }
+
+  async playRandomVoiceTestNote() {
+    const vt = this.voiceTest;
+    if (!vt || !this.vtKeyboard) return;
+
+    const minM = Math.max(VOICE_TEST_MIN_MIDI, Math.min(VOICE_TEST_MAX_MIDI, this.vocalMinMidi ?? 48));
+    const maxM = Math.max(minM, Math.min(VOICE_TEST_MAX_MIDI, this.vocalMaxMidi ?? 72));
+    const midi = minM + Math.floor(Math.random() * (maxM - minM + 1));
+    const keyEl = this.vtKeyboard.querySelector(`.vt-key[data-midi="${midi}"]`);
+    if (!keyEl) return;
+
+    this.ensureVoiceTestKeyVisible(keyEl);
+    await this.voiceTestPress(midi, keyEl);
+    const currentPressId = vt.pressId;
+    vt.randomTimer = setTimeout(() => {
+      vt.randomTimer = null;
+      if (vt.pressId === currentPressId && vt.activeKey === keyEl) {
+        this.voiceTestRelease(keyEl);
+      }
+    }, 1000);
   }
 
   async startVoiceTestRecording(midi, token) {
@@ -6712,6 +6764,22 @@ class TrinoShell {
           this.generateNextQuestion();
         }
         this.schedulePlayAfterOneSecond();
+      });
+      return;
+    }
+
+    if (viewKey === 'voice-test') {
+      this.bottomZone.innerHTML = `
+        <button type="button" class="cmd-btn" data-cmd-nav="home">← Volver al Inicio</button>
+        <button type="button" class="cmd-btn cmd-btn-primary" id="cmd-vt-random-note">Nota al azar</button>
+      `;
+      this.bottomZone.querySelectorAll('[data-cmd-nav]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          this.navigateTo(btn.getAttribute('data-cmd-nav'));
+        });
+      });
+      document.getElementById('cmd-vt-random-note')?.addEventListener('click', () => {
+        this.playRandomVoiceTestNote();
       });
       return;
     }
