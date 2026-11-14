@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Trino</title>
-  <link rel="stylesheet" href="./css/styles.css?v=66" />
+  <link rel="stylesheet" href="./css/styles.css?v=68" />
 </head>
 
 <body>
@@ -15,7 +15,7 @@
       <div class="app-brand" id="brand-home-btn" title="Ir al inicio">
         <div class="app-logo-dot">🎵</div>
         <span class="app-name">Trino</span>
-        <span class="app-version" id="app-version-badge">v1.0.0066</span>
+        <span class="app-version" id="app-version-badge">v1.2.0006</span>
       </div>
 
       <button type="button" class="menu-btn" id="menu-toggle-btn" aria-label="Abrir menú">
@@ -54,8 +54,7 @@
           <h1 class="welcome-title" id="home-greeting-title">¡Bienvenido a Trino!</h1>
           <div id="home-guest-box" class="auth-home-box">
             <p class="welcome-text">
-              Practica con Trino, entrena tu oído y tu voz, y mejora con ejercicios progresivos diseñados para cada
-              nivel.
+              Practica con Trino, entrena tu oído y tu voz, y mejora con ejercicios progresivos diseñados para cada nivel.
             </p>
           </div>
           <div id="home-user-box" class="auth-home-box hidden">
@@ -103,6 +102,24 @@
             </div>
             <p class="module-desc">Toca una nota en el teclado, cántala y analiza tu afinación.</p>
           </button>
+
+          <button type="button" class="module-card" data-open-module="scales">
+            <div class="module-icon icon-scales">🎼</div>
+            <div class="module-info">
+              <span class="module-tag" data-module-progress="scales">MÓDULO 5 - Hoy 0/100</span>
+              <h2 class="module-title">Reconocer Escalas</h2>
+            </div>
+            <p class="module-desc">Escucha una escala completa e identifica su modo o estructura tonal.</p>
+          </button>
+
+          <button type="button" class="module-card" data-open-module="sing-scales">
+            <div class="module-icon icon-singscales">🎶</div>
+            <div class="module-info">
+              <span class="module-tag">MÓDULO 6</span>
+              <h2 class="module-title">Cantar Escalas</h2>
+            </div>
+            <p class="module-desc">Vocaliza escalas y patrones guiados en tu rango vocal al ritmo del metrónomo.</p>
+          </button>
         </div>
       </section>
 
@@ -122,8 +139,7 @@
         <div class="exercise-header-card">
           <div class="exercise-title-row">
             <span class="exercise-level-name" id="ex-level-title">Nivel 1</span>
-            <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel"
-              title="Ver información del nivel">i</button>
+            <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel" title="Ver información del nivel">i</button>
           </div>
         </div>
 
@@ -167,8 +183,7 @@
         <div class="exercise-header-card">
           <div class="exercise-title-row">
             <span class="exercise-level-name" id="sing-level-title">Nivel 1</span>
-            <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel"
-              title="Ver información del nivel">i</button>
+            <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel" title="Ver información del nivel">i</button>
           </div>
         </div>
 
@@ -209,12 +224,14 @@
         <div class="exercise-header-card">
           <div class="exercise-title-row">
             <span class="exercise-level-name" id="chord-level-title">Díadas I</span>
-            <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel"
-              title="Ver información del nivel">i</button>
+            <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel" title="Ver información del nivel">i</button>
           </div>
         </div>
         <p class="exercise-prompt" id="chord-prompt-text">Escucha el acorde e identifica su tipo.</p>
-        <div class="answers-grid hidden" id="chord-answers-container"></div>
+        <div class="ex-time-bar-track" id="chord-time-bar-track" aria-hidden="true">
+          <div class="ex-time-bar-fill" id="chord-time-bar-fill"></div>
+        </div>
+        <div class="answers-grid" id="chord-answers-container"></div>
         <div class="session-log-wrapper hidden" id="chord-session-log-wrapper">
           <table class="session-log-table" aria-label="Historial de reconocer acordes">
             <tbody id="chord-session-log-tbody"></tbody>
@@ -226,31 +243,28 @@
       <section id="view-voice-test" class="hidden">
         <div class="levels-header vt-header">
           <h2 class="welcome-title">Módulo 4 · Prueba de voz</h2>
-          <button type="button" class="level-info-btn" id="vt-info-button" aria-label="Información del Módulo 4"
-            title="Información del módulo">i</button>
+          <button type="button" class="level-info-btn" id="vt-info-button" aria-label="Información del Módulo 4" title="Información del módulo">i</button>
         </div>
 
         <div class="voice-staff-box">
           <canvas id="voice-test-canvas" width="440" height="208"></canvas>
         </div>
         <div class="vt-below">
-          <div class="vt-rec-bar" id="vt-rec-bar">
-            <div class="vt-rec-fill" id="vt-rec-fill"></div>
-            <span class="vt-rec-text" id="vt-rec-text">Grabando</span>
-          </div>
-          <div class="vt-analysis" id="voice-test-result" aria-live="polite">
-            <p class="vt-row" id="vt-row-1"></p>
-            <p class="vt-row" id="vt-row-2"></p>
-            <p class="vt-row" id="vt-row-3"></p>
-          </div>
+        <div class="vt-rec-bar" id="vt-rec-bar">
+          <div class="vt-rec-fill" id="vt-rec-fill"></div>
+          <span class="vt-rec-text" id="vt-rec-text">Grabando</span>
+        </div>
+        <div class="vt-analysis" id="voice-test-result" aria-live="polite">
+          <p class="vt-row" id="vt-row-1"></p>
+          <p class="vt-row" id="vt-row-2"></p>
+          <p class="vt-row" id="vt-row-3"></p>
+        </div>
         </div>
 
         <div class="vt-keyboard-bar">
-          <button type="button" class="vt-scroll-btn" id="vt-scroll-left"
-            aria-label="Desplazar teclado a la izquierda">◀</button>
+          <button type="button" class="vt-scroll-btn" id="vt-scroll-left" aria-label="Desplazar teclado a la izquierda">◀</button>
           <span class="vt-range-label" id="vt-range-label"></span>
-          <button type="button" class="vt-scroll-btn" id="vt-scroll-right"
-            aria-label="Desplazar teclado a la derecha">▶</button>
+          <button type="button" class="vt-scroll-btn" id="vt-scroll-right" aria-label="Desplazar teclado a la derecha">▶</button>
         </div>
         <div class="vt-keyboard-scroll" id="vt-keyboard-scroll">
           <div class="vt-keyboard" id="vt-keyboard"></div>
@@ -263,13 +277,77 @@
         </div>
       </section>
 
+      <!-- VISTA: MÓDULO 5 (Reconocer Escalas — Listado de Niveles) -->
+      <section id="view-scales" class="hidden">
+        <div class="levels-header">
+          <h2 class="welcome-title">Módulo 5 - Reconocer Escalas</h2>
+        </div>
+        <div class="levels-list" id="scales-levels-list"></div>
+      </section>
+
+      <!-- VISTA: EJERCICIO ACTIVO DE ESCALAS -->
+      <section id="view-scale-exercise" class="hidden">
+        <div class="exercise-header-card">
+          <div class="exercise-title-row">
+            <span class="exercise-level-name" id="scale-level-title">Nivel 1</span>
+            <button type="button" class="level-info-btn" data-active-level-info aria-label="Información del nivel"
+              title="Ver información del nivel">i</button>
+          </div>
+        </div>
+        <p class="exercise-prompt" id="scale-prompt-text">
+          Escucha la escala y marca la respuesta correcta entre las opciones
+        </p>
+        <div class="ex-time-bar-track" id="scale-time-bar-track" aria-hidden="true">
+          <div class="ex-time-bar-fill" id="scale-time-bar-fill"></div>
+        </div>
+        <div class="answers-grid" id="scale-answers-container"></div>
+        <div class="session-log-wrapper hidden" id="scale-session-log-wrapper">
+          <table class="session-log-table" aria-label="Historial de reconocer escalas">
+            <tbody id="scale-session-log-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VISTA: MÓDULO 6 (Cantar Escalas — Listado de Escalas) -->
+      <section id="view-sing-scales" class="hidden">
+        <div class="levels-header">
+          <h2 class="welcome-title">Módulo 6 - Cantar Escalas</h2>
+        </div>
+        <div class="levels-list" id="sing-scales-levels-list"></div>
+      </section>
+
+      <!-- VISTA: EJERCICIO ACTIVO DE CANTAR ESCALAS -->
+      <section id="view-sing-scale-exercise" class="hidden">
+        <div class="exercise-header-card">
+          <div class="exercise-title-row">
+            <span class="exercise-level-name" id="sing-scale-level-title">1 · Tríadas</span>
+            <button type="button" class="level-info-btn" data-active-level-info aria-label="Configuración de la escala"
+              title="Configuración de la escala">i</button>
+          </div>
+        </div>
+
+        <p class="exercise-prompt" id="sing-scale-prompt-text">
+          Pulsa Comenzar para escuchar y vocalizar la escala dentro de tu rango vocal
+        </p>
+
+        <div class="sing-scale-meta-bar" id="sing-scale-meta-bar">
+          <span id="sing-scale-step-label">Tónica inicial</span>
+          <span id="sing-scale-range-badge">Rango vocal</span>
+        </div>
+
+        <div class="staff-canvas-box" id="sing-scale-staff-box">
+          <canvas id="sing-scale-staff-canvas" width="440" height="235"></canvas>
+        </div>
+
+        <div class="sing-scale-notes-strip" id="sing-scale-notes-strip" aria-live="polite"></div>
+      </section>
+
       <!-- VISTA: CONFIGURACIÓN -->
       <section id="view-settings" class="hidden">
         <div class="view-placeholder settings-panel">
           <div class="settings-header">
             <h2 class="welcome-title">Configuración</h2>
-            <button type="button" class="settings-close-btn" data-target="home" aria-label="Cerrar configuración"
-              title="Cerrar configuración">×</button>
+            <button type="button" class="settings-close-btn" data-target="home" aria-label="Cerrar configuración" title="Cerrar configuración">×</button>
           </div>
 
           <!-- 1. Meta diaria -->
@@ -279,40 +357,35 @@
               <span class="settings-label">Metas independientes por tipo de ejercicio</span>
               <div class="daily-goal-settings-grid">
                 <div class="daily-goal-setting">
-                  <span class="daily-goal-setting-label" id="daily-intervals-min-label">Reconocimiento de
-                    intervalos</span>
-                  <div class="settings-inline-row daily-goal-stepper" role="group"
-                    aria-labelledby="daily-intervals-min-label">
-                    <button type="button" class="bpm-step-btn" id="daily-intervals-min-decrease"
-                      aria-label="Reducir meta de intervalos">−</button>
-                    <output class="settings-val-badge" id="daily-intervals-min-value" aria-live="polite">100
-                      diarios</output>
-                    <button type="button" class="bpm-step-btn" id="daily-intervals-min-increase"
-                      aria-label="Aumentar meta de intervalos">+</button>
+                  <span class="daily-goal-setting-label" id="daily-intervals-min-label">Reconocimiento de intervalos</span>
+                  <div class="settings-inline-row daily-goal-stepper" role="group" aria-labelledby="daily-intervals-min-label">
+                    <button type="button" class="bpm-step-btn" id="daily-intervals-min-decrease" aria-label="Reducir meta de intervalos">−</button>
+                    <output class="settings-val-badge" id="daily-intervals-min-value" aria-live="polite">100 diarios</output>
+                    <button type="button" class="bpm-step-btn" id="daily-intervals-min-increase" aria-label="Aumentar meta de intervalos">+</button>
                   </div>
                 </div>
                 <div class="daily-goal-setting">
                   <span class="daily-goal-setting-label" id="daily-singing-min-label">Cantar notas</span>
-                  <div class="settings-inline-row daily-goal-stepper" role="group"
-                    aria-labelledby="daily-singing-min-label">
-                    <button type="button" class="bpm-step-btn" id="daily-singing-min-decrease"
-                      aria-label="Reducir meta de canto">−</button>
-                    <output class="settings-val-badge" id="daily-singing-min-value" aria-live="polite">100
-                      diarios</output>
-                    <button type="button" class="bpm-step-btn" id="daily-singing-min-increase"
-                      aria-label="Aumentar meta de canto">+</button>
+                  <div class="settings-inline-row daily-goal-stepper" role="group" aria-labelledby="daily-singing-min-label">
+                    <button type="button" class="bpm-step-btn" id="daily-singing-min-decrease" aria-label="Reducir meta de canto">−</button>
+                    <output class="settings-val-badge" id="daily-singing-min-value" aria-live="polite">100 diarios</output>
+                    <button type="button" class="bpm-step-btn" id="daily-singing-min-increase" aria-label="Aumentar meta de canto">+</button>
                   </div>
                 </div>
                 <div class="daily-goal-setting">
                   <span class="daily-goal-setting-label" id="daily-chords-min-label">Reconocer Acordes</span>
-                  <div class="settings-inline-row daily-goal-stepper" role="group"
-                    aria-labelledby="daily-chords-min-label">
-                    <button type="button" class="bpm-step-btn" id="daily-chords-min-decrease"
-                      aria-label="Reducir meta de acordes">−</button>
-                    <output class="settings-val-badge" id="daily-chords-min-value" aria-live="polite">100
-                      diarios</output>
-                    <button type="button" class="bpm-step-btn" id="daily-chords-min-increase"
-                      aria-label="Aumentar meta de acordes">+</button>
+                  <div class="settings-inline-row daily-goal-stepper" role="group" aria-labelledby="daily-chords-min-label">
+                    <button type="button" class="bpm-step-btn" id="daily-chords-min-decrease" aria-label="Reducir meta de acordes">−</button>
+                    <output class="settings-val-badge" id="daily-chords-min-value" aria-live="polite">100 diarios</output>
+                    <button type="button" class="bpm-step-btn" id="daily-chords-min-increase" aria-label="Aumentar meta de acordes">+</button>
+                  </div>
+                </div>
+                <div class="daily-goal-setting">
+                  <span class="daily-goal-setting-label" id="daily-scales-min-label">Reconocer Escalas</span>
+                  <div class="settings-inline-row daily-goal-stepper" role="group" aria-labelledby="daily-scales-min-label">
+                    <button type="button" class="bpm-step-btn" id="daily-scales-min-decrease" aria-label="Reducir meta de escalas">−</button>
+                    <output class="settings-val-badge" id="daily-scales-min-value" aria-live="polite">100 diarios</output>
+                    <button type="button" class="bpm-step-btn" id="daily-scales-min-increase" aria-label="Aumentar meta de escalas">+</button>
                   </div>
                 </div>
               </div>
@@ -340,8 +413,7 @@
                 <select id="vocal-min-select" class="settings-select"></select>
                 <div class="vocal-range-actions">
                   <button type="button" class="settings-test-btn" id="btn-detect-vocal-min"
-                    title="Cantar tu nota más grave para detectarla"
-                    aria-label="Detectar nota más grave con el micrófono">🎙️</button>
+                    title="Cantar tu nota más grave para detectarla" aria-label="Detectar nota más grave con el micrófono">🎙️</button>
                   <button type="button" class="settings-test-btn" id="btn-test-vocal-min"
                     title="Escuchar nota más grave" aria-label="Escuchar nota más grave">🔊</button>
                 </div>
@@ -352,8 +424,7 @@
                 <select id="vocal-max-select" class="settings-select"></select>
                 <div class="vocal-range-actions">
                   <button type="button" class="settings-test-btn" id="btn-detect-vocal-max"
-                    title="Cantar tu nota más aguda para detectarla"
-                    aria-label="Detectar nota más aguda con el micrófono">🎙️</button>
+                    title="Cantar tu nota más aguda para detectarla" aria-label="Detectar nota más aguda con el micrófono">🎙️</button>
                   <button type="button" class="settings-test-btn" id="btn-test-vocal-max"
                     title="Escuchar nota más aguda" aria-label="Escuchar nota más aguda">🔊</button>
                 </div>
@@ -368,8 +439,7 @@
               <input type="checkbox" id="rectify-vibrato-input" />
               <span>Aplicar rectificación de vibrato al calificar</span>
             </label>
-            <p class="settings-hint">Ajusta el efecto del vibrato según la regularidad de sus ciclos para calificar la
-              afinación.</p>
+            <p class="settings-hint">Ajusta el efecto del vibrato según la regularidad de sus ciclos para calificar la afinación.</p>
           </div>
 
           <!-- 3. Probador de Micrófono en vivo -->
@@ -446,8 +516,7 @@
         <div class="welcome-box settings-panel">
           <div class="settings-header">
             <h1 class="welcome-title" id="stats-main-title">Estadística</h1>
-            <button type="button" class="settings-close-btn" id="btn-stats-close" aria-label="Cerrar estadística"
-              title="Cerrar estadística">×</button>
+            <button type="button" class="settings-close-btn" id="btn-stats-close" aria-label="Cerrar estadística" title="Cerrar estadística">×</button>
           </div>
 
           <div class="stats-select-wrap">
@@ -455,7 +524,11 @@
               <option value="m1-abs">Módulo 1 - Intervalos absolutos</option>
               <option value="m1-notes">Módulo 1 - Intervalos por notas</option>
               <option value="m2-notes">Módulo 2 - Canto por notas</option>
+              <option value="m3-abs">Módulo 3 - Acordes absolutos</option>
+              <option value="m3-notes">Módulo 3 - Acordes por notas</option>
               <option value="m4-notes">Módulo 4 - Canto por notas</option>
+              <option value="m5-abs">Módulo 5 - Escalas absolutas</option>
+              <option value="m5-notes">Módulo 5 - Escalas por tónica</option>
             </select>
           </div>
 
@@ -487,8 +560,7 @@
       </div>
     </div>
 
-    <div class="start-modal-overlay hidden" id="account-unavailable-modal" role="dialog" aria-modal="true"
-      aria-labelledby="account-unavailable-title">
+    <div class="start-modal-overlay hidden" id="account-unavailable-modal" role="dialog" aria-modal="true" aria-labelledby="account-unavailable-title">
       <div class="start-modal-card account-unavailable-card">
         <span class="account-unavailable-icon" aria-hidden="true">i</span>
         <h3 class="level-info-modal-title" id="account-unavailable-title">Activación no disponible</h3>
@@ -508,8 +580,7 @@
         <div class="level-info-modal-body hidden" id="vt-module-info">
           <div class="level-info-section">
             <span class="level-info-label">Prueba de voz</span>
-            <p class="level-info-value">Elige una nota en el teclado y cántala. Trino muestra la nota detectada, su
-              centro tonal y la estabilidad de la voz.</p>
+            <p class="level-info-value">Elige una nota en el teclado y cántala. Trino muestra la nota detectada, su centro tonal y la estabilidad de la voz.</p>
           </div>
           <div class="level-info-section">
             <span class="level-info-label">Configuración del módulo</span>
@@ -646,7 +717,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="./js/app.js?v=83"></script>
+  <script src="./js/app.js?v=90"></script>
 </body>
 
 </html>

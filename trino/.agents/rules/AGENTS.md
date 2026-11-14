@@ -17,6 +17,8 @@ Deferred/batch singing pitch analyzer (`8s` recording -> `< 1–3s` $f_0$ analys
 - The delivered static app also includes Module 1 interval recognition, Module 2 singing practice, and Module 3 chord recognition. `index.html`, `css/styles.css`, and `js/app.js` are the active files; the separate audio-capture/worker/backend files above remain planned, not present in the current app.
 - Module 3's 16 levels, simultaneous chord playback, answer evaluation, daily log, progress, and `dailyChordsMin` setting are implemented in `js/app.js` and `index.html`.
 - Module 4 (Prueba de voz) is a single keyboard screen with its own recording and single-note analysis; its logic lives in the `initVoiceTest`/`voiceTest*` methods of `js/app.js` and is documented in `TECHNICAL_SPEC.md` §10.
+- Module 5 (Reconocer escalas) includes Nivel Progresivo + 14 levels of major, minor, pentatonic, blues, and Greek mode scales with time-limit and auto-advance settings in `js/app.js` and `index.html`.
+- Module 6 (Cantar escalas) includes 8 vocalise/scale patterns (Tríadas, Tríadas con Octava, Pedal de Tónica, Escalera Acumulativa, Escala Mayor, Escala Menor, Hanon 1, Hanon 2) constrained to the user's vocal range, with BPM control and real-time note highlighting on the Grand Staff.
 
 ## Doc Index (Read on demand only)
 - **Living State (`platon6/sitio-web/trino/.agents/`):**
@@ -26,8 +28,11 @@ Deferred/batch singing pitch analyzer (`8s` recording -> `< 1–3s` $f_0$ analys
   - [ENVIRONMENTS.md](../ENVIRONMENTS.md) & [REGRESSION_TESTS.md](../REGRESSION_TESTS.md).
 - **External Docs (`platon6/docs/trino/`):**
   - [PRD_VISION.md](../../../../docs/trino/PRD_VISION.md), [PRD_SPECS.md](../../../../docs/trino/PRD_SPECS.md), [SOLUTION_DESIGN.md](../../../../docs/trino/SOLUTION_DESIGN.md), [DEVELOPMENT_PLAN.md](../../../../docs/trino/DEVELOPMENT_PLAN.md), [CHANGELOG.md](../../../../docs/trino/CHANGELOG.md).
+  - `platon6/docs/trino/changes/YYYY-MM-DD_<version>.md`: Individual per-change notes.
 
 ## Critical Rules
 1. **Raw audio for singing:** Always set `echoCancellation: false`, `noiseSuppression: false`, `autoGainControl: false` in `getUserMedia`.
 2. **Silent fallback:** When `http://127.0.0.1:8000/health` times out (`400ms`) or fails on GitHub Pages, hide/disable the Python engine selector without console/UI errors.
 3. **Unified contract:** Both Engine 1 (Web Worker) and Engine 2 (FastAPI) MUST output the identical `AnalysisResult` JSON structure.
+4. **Versioning (`v1.X.NNNN`):** On normal changes, increment `NNNN` (`v1.1.0002`). When adding a major change (new module or new section), increment `X` and reset the counter to `0001` (`v1.1.0001`, `v1.2.0001`, etc.).
+5. **Token-saving change notes:** Do NOT read or update `TECHNICAL_SPEC.md`, `USE_CASES.md`, `DEVELOPMENT_PLAN.md`, or `CHANGELOG.md` on routine changes unless explicitly requested to consolidate. Instead, record each change in a new standalone file `platon6/docs/trino/changes/YYYY-MM-DD_<version>.md` without reading previous change files.
