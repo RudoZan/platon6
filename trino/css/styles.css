@@ -369,7 +369,6 @@ body {
   min-width: 0;
   margin: 0;
   font-size: 0.9rem;
-  white-space: nowrap;
 }
 
 .vt-debug-btn {
@@ -655,9 +654,21 @@ body {
 /* Listado de Niveles (Reconocer Intervalos) */
 .levels-header {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 0.75rem;
+}
+
+.levels-header .welcome-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.module-header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.4rem;
 }
 
 .levels-list {
@@ -876,6 +887,7 @@ body {
 .level-info-btn {
   width: 24px;
   height: 24px;
+  flex: 0 0 24px;
   border-radius: 50%;
   border: 1px solid rgba(56, 189, 248, 0.45);
   background: rgba(15, 23, 42, 0.75);
@@ -896,6 +908,10 @@ body {
 
 .level-info-btn:active {
   transform: scale(0.92);
+}
+
+.level-config-btn {
+  font-size: 1rem;
 }
 
 .star-filled {
@@ -929,6 +945,8 @@ body {
 }
 
 .exercise-level-name {
+  flex: 1;
+  min-width: 0;
   font-family: 'Outfit', sans-serif;
   font-size: 0.94rem;
   font-weight: 700;
@@ -1556,6 +1574,38 @@ body {
   border: none;
   accent-color: var(--primary-color);
   cursor: pointer;
+}
+
+.tone-preview-notes,
+.tone-preview-chords {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.tone-preview-notes {
+  grid-template-columns: 1fr 1fr;
+}
+
+.tone-preview-chords {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.tone-preview-btn {
+  min-height: 32px;
+  padding: 0.35rem 0.3rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--frame-bg);
+  color: var(--text-main);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tone-preview-btn:hover {
+  background-color: rgba(99, 102, 241, 0.18);
+  border-color: var(--primary-light);
 }
 
 .settings-test-btn {

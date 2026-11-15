@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.2.0006';
+const APP_VERSION = 'v1.2.0011';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -575,6 +575,12 @@ const MAX_EXERCISES_PER_MODULE = 2000;
 
 const AUTH_NATURAL_NOTES = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
 const AUTH_NOTE_MIDI = { Do: 60, Re: 62, Mi: 64, Fa: 65, Sol: 67, La: 69, Si: 71 };
+const TONE_TIMBRES = {
+  triangle: true,
+  'sine-octave': true,
+  sine: true,
+  'triangle-soft': true,
+};
 
 /**
  * URL de Google Apps Script Web App para enviar el correo con las 3 notas.
@@ -605,6 +611,7 @@ class TrinoShell {
     const vols = this.loadVolumes();
     this.noteVolume = vols.note;
     this.clickVolume = vols.click;
+    this.toneTimbre = this.loadToneTimbre();
     this.rectifyVibratoEnabled = this.loadRectifyVibrato();
     const extraCfg = this.loadModulePopupConfigs();
     this.singNotesCount = extraCfg.singNotesCount;
@@ -734,6 +741,7 @@ class TrinoShell {
     this.micLiveDetail = document.getElementById('mic-live-detail');
     this.isMicTesting = false;
     this.isDetectingVocalLimit = false;
+    this.toneTimbreSelect = document.getElementById('tone-timbre-select');
     this.noteVolumeInput = document.getElementById('note-volume-input');
     this.noteVolumeVal = document.getElementById('note-volume-val');
     this.btnTestNoteVol = document.getElementById('btn-test-note-vol');
@@ -1851,6 +1859,7 @@ class TrinoShell {
       vocalMaxMidi: this.vocalMaxMidi,
       noteVolume: this.noteVolume,
       clickVolume: this.clickVolume,
+      toneTimbre: this.toneTimbre,
       rectifyVibrato: this.rectifyVibratoEnabled,
       singNotesCount: this.singNotesCount,
       singOnlyFirstNote: this.singOnlyFirstNote,
@@ -1928,6 +1937,23 @@ class TrinoShell {
     this.saveAllSettings();
   }
 
+  adjustDailyGoal(moduleType, amount) {
+    const goals = {
+      intervals: this.dailyIntervalsMin,
+      singing: this.dailySingingMin,
+      chords: this.dailyChordsMin,
+      scales: this.dailyScalesMin,
+    };
+    if (!(moduleType in goals)) return;
+    this.saveDailyMin(moduleType, Math.max(10, Math.min(200, goals[moduleType] + amount)));
+    this.syncSettingsUi();
+    this.renderIntervalLevels();
+    this.renderSingingLevels();
+    this.renderChordLevels();
+    this.renderScaleLevels();
+    this.updateHomeModuleProgress();
+  }
+
   loadVocalRange() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
@@ -1957,6 +1983,17 @@ class TrinoShell {
       }
     } catch (_) { }
     return { note: 80, click: 90 };
+  }
+
+  loadToneTimbre() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
+      if (raw) {
+        const id = JSON.parse(raw).toneTimbre;
+        if (TONE_TIMBRES[id]) return id;
+      }
+    } catch (_) { }
+    return 'triangle';
   }
 
   loadRectifyVibrato() {
@@ -2085,6 +2122,7 @@ class TrinoShell {
       this.vocalPresetSelect.value = hasPreset ? pairKey : 'custom';
     }
 
+    if (this.toneTimbreSelect) this.toneTimbreSelect.value = this.toneTimbre || 'triangle';
     if (this.noteVolumeInput) this.noteVolumeInput.value = String(this.noteVolume);
     if (this.noteVolumeVal) this.noteVolumeVal.textContent = `${this.noteVolume}%`;
     if (this.clickVolumeInput) this.clickVolumeInput.value = String(this.clickVolume);
@@ -2119,22 +2157,7 @@ class TrinoShell {
       });
     });
 
-    const adjustDailyGoal = (moduleType, amount) => {
-      const currentGoal = moduleType === 'singing'
-        ? this.dailySingingMin
-        : moduleType === 'chords'
-          ? this.dailyChordsMin
-          : moduleType === 'scales'
-            ? this.dailyScalesMin
-            : this.dailyIntervalsMin;
-      this.saveDailyMin(moduleType, Math.max(10, Math.min(200, currentGoal + amount)));
-      this.syncSettingsUi();
-      this.renderIntervalLevels();
-      this.renderSingingLevels();
-      this.renderChordLevels();
-      this.renderScaleLevels();
-      this.updateHomeModuleProgress();
-    };
+    const adjustDailyGoal = (moduleType, amount) => this.adjustDailyGoal(moduleType, amount);
     this.dailyIntervalsMinDecrease?.addEventListener('click', () => adjustDailyGoal('intervals', -10));
     this.dailyIntervalsMinIncrease?.addEventListener('click', () => adjustDailyGoal('intervals', 10));
     this.dailySingingMinDecrease?.addEventListener('click', () => adjustDailyGoal('singing', -10));
@@ -2220,6 +2243,20 @@ class TrinoShell {
         this.toggleMicTester();
       });
     }
+
+    if (this.toneTimbreSelect) {
+      this.toneTimbreSelect.addEventListener('change', () => {
+        const id = this.toneTimbreSelect.value;
+        this.toneTimbre = TONE_TIMBRES[id] ? id : 'triangle';
+        this.saveAllSettings();
+      });
+    }
+
+    document.querySelectorAll('[data-tone-preview]').forEach((button) => {
+      button.addEventListener('click', () => {
+        this.playSoundPreview(button.getAttribute('data-tone-preview'));
+      });
+    });
 
     if (this.noteVolumeInput) {
       this.noteVolumeInput.addEventListener('input', () => {
@@ -2363,6 +2400,19 @@ class TrinoShell {
         if (this.activeLevel && this.activeModule) {
           this.openLevelInfoModal(this.activeLevel, this.activeModule);
         }
+      });
+    });
+    document.querySelectorAll('[data-active-level-config]').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (this.activeLevel && this.activeModule) {
+          this.openLevelInfoModal(this.activeLevel, this.activeModule, true);
+        }
+      });
+    });
+    document.querySelectorAll('[data-module-info], [data-module-config]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const showConfig = button.hasAttribute('data-module-config');
+        this.openModuleInfoModal(button.getAttribute(showConfig ? 'data-module-config' : 'data-module-info'), showConfig);
       });
     });
 
@@ -2791,6 +2841,7 @@ class TrinoShell {
     }
     if (cfg.noteVolume >= 10 && cfg.noteVolume <= 100) this.noteVolume = cfg.noteVolume;
     if (cfg.clickVolume >= 10 && cfg.clickVolume <= 100) this.clickVolume = cfg.clickVolume;
+    if (TONE_TIMBRES[cfg.toneTimbre]) this.toneTimbre = cfg.toneTimbre;
     if (typeof cfg.rectifyVibrato === 'boolean') this.rectifyVibratoEnabled = cfg.rectifyVibrato;
     if (cfg.singNotesCount >= 1 && cfg.singNotesCount <= 4) this.singNotesCount = cfg.singNotesCount;
     if (typeof cfg.singOnlyFirstNote === 'boolean') this.singOnlyFirstNote = cfg.singOnlyFirstNote;
@@ -3065,8 +3116,10 @@ class TrinoShell {
       // 3 · Pedal de Tónica: subiendo desde tónica, bajando desde la octava
       const upPat = [0, 2, 0, 4, 0, 5, 0, 7, 0, 9, 0, 11, 0, 12];
       const downPat = [12, 11, 12, 9, 12, 7, 12, 5, 12, 4, 12, 2, 12, 0];
-      upRoots.forEach((r) => addPass(r, 'up', upPat));
-      downRoots.forEach((r) => addPass(r, 'down', downPat));
+      [...upRoots, ...downRoots.slice(1)].forEach((r) => {
+        addPass(r, 'up', upPat);
+        addPass(r, 'down', downPat);
+      });
     } else if (level.id === 4) {
       // 4 · Escalera Acumulativa: sub-frases acumulativas subiendo desde tónica y bajando desde la octava
       const upSteps = [
@@ -3399,7 +3452,7 @@ class TrinoShell {
     this.scheduleCurrentSingScalePass();
   }
 
-  scheduleCurrentSingScalePass() {
+  scheduleCurrentSingScalePass(continueFromPrevious = false) {
     if (!this.singScaleState?.playing) return;
     const passes = this.singScaleState.passes || [];
     const pass = passes[this.singScaleState.passIdx];
@@ -3413,8 +3466,11 @@ class TrinoShell {
     const beatSec = 60 / Math.max(40, Math.min(220, this.singScaleBpm || 110));
     const noteDur = Math.max(0.14, beatSec * 0.90);
     const levelId = this.activeLevel?.id || 1;
-    const hasRefTone = levelId >= 1 && levelId <= 6;
-    const scaleStartOffsetSec = hasRefTone ? 0.08 + beatSec * 1.35 : 0.08;
+    const nextPass = passes[this.singScaleState.passIdx + 1];
+    const continuesToNext = levelId === 3 && pass.direction === 'up' &&
+      nextPass?.direction === 'down' && nextPass.rootMidi === pass.rootMidi;
+    const hasRefTone = levelId >= 1 && levelId <= 6 && !continueFromPrevious;
+    const scaleStartOffsetSec = continueFromPrevious ? beatSec : hasRefTone ? 0.08 + beatSec * 1.35 : 0.08;
 
     // En las escalas 1 a 6, sonar una vez antes la primera nota como tono de referencia (sin duplicarla en el pentagrama)
     if (hasRefTone) {
@@ -3429,28 +3485,30 @@ class TrinoShell {
     }
 
     pass.midis.forEach((midi, idx) => {
+      if (continueFromPrevious && idx === 0) return;
       const hz = 440 * Math.pow(2, (midi - 69) / 12);
       const isLast = idx === pass.midis.length - 1;
-      const dur = !hasRefTone ? noteDur : isLast ? Math.max(noteDur, beatSec * 1.35) : noteDur;
+      const dur = isLast && !continuesToNext && levelId >= 1 && levelId <= 6
+        ? Math.max(noteDur, beatSec * 1.35) : noteDur;
 
       const timerId = setTimeout(() => {
         if (!this.singScaleState?.playing) return;
         this.playTone(hz, this.audioCtx.currentTime, dur);
         this.singScaleState.noteIdx = idx;
         this.renderSingScalePassUi();
-      }, Math.round((scaleStartOffsetSec + idx * beatSec) * 1000));
+      }, Math.round((scaleStartOffsetSec + (idx - (continueFromPrevious ? 1 : 0)) * beatSec) * 1000));
       this.singScaleState.timers.push(timerId);
     });
 
-    const tailPauseSec = hasRefTone ? beatSec * 0.65 : 0;
-    const totalPassSec = scaleStartOffsetSec + pass.midis.length * beatSec + tailPauseSec;
+    const tailPauseSec = levelId >= 1 && levelId <= 6 && !continuesToNext ? beatSec * 0.65 : 0;
+    const totalPassSec = scaleStartOffsetSec + (pass.midis.length - (continueFromPrevious ? 1 : 0)) * beatSec + tailPauseSec;
     const nextPassTimer = setTimeout(() => {
       if (!this.singScaleState?.playing) return;
       if (this.singScaleState.passIdx + 1 < passes.length) {
         this.singScaleState.passIdx += 1;
         this.singScaleState.noteIdx = -1;
         this.renderSingScalePassUi();
-        this.scheduleCurrentSingScalePass();
+        this.scheduleCurrentSingScalePass(continuesToNext);
       } else {
         this.stopSingScalePlayback(true);
         this.singScaleState.passIdx = 0;
@@ -3994,7 +4052,42 @@ class TrinoShell {
     return `${this.midiToNoteNameEs(rounded)}${octave}`;
   }
 
-  openLevelInfoModal(lvl, moduleType) {
+  openModuleInfoModal(moduleType, showConfig = false) {
+    const modules = {
+      intervals: ['Módulo 1 · Reconocer Intervalos', 'Escucha dos notas e identifica el intervalo que las separa.'],
+      singing: ['Módulo 2 · Cantar Notas', 'Escucha las notas del primer compás y cántalas en el segundo para evaluar tu afinación.'],
+      chords: ['Módulo 3 · Reconocer Acordes', 'Escucha las notas e identifica el tipo de acorde o díada.'],
+      'voice-test': ['Módulo 4 · Prueba de voz', 'Elige una nota en el teclado y cántala. Trino muestra la nota detectada, su centro tonal y la estabilidad de la voz.'],
+      scales: ['Módulo 5 · Reconocer Escalas', 'Escucha una escala e identifica su modo o estructura tonal.'],
+      'sing-scales': ['Módulo 6 · Cantar Escalas', 'Vocaliza escalas y patrones guiados dentro de tu rango vocal.'],
+    };
+    const module = modules[moduleType];
+    if (!module || !this.levelInfoModal) return;
+    if (moduleType === 'voice-test') {
+      if (this.levelInfoModalModule) this.levelInfoModalModule.textContent = module[0];
+      if (this.levelInfoModalTitle) this.levelInfoModalTitle.textContent = showConfig ? 'Configuración' : 'Información';
+      this.levelInfoModalBody?.classList.add('hidden');
+      this.voiceTestInfoBody?.classList.remove('hidden');
+      document.getElementById('vt-info-section')?.classList.toggle('hidden', showConfig);
+      document.getElementById('vt-config-section')?.classList.toggle('hidden', !showConfig);
+      this.levelInfoModal.classList.remove('hidden');
+      return;
+    }
+    if (showConfig) {
+      this.openLevelInfoModal({ title: '' }, moduleType, true);
+      return;
+    }
+    if (this.levelInfoModalModule) this.levelInfoModalModule.textContent = module[0];
+    if (this.levelInfoModalTitle) this.levelInfoModalTitle.textContent = 'Información';
+    this.voiceTestInfoBody?.classList.add('hidden');
+    this.levelInfoModalBody?.classList.remove('hidden');
+    if (this.levelInfoModalBody) {
+      this.levelInfoModalBody.innerHTML = `<div class="level-info-section"><p class="level-info-value">${module[1]}</p></div>`;
+    }
+    this.levelInfoModal.classList.remove('hidden');
+  }
+
+  openLevelInfoModal(lvl, moduleType, showConfig = false) {
     if (!this.levelInfoModal) return;
 
     this.levelInfoModalBody?.classList.remove('hidden');
@@ -4011,7 +4104,7 @@ class TrinoShell {
     if (this.levelInfoModalModule) this.levelInfoModalModule.textContent = moduleLabel;
     if (this.levelInfoModalTitle) {
       const subId = moduleType === 'scales' ? this.scaleProgressiveSubLevelId : this.progressiveSubLevelId;
-      this.levelInfoModalTitle.textContent = lvl.isProgressive
+      this.levelInfoModalTitle.textContent = showConfig ? 'Configuración' : lvl.isProgressive
         ? `${lvl.title} - (N${subId})`
         : lvl.title;
     }
@@ -4021,7 +4114,7 @@ class TrinoShell {
       const maxMidi = Math.max(this.vocalMinMidi, this.vocalMaxMidi);
       const currBpm = Math.max(40, Math.min(220, this.singScaleBpm || 100));
       if (this.levelInfoModalBody) {
-        this.levelInfoModalBody.innerHTML = `
+        this.levelInfoModalBody.innerHTML = showConfig ? `
           <div class="level-info-section">
             <span class="level-info-label">Configuración del módulo (BPM)</span>
             <div class="level-info-config-group">
@@ -4031,6 +4124,7 @@ class TrinoShell {
               </div>
             </div>
           </div>
+        ` : `
           <div class="level-info-section">
             <span class="level-info-label">Patrón de la escala</span>
             <p class="level-info-value"><strong>${lvl.subtitle || ''}</strong> — ${lvl.desc || ''}</p>
@@ -4066,6 +4160,10 @@ class TrinoShell {
         <div class="level-info-section">
           <span class="level-info-label">Configuración del módulo</span>
           <div class="level-info-config-group">
+            <div class="level-info-config-field">
+              <label for="modal-sing-bpm-input">Velocidad (40–140 BPM)</label>
+              <input type="number" id="modal-sing-bpm-input" class="settings-select" min="40" max="140" step="1" value="${this.singBpm}" />
+            </div>
             <div class="level-info-config-field">
               <label for="modal-sing-notes-count">Notas que se tocarán en el compás</label>
               <select id="modal-sing-notes-count" class="settings-select">
@@ -4136,6 +4234,29 @@ class TrinoShell {
       `;
     }
 
+    if (showConfig) {
+      const goals = {
+        intervals: this.dailyIntervalsMin,
+        singing: this.dailySingingMin,
+        chords: this.dailyChordsMin,
+        scales: this.dailyScalesMin,
+      };
+      const goal = goals[moduleType];
+      const goalHtml = goal === undefined ? '' : `
+        <div class="level-info-section">
+          <span class="level-info-label" id="modal-daily-goal-label">Meta diaria</span>
+          <div class="settings-inline-row daily-goal-stepper" role="group" aria-labelledby="modal-daily-goal-label">
+            <button type="button" class="bpm-step-btn" id="modal-daily-goal-decrease" aria-label="Reducir meta diaria"${goal <= 10 ? ' disabled' : ''}>−</button>
+            <output class="settings-val-badge" id="modal-daily-goal-value" aria-live="polite">${goal} diarios</output>
+            <button type="button" class="bpm-step-btn" id="modal-daily-goal-increase" aria-label="Aumentar meta diaria"${goal >= 200 ? ' disabled' : ''}>+</button>
+          </div>
+        </div>`;
+      if (this.levelInfoModalBody) this.levelInfoModalBody.innerHTML = goalHtml + configSectionHtml;
+      this.bindLevelInfoModalControls(moduleType);
+      this.levelInfoModal.classList.remove('hidden');
+      return;
+    }
+
     if (moduleType === 'scales') {
       const effectiveScaleLvl = lvl.isProgressive ? this.getEffectiveScaleLevel() : lvl;
       const scaleProgHtml = lvl.isProgressive
@@ -4157,7 +4278,6 @@ class TrinoShell {
       const tonicNames = (effectiveScaleLvl.tonicPcs || []).map((pc) => NOTE_NAMES_ES[pc]).join(', ');
       if (this.levelInfoModalBody) {
         this.levelInfoModalBody.innerHTML = `
-          ${configSectionHtml}
           ${scaleProgHtml}
           <div class="level-info-section">
             <span class="level-info-label">Escalas incluidas (${(effectiveScaleLvl.options || []).length})</span>
@@ -4184,7 +4304,6 @@ class TrinoShell {
         .join('');
       if (this.levelInfoModalBody) {
         this.levelInfoModalBody.innerHTML = `
-          ${configSectionHtml}
           <div class="level-info-section">
             <span class="level-info-label">Tipos incluidos (${(lvl.options || []).length})</span>
             <ul class="level-info-list">${chordsListHtml}</ul>
@@ -4274,7 +4393,6 @@ class TrinoShell {
 
     if (this.levelInfoModalBody) {
       this.levelInfoModalBody.innerHTML = `
-        ${configSectionHtml}
         ${progressiveExplainHtml}
         <div class="level-info-section">
           <span class="level-info-label">Tipos de intervalos (${(effectiveLvl.options || []).length})</span>
@@ -4298,7 +4416,35 @@ class TrinoShell {
 
   bindLevelInfoModalControls(moduleType) {
     if (!this.levelInfoModalBody) return;
+    const goalDecrease = this.levelInfoModalBody.querySelector('#modal-daily-goal-decrease');
+    const goalIncrease = this.levelInfoModalBody.querySelector('#modal-daily-goal-increase');
+    const goalValue = this.levelInfoModalBody.querySelector('#modal-daily-goal-value');
+    const updateGoal = (amount) => {
+      this.adjustDailyGoal(moduleType, amount);
+      const goals = {
+        intervals: this.dailyIntervalsMin,
+        singing: this.dailySingingMin,
+        chords: this.dailyChordsMin,
+        scales: this.dailyScalesMin,
+      };
+      const goal = goals[moduleType];
+      if (goalValue) goalValue.textContent = `${goal} diarios`;
+      if (goalDecrease) goalDecrease.disabled = goal <= 10;
+      if (goalIncrease) goalIncrease.disabled = goal >= 200;
+    };
+    goalDecrease?.addEventListener('click', () => updateGoal(-10));
+    goalIncrease?.addEventListener('click', () => updateGoal(10));
     if (moduleType === 'singing') {
+      const bpmInput = this.levelInfoModalBody.querySelector('#modal-sing-bpm-input');
+      bpmInput?.addEventListener('change', () => {
+        const val = parseInt(bpmInput.value, 10);
+        if (!Number.isNaN(val)) this.saveSingBpm(val);
+        bpmInput.value = String(this.singBpm);
+        if (this.currentView === 'singing-exercise') {
+          this.stopSingingSequence();
+          this.drawGrandStaff(null, this.lastVoiceFrames);
+        }
+      });
       const countSelect = this.levelInfoModalBody.querySelector('#modal-sing-notes-count');
       const onlyFirstChk = this.levelInfoModalBody.querySelector('#modal-sing-only-first');
       countSelect?.addEventListener('change', () => {
@@ -4306,7 +4452,7 @@ class TrinoShell {
         if (val >= 1 && val <= 4) {
           this.singNotesCount = val;
           this.saveAllSettings();
-          if (this.activeModule === 'singing') {
+          if (this.currentView === 'singing-exercise' && this.activeModule === 'singing') {
             this.generateNextQuestion();
           }
         }
@@ -4355,9 +4501,14 @@ class TrinoShell {
       bpmInput?.addEventListener('change', () => {
         const val = parseInt(bpmInput.value, 10);
         if (!Number.isNaN(val)) {
+          if (this.currentView === 'sing-scale-exercise' && this.singScaleState?.playing) {
+            this.pauseSingScalePlayback();
+          }
           this.saveSingScaleBpm(val);
-          bpmInput.value = String(this.singScaleBpm);
+          this.renderSingScaleLevels();
+          if (this.currentView === 'sing-scale-exercise') this.renderSingScalePassUi();
         }
+        bpmInput.value = String(this.singScaleBpm);
       });
     }
   }
@@ -7477,24 +7628,87 @@ class TrinoShell {
     }
   }
 
+  midiToHz(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }
+
+  async playSoundPreview(kind) {
+    await this.ensureAudioReady();
+    const now = this.audioCtx.currentTime;
+    if (kind === 'mid') {
+      this.playTone(this.midiToHz(60), now, 0.9);
+      return;
+    }
+    if (kind === 'high') {
+      this.playTone(this.midiToHz(72), now, 0.9);
+      return;
+    }
+    const chords = {
+      major: [60, 64, 67],
+      minor: [60, 63, 67],
+      seventh: [60, 64, 67, 70],
+    };
+    const midis = chords[kind];
+    if (!midis) return;
+    const gainScale = 1 / Math.sqrt(midis.length);
+    midis.forEach((midi) => {
+      this.playTone(this.midiToHz(midi), now, 1.25, gainScale);
+    });
+  }
+
+  tonePartials() {
+    const timbre = this.toneTimbre || 'triangle';
+    if (timbre === 'sine') return [{ ratio: 1, gain: 1, type: 'sine' }];
+    if (timbre === 'sine-octave') {
+      return [
+        { ratio: 1, gain: 1, type: 'sine' },
+        { ratio: 2, gain: 0.18, type: 'sine' },
+      ];
+    }
+    if (timbre === 'triangle-soft') return [{ ratio: 1, gain: 1, type: 'triangle', cutoff: 1200 }];
+    return [{ ratio: 1, gain: 1, type: 'triangle' }];
+  }
+
+  buildToneChain(hz, startTime, peakGain) {
+    const ctx = this.audioCtx;
+    const oscs = [];
+    const gains = [];
+    this.tonePartials().forEach((partial) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = partial.type;
+      osc.frequency.setValueAtTime(hz * partial.ratio, startTime);
+      gain.gain.setValueAtTime(0.0001, startTime);
+      osc.connect(gain);
+      if (partial.cutoff) {
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(partial.cutoff, startTime);
+        filter.Q.setValueAtTime(0.7, startTime);
+        gain.connect(filter);
+        filter.connect(ctx.destination);
+      } else {
+        gain.connect(ctx.destination);
+      }
+      oscs.push(osc);
+      gains.push({ node: gain, peak: Math.max(0.0001, peakGain * partial.gain) });
+    });
+    return { oscs, gains };
+  }
+
   playTone(hz, startTime, duration, gainScale = 1) {
-    const osc = this.audioCtx.createOscillator();
-    const gain = this.audioCtx.createGain();
-
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(hz, startTime);
-
     const peakGain = Math.max(0.001, ((this.noteVolume ?? 80) / 100) * 0.40 * gainScale);
-    gain.gain.setValueAtTime(0.0001, startTime);
-    gain.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.03);
-    gain.gain.setValueAtTime(peakGain, startTime + duration - 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-
-    osc.connect(gain);
-    gain.connect(this.audioCtx.destination);
-
-    osc.start(startTime);
-    osc.stop(startTime + duration + 0.02);
+    const { oscs, gains } = this.buildToneChain(hz, startTime, peakGain);
+    const releaseAt = Math.max(startTime + 0.04, startTime + duration - 0.05);
+    gains.forEach(({ node, peak }) => {
+      node.gain.exponentialRampToValueAtTime(peak, startTime + 0.03);
+      node.gain.setValueAtTime(peak, releaseAt);
+      node.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+    });
+    oscs.forEach((osc) => {
+      osc.start(startTime);
+      osc.stop(startTime + duration + 0.02);
+    });
   }
 
   /* =========================================================================
@@ -7721,13 +7935,6 @@ class TrinoShell {
     this.vtRecText = document.getElementById('vt-rec-text');
     this.vtRecordSelect = document.getElementById('vt-record-select');
     this.vtRangeLabel = document.getElementById('vt-range-label');
-    document.getElementById('vt-info-button')?.addEventListener('click', () => {
-      if (this.levelInfoModalModule) this.levelInfoModalModule.textContent = 'Módulo 4';
-      if (this.levelInfoModalTitle) this.levelInfoModalTitle.textContent = 'Prueba de voz';
-      this.levelInfoModalBody?.classList.add('hidden');
-      this.voiceTestInfoBody?.classList.remove('hidden');
-      this.levelInfoModal?.classList.remove('hidden');
-    });
     if (!this.vtKeyboard || !this.vtScroll) return;
 
     this.buildVoiceTestKeyboard();
@@ -7910,26 +8117,25 @@ class TrinoShell {
   // Tono sostenido mientras la tecla está pulsada
   startHeldTone(hz) {
     const ctx = this.audioCtx;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
     const peak = Math.max(0.001, ((this.noteVolume ?? 80) / 100) * 0.40);
     const t = ctx.currentTime;
-
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(hz, t);
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(peak, t + 0.03);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(t);
+    const { oscs, gains } = this.buildToneChain(hz, t, peak);
+    gains.forEach(({ node, peak: partialPeak }) => {
+      node.gain.exponentialRampToValueAtTime(partialPeak, t + 0.03);
+    });
+    oscs.forEach((osc) => osc.start(t));
 
     return {
       stop: () => {
         const now = ctx.currentTime;
-        gain.gain.cancelScheduledValues(now);
-        gain.gain.setValueAtTime(peak, now);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
-        osc.stop(now + 0.08);
+        gains.forEach(({ node, peak: partialPeak }) => {
+          node.gain.cancelScheduledValues(now);
+          node.gain.setValueAtTime(partialPeak, now);
+          node.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+        });
+        oscs.forEach((osc) => {
+          try { osc.stop(now + 0.08); } catch (_) { }
+        });
       },
     };
   }
