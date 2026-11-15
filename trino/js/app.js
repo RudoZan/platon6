@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.2.0011';
+const APP_VERSION = 'v1.2.0020';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -2436,7 +2436,7 @@ class TrinoShell {
         if (this.currentUser?.verificado) {
           this.logoutUser();
         } else {
-          this.openAuthModal();
+          this.accountUnavailableModal?.classList.remove('hidden');
         }
       });
     }

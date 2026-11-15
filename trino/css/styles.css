@@ -199,6 +199,19 @@ body {
   gap: 0.35rem;
 }
 
+#view-home > .welcome-box {
+  background: var(--card-bg);
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+  margin: -1.1rem -1rem 0;
+  padding: 0.55rem 1rem 0.65rem;
+}
+
+#view-home .welcome-badge {
+  margin-top: -0.2rem;
+}
+
 .welcome-badge {
   align-self: flex-start;
   font-size: 0.62rem;
@@ -206,9 +219,6 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--accent-primary);
-  background: rgba(56, 189, 248, 0.12);
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
 }
 
 .welcome-title {
@@ -1566,6 +1576,13 @@ body {
   padding: 0.48rem 0.6rem;
   font-family: 'Inter', sans-serif;
   font-size: 0.76rem;
+}
+
+@media (max-width: 600px) {
+  #stats-report-select,
+  #stats-report-select option {
+    font-size: 0.68rem;
+  }
 }
 
 .settings-select[type="range"] {
