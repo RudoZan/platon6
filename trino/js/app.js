@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.2.0020';
+const APP_VERSION = 'v1.2.0027';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -672,6 +672,7 @@ class TrinoShell {
       passIdx: 0,
       noteIdx: -1,
       timers: [],
+      oscillators: [],
     };
     this.singRafId = null;
     this.singTimers = [];
@@ -3415,6 +3416,12 @@ class TrinoShell {
       this.singScaleState.timers = [];
     }
     if (this.singScaleState) {
+      this.singScaleState.oscillators.forEach((osc) => {
+        try {
+          osc.stop();
+        } catch (_) { }
+      });
+      this.singScaleState.oscillators = [];
       this.singScaleState.playing = false;
       if (resetPause) {
         this.singScaleState.paused = false;
@@ -3464,46 +3471,52 @@ class TrinoShell {
     }
 
     const beatSec = 60 / Math.max(40, Math.min(220, this.singScaleBpm || 110));
-    const noteDur = Math.max(0.14, beatSec * 0.90);
+    const noteDur = beatSec * 0.9;
     const levelId = this.activeLevel?.id || 1;
     const nextPass = passes[this.singScaleState.passIdx + 1];
     const continuesToNext = levelId === 3 && pass.direction === 'up' &&
       nextPass?.direction === 'down' && nextPass.rootMidi === pass.rootMidi;
     const hasRefTone = levelId >= 1 && levelId <= 6 && !continueFromPrevious;
-    const scaleStartOffsetSec = continueFromPrevious ? beatSec : hasRefTone ? 0.08 + beatSec * 1.35 : 0.08;
+    const scaleStartOffsetSec = continueFromPrevious ? 0 : hasRefTone ? beatSec * 3 : 0.08;
+    const scheduledNoteCount = pass.midis.length;
+    const extendsFinalNote = levelId >= 1 && levelId <= 6 && !continuesToNext;
+    const finalNoteDur = continuesToNext ? noteDur * 2 : extendsFinalNote ? beatSec * 1.9 : noteDur;
+    const tailPauseSec = extendsFinalNote
+      ? beatSec * 1.1
+      : continuesToNext ? beatSec * 1.2 : 0;
+    const scheduleLeadSec = 0.03;
+    const audioStartTime = this.audioCtx.currentTime + scheduleLeadSec;
 
-    // En las escalas 1 a 6, sonar una vez antes la primera nota como tono de referencia (sin duplicarla en el pentagrama)
     if (hasRefTone) {
       const refMidi = pass.midis[0];
       const refHz = 440 * Math.pow(2, (refMidi - 69) / 12);
-      const refDur = Math.max(0.22, beatSec * 1.0);
-      const refTimerId = setTimeout(() => {
-        if (!this.singScaleState?.playing) return;
-        this.playTone(refHz, this.audioCtx.currentTime, refDur);
-      }, 80);
-      this.singScaleState.timers.push(refTimerId);
+      this.singScaleState.oscillators.push(...this.playTone(refHz, audioStartTime, beatSec * 1.9));
     }
 
     pass.midis.forEach((midi, idx) => {
-      if (continueFromPrevious && idx === 0) return;
       const hz = 440 * Math.pow(2, (midi - 69) / 12);
       const isLast = idx === pass.midis.length - 1;
-      const dur = isLast && !continuesToNext && levelId >= 1 && levelId <= 6
-        ? Math.max(noteDur, beatSec * 1.35) : noteDur;
+      const dur = isLast ? finalNoteDur : noteDur;
+      const noteOffsetSec = scaleStartOffsetSec + idx * beatSec;
+      this.singScaleState.oscillators.push(
+        ...this.playTone(hz, audioStartTime + noteOffsetSec, dur)
+      );
 
-      const timerId = setTimeout(() => {
+      const uiTimerId = setTimeout(() => {
         if (!this.singScaleState?.playing) return;
-        this.playTone(hz, this.audioCtx.currentTime, dur);
         this.singScaleState.noteIdx = idx;
         this.renderSingScalePassUi();
-      }, Math.round((scaleStartOffsetSec + (idx - (continueFromPrevious ? 1 : 0)) * beatSec) * 1000));
-      this.singScaleState.timers.push(timerId);
+      }, Math.round((scheduleLeadSec + noteOffsetSec) * 1000));
+      this.singScaleState.timers.push(uiTimerId);
     });
 
-    const tailPauseSec = levelId >= 1 && levelId <= 6 && !continuesToNext ? beatSec * 0.65 : 0;
-    const totalPassSec = scaleStartOffsetSec + (pass.midis.length - (continueFromPrevious ? 1 : 0)) * beatSec + tailPauseSec;
+    const lastNoteOffsetSec = scheduledNoteCount > 0
+      ? scaleStartOffsetSec + (scheduledNoteCount - 1) * beatSec
+      : scaleStartOffsetSec;
+    const totalPassSec = lastNoteOffsetSec + finalNoteDur + tailPauseSec;
     const nextPassTimer = setTimeout(() => {
       if (!this.singScaleState?.playing) return;
+      this.singScaleState.oscillators = [];
       if (this.singScaleState.passIdx + 1 < passes.length) {
         this.singScaleState.passIdx += 1;
         this.singScaleState.noteIdx = -1;
@@ -3515,7 +3528,7 @@ class TrinoShell {
         this.renderSingScalePassUi();
         this.renderBottomCommands('sing-scale-exercise');
       }
-    }, Math.round(totalPassSec * 1000));
+    }, Math.round((scheduleLeadSec + totalPassSec) * 1000));
     this.singScaleState.timers.push(nextPassTimer);
   }
 
@@ -7709,6 +7722,7 @@ class TrinoShell {
       osc.start(startTime);
       osc.stop(startTime + duration + 0.02);
     });
+    return oscs;
   }
 
   /* =========================================================================
