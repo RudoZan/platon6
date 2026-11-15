@@ -1,9 +1,75 @@
 // Shared Global State & Cross-Module Helpers — educacionFinanciera
 
+    const SIMULATION_STORAGE_KEY = 'educacionFinanciera.simulationState.v1';
+    let simulationPersistenceEnabled = true;
+
+    function createPersistentState(defaultState) {
+      let saveTimer = null;
+      let rootProxy;
+      const proxies = new WeakMap();
+      let initialState = defaultState;
+
+      try {
+        const savedState = JSON.parse(window.localStorage.getItem(SIMULATION_STORAGE_KEY));
+        if (savedState && typeof savedState === 'object' && !Array.isArray(savedState)) {
+          initialState = { ...defaultState, ...savedState };
+        }
+      } catch (error) {
+        try {
+          window.localStorage.removeItem(SIMULATION_STORAGE_KEY);
+        } catch (storageError) {
+          console.warn('No se pudo acceder al progreso guardado.', storageError);
+        }
+      }
+
+      const save = () => {
+        if (!simulationPersistenceEnabled) return;
+        window.clearTimeout(saveTimer);
+        saveTimer = window.setTimeout(() => {
+          if (!simulationPersistenceEnabled) return;
+          try {
+            window.localStorage.setItem(SIMULATION_STORAGE_KEY, JSON.stringify(rootProxy));
+          } catch (error) {
+            console.warn('No se pudo guardar el progreso de la simulación.', error);
+          }
+        }, 100);
+      };
+
+      const wrap = value => {
+        if (!value || typeof value !== 'object') return value;
+        if (proxies.has(value)) return proxies.get(value);
+        const proxy = new Proxy(value, {
+          get(target, property, receiver) {
+            return wrap(Reflect.get(target, property, receiver));
+          },
+          set(target, property, nextValue, receiver) {
+            const changed = Reflect.set(target, property, nextValue, receiver);
+            save();
+            return changed;
+          },
+          deleteProperty(target, property) {
+            const deleted = Reflect.deleteProperty(target, property);
+            if (deleted) save();
+            return deleted;
+          }
+        });
+        proxies.set(value, proxy);
+        proxies.set(proxy, proxy);
+        return proxy;
+      };
+
+      rootProxy = wrap(initialState);
+      return rootProxy;
+    }
+
     // ESTADO GLOBAL DEL PERSONAJE (CONFIGURACIÓN POR DEFECTO PARA DESARROLLO)
-    const state = {
+    const state = createPersistentState({
       currentSlideIdx: 0,
       activeHudTab: null,
+      simulationDay: 1,
+      simulationMonth: 0,
+      simulationYear: 1,
+      simulationClockRunning: false,
       profileCompleted: false,
       totalBolitas: 25,
       assignedBolitas: 21,
@@ -75,7 +141,78 @@
       ],
       apvAccount: null, // Cuenta APV contratada (régimen, multifondo, saldo y aporte mensual)
       cuenta2Account: null, // Cuenta 2 AFP contratada (multifondo, saldo y aporte mensual)
-    };
+    });
+
+    let simulationClockInterval = null;
+
+    function renderSimulationDate() {
+      const dateElement = document.getElementById('slide-top-date');
+      if (!dateElement) return;
+      const monthLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      const day = String(state.simulationDay).padStart(2, '0');
+      const year = String(state.simulationYear).padStart(2, '0');
+      dateElement.textContent = `${day}-${monthLabels[state.simulationMonth]}-Año${year}`;
+    }
+
+    function advanceSimulationDay() {
+      if (document.visibilityState !== 'visible' || !document.hasFocus()) return;
+      const monthLengths = [31, isSimulationLeapYear(state.simulationYear) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      state.simulationDay += 1;
+      if (state.simulationDay > monthLengths[state.simulationMonth]) {
+        state.simulationDay = 1;
+        state.simulationMonth += 1;
+        if (state.simulationMonth >= monthLengths.length) {
+          state.simulationMonth = 0;
+          state.simulationYear += 1;
+        }
+      }
+      renderSimulationDate();
+      if (typeof processDailyFinancialEvents === 'function') processDailyFinancialEvents();
+      if (state.simulationDay === 1 && typeof processMonthlyFinancialEvents === 'function') {
+        processMonthlyFinancialEvents();
+      }
+    }
+
+    function isSimulationLeapYear(year) {
+      return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+    }
+
+    function startSimulationClock() {
+      if (simulationClockInterval) return;
+      state.simulationClockRunning = true;
+      if (document.visibilityState !== 'visible' || !document.hasFocus()) return;
+      const startButton = document.getElementById('simulation-start-button');
+      if (startButton) {
+        startButton.disabled = true;
+        startButton.innerHTML = '<span>Simulación en curso</span>';
+      }
+      simulationClockInterval = window.setInterval(advanceSimulationDay, 2000);
+    }
+
+    function stopSimulationClock() {
+      if (simulationClockInterval) window.clearInterval(simulationClockInterval);
+      simulationClockInterval = null;
+    }
+
+    function syncSimulationClockVisibility() {
+      if (document.visibilityState === 'visible' && document.hasFocus()) {
+        if (state.simulationClockRunning && !simulationClockInterval) startSimulationClock();
+        return;
+      }
+      stopSimulationClock();
+    }
+
+    function resetSimulators() {
+      if (!window.confirm('Se reiniciarán la fecha y todas las decisiones de la simulación. ¿Continuar?')) return;
+      stopSimulationClock();
+      simulationPersistenceEnabled = false;
+      try {
+        window.localStorage.removeItem(SIMULATION_STORAGE_KEY);
+      } catch (error) {
+        console.warn('No se pudo borrar el progreso guardado.', error);
+      }
+      window.location.reload();
+    }
 
     // COMPROBACIÓN DE PERFIL COMPLETO (INTERESES PRIORIZADOS + ESTILO DE VIDA CON 2 OPCIONES C/U)
     function checkProfileCompletion() {
@@ -121,6 +258,7 @@
 
     // INICIALIZACIÓN
     window.addEventListener('DOMContentLoaded', () => {
+      renderSimulationDate();
       renderSlideCarousel();
       initSlideTrackInteractions();
       renderBolitas();
@@ -128,7 +266,23 @@
       syncDefaultAnchorsUI();
       updateHUD();
       updateInterestsValidation();
-      selectSlide(0);
+      const restoredSlide = Math.min(Math.max(0, Number(state.currentSlideIdx) || 0), slidesData.length - 1);
+      selectSlide(restoredSlide);
+      syncSimulationClockVisibility();
+    });
+
+    window.addEventListener('focus', syncSimulationClockVisibility);
+    window.addEventListener('blur', syncSimulationClockVisibility);
+    window.addEventListener('pageshow', syncSimulationClockVisibility);
+    document.addEventListener('visibilitychange', syncSimulationClockVisibility);
+    window.addEventListener('pagehide', () => {
+      stopSimulationClock();
+      if (!simulationPersistenceEnabled) return;
+      try {
+        window.localStorage.setItem(SIMULATION_STORAGE_KEY, JSON.stringify(state));
+      } catch (error) {
+        console.warn('No se pudo guardar el progreso de la simulación.', error);
+      }
     });
 
 

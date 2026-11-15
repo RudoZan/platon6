@@ -27,6 +27,14 @@
               </button>
             </div>
             <div id="session-code-feedback" style="display: none; font-size: 0.70rem; margin-top: 5px; font-weight: 600;"></div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+              <button type="button" id="simulation-start-button" class="btn-step-next" style="flex: 1; min-width: 150px; margin: 0; justify-content: center;" onclick="startSimulationClock()">
+                <span>▶ Iniciar simulación</span>
+              </button>
+              <button type="button" class="btn-step-prev" style="flex: 1; min-width: 150px; margin: 0; justify-content: center;" onclick="resetSimulators()">
+                <span>↻ Reiniciar simuladores</span>
+              </button>
+            </div>
           </div>
         </div>`
       },

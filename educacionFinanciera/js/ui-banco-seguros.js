@@ -1734,9 +1734,6 @@
                     </div>
 
                     <div style="display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #cbd5e1;">
-                      <button type="button" onclick="simulateMonthFFMM('${pos.id}')" style="padding: 4px 9px; font-size: 0.58rem; font-weight: 800; background: #0284c7; color: #ffffff; border: none; border-radius: 5px; cursor: pointer;" title="Simular la variación del valor cuota durante 1 mes de mercado">
-                        📈 Simular 1 Mes
-                      </button>
                       <button type="button" onclick="openRedeemFFMMModal('${pos.id}')" style="padding: 4px 9px; font-size: 0.58rem; font-weight: 800; background: #047857; color: #ffffff; border: none; border-radius: 5px; cursor: pointer;" title="Rescatar total o parcialmente tus cuotas sin castigo">
                         💸 Rescatar (Total o Parcial)
                       </button>
@@ -2323,10 +2320,8 @@
                   </div>
 
                   <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #86efac;">
-                    <span style="font-size: 0.57rem; color: #475569;">🔒 Inmovilizado y sin cambios hasta cumplir los ${dap.days} días</span>
-                    <button type="button" onclick="simulateMaturityDAP('${dap.id}')" style="padding: 4px 9px; font-size: 0.58rem; font-weight: 800; background: #047857; color: #ffffff; border: none; border-radius: 5px; cursor: pointer;" title="Simular que se cumplieron los ${dap.days} días del depósito">
-                      ⏩ Simular llegada al vencimiento (${dap.days}d)
-                    </button>
+                    <span style="font-size: 0.57rem; color: #475569;">${dap.maturityPending ? `⏳ Ventana de cobro: ${Math.max(0, 3 - (Number(dap.graceBusinessDaysElapsed) || 0))} días hábiles` : `🔒 Vence en ${Math.max(0, Number(dap.days) - (Number(dap.daysElapsed) || 0))} días simulados`}</span>
+                    ${dap.maturityPending ? `<button type="button" onclick="executeRenewableDAPDecision('${dap.id}', 'collect')" style="padding: 4px 9px; font-size: 0.58rem; font-weight: 800; background: #047857; color: #ffffff; border: none; border-radius: 5px; cursor: pointer;">📥 Cobrar</button>` : ''}
                   </div>
                 </div>
               `).join('')}
@@ -2515,6 +2510,9 @@
         payoutAccountId: sourceId,
         payoutAccountName: payoutAccountName,
         cycle: 1,
+        daysElapsed: 0,
+        maturityPending: false,
+        graceBusinessDaysElapsed: 0,
         createdAt: new Date().toISOString()
       });
 
@@ -2604,6 +2602,83 @@
       }
     }
 
+    function getSimulationWeekday() {
+      const year = Number(state.simulationYear) || 1;
+      const priorYear = year - 1;
+      const daysBeforeYear = priorYear * 365 + Math.floor(priorYear / 4) - Math.floor(priorYear / 100) + Math.floor(priorYear / 400);
+      const monthLengths = [31, isSimulationLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      const daysBeforeMonth = monthLengths.slice(0, state.simulationMonth).reduce((sum, days) => sum + days, 0);
+      return (daysBeforeYear + daysBeforeMonth + state.simulationDay - 1) % 7;
+    }
+
+    function settleTermDeposit(dap, index) {
+      const totalPayout = (Number(dap.principal) || 0) + (Number(dap.expectedInterest) || 0);
+      const targetAccount = (state.bankAccounts || []).find(account => account.id === dap.payoutAccountId);
+      if (targetAccount) targetAccount.balance = (Number(targetAccount.balance) || 0) + totalPayout;
+      else state.cash = (Number(state.cash) || 0) + totalPayout;
+      state.termDeposits.splice(index, 1);
+    }
+
+    function renewTermDeposit(dap) {
+      dap.principal = (Number(dap.principal) || 0) + (Number(dap.expectedInterest) || 0);
+      dap.expectedInterest = Math.round(dap.principal * (Number(dap.ratePeriod) || 0));
+      dap.cycle = (Number(dap.cycle) || 1) + 1;
+      dap.daysElapsed = 0;
+      dap.maturityPending = false;
+      dap.graceBusinessDaysElapsed = 0;
+    }
+
+    function processDailyTermDeposits() {
+      if (!Array.isArray(state.termDeposits)) state.termDeposits = [];
+      const weekday = getSimulationWeekday();
+      for (let index = state.termDeposits.length - 1; index >= 0; index -= 1) {
+        const dap = state.termDeposits[index];
+        if (dap.maturityPending) {
+          if (weekday < 5) dap.graceBusinessDaysElapsed = (Number(dap.graceBusinessDaysElapsed) || 0) + 1;
+          if (dap.graceBusinessDaysElapsed >= 3) renewTermDeposit(dap);
+          continue;
+        }
+        dap.daysElapsed = (Number(dap.daysElapsed) || 0) + 1;
+        if (dap.daysElapsed < Number(dap.days)) continue;
+        if (dap.isRenewable) {
+          dap.maturityPending = true;
+          dap.graceBusinessDaysElapsed = 0;
+        } else {
+          settleTermDeposit(dap, index);
+        }
+      }
+    }
+
+    function processMonthlyBankCharges() {
+      const cashBalance = () => Number(state.cash) || 0;
+      (state.bankAccounts || []).forEach(account => {
+        const maintenance = Math.max(0, Number(account.maintenance) || 0);
+        if (maintenance > 0 && cashBalance() >= maintenance) state.cash -= maintenance;
+      });
+      if (state.creditCard && (Number(state.creditCard.used) || 0) > 0) {
+        const maintenance = Math.max(0, Number(state.creditCard.maintenance) || 0);
+        if (maintenance > 0 && cashBalance() >= maintenance) state.cash -= maintenance;
+      }
+      (state.insurances || []).forEach(policy => {
+        const premium = Math.max(0, Number(policy.costMonthly) || 0);
+        if (premium > 0 && cashBalance() >= premium) state.cash -= premium;
+      });
+    }
+
+    function processDailyFinancialEvents() {
+      if (typeof processDailyInvestmentEvents === 'function') processDailyInvestmentEvents();
+      processDailyTermDeposits();
+      if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
+      if (typeof updateHUD === 'function') updateHUD();
+    }
+
+    function processMonthlyFinancialEvents() {
+      if (typeof processMonthlyInvestmentEvents === 'function') processMonthlyInvestmentEvents();
+      processMonthlyBankCharges();
+      if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
+      if (typeof updateHUD === 'function') updateHUD();
+    }
+
     function executeRenewableDAPDecision(dapId, decision) {
       const idx = (state.termDeposits || []).findIndex(d => d.id === dapId);
       if (idx === -1) {
@@ -2611,42 +2686,12 @@
         return;
       }
       const dap = state.termDeposits[idx];
-      const totalPayout = (Number(dap.principal) || 0) + (Number(dap.expectedInterest) || 0);
-
       closeBancoModal();
-
-      if (decision === 'collect') {
-        let targetName = 'Dinero en Efectivo';
-        const targetAcc = (state.bankAccounts || []).find(a => a.id === dap.payoutAccountId);
-        if (targetAcc) {
-          targetAcc.balance = (Number(targetAcc.balance) || 0) + totalPayout;
-          targetName = targetAcc.name;
-        } else {
-          state.cash = (Number(state.cash) || 0) + totalPayout;
-        }
-
-        state.termDeposits.splice(idx, 1);
-        syncInvestedTotal();
-        renderBancoStage('depositos');
-        if (typeof updateHUD === 'function') updateHUD();
-        alertUpcomingBankFeature(
-          '📥 DAP Renovable Cobrado en Ventana de 3 Días',
-          `Diste orden de no renovar dentro de los 3 días hábiles posteriores al vencimiento. Se abonaron $${totalPayout.toLocaleString('es-CL')} en tu ${targetName}.`
-        );
-      } else {
-        const prevPrincipal = dap.principal;
-        const earned = dap.expectedInterest;
-        dap.principal = totalPayout;
-        dap.expectedInterest = Math.round(dap.principal * dap.ratePeriod);
-        dap.cycle = (dap.cycle || 1) + 1;
-        syncInvestedTotal();
-        renderBancoStage('depositos');
-        if (typeof updateHUD === 'function') updateHUD();
-        alertUpcomingBankFeature(
-          '🔄 DAP Renovado Automáticamente',
-          `Pasaron los 3 días hábiles sin cobro: tus $${prevPrincipal.toLocaleString('es-CL')} + $${earned.toLocaleString('es-CL')} de intereses se reinvirtieron automáticamente por otro ciclo de ${dap.days} días (Nuevo capital: $${dap.principal.toLocaleString('es-CL')}).`
-        );
-      }
+      if (decision !== 'collect' || !dap.isRenewable || !dap.maturityPending) return;
+      settleTermDeposit(dap, idx);
+      syncInvestedTotal();
+      renderBancoStage('depositos');
+      if (typeof updateHUD === 'function') updateHUD();
     }
 
     // ==========================================================================

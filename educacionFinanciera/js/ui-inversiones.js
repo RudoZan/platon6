@@ -1265,7 +1265,7 @@
             rescueDays: 0,
             minAmount: 5000,
             lockMonths: 0,
-            desc: 'Cuenta digital de libre disponibilidad. El interés de cada día se calcula sobre el saldo y se abona al simular el día.'
+            desc: 'Cuenta digital de libre disponibilidad. El interés de cada día se calcula sobre el saldo y se abona automáticamente al avanzar el calendario.'
           }
         ]
       },
@@ -1541,6 +1541,93 @@
       );
     }
 
+    function processDailyInvestmentEvents() {
+      const account = getDigitalWalletAccount();
+      if (!account) return;
+      const product = findOtherInvCatalogItem('wallet_remunerada')?.item;
+      const annualRate = Number(product?.annualInterestRate) || 0.0465;
+      const dailyRate = Math.pow(1 + annualRate, 1 / 365) - 1;
+      const interest = Math.round((Number(account.balance) || 0) * dailyRate);
+      account.balance = (Number(account.balance) || 0) + interest;
+      account.interestEarned = (Number(account.interestEarned) || 0) + interest;
+      account.simulatedInterestDays = (Number(account.simulatedInterestDays) || 0) + 1;
+    }
+
+    function getMonthlyInvestmentRate(accountType, fund, regime = 'A') {
+      const rates = accountType === 'apv'
+        ? { A: [0.0085, 0.028], B: [0.0073, 0.0195], C: [0.0058, 0.011], D: [0.0051, 0.00775], E: [0.0045, 0.0045] }
+        : { A: [0.009, 0.029], B: [0.00775, 0.0205], C: [0.0065, 0.012], D: [0.0055, 0.00825], E: [0.0045, 0.0045] };
+      const [expected, volatility] = rates[fund] || rates.C;
+      return { expected: regime === 'B' ? expected + 0.001 : expected, volatility };
+    }
+
+    function randomMonthlyReturn(expected, volatility) {
+      const u1 = Math.max(1e-7, Math.random());
+      const u2 = Math.random();
+      const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      return expected + z * volatility;
+    }
+
+    function applyScheduledContribution(account) {
+      if (!account?.monthlyActive || !account.monthlyContribution || !account.debitAccountId) return;
+      const source = (state.bankAccounts || []).find(item => item.id === account.debitAccountId);
+      const amount = Math.round(Number(account.monthlyContribution) || 0);
+      if (!source || amount <= 0 || (Number(source.balance) || 0) < amount) return;
+      source.balance -= amount;
+      account.balance = (Number(account.balance) || 0) + amount;
+      account.contributedCapital = (Number(account.contributedCapital) || 0) + amount;
+    }
+
+    function processMonthlyInvestmentEvents() {
+      if (!Array.isArray(state.otherInvestments)) state.otherInvestments = [];
+      state.otherInvestments.forEach(position => {
+        const monthlyReturn = randomMonthlyReturn(
+          Number(position.expectedMonthlyRate) || 0,
+          Number(position.monthlyVolatility) || 0
+        );
+        position.currentBalance = Math.max(0, Math.round((Number(position.currentBalance) || 0) * (1 + monthlyReturn)));
+        position.monthsSimulated = (Number(position.monthsSimulated) || 0) + 1;
+
+        if (Number(position.stateBonusMonthly) > 0) {
+          const bonus = Math.min(33000, Math.round((Number(position.contributedCapital) || 0) * Number(position.stateBonusMonthly) / 12));
+          position.stateBonusAccumulated = (Number(position.stateBonusAccumulated) || 0) + bonus;
+          position.currentBalance += bonus;
+        }
+
+        if (position.categoryId === 'fraccionada' && Number(position.propertyValue) > 0) {
+          const rent = Math.round((Number(position.monthlyRent) || 0) * (Number(position.contributedCapital) || 0) / Number(position.propertyValue));
+          state.cash = (Number(state.cash) || 0) + rent;
+        }
+      });
+
+      (state.mutualFunds || []).forEach(position => {
+        const monthlyReturn = randomMonthlyReturn(
+          Number(position.expectedMonthlyRate) || 0,
+          Number(position.monthlyVolatility) || 0
+        );
+        position.currentSharePrice = Math.max(10, (Number(position.currentSharePrice) || 0) * (1 + monthlyReturn));
+        position.currentBalance = Math.round((Number(position.shares) || 0) * position.currentSharePrice);
+        position.monthsSimulated = (Number(position.monthsSimulated) || 0) + 1;
+      });
+
+      [state.apvAccount, state.cuenta2Account].forEach(account => {
+        if (!account) return;
+        applyScheduledContribution(account);
+        const type = account === state.apvAccount ? 'apv' : 'cuenta2';
+        const { expected, volatility } = getMonthlyInvestmentRate(type, account.fund, account.regime);
+        account.balance = Math.max(0, Math.round((Number(account.balance) || 0) * (1 + randomMonthlyReturn(expected, volatility))));
+        account.monthsSimulated = (Number(account.monthsSimulated) || 0) + 1;
+        if (type === 'apv' && account.regime === 'A') {
+          const bonus = Math.min(33000, Math.round((Number(account.contributedCapital) || 0) * 0.15 / 12));
+          account.stateBonusAccumulated = (Number(account.stateBonusAccumulated) || 0) + bonus;
+          account.balance += bonus;
+        }
+      });
+
+      if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
+      if (typeof updateHUD === 'function') updateHUD();
+    }
+
     function renderDigitalWalletView() {
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
@@ -1581,12 +1668,11 @@
             <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;">
               <button type="button" onclick="promptDepositModal('${account.id}')" style="padding:9px 6px;background:#fff;border:1.5px solid #86efac;border-radius:7px;color:#166534;font-size:.64rem;font-weight:800;cursor:pointer;">📥 Depositar / transferir</button>
               <button type="button" onclick="promptWithdrawModal('${account.id}')" style="padding:9px 6px;background:#fff;border:1.5px solid #93c5fd;border-radius:7px;color:#1e40af;font-size:.64rem;font-weight:800;cursor:pointer;">📤 Girar a efectivo</button>
-              <button type="button" onclick="simulateDigitalWalletDay()" style="padding:9px 6px;background:#ecfdf5;border:1.5px solid #86efac;border-radius:7px;color:#047857;font-size:.64rem;font-weight:800;cursor:pointer;">📈 Simular día e interés</button>
               <button type="button" onclick="promptCloseBankAccount('${account.id}')" style="padding:9px 6px;background:#fff;border:1.5px solid #fca5a5;border-radius:7px;color:#991b1b;font-size:.64rem;font-weight:800;cursor:pointer;">⚠️ Cerrar billetera</button>
             </div>
           ` : `
             <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:9px 11px;margin-bottom:8px;font-size:.62rem;color:#475569;line-height:1.4;">
-              Apertura sin costo, mantención $0 y giros sin comisión. Tasa anual efectiva referencial: <strong>~${(annualRate * 100).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</strong>, abonada al simular cada día.
+              Apertura sin costo, mantención $0 y giros sin comisión. Tasa anual efectiva referencial: <strong>~${(annualRate * 100).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</strong>, abonada automáticamente cada día simulado.
             </div>
             <button type="button" onclick="openDigitalWalletAccount()" style="width:100%;padding:9px;border:none;border-radius:6px;background:#047857;color:#fff;font-size:.70rem;font-weight:800;cursor:pointer;">Abrir billetera</button>
           `}
