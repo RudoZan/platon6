@@ -59,3 +59,20 @@
 ## UC-10: Digital Wallet in Other Investments
 1. Opening the remunerated wallet creates a liquid account with zero balance. Deposit, withdrawal and closure use the shared bank-account flows.
 2. Simulating a day credits rounded interest on the current balance and updates the accrued-interest and day counters. A legacy wallet investment position is migrated to the account once.
+
+## UC-11: Property Sales and Rentals in "Corredora"
+1. The user lists an owned property for sale or rent from the property management views; the same property may have both listing types active.
+2. Sale listings allow a custom price and edits while preserving time listed. Simulated evaluations may complete a sale, deduct the 2% commission and outstanding mortgage, then credit net proceeds.
+3. Rental listings compare the requested rent with catalog market rent. A matched tenant starts a contract; monthly receipts deduct 5% commission and store net rent history.
+4. As a tenant, the user pays rent monthly. Ending a lease returns the guarantee less any simulated damage deduction.
+
+## UC-12: Credit, Property Financing & Financial History
+1. Consumer credit applications enforce employment-tenure eligibility and offer amortized monthly payments; users can repay the remaining balance in full.
+2. Mortgage eligibility uses up to three recent net salary payments. The first mortgage limit is 33% of average net salary; subsequent limits use 50% of average salary plus net rent, less existing mortgage payments. The user selects an eligible property and funding account for payments.
+3. Credit-line and card interest accrue daily at their configured rates and consolidate monthly. A checking-account deposit first covers outstanding credit-line principal and interest.
+4. "Movimientos de cuentas y efectivo" lists cash and account transactions with date, contextual detail, expenses, income and account, newest first, with a year filter.
+
+## UC-13: Automatic Simulated Financial Events
+1. The simulated calendar advances while the application is visible and focused, pauses in the background, and resumes when the user returns.
+2. Daily and monthly processing handles investment returns, wallet interest, rent, premiums, maintenance, credit interest, mortgage payments and term-deposit maturity.
+3. Simulation state is persisted in the browser and restored from the most recent valid local/session storage backup; restarting clears both backups.

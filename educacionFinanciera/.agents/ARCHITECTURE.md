@@ -18,3 +18,9 @@ Rendered over a **3D spatial perspective background** (32% horizon, radial `#7dd
    - Fixed bottom bar (`bottom: 0`, constant 80% opacity `rgba(..., 0.80)`, ocean-to-night blue gradient, `#38bdf8` top border).
    - 7 places: `"Banco"`, `"Otras Inversiones"`, `"Corredora"`, `"Comercio"`, `"Actividades"`, `"Trabajo"`, `"Mi Estado"` (`Personal`).
    - **Strict Sync Rule:** A dock icon is `.active` (`#7dd3fc` + 28px bar) ONLY when its showcase (`view-hub-stage`) is open in the middle zone. Changing the top slide sets `state.activeHudTab = null` and unmarks the dock icon.
+
+## 3. Simulated Financial Event Flow
+- `state.js` owns the simulated calendar and invokes daily and month-boundary handlers while the page is visible/focused; the clock pauses in the background.
+- Domain handlers in `ui-banco-seguros.js`, `ui-inversiones.js`, `ui-trabajo.js`, and `ui-corredora.js` process credit interest/payments, investment returns, salary, property sales/rentals, account fees and maturities.
+- Persistent state records cash/account mutations as financial movements. Operation wrappers provide contextual descriptions so `ui-personal.js` can render a chronological, year-filtered ledger.
+- Browser persistence uses localStorage with sessionStorage fallback and selects the newest timestamped backup on restore.

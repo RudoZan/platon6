@@ -43,7 +43,7 @@
       `;
     }
 
-    function renderBancoStage(subView = 'main') {
+    function renderBancoStage(subView = 'main', mortgagePropertyId = null) {
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
 
@@ -81,6 +81,10 @@
         renderTarjetaCreditoView();
         return;
       }
+      if (subView === 'credito_consumo' || subView === 'credito_hipotecario') {
+        renderCreditLoanView(subView === 'credito_consumo' ? 'consumo' : 'hipotecario', mortgagePropertyId);
+        return;
+      }
       if (subView === 'fondos') {
         renderFondosMutuosView();
         return;
@@ -111,6 +115,8 @@
                 clickAction = "renderBancoStage('linea')";
               } else if (sec.id === 'tarjeta') {
                 clickAction = "renderBancoStage('tarjeta')";
+              } else if (sec.id === 'credito_consumo' || sec.id === 'credito_hipotecario') {
+                clickAction = `renderBancoStage('${sec.id}')`;
               } else if (sec.id === 'fondos') {
                 clickAction = "renderBancoStage('fondos')";
               } else if (sec.id === 'dap' || sec.id === 'depositos') {
@@ -383,16 +389,21 @@
           alertUpcomingBankFeature('Saldo insuficiente', `No tienes suficiente efectivo ($${available.toLocaleString('es-CL')}) para depositar $${amount.toLocaleString('es-CL')}.`);
           return;
         }
-        state.cash -= amount;
-        destAcc.balance = (destAcc.balance || 0) + amount;
+        withFinancialMovementDetail(`Depósito en ${destAcc.name}`, () => {
+          state.cash -= amount;
+          creditBankAccount(destAcc.id, amount);
+        });
       } else {
         const srcAcc = (state.bankAccounts || []).find(a => a.id === sourceVal);
-        if (!srcAcc || (srcAcc.balance || 0) < amount) {
+        const transferred = srcAcc && withFinancialMovementDetail(`Transferencia de ${srcAcc.name} a ${destAcc.name}`, () => {
+          if (!debitBankAccountWithCreditLine(srcAcc.id, amount)) return false;
+          creditBankAccount(destAcc.id, amount);
+          return true;
+        });
+        if (!transferred) {
           alertUpcomingBankFeature('Saldo insuficiente', `La cuenta seleccionada no tiene saldo suficiente para transferir $${amount.toLocaleString('es-CL')}.`);
           return;
         }
-        srcAcc.balance -= amount;
-        destAcc.balance = (destAcc.balance || 0) + amount;
       }
 
       if (typeof updateHUD === 'function') updateHUD();
@@ -405,7 +416,13 @@
     function promptWithdrawModal(accId) {
       const acc = (state.bankAccounts || []).find(a => a.id === accId);
       if (!acc) return;
-      if ((acc.balance || 0) <= 0) {
+      const isCheckingAccount = acc.id === 'acc_corriente' || acc.type === 'corriente';
+      const lineAvailable = isCheckingAccount && state.creditLine
+        ? Math.max(0, (Number(state.creditLine.limit) || 0) - (Number(state.creditLine.used) || 0)
+          - (Number(state.creditLine.accruedInterest) || 0) - (Number(state.creditLine.currentDayInterest) || 0))
+        : 0;
+      const totalAvailable = (Number(acc.balance) || 0) + lineAvailable;
+      if (totalAvailable <= 0) {
         alertUpcomingBankFeature('Sin fondos disponibles', `Tu ${acc.name} tiene saldo $0. Realiza un depósito primero para poder girar.`);
         return;
       }
@@ -424,7 +441,7 @@
                   Girar dinero a Efectivo
                 </div>
                 <div class="job-modal-subtitle" style="font-size: 0.72rem; margin-top: 2px;">
-                  Desde ${acc.name} ($${(acc.balance || 0).toLocaleString('es-CL')} disponible)
+                  Desde ${acc.name} ($${(acc.balance || 0).toLocaleString('es-CL')} de saldo${lineAvailable ? ` + $${lineAvailable.toLocaleString('es-CL')} de Línea disponible` : ''})
                 </div>
               </div>
             </div>
@@ -432,8 +449,8 @@
             <div class="job-modal-body" style="padding: 14px 16px;">
               <div style="font-size: 0.68rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Monto a retirar ($):</div>
               <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 14px;">
-                <input type="number" id="bank-withdraw-amount" min="1000" max="${acc.balance || 0}" style="flex: 1; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 7px 9px; font-size: 0.88rem; font-weight: 700; color: #0f172a; outline: none; box-sizing: border-box;" />
-                <button type="button" onclick="document.getElementById('bank-withdraw-amount').value = ${acc.balance || 0}" style="font-size: 0.68rem; font-weight: 700; background: #eff6ff; border: 1.5px solid #93c5fd; color: #1d4ed8; border-radius: 6px; padding: 7px 10px; cursor: pointer; white-space: nowrap;">Todo el saldo</button>
+                <input type="number" id="bank-withdraw-amount" min="1000" max="${totalAvailable}" style="flex: 1; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 7px 9px; font-size: 0.88rem; font-weight: 700; color: #0f172a; outline: none; box-sizing: border-box;" />
+                <button type="button" onclick="document.getElementById('bank-withdraw-amount').value = ${totalAvailable}" style="font-size: 0.68rem; font-weight: 700; background: #eff6ff; border: 1.5px solid #93c5fd; color: #1d4ed8; border-radius: 6px; padding: 7px 10px; cursor: pointer; white-space: nowrap;">Todo disponible</button>
               </div>
 
               <div style="display: flex; gap: 8px;">
@@ -458,13 +475,15 @@
         return;
       }
 
-      if ((acc.balance || 0) < amount) {
+      const debited = withFinancialMovementDetail(`Giro de ${acc.name} a efectivo`, () => debitBankAccountWithCreditLine(acc.id, amount));
+      if (!debited) {
         alertUpcomingBankFeature('Saldo insuficiente', `La cuenta solo dispone de $${(acc.balance || 0).toLocaleString('es-CL')}.`);
         return;
       }
 
-      acc.balance -= amount;
-      state.cash = (state.cash || 0) + amount;
+      withFinancialMovementDetail(`Giro de ${acc.name} a efectivo`, () => {
+        state.cash = (state.cash || 0) + amount;
+      });
 
       closeBancoModal();
       if (typeof updateHUD === 'function') updateHUD();
@@ -606,7 +625,11 @@
         renderInversionesStage('billeteras');
         return;
       }
-      const currentSubView = (account.id || '').includes('ahorro') ? 'cuenta_ahorro' : 'cuenta_rut_vista';
+      const currentSubView = account.type === 'corriente' || (account.id || '').includes('corriente')
+        ? 'cuenta_corriente'
+        : (account.id || '').includes('ahorro')
+          ? 'cuenta_ahorro'
+          : 'cuenta_rut_vista';
       renderBancoStage(currentSubView);
     }
 
@@ -926,11 +949,11 @@
                 ${isLinea ? `
                   • <strong>Beneficio en el plan:</strong> Rebaja en <strong>$7.000/mes</strong> la mantención de tu Cuenta Corriente.<br/>
                   • <strong>Costo fijo obligatorio:</strong> Requiere contratar un <strong>Seguro de Desgravamen de $1.900/mes</strong> (se cobra todos los meses aunque no uses el cupo).<br/>
-                  • <strong>Costo por uso:</strong> Si utilizas el sobregiro, se cobra un interés diario de <strong>0,08%</strong> por los días utilizados.
+                  • <strong>Costo por uso:</strong> Si utilizas el sobregiro, se cobra un interés diario de <strong>0,09%</strong> sobre el saldo utilizado; se consolida una vez al mes.
                 ` : `
                   • <strong>Beneficio en el plan:</strong> Rebaja en <strong>$7.000/mes</strong> la mantención de tu Cuenta Corriente.<br/>
                   • <strong>Costo de mantención:</strong> Tiene una comisión de administración de <strong>$6.900/mes</strong> que se cobra <strong>únicamente en los meses en que tengas compras o cuotas vigentes</strong> ($0/mes si no la utilizas).<br/>
-                  • <strong>Intereses:</strong> Si pagas en cuotas con interés o solo el pago mínimo, se aplican intereses rotativos sobre el saldo adeudado.
+                  • <strong>Interés rotativo:</strong> <strong>0,08% diario</strong> sobre el saldo utilizado, calculado diariamente y consolidado una vez al mes.
                 `}
               </div>
 
@@ -1059,6 +1082,10 @@
           name: 'Línea de Crédito',
           limit: 500000,
           used: 0,
+          dailyInterestRate: revolvingCreditDailyRates.linea,
+          accruedInterest: 0,
+          currentDayInterest: 0,
+          interestConsolidatedTotal: 0,
           associatedTo: 'acc_corriente'
         };
         if (!state.insurances.some(i => i.id === 'desgravamen_linea' || i.id === 'desgravamen')) {
@@ -1085,6 +1112,11 @@
             isIndependent: false,
             limit: 950000,
             used: 0,
+            dailyInterestRate: revolvingCreditDailyRates.tarjeta,
+            accruedInterest: 0,
+            currentDayInterest: 0,
+            interestConsolidatedTotal: 0,
+            purchases: [],
             maintenance: 6900,
             associatedTo: 'acc_corriente'
           };
@@ -1124,6 +1156,511 @@
     // ==========================================================================
     // LÍNEAS DE CRÉDITO: REQUISITO DE CUENTA CORRIENTE Y GESTIÓN
     // ==========================================================================
+    const creditLoanSettings = {
+      consumo: { name: 'Crédito de Consumo', icon: '💵', monthlyRate: 0.012, rateLabel: '1,20%', minimumAmount: 100000, terms: [12, 18, 24, 28, 32, 36, 40, 44, 48, 60], minimumTenureMonths: 6 },
+      hipotecario: { name: 'Crédito Hipotecario', icon: '🏠', monthlyRate: 0.004, rateLabel: '0,40%', minimumAmount: 5000000, terms: [132, 180, 240, 300, 360], minimumTenureMonths: 12 }
+    };
+
+    const revolvingCreditDailyRates = { linea: 0.0009, tarjeta: 0.0008 };
+
+    function accrueRevolvingCreditInterest(product, dailyRate) {
+      if (!product || Number(product.used) <= 0) return;
+      const accrued = Number(product.accruedInterest) || 0;
+      const currentDay = Number(product.currentDayInterest) || 0;
+      const dailyBase = (Number(product.used) || 0) + accrued + currentDay;
+      const interest = dailyBase * dailyRate;
+      if (Number(state.simulationDay) === 1) product.currentDayInterest = currentDay + interest;
+      else product.accruedInterest = accrued + interest;
+    }
+
+    function accrueRevolvingCreditDailyInterest() {
+      accrueRevolvingCreditInterest(state.creditLine, revolvingCreditDailyRates.linea);
+      accrueRevolvingCreditInterest(state.creditCard, revolvingCreditDailyRates.tarjeta);
+    }
+
+    function consolidateRevolvingCreditInterest() {
+      [[state.creditLine, 'Línea de Crédito'], [state.creditCard, 'Tarjeta de Crédito']].forEach(([product, productName]) => {
+        if (!product) return;
+        const interest = Math.max(0, Math.round(Number(product.accruedInterest) || 0));
+        if (interest > 0) {
+          product.used = (Number(product.used) || 0) + interest;
+          product.interestConsolidatedTotal = (Number(product.interestConsolidatedTotal) || 0) + interest;
+          product.lastMonthlyInterest = interest;
+          recordFinancialMovement({
+            detail: `Interés mensual consolidado de ${productName}`,
+            amount: interest,
+            direction: 'expense',
+            accountId: product.id,
+            accountName: productName
+          });
+        } else {
+          product.lastMonthlyInterest = 0;
+        }
+        product.accruedInterest = Number(product.currentDayInterest) || 0;
+        product.currentDayInterest = 0;
+      });
+    }
+
+    function findActiveLoan(loanType, propertyId = null) {
+      return (state.debts || []).find(debt => debt.loanType === loanType
+        && (propertyId === null || debt.propertyCatalogId === propertyId)) || null;
+    }
+
+    function calculateLoanInstallment(principal, monthlyRate, termMonths) {
+      if (!principal || !termMonths) return 0;
+      if (!monthlyRate) return Math.ceil(principal / termMonths);
+      return Math.ceil(principal * monthlyRate / (1 - Math.pow(1 + monthlyRate, -termMonths)));
+    }
+
+    function getMortgageFundingOptions() {
+      const options = [{ id: 'cash', label: `Efectivo ($${(Number(state.cash) || 0).toLocaleString('es-CL')})` }];
+      (state.bankAccounts || []).filter(account => account.type !== 'credit').forEach(account => {
+        options.push({
+          id: account.id,
+          label: `${account.icon || '🏦'} ${account.name} ($${(Number(account.balance) || 0).toLocaleString('es-CL')})`
+        });
+      });
+      return options.map(option => `<option value="${option.id}">${option.label}</option>`).join('');
+    }
+
+    function getMortgageFundingSource(sourceId, allowCreditLine = false) {
+      if (sourceId === 'cash') return { get: () => Number(state.cash) || 0, set: value => { state.cash = value; } };
+      const account = (state.bankAccounts || []).find(item => item.id === sourceId && item.type !== 'credit');
+      if (!account) return null;
+      return {
+        get: () => allowCreditLine ? getBankAccountSpendableBalance(account.id) : Number(account.balance) || 0,
+        set: value => {
+          if (allowCreditLine) {
+            const debit = getBankAccountSpendableBalance(account.id) - Number(value);
+            if (debit > 0) debitBankAccountWithCreditLine(account.id, debit);
+          } else {
+            account.balance = value;
+          }
+        }
+      };
+    }
+
+    function getMortgageClosingCosts(propertyValue) {
+      const value = Math.max(0, Number(propertyValue) || 0);
+      return {
+        appraisal: Math.round(value * 0.001),
+        operatingCosts: Math.round(value * 0.002),
+        commission: Math.round(value * 0.02)
+      };
+    }
+
+    function getCreditLoanOffer(loanType, termMonths) {
+      const settings = creditLoanSettings[loanType];
+      const job = state.currentJob;
+      if (!settings || !job || Number(job.salary) <= 0 || getCurrentJobTenureMonths(job) < settings.minimumTenureMonths) return null;
+      if (loanType === 'consumo') return Math.floor(Number(job.salary) * 5 / 10000) * 10000;
+      const paymentLimit = getMortgagePaymentCapacity(job);
+      if (paymentLimit <= 0) return 0;
+      const factor = settings.monthlyRate / (1 - Math.pow(1 + settings.monthlyRate, -termMonths));
+      return Math.floor(paymentLimit / factor / 10000) * 10000;
+    }
+
+    function getMortgageQualifyingIncome(job = state.currentJob) {
+      if (!job) return 0;
+      const payments = (Array.isArray(job.salaryPaymentHistory) ? job.salaryPaymentHistory : [])
+        .map(payment => Number(payment.amount) || 0)
+        .filter(amount => amount > 0);
+      if (!payments.length && Number(job.lastNetSalary) > 0) payments.push(Number(job.lastNetSalary));
+      if (!payments.length) {
+        const performance = getWorkPerformance(job);
+        const multiplier = job.isFreelance
+          ? getFreelanceIncomeMultiplier(performance.level)
+          : job.isCommercial
+            ? 1 + getCommercialCommissionMultiplier(performance.level)
+            : 1;
+        return Math.round((Number(job.salary) || 0) * multiplier);
+      }
+      const recentPayments = payments.slice(-3);
+      return Math.round(recentPayments.reduce((sum, amount) => sum + amount, 0) / recentPayments.length);
+    }
+
+    function getMortgageIncomeAssessment(job = state.currentJob) {
+      const currentMonthIndex = getSimulationMonthIndex();
+      const recentMonthIndexes = [currentMonthIndex - 2, currentMonthIndex - 1, currentMonthIndex];
+      const recentMonthSet = new Set(recentMonthIndexes);
+      const salaryPayments = (Array.isArray(job?.salaryPaymentHistory) ? job.salaryPaymentHistory : [])
+        .filter(payment => recentMonthSet.has(getSimulationMonthIndex(payment.year, payment.month)));
+      let salaryTotal = salaryPayments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
+      if (!salaryPayments.length) salaryTotal = getMortgageQualifyingIncome(job) * 3;
+      const salaryAverage = Math.round(salaryTotal / 3);
+
+      const rentalTotal = (Array.isArray(state.propertyRentalListings) ? state.propertyRentalListings : [])
+        .reduce((sum, listing) => sum + (Array.isArray(listing.rentPaymentHistory) ? listing.rentPaymentHistory : [])
+          .filter(payment => recentMonthSet.has(getSimulationMonthIndex(payment.year, payment.month)))
+          .reduce((listingSum, payment) => listingSum + (Number(payment.amount) || 0), 0), 0);
+      const rentalAverage = Math.round(rentalTotal / 3);
+      const activeMortgages = (state.debts || []).filter(debt => debt.loanType === 'hipotecario' && Number(debt.remainingBalance) > 0);
+      const existingDividends = activeMortgages.reduce((sum, debt) => sum + (Number(debt.monthlyPayment) || 0), 0);
+      const isFirstMortgage = activeMortgages.length === 0;
+      const combinedIncomeAverage = salaryAverage + rentalAverage;
+      const paymentCapacity = isFirstMortgage
+        ? Math.floor(salaryAverage * 0.33)
+        : Math.max(0, Math.floor(combinedIncomeAverage * 0.5) - existingDividends);
+
+      return { salaryAverage, rentalAverage, combinedIncomeAverage, existingDividends, isFirstMortgage, paymentCapacity };
+    }
+
+    function getMortgagePaymentCapacity(job = state.currentJob) {
+      return getMortgageIncomeAssessment(job).paymentCapacity;
+    }
+
+    function renderCreditLoanView(loanType, propertyId = null) {
+      const container = document.getElementById('hub-stage-sections');
+      const settings = creditLoanSettings[loanType];
+      if (!container || !settings) return;
+      const header = `<div class="personal-subview-top"><span style="font-size:.88rem;font-weight:800;color:#0284c7;">${settings.icon} ${settings.name}</span><button type="button" class="personal-subview-back-btn" onclick="renderBancoStage('main')"><span>◀ Volver</span></button></div>`;
+      const propertyContext = loanType === 'hipotecario'
+        && Array.isArray(corredoraHousingCatalog)
+        && corredoraHousingCatalog.length > 0;
+      const properties = propertyContext ? corredoraHousingCatalog : [];
+      const activeMortgagedPropertyIds = new Set((state.debts || [])
+        .filter(debt => debt.loanType === 'hipotecario' && Number(debt.remainingBalance) > 0)
+        .map(debt => debt.propertyCatalogId));
+      const mortgageableProperties = properties.filter(property => !activeMortgagedPropertyIds.has(property.id));
+      const requestedProperty = propertyId ? properties.find(property => property.id === propertyId) : null;
+      const initialProperty = requestedProperty || mortgageableProperties[0] || properties[0] || null;
+      const initialPropertyId = initialProperty?.id;
+      const selectedProperty = propertyContext
+        ? (properties.find(property => property.id === initialPropertyId) || null)
+        : null;
+      const activeLoan = findActiveLoan(loanType, propertyContext ? selectedProperty?.id : null);
+      const propertySelector = propertyContext
+        ? `<label for="credit-loan-property" style="display:block;font-size:.64rem;font-weight:800;color:#334155;margin-bottom:4px;">Propiedad</label><select id="credit-loan-property" onchange="renderBancoStage('credito_hipotecario',this.value)" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:9px;">${properties.map(property => `<option value="${property.id}" ${property.id === selectedProperty.id ? 'selected' : ''}>${property.name} · ${property.priceUF.toLocaleString('es-CL')} UF ($${Number(property.value).toLocaleString('es-CL')})${activeMortgagedPropertyIds.has(property.id) ? ' · Crédito activo' : ''}</option>`).join('')}</select>`
+        : '';
+      if (activeLoan) {
+        const paidInstallments = Math.max(0, (Number(activeLoan.originalTermMonths) || 0) - (Number(activeLoan.remainingTermMonths) || 0));
+        const overdueInstallments = Number(activeLoan.missedPayments) || 0;
+        const paymentSourceName = activeLoan.paymentSourceId === 'cash'
+          ? 'Efectivo'
+          : (state.bankAccounts || []).find(account => account.id === activeLoan.paymentSourceId)?.name || 'Efectivo';
+        const paymentLabel = loanType === 'consumo' ? 'Cuota mensual' : 'Dividendo mensual';
+        container.innerHTML = `<div class="personal-subview-box">${header}${propertySelector}<div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:8px;padding:10px 12px;margin-bottom:8px;"><div style="font-size:.60rem;font-weight:800;color:#1e40af;">Crédito activo${activeLoan.propertyName ? ` · ${activeLoan.propertyName}` : ''}</div><div style="font-size:1.08rem;font-weight:800;color:#1d4ed8;">Saldo: $${Number(activeLoan.remainingBalance).toLocaleString('es-CL')}</div><div style="font-size:.63rem;color:#334155;line-height:1.5;">${paymentLabel}: <strong>$${Number(activeLoan.monthlyPayment).toLocaleString('es-CL')}</strong><br/>Plazo restante: <strong>${Number(activeLoan.remainingTermMonths)} meses</strong><br/>Dividendos pagados: <strong>${paidInstallments}</strong>${overdueInstallments > 0 ? `<br/><span style="color:#b91c1c;">Dividendos morosos: <strong>${overdueInstallments}</strong></span>` : ''}${activeLoan.propertyCatalogId ? `<br/>Cargo desde: <strong>${paymentSourceName}</strong><br/>Próximo cobro: día 5 del mes` : ''}</div></div>${loanType === 'consumo' ? `<button type="button" onclick="openPayOffConsumerLoan('${activeLoan.id}')" style="width:100%;padding:8px;border:1px solid #047857;border-radius:6px;background:#fff;color:#047857;font-size:.64rem;font-weight:800;cursor:pointer;">Pagar todo el crédito</button>` : ''}</div>`;
+        return;
+      }
+
+      if (propertyContext && !selectedProperty) {
+        container.innerHTML = `<div class="personal-subview-box">${header}<div style="padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:.68rem;color:#475569;line-height:1.4;">No hay propiedades propias disponibles para un nuevo crédito hipotecario.</div></div>`;
+        return;
+      }
+
+      const defaultTerm = propertyContext ? 132 : loanType === 'consumo' ? 12 : settings.terms[settings.terms.length - 1];
+      const availableAmount = getCreditLoanOffer(loanType, defaultTerm);
+      if ((!availableAmount || availableAmount < settings.minimumAmount) && !propertyContext && loanType !== 'consumo') {
+        container.innerHTML = `<div class="personal-subview-box">${header}<div style="padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:.68rem;color:#475569;line-height:1.4;">No hay una oferta disponible en este momento.</div></div>`;
+        return;
+      }
+
+      const defaultAmount = propertyContext
+        ? Number(selectedProperty.value) * 0.8
+        : availableAmount && availableAmount >= settings.minimumAmount
+          ? Math.min(availableAmount, Math.max(settings.minimumAmount, loanType === 'consumo' ? 1000000 : 5000000))
+          : settings.minimumAmount;
+      const insuranceOptions = loanType === 'consumo'
+        ? `<label style="display:flex;align-items:center;gap:7px;padding:7px;border:1px solid #cbd5e1;border-radius:6px;font-size:.62rem;"><input type="checkbox" id="loan-insurance-desgravamen" onchange="updateCreditLoanPreview('${loanType}')"><span>Seguro de desgravamen · $1.900/mes</span></label><label style="display:flex;align-items:center;gap:7px;padding:7px;border:1px solid #cbd5e1;border-radius:6px;font-size:.62rem;"><input type="checkbox" id="loan-insurance-cesantia" onchange="updateCreditLoanPreview('${loanType}')"><span>Seguro de cesantía · $4.500/mes</span></label>`
+        : propertyContext
+          ? `<div style="padding:7px;border:1px solid #bfdbfe;border-radius:6px;background:#eff6ff;font-size:.62rem;color:#1e3a8a;line-height:1.45;">Incendio y sismo: 0,015%–0,02% mensual del valor asegurado. Desgravamen: 0,02%–0,03% mensual del saldo de la deuda. La estimación usa el punto medio de cada rango.</div>`
+          : `<div style="padding:7px;border:1px solid #bfdbfe;border-radius:6px;background:#eff6ff;font-size:.62rem;color:#1e3a8a;">Desgravamen ($1.900/mes) e incendio/sismo ($11.000/mes).</div><label style="display:flex;align-items:center;gap:7px;padding:7px;border:1px solid #cbd5e1;border-radius:6px;font-size:.62rem;"><input type="checkbox" id="loan-insurance-cesantia" onchange="updateCreditLoanPreview('${loanType}')"><span>Agregar seguro de cesantía · $4.500/mes</span></label>`;
+      const amountControl = propertyContext
+        ? `${propertySelector}<div id="credit-loan-property-amount" style="margin-bottom:9px;font-size:.65rem;color:#475569;">Valor de la propiedad: <strong>$${Number(selectedProperty.value).toLocaleString('es-CL')}</strong></div>`
+        : `<label for="credit-loan-amount" style="display:block;font-size:.64rem;font-weight:800;color:#334155;margin-bottom:4px;">Monto solicitado</label><input id="credit-loan-amount" type="number" min="${settings.minimumAmount}" step="10000" value="${defaultAmount}" oninput="updateCreditLoanPreview('${loanType}')" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:9px;">`;
+      const mortgageControls = propertyContext ? `
+        <label for="mortgage-down-payment-rate" style="display:block;font-size:.64rem;font-weight:800;color:#334155;margin:8px 0 4px;">Pie de la propiedad (mínimo 20%)</label>
+        <select id="mortgage-down-payment-rate" onchange="updateCreditLoanPreview('hipotecario')" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">
+          ${[20, 25, 30, 35, 40, 50].map(rate => `<option value="${rate}" ${rate === 20 ? 'selected' : ''}>${rate}%</option>`).join('')}
+        </select>
+        <div id="mortgage-upfront-preview" style="margin-top:7px;padding:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;font-size:.61rem;color:#475569;"></div>
+        <label for="mortgage-upfront-source" style="display:block;font-size:.62rem;font-weight:800;color:#334155;margin:8px 0 4px;">Descontar pie y gastos de cierre desde</label>
+        <select id="mortgage-upfront-source" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">${getMortgageFundingOptions()}</select>
+        <label for="mortgage-payment-source" style="display:block;font-size:.62rem;font-weight:800;color:#334155;margin:8px 0 4px;">Descontar el dividendo mensual desde</label>
+        <select id="mortgage-payment-source" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">${getMortgageFundingOptions()}</select>
+        <div style="margin-top:5px;font-size:.57rem;color:#64748b;">Primer dividendo: día 5 del mes siguiente a la compra.</div>` : '';
+      container.innerHTML = `<div class="personal-subview-box">${header}<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+        ${amountControl}
+        <label for="credit-loan-term" style="display:block;font-size:.64rem;font-weight:800;color:#334155;margin-bottom:4px;">Plazo</label>
+        <select id="credit-loan-term" onchange="updateCreditLoanPreview('${loanType}')" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">${settings.terms.map(term => `<option value="${term}" ${term === defaultTerm ? 'selected' : ''}>${term} meses${loanType === 'hipotecario' ? ` (${term / 12} ${term === 12 ? 'año' : 'años'})` : ''}</option>`).join('')}</select>
+        ${mortgageControls}
+      </div><div id="credit-loan-preview" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px 11px;margin-bottom:8px;font-size:.64rem;color:#166534;"></div><div style="display:grid;gap:5px;margin-bottom:8px;">${insuranceOptions}</div><div id="credit-loan-error" style="display:none;margin-bottom:8px;padding:7px 9px;border:1px solid #fecaca;border-radius:6px;background:#fef2f2;color:#b91c1c;font-size:.61rem;font-weight:700;"></div><button type="button" onclick="executeCreditLoan('${loanType}')" style="width:100%;padding:9px;border:0;border-radius:6px;background:#0284c7;color:#fff;font-size:.68rem;font-weight:800;cursor:pointer;">Solicitar crédito</button></div>`;
+      updateCreditLoanPreview(loanType, propertyContext ? selectedProperty.id : null);
+    }
+
+    function openPayOffConsumerLoan(debtId) {
+      const debt = (state.debts || []).find(item => item.id === debtId && item.loanType === 'consumo');
+      const modalRoot = document.getElementById('banco-modal-root');
+      if (!debt || !modalRoot) return;
+      const payoffAmount = Math.max(0, Math.ceil(Number(debt.remainingBalance) || 0));
+      const sources = [
+        { id: 'cash', label: `Efectivo ($${(Number(state.cash) || 0).toLocaleString('es-CL')})` },
+        ...(state.bankAccounts || []).filter(account => account.type !== 'credit').map(account => ({
+          id: account.id,
+          label: `${account.icon || '🏦'} ${account.name} ($${(Number(account.balance) || 0).toLocaleString('es-CL')})`
+        }))
+      ];
+      modalRoot.innerHTML = `
+        <div class="job-modal-backdrop" onclick="if(event.target === this) closeBancoModal()">
+          <div class="job-modal-card" style="max-width:410px;border-color:#047857;">
+            <div class="job-modal-header" style="background:#047857;color:#fff;padding:12px 14px;">
+              <div class="job-modal-title" style="color:#fff;">Pagar todo el Crédito de Consumo</div>
+              <div class="job-modal-subtitle" style="color:#d1fae5;">Saldo total: $${payoffAmount.toLocaleString('es-CL')}</div>
+            </div>
+            <div class="job-modal-body" style="padding:13px 15px;">
+              <label for="consumer-loan-payoff-source" style="display:block;font-size:.64rem;font-weight:700;color:#334155;margin-bottom:4px;">Descontar desde</label>
+              <select id="consumer-loan-payoff-source" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;">${sources.map(source => `<option value="${source.id}">${source.label}</option>`).join('')}</select>
+              <div id="consumer-loan-payoff-error" style="display:none;margin-top:8px;padding:7px;border:1px solid #fecaca;border-radius:5px;background:#fef2f2;color:#b91c1c;font-size:.6rem;"></div>
+              <div style="display:flex;gap:8px;margin-top:12px;">
+                <button type="button" onclick="closeBancoModal()" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;background:#f8fafc;">Cancelar</button>
+                <button type="button" onclick="confirmPayOffConsumerLoan('${debt.id}')" style="flex:1.4;padding:8px;border:0;border-radius:6px;background:#047857;color:#fff;font-weight:800;">Confirmar pago total</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function confirmPayOffConsumerLoan(debtId) {
+      const debtIndex = (state.debts || []).findIndex(item => item.id === debtId && item.loanType === 'consumo');
+      if (debtIndex < 0) return;
+      const debt = state.debts[debtIndex];
+      const amount = Math.max(0, Math.ceil(Number(debt.remainingBalance) || 0));
+      const sourceId = document.getElementById('consumer-loan-payoff-source')?.value || 'cash';
+      const error = document.getElementById('consumer-loan-payoff-error');
+      const source = getMortgageFundingSource(sourceId);
+      if (!source || source.get() < amount) {
+        if (error) {
+          error.style.display = 'block';
+          error.textContent = `Fondos insuficientes. El saldo total es $${amount.toLocaleString('es-CL')}.`;
+        }
+        return;
+      }
+
+      withFinancialMovementDetail('Pago total de Crédito de Consumo', () => source.set(source.get() - amount));
+      state.debts.splice(debtIndex, 1);
+      state.insurances = (state.insurances || []).filter(policy => policy.loanId !== debt.id);
+      updateMonthlyDebtTotal();
+      closeBancoModal();
+      renderBancoStage('credito_consumo');
+      if (typeof updateHUD === 'function') updateHUD();
+      alertUpcomingBankFeature('Crédito de Consumo pagado', `Se pagó el saldo total de $${amount.toLocaleString('es-CL')}.`);
+    }
+
+    function updateCreditLoanPreview(loanType, propertyId = null) {
+      const settings = creditLoanSettings[loanType];
+      const propertySelect = document.getElementById('credit-loan-property');
+      const selectedPropertyId = propertyId || propertySelect?.value;
+      const selectedProperty = loanType === 'hipotecario' && propertySelect
+        ? corredoraHousingCatalog.find(property => property.id === selectedPropertyId)
+        : null;
+      const propertyValue = selectedProperty ? Number(selectedProperty.value) : 0;
+      const downPaymentRate = Number(document.getElementById('mortgage-down-payment-rate')?.value || 20) / 100;
+      const downPayment = selectedProperty ? Math.round(propertyValue * downPaymentRate) : 0;
+      const mortgagePrincipal = selectedProperty ? propertyValue - downPayment : 0;
+      const closingCosts = selectedProperty ? getMortgageClosingCosts(propertyValue) : null;
+      const closingCostsTotal = closingCosts
+        ? closingCosts.appraisal + closingCosts.operatingCosts + closingCosts.commission
+        : 0;
+      const upfrontTotal = downPayment + closingCostsTotal;
+      const amount = selectedProperty
+        ? mortgagePrincipal
+        : Math.round(Number(document.getElementById('credit-loan-amount')?.value) || 0);
+      const termMonths = Number(document.getElementById('credit-loan-term')?.value) || settings.terms[0];
+      const installment = calculateLoanInstallment(amount, settings.monthlyRate, termMonths);
+      const optionalInsurance = document.getElementById('loan-insurance-cesantia')?.checked ? 4500 : 0;
+      const desgravamen = selectedProperty
+        ? Math.ceil(amount * 0.00025)
+        : loanType === 'hipotecario' ? 1900 : (document.getElementById('loan-insurance-desgravamen')?.checked ? 1900 : 0);
+      const homePolicy = selectedProperty ? Math.ceil(Number(selectedProperty.value) * 0.000175) : loanType === 'hipotecario' ? 11000 : 0;
+      const preview = document.getElementById('credit-loan-preview');
+      const propertyAmount = document.getElementById('credit-loan-property-amount');
+      if (propertyAmount && selectedProperty) propertyAmount.innerHTML = `Valor: <strong>$${propertyValue.toLocaleString('es-CL')}</strong> · Monto del crédito después del pie: <strong>$${amount.toLocaleString('es-CL')}</strong>`;
+      const upfrontPreview = document.getElementById('mortgage-upfront-preview');
+      if (upfrontPreview && selectedProperty) {
+        upfrontPreview.innerHTML = `Pie (${Math.round(downPaymentRate * 100)}%): <strong>$${downPayment.toLocaleString('es-CL')}</strong><br/>Tasación (0,10% estimado): $${closingCosts.appraisal.toLocaleString('es-CL')}<br/>Gastos operacionales (0,20% estimado): $${closingCosts.operatingCosts.toLocaleString('es-CL')}<div style="font-size:.54rem;color:#64748b;">Notaría, inscripción en el Conservador de Bienes Raíces, estudio de títulos y trámites asociados.</div><br/>Comisión de compraventa (2,00% estimada): $${closingCosts.commission.toLocaleString('es-CL')}<br/>Total inicial a pagar: <strong>$${upfrontTotal.toLocaleString('es-CL')}</strong>`;
+      }
+      const offer = getCreditLoanOffer(loanType, termMonths);
+      const currentTenureMonths = state.currentJob ? getCurrentJobTenureMonths(state.currentJob) : 0;
+      const mortgageAssessment = loanType === 'hipotecario' ? getMortgageIncomeAssessment() : null;
+      const mortgageIncomeAverage = mortgageAssessment
+        ? mortgageAssessment.isFirstMortgage ? mortgageAssessment.salaryAverage : mortgageAssessment.combinedIncomeAverage
+        : 0;
+      const mortgageJobEligible = Boolean(state.currentJob && Number(state.currentJob.salary) > 0
+        && currentTenureMonths >= settings.minimumTenureMonths);
+      const affordabilityNote = selectedProperty && !mortgageJobEligible
+        ? `<br/><span style="color:#b45309;">Para pedir este crédito necesitas un empleo vigente y al menos ${settings.minimumTenureMonths} meses de antigüedad.</span>`
+        : selectedProperty && (!offer || amount > offer)
+          ? `<br/><span style="color:#b45309;">${mortgageAssessment?.isFirstMortgage
+            ? `No puedes pedir el crédito ya que tu dividendo sería muy alto para tu sueldo. Promedio líquido de sueldo: $${mortgageAssessment.salaryAverage.toLocaleString('es-CL')}.`
+            : `No puedes pedir el crédito: la suma de dividendos supera el 50% de tus ingresos promedio. Sueldo y arriendos netos: $${mortgageAssessment.combinedIncomeAverage.toLocaleString('es-CL')}; dividendos hipotecarios vigentes: $${mortgageAssessment.existingDividends.toLocaleString('es-CL')}/mes.`}</span>`
+        : loanType === 'consumo' && (!offer || amount > offer)
+          ? `<br/><span style="color:#b45309;">${!state.currentJob || Number(state.currentJob.salary) <= 0
+            ? 'Para solicitarlo necesitas un empleo vigente con sueldo.'
+            : currentTenureMonths < settings.minimumTenureMonths
+              ? `La oferta requiere 6 meses de antigüedad laboral; tienes ${currentTenureMonths} meses.`
+              : 'El monto solicitado supera la oferta estimada para tu sueldo.'}</span>`
+          : '';
+      const paymentLabel = loanType === 'consumo' ? 'Cuota mensual' : 'Dividendo estimado';
+      const incomeBreakdown = mortgageAssessment
+        ? mortgageAssessment.isFirstMortgage
+          ? `Sueldo líquido promedio (3 meses): <strong>$${mortgageAssessment.salaryAverage.toLocaleString('es-CL')}</strong><br/>Límite del dividendo (33%): <strong>$${mortgageAssessment.paymentCapacity.toLocaleString('es-CL')}/mes</strong>`
+          : `Sueldo líquido promedio: <strong>$${mortgageAssessment.salaryAverage.toLocaleString('es-CL')}</strong> · Arriendos netos promedio: <strong>$${mortgageAssessment.rentalAverage.toLocaleString('es-CL')}</strong><br/>Ingresos promedio totales: <strong>$${mortgageAssessment.combinedIncomeAverage.toLocaleString('es-CL')}</strong> · Dividendos vigentes: <strong>$${mortgageAssessment.existingDividends.toLocaleString('es-CL')}/mes</strong><br/>Límite disponible para nuevos dividendos (50%): <strong>$${mortgageAssessment.paymentCapacity.toLocaleString('es-CL')}/mes</strong>`
+        : '';
+      if (preview) preview.innerHTML = `${paymentLabel}: <strong>$${installment.toLocaleString('es-CL')}/mes</strong>${selectedProperty ? `<br/>${incomeBreakdown}` : ''}<br/>Tasa mensual referencial de simulación: <strong>${settings.rateLabel}</strong><br/>Seguros: <strong>$${(optionalInsurance + desgravamen + homePolicy).toLocaleString('es-CL')}/mes</strong>${selectedProperty ? `<br/>Incendio/sismo (0,0175%): $${homePolicy.toLocaleString('es-CL')} · Desgravamen (0,025% del crédito inicial): $${desgravamen.toLocaleString('es-CL')}` : ''}<br/>Compromiso mensual estimado: <strong>$${(installment + optionalInsurance + desgravamen + homePolicy).toLocaleString('es-CL')}</strong>${affordabilityNote}`;
+    }
+
+    function createCreditLoanPolicy(debt, insuranceType, mandatory) {
+      const item = segurosCatalog.find(policy => policy.id === insuranceType);
+      if (!item) return;
+      if (!mandatory && (state.insurances || []).some(policy => policy.type === insuranceType && !policy.mandatory)) return;
+      state.insurances.push({
+        id: `${debt.id}_${insuranceType}`, type: insuranceType, name: `${item.name} (${debt.name})`,
+        icon: item.icon, costMonthly: item.costMonthly, costDisplay: item.costDisplay,
+        associatedTo: debt.name, loanId: debt.id, mandatory, contractedAt: new Date().toISOString()
+      });
+    }
+
+    function createPropertyMortgagePolicies(debt, property) {
+      const firePolicy = segurosCatalog.find(policy => policy.id === 'incendio_sismo');
+      const lifePolicy = segurosCatalog.find(policy => policy.id === 'desgravamen');
+      if (!firePolicy || !lifePolicy) return;
+      state.insurances.push({
+        id: `${debt.id}_incendio_sismo`, type: 'incendio_sismo', name: `${firePolicy.name} (${property.name})`,
+        icon: firePolicy.icon, costMonthly: Math.ceil(property.value * 0.000175), costRateMonthly: 0.000175,
+        premiumBase: 'insured_value', insuredValue: property.value, costDisplay: '0,0175% mensual del valor asegurado',
+        associatedTo: property.name, loanId: debt.id, mandatory: true, contractedAt: new Date().toISOString()
+      });
+      state.insurances.push({
+        id: `${debt.id}_desgravamen`, type: 'desgravamen', name: `${lifePolicy.name} (${property.name})`,
+        icon: lifePolicy.icon, costMonthly: Math.ceil(debt.remainingBalance * 0.00025), costRateMonthly: 0.00025,
+        premiumBase: 'loan_balance', insuredValue: 0, costDisplay: '0,025% mensual del saldo de la deuda',
+        associatedTo: property.name, loanId: debt.id, mandatory: true, contractedAt: new Date().toISOString()
+      });
+    }
+
+    function updateMonthlyDebtTotal() {
+      state.monthlyDebt = (state.debts || []).reduce((sum, debt) => sum + (Number(debt.monthlyPayment) || 0), 0);
+    }
+
+    function executeCreditLoan(loanType, propertyId = null) {
+      const settings = creditLoanSettings[loanType];
+      const propertySelect = document.getElementById('credit-loan-property');
+      const selectedPropertyId = propertyId || propertySelect?.value || null;
+      const propertyContext = loanType === 'hipotecario' && Boolean(selectedPropertyId) && Boolean(propertySelect);
+      const property = propertyContext
+        ? corredoraHousingCatalog.find(item => item.id === selectedPropertyId)
+        : null;
+      if (!settings || findActiveLoan(loanType, propertyContext ? property.id : null)) return;
+      const amount = propertyContext
+        ? Math.round((Number(property.value) || 0) * (1 - Number(document.getElementById('mortgage-down-payment-rate')?.value || 20) / 100))
+        : Math.round(Number(document.getElementById('credit-loan-amount')?.value) || 0);
+      const downPaymentRate = propertyContext
+        ? Number(document.getElementById('mortgage-down-payment-rate')?.value || 20) / 100
+        : 0;
+      const downPayment = propertyContext ? Math.round(Number(property.value) * downPaymentRate) : 0;
+      const closingCosts = propertyContext ? getMortgageClosingCosts(property.value) : null;
+      const closingCostsTotal = closingCosts
+        ? closingCosts.appraisal + closingCosts.operatingCosts + closingCosts.commission
+        : 0;
+      const upfrontTotal = downPayment + closingCostsTotal;
+      const upfrontSourceId = propertyContext
+        ? document.getElementById('mortgage-upfront-source')?.value || 'cash'
+        : null;
+      const paymentSourceId = propertyContext
+        ? document.getElementById('mortgage-payment-source')?.value || 'cash'
+        : null;
+      const upfrontSource = propertyContext ? getMortgageFundingSource(upfrontSourceId, true) : null;
+      const termMonths = Number(document.getElementById('credit-loan-term')?.value);
+      const error = document.getElementById('credit-loan-error');
+      const availableAmount = getCreditLoanOffer(loanType, termMonths);
+      const installment = calculateLoanInstallment(amount, settings.monthlyRate, termMonths);
+      if (!availableAmount || amount < settings.minimumAmount || amount > availableAmount || !settings.terms.includes(termMonths)
+        || (propertyContext && (!upfrontSource || upfrontSource.get() < upfrontTotal))
+        || (loanType === 'hipotecario' && installment > getMortgagePaymentCapacity())) {
+        if (error) {
+          error.style.display = 'block';
+          error.textContent = propertyContext && upfrontSource && upfrontSource.get() < upfrontTotal
+            ? `La fuente seleccionada no tiene fondos suficientes. El pie y los gastos de cierre suman $${upfrontTotal.toLocaleString('es-CL')}.`
+            : loanType === 'hipotecario' && (!state.currentJob || Number(state.currentJob.salary) <= 0 || getCurrentJobTenureMonths(state.currentJob) < settings.minimumTenureMonths)
+              ? `Para pedir este crédito necesitas un empleo vigente y al menos ${settings.minimumTenureMonths} meses de antigüedad.`
+              : loanType === 'hipotecario' && installment > getMortgagePaymentCapacity()
+                ? (() => {
+                  const assessment = getMortgageIncomeAssessment();
+                  return assessment.isFirstMortgage
+                    ? `No puedes pedir el crédito ya que tu dividendo sería muy alto para tu sueldo. Promedio líquido de sueldo: $${assessment.salaryAverage.toLocaleString('es-CL')}.`
+                    : `No puedes pedir el crédito: la suma de dividendos supera el 50% de tus ingresos promedio. Sueldo y arriendos netos: $${assessment.combinedIncomeAverage.toLocaleString('es-CL')}; dividendos hipotecarios vigentes: $${assessment.existingDividends.toLocaleString('es-CL')}/mes.`;
+                })()
+            : 'No fue posible procesar la solicitud con los datos ingresados.';
+        }
+        return;
+      }
+
+      if (propertyContext) {
+        [
+          { detail: 'Tasación de propiedad', amount: closingCosts.appraisal },
+          { detail: 'Comisión de compraventa', amount: closingCosts.commission },
+          { detail: 'Gastos operacionales de compraventa', amount: closingCosts.operatingCosts },
+          { detail: 'Pie de crédito hipotecario', amount: downPayment }
+        ].forEach(charge => {
+          if (charge.amount <= 0) return;
+          withFinancialMovementDetail(charge.detail, () => {
+            upfrontSource.set(upfrontSource.get() - charge.amount);
+          });
+        });
+      }
+
+      const debt = {
+        id: `credit_${loanType}_${Date.now()}`, loanType, name: settings.name,
+        ...(propertyContext ? {
+          propertyCatalogId: property.id,
+          propertyName: property.name,
+          insuredPropertyValue: property.value,
+          downPayment,
+          downPaymentRate,
+          closingCosts,
+          upfrontSourceId,
+          paymentSourceId,
+          nextPaymentMonthIndex: getSimulationMonthIndex() + 1,
+          nextPaymentDay: 5
+        } : {}),
+        principal: amount, amount, remainingBalance: amount, totalDebt: amount,
+        monthlyPayment: installment, monthlyInterestRate: settings.monthlyRate,
+        originalTermMonths: termMonths, remainingTermMonths: termMonths, missedPayments: 0
+      };
+      if (!Array.isArray(state.debts)) state.debts = [];
+      if (!Array.isArray(state.insurances)) state.insurances = [];
+      state.debts.push(debt);
+      if (loanType === 'hipotecario') {
+        if (propertyContext) {
+          createPropertyMortgagePolicies(debt, property);
+          if (!Array.isArray(state.properties)) state.properties = [];
+          state.properties.push({
+            id: `corredora_${property.id}_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+            catalogId: property.id, name: property.name, sub: property.preferenceName,
+            icon: property.icon, value: property.value, priceUF: property.priceUF,
+            bedrooms: property.bedrooms, bathrooms: property.bathrooms,
+            landArea: property.landArea || null, mortgageDebtId: debt.id,
+            purchaseDate: { year: Number(state.simulationYear) || 1, month: Number(state.simulationMonth) || 0, day: Number(state.simulationDay) || 1 }
+          });
+        } else {
+          createCreditLoanPolicy(debt, 'desgravamen', true);
+          createCreditLoanPolicy(debt, 'incendio_sismo', true);
+        }
+      } else if (document.getElementById('loan-insurance-desgravamen')?.checked) {
+        createCreditLoanPolicy(debt, 'desgravamen', false);
+      }
+      if (document.getElementById('loan-insurance-cesantia')?.checked) createCreditLoanPolicy(debt, 'cesantia', false);
+
+      if (!propertyContext) state.cash = (Number(state.cash) || 0) + amount;
+      updateMonthlyDebtTotal();
+      closeBancoModal();
+      renderBancoStage(loanType === 'consumo' ? 'credito_consumo' : 'credito_hipotecario');
+      if (typeof updateHUD === 'function') updateHUD();
+      alertUpcomingBankFeature('Crédito contratado', propertyContext
+        ? `Se compró ${property.name} mediante crédito hipotecario. Pie y gastos de cierre pagados: $${upfrontTotal.toLocaleString('es-CL')}. Crédito: $${amount.toLocaleString('es-CL')}. El primer dividendo de $${installment.toLocaleString('es-CL')} se descontará el día 5 del próximo mes desde la fuente seleccionada.`
+        : `Se incorporaron $${amount.toLocaleString('es-CL')} a tu efectivo simulado. La cuota estimada es de $${installment.toLocaleString('es-CL')} al mes.`);
+    }
+
     function renderLineaCreditoView() {
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
@@ -1172,7 +1709,7 @@
                 <span style="font-size: 0.58rem; color: #0284c7; font-weight: 600;">Asociada a Cuenta Corriente</span>
               </div>
               <div style="font-size: 1.30rem; font-weight: 800; color: #1e40af; font-family: var(--font-title);">
-                $${((line.limit || 500000) - (line.used || 0)).toLocaleString('es-CL')}
+                $${Math.max(0, (Number(line.limit) || 500000) - (Number(line.used) || 0) - (Number(line.accruedInterest) || 0) - (Number(line.currentDayInterest) || 0)).toLocaleString('es-CL')}
               </div>
               <div style="font-size: 0.58rem; color: #475569;">Cupo disponible de sobregiro (Total: $${(line.limit || 500000).toLocaleString('es-CL')})</div>
             </div>
@@ -1186,7 +1723,11 @@
                 </div>
                 <div style="display: flex; justify-content: space-between;">
                   <span style="color: #64748b;">• Tasa de interés diaria por uso:</span>
-                  <strong style="color: #0284c7;">0,08% al día (solo si se usa)</strong>
+                  <strong style="color: #0284c7;">0,09% al día (se consolida mensualmente)</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #64748b;">• Interés pendiente de consolidación:</span>
+                  <strong style="color: #b45309;">$${Math.round((Number(line.accruedInterest) || 0) + (Number(line.currentDayInterest) || 0)).toLocaleString('es-CL')}</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
                   <span style="color: #64748b;">• Seguro de Desgravamen:</span>
@@ -1226,6 +1767,10 @@
         name: 'Línea de Crédito',
         limit: 500000,
         used: 0,
+        dailyInterestRate: revolvingCreditDailyRates.linea,
+        accruedInterest: 0,
+        currentDayInterest: 0,
+        interestConsolidatedTotal: 0,
         associatedTo: 'acc_corriente'
       };
       if (!Array.isArray(state.insurances)) state.insurances = [];
@@ -1250,7 +1795,7 @@
       const modalRoot = document.getElementById('banco-modal-root');
       if (!modalRoot) return;
 
-      const debt = Number(state.creditLine.used) || 0;
+      const debt = Math.ceil((Number(state.creditLine.used) || 0) + (Number(state.creditLine.accruedInterest) || 0) + (Number(state.creditLine.currentDayInterest) || 0));
       const ccAcc = (state.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
       const availableFunds = (ccAcc ? (Number(ccAcc.balance) || 0) : 0) + (Number(state.cash) || 0);
       const canPay = availableFunds >= debt;
@@ -1296,7 +1841,7 @@
 
     function executeCancelCreditLine() {
       if (!state.creditLine) return;
-      const debt = Number(state.creditLine.used) || 0;
+      const debt = Math.ceil((Number(state.creditLine.used) || 0) + (Number(state.creditLine.accruedInterest) || 0) + (Number(state.creditLine.currentDayInterest) || 0));
       if (debt > 0) {
         const ccAcc = (state.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
         const ccBal = ccAcc ? (Number(ccAcc.balance) || 0) : 0;
@@ -1360,7 +1905,7 @@
                 </span>
               </div>
               <div style="font-size: 1.30rem; font-weight: 800; font-family: var(--font-title); color: #f8fafc; margin-bottom: 2px;">
-                $${((card.limit || 950000) - (card.used || 0)).toLocaleString('es-CL')}
+                $${Math.max(0, (Number(card.limit) || 950000) - (Number(card.used) || 0) - (Number(card.accruedInterest) || 0) - (Number(card.currentDayInterest) || 0)).toLocaleString('es-CL')}
               </div>
               <div style="font-size: 0.58rem; color: #94a3b8; display: flex; justify-content: space-between;">
                 <span>Cupo disponible nacional/internacional</span>
@@ -1382,7 +1927,20 @@
                   <span style="color: #64748b;">• Comisión de administración:</span>
                   <strong style="color: #0284c7;">$6.900/mes ($0 en meses sin compras)</strong>
                 </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #64748b;">• Interés rotativo:</span>
+                  <strong style="color: #0284c7;">0,08% diario, consolidado mensualmente</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #64748b;">• Interés pendiente de consolidación:</span>
+                  <strong style="color: #b45309;">$${Math.round((Number(card.accruedInterest) || 0) + (Number(card.currentDayInterest) || 0)).toLocaleString('es-CL')}</strong>
+                </div>
               </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:8px;">
+              <button type="button" onclick="openCreditCardPurchaseModal()" style="padding:8px 6px;border:0;border-radius:6px;background:#0369a1;color:#fff;font-size:.62rem;font-weight:800;cursor:pointer;">Registrar compra</button>
+              <button type="button" onclick="openCreditCardPaymentModal()" style="padding:8px 6px;border:1px solid #047857;border-radius:6px;background:#fff;color:#047857;font-size:.62rem;font-weight:800;cursor:pointer;" ${(Number(card.used) || 0) + (Number(card.accruedInterest) || 0) + (Number(card.currentDayInterest) || 0) > 0 ? '' : 'disabled'}>Pagar deuda</button>
             </div>
 
             <button type="button" onclick="promptCancelCreditCard()" style="width: 100%; padding: 8px; font-size: 0.72rem; font-weight: 700; background: #fff5f5; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; cursor: pointer;">
@@ -1412,6 +1970,135 @@
       `;
     }
 
+    function openCreditCardPurchaseModal() {
+      const card = state.creditCard;
+      const modalRoot = document.getElementById('banco-modal-root');
+      if (!card || !modalRoot) return;
+      const available = Math.max(0, (Number(card.limit) || 950000) - (Number(card.used) || 0) - (Number(card.accruedInterest) || 0) - (Number(card.currentDayInterest) || 0));
+      modalRoot.innerHTML = `
+        <div class="job-modal-backdrop" onclick="if(event.target === this) closeBancoModal()">
+          <div class="job-modal-card" style="max-width:410px;border-color:#0284c7;">
+            <div class="job-modal-header" style="background:#0369a1;color:#fff;padding:12px 14px;">
+              <div class="job-modal-title" style="color:#fff;">Registrar compra con tarjeta</div>
+              <div class="job-modal-subtitle" style="color:#e0f2fe;">Cupo disponible: $${available.toLocaleString('es-CL')}</div>
+            </div>
+            <div class="job-modal-body" style="padding:13px 15px;">
+              <label for="credit-card-purchase-detail" style="display:block;font-size:.64rem;font-weight:700;margin-bottom:4px;">Detalle de la compra</label>
+              <input id="credit-card-purchase-detail" type="text" maxlength="80" placeholder="Ej.: compra en comercio" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:9px;">
+              <label for="credit-card-purchase-amount" style="display:block;font-size:.64rem;font-weight:700;margin-bottom:4px;">Monto ($)</label>
+              <input id="credit-card-purchase-amount" type="number" min="1" max="${available}" step="1000" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">
+              <div id="credit-card-purchase-error" style="display:none;margin-top:8px;padding:7px;border:1px solid #fecaca;border-radius:5px;background:#fef2f2;color:#b91c1c;font-size:.6rem;"></div>
+              <div style="display:flex;gap:8px;margin-top:12px;">
+                <button type="button" onclick="closeBancoModal()" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;background:#f8fafc;">Cancelar</button>
+                <button type="button" onclick="executeCreditCardPurchase()" style="flex:1.3;padding:8px;border:0;border-radius:6px;background:#0369a1;color:#fff;font-weight:800;">Confirmar compra</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function executeCreditCardPurchase() {
+      const card = state.creditCard;
+      if (!card) return;
+      const amount = Math.round(Number(document.getElementById('credit-card-purchase-amount')?.value) || 0);
+      const error = document.getElementById('credit-card-purchase-error');
+      const available = Math.max(0, (Number(card.limit) || 950000) - (Number(card.used) || 0) - (Number(card.accruedInterest) || 0) - (Number(card.currentDayInterest) || 0));
+      if (amount <= 0 || amount > available) {
+        if (error) {
+          error.style.display = 'block';
+          error.textContent = amount > available
+            ? `La compra supera el cupo disponible de $${available.toLocaleString('es-CL')}.`
+            : 'Ingresa un monto válido mayor que cero.';
+        }
+        return;
+      }
+
+      const detail = document.getElementById('credit-card-purchase-detail')?.value.trim() || 'Compra con tarjeta';
+      card.used = (Number(card.used) || 0) + amount;
+      if (!Array.isArray(card.purchases)) card.purchases = [];
+      card.purchases.push({
+        id: `card_purchase_${Date.now()}`,
+        detail,
+        amount,
+        year: Number(state.simulationYear) || 1,
+        month: Number(state.simulationMonth) || 0,
+        day: Number(state.simulationDay) || 1
+      });
+      recordFinancialMovement({
+        detail: `Compra con Tarjeta de Crédito: ${detail}`,
+        amount,
+        direction: 'expense',
+        accountId: card.id,
+        accountName: 'Tarjeta de Crédito'
+      });
+      closeBancoModal();
+      renderBancoStage('tarjeta');
+      if (typeof updateHUD === 'function') updateHUD();
+      alertUpcomingBankFeature('Compra con tarjeta registrada', `Se cargaron $${amount.toLocaleString('es-CL')} por ${detail}. El saldo utilizado comenzará a devengar interés diario.`);
+    }
+
+    function openCreditCardPaymentModal() {
+      const card = state.creditCard;
+      const modalRoot = document.getElementById('banco-modal-root');
+      if (!card || !modalRoot) return;
+      const accrued = Math.round((Number(card.accruedInterest) || 0) + (Number(card.currentDayInterest) || 0));
+      const totalDebt = (Number(card.used) || 0) + accrued;
+      const sources = [
+        { id: 'cash', name: `Efectivo ($${(Number(state.cash) || 0).toLocaleString('es-CL')})` },
+        ...(state.bankAccounts || []).filter(account => account.type !== 'credit').map(account => ({
+          id: account.id,
+          name: `${account.icon || '🏦'} ${account.name} ($${(Number(account.balance) || 0).toLocaleString('es-CL')})`
+        }))
+      ];
+      modalRoot.innerHTML = `
+        <div class="job-modal-backdrop" onclick="if(event.target === this) closeBancoModal()">
+          <div class="job-modal-card" style="max-width:410px;border-color:#047857;">
+            <div class="job-modal-header" style="background:#047857;color:#fff;padding:12px 14px;"><div class="job-modal-title" style="color:#fff;">Pagar Tarjeta de Crédito</div><div class="job-modal-subtitle" style="color:#d1fae5;">Deuda total: $${totalDebt.toLocaleString('es-CL')}</div></div>
+            <div class="job-modal-body" style="padding:13px 15px;">
+              <label for="credit-card-payment-source" style="display:block;font-size:.64rem;font-weight:700;margin-bottom:4px;">Pagar desde</label>
+              <select id="credit-card-payment-source" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:9px;">${sources.map(source => `<option value="${source.id}">${source.name}</option>`).join('')}</select>
+              <label for="credit-card-payment-amount" style="display:block;font-size:.64rem;font-weight:700;margin-bottom:4px;">Monto a pagar (máximo $${totalDebt.toLocaleString('es-CL')})</label>
+              <input id="credit-card-payment-amount" type="number" min="1" max="${totalDebt}" value="${totalDebt}" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">
+              <div id="credit-card-payment-error" style="display:none;margin-top:8px;padding:7px;border:1px solid #fecaca;border-radius:5px;background:#fef2f2;color:#b91c1c;font-size:.6rem;"></div>
+              <div style="display:flex;gap:8px;margin-top:12px;"><button type="button" onclick="closeBancoModal()" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;background:#f8fafc;">Cancelar</button><button type="button" onclick="executeCreditCardPayment()" style="flex:1.3;padding:8px;border:0;border-radius:6px;background:#047857;color:#fff;font-weight:800;">Confirmar pago</button></div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function executeCreditCardPayment() {
+      const card = state.creditCard;
+      if (!card) return;
+      const amount = Math.round(Number(document.getElementById('credit-card-payment-amount')?.value) || 0);
+      const sourceId = document.getElementById('credit-card-payment-source')?.value || 'cash';
+      const error = document.getElementById('credit-card-payment-error');
+      const accrued = Math.round((Number(card.accruedInterest) || 0) + (Number(card.currentDayInterest) || 0));
+      const totalDebt = (Number(card.used) || 0) + accrued;
+      const source = getMortgageFundingSource(sourceId);
+      if (!source || amount <= 0 || amount > totalDebt || source.get() < amount) {
+        if (error) {
+          error.style.display = 'block';
+          error.textContent = source && source.get() < amount
+            ? `La fuente seleccionada solo tiene $${source.get().toLocaleString('es-CL')} disponibles.`
+            : `Ingresa un pago válido de hasta $${totalDebt.toLocaleString('es-CL')}.`;
+        }
+        return;
+      }
+
+      withFinancialMovementDetail('Pago de Tarjeta de Crédito', () => source.set(source.get() - amount));
+      let remainingPayment = amount;
+      const accruedPayment = Math.min(remainingPayment, Number(card.accruedInterest) || 0);
+      card.accruedInterest = Math.max(0, (Number(card.accruedInterest) || 0) - accruedPayment);
+      remainingPayment -= accruedPayment;
+      const currentDayPayment = Math.min(remainingPayment, Number(card.currentDayInterest) || 0);
+      card.currentDayInterest = Math.max(0, (Number(card.currentDayInterest) || 0) - currentDayPayment);
+      remainingPayment -= currentDayPayment;
+      card.used = Math.max(0, (Number(card.used) || 0) - remainingPayment);
+      closeBancoModal();
+      renderBancoStage('tarjeta');
+      if (typeof updateHUD === 'function') updateHUD();
+    }
+
     function activateCreditCardAction() {
       const hasCuentaCorriente = (state.bankAccounts || []).some(a => (a.id || '').includes('corriente') || (a.type || '').includes('corriente'));
       state.creditCard = {
@@ -1420,6 +2107,11 @@
         isIndependent: !hasCuentaCorriente,
         limit: 950000,
         used: 0,
+        dailyInterestRate: revolvingCreditDailyRates.tarjeta,
+        accruedInterest: 0,
+        currentDayInterest: 0,
+        interestConsolidatedTotal: 0,
+        purchases: [],
         maintenance: 6900,
         associatedTo: hasCuentaCorriente ? 'acc_corriente' : null
       };
@@ -1437,7 +2129,7 @@
       const modalRoot = document.getElementById('banco-modal-root');
       if (!modalRoot) return;
 
-      const debt = Number(state.creditCard.used) || 0;
+      const debt = Math.ceil((Number(state.creditCard.used) || 0) + (Number(state.creditCard.accruedInterest) || 0) + (Number(state.creditCard.currentDayInterest) || 0));
       const ccAcc = (state.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
       const availableFunds = (ccAcc ? (Number(ccAcc.balance) || 0) : 0) + (Number(state.cash) || 0);
       const canPay = availableFunds >= debt;
@@ -1483,7 +2175,7 @@
 
     function executeCancelCreditCard() {
       if (!state.creditCard) return;
-      const debt = Number(state.creditCard.used) || 0;
+      const debt = Math.ceil((Number(state.creditCard.used) || 0) + (Number(state.creditCard.accruedInterest) || 0) + (Number(state.creditCard.currentDayInterest) || 0));
       if (debt > 0) {
         const ccAcc = (state.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
         const ccBal = ccAcc ? (Number(ccAcc.balance) || 0) : 0;
@@ -1885,14 +2577,14 @@
         state.cash = available - amount;
       } else {
         const acc = (state.bankAccounts || []).find(a => a.id === sourceId);
-        if (!acc || (Number(acc.balance) || 0) < amount) {
+        if (!acc || getBankAccountSpendableBalance(acc.id) < amount) {
           if (errorEl) {
             errorEl.style.display = 'block';
             errorEl.textContent = '⚠️ Saldo insuficiente en la cuenta bancaria seleccionada.';
           }
           return;
         }
-        acc.balance = (Number(acc.balance) || 0) - amount;
+        debitBankAccountWithCreditLine(acc.id, amount);
       }
 
       if (!Array.isArray(state.mutualFunds)) state.mutualFunds = [];
@@ -2484,14 +3176,14 @@
         state.cash -= amount;
       } else {
         const acc = (state.bankAccounts || []).find(a => a.id === sourceId);
-        if (!acc || (Number(acc.balance) || 0) < amount) {
+        if (!acc || getBankAccountSpendableBalance(acc.id) < amount) {
           if (errEl) {
             errEl.style.display = 'block';
             errEl.innerText = `⚠️ Saldo insuficiente en ${acc ? acc.name : 'la cuenta seleccionada'} para invertir $${amount.toLocaleString('es-CL')}.`;
           }
           return;
         }
-        acc.balance -= amount;
+        debitBankAccountWithCreditLine(acc.id, amount);
         payoutAccountName = acc.name;
       }
 
@@ -2585,7 +3277,7 @@
         let targetName = 'Dinero en Efectivo';
         const targetAcc = (state.bankAccounts || []).find(a => a.id === dap.payoutAccountId);
         if (targetAcc) {
-          targetAcc.balance = (Number(targetAcc.balance) || 0) + totalPayout;
+          creditBankAccount(targetAcc.id, totalPayout);
           targetName = targetAcc.name;
         } else {
           state.cash = (Number(state.cash) || 0) + totalPayout;
@@ -2614,7 +3306,7 @@
     function settleTermDeposit(dap, index) {
       const totalPayout = (Number(dap.principal) || 0) + (Number(dap.expectedInterest) || 0);
       const targetAccount = (state.bankAccounts || []).find(account => account.id === dap.payoutAccountId);
-      if (targetAccount) targetAccount.balance = (Number(targetAccount.balance) || 0) + totalPayout;
+      if (targetAccount) creditBankAccount(targetAccount.id, totalPayout);
       else state.cash = (Number(state.cash) || 0) + totalPayout;
       state.termDeposits.splice(index, 1);
     }
@@ -2653,28 +3345,255 @@
       const cashBalance = () => Number(state.cash) || 0;
       (state.bankAccounts || []).forEach(account => {
         const maintenance = Math.max(0, Number(account.maintenance) || 0);
-        if (maintenance > 0 && cashBalance() >= maintenance) state.cash -= maintenance;
+        if (maintenance > 0 && cashBalance() >= maintenance) {
+          withFinancialMovementDetail(`Mantención mensual de ${account.name}`, () => { state.cash -= maintenance; });
+        }
       });
-      if (state.creditCard && (Number(state.creditCard.used) || 0) > 0) {
+      if (state.creditCard && ((Number(state.creditCard.used) || 0) + (Number(state.creditCard.accruedInterest) || 0) + (Number(state.creditCard.currentDayInterest) || 0)) > 0) {
         const maintenance = Math.max(0, Number(state.creditCard.maintenance) || 0);
-        if (maintenance > 0 && cashBalance() >= maintenance) state.cash -= maintenance;
+        if (maintenance > 0 && cashBalance() >= maintenance) {
+          withFinancialMovementDetail('Mantención mensual de Tarjeta de Crédito', () => { state.cash -= maintenance; });
+        }
       }
       (state.insurances || []).forEach(policy => {
-        const premium = Math.max(0, Number(policy.costMonthly) || 0);
-        if (premium > 0 && cashBalance() >= premium) state.cash -= premium;
+        let premium = Math.max(0, Number(policy.costMonthly) || 0);
+        if (Number(policy.costRateMonthly) > 0) {
+          const debt = (state.debts || []).find(item => item.id === policy.loanId);
+          const insuredValue = Number(policy.insuredValue) || 0;
+          const premiumBase = policy.premiumBase === 'loan_balance'
+            ? Number(debt?.remainingBalance) || 0
+            : insuredValue;
+          premium = Math.ceil(premiumBase * Number(policy.costRateMonthly));
+          policy.costMonthly = premium;
+        }
+        if (premium > 0 && cashBalance() >= premium) {
+          withFinancialMovementDetail(`Pago de seguro: ${policy.name}`, () => { state.cash -= premium; });
+        }
       });
     }
 
+    function getSimulationDateForMonthIndex(monthIndex, day = 1) {
+      return {
+        year: Math.floor(monthIndex / 12) + 1,
+        month: monthIndex % 12,
+        day
+      };
+    }
+
+    function getJobMonthlyPay(job, year, month, firstDay, lastDay, performance = null) {
+      const monthLengths = [31, isSimulationLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      const daysInMonth = monthLengths[month];
+      const startDate = job.tenureStartDate;
+      const firstWorkedDay = startDate
+        && Number(startDate.year) === year
+        && Number(startDate.month) === month
+        ? Math.max(firstDay, Number(startDate.day) || firstDay)
+        : firstDay;
+      const workedDays = Math.max(0, Math.min(lastDay, daysInMonth) - firstWorkedDay + 1);
+      const jobPerformance = performance || getWorkPerformance(job, getSimulationMonthIndex(year, month));
+      const baseIncome = Math.max(0, Number(job.salary) || 0);
+      const multiplier = job.isFreelance
+        ? getFreelanceIncomeMultiplier(jobPerformance.level)
+        : job.isCommercial
+          ? 1 + getCommercialCommissionMultiplier(jobPerformance.level)
+          : 1;
+      return Math.round((baseIncome * multiplier * workedDays) / daysInMonth);
+    }
+
+    function payCurrentJobThroughToday() {
+      const job = state.currentJob;
+      if (!job) return 0;
+      const amount = getJobMonthlyPay(
+        job,
+        Number(state.simulationYear),
+        Number(state.simulationMonth),
+        1,
+        Number(state.simulationDay)
+      );
+      depositJobSalary(job, amount);
+      recordJobSalaryPayment(job, amount, {
+        year: Number(state.simulationYear),
+        month: Number(state.simulationMonth),
+        day: Number(state.simulationDay)
+      });
+      return amount;
+    }
+
+    function processMonthlyJobPerformance() {
+      const job = state.currentJob;
+      if (!job) return null;
+      if (!Array.isArray(job.performanceHistory)) job.performanceHistory = [];
+      const currentMonthIndex = getSimulationMonthIndex();
+      const paidMonthIndex = currentMonthIndex - 1;
+      const paidDate = getSimulationDateForMonthIndex(paidMonthIndex);
+      const previousEvaluation = job.performanceHistory.find(item => item.year === paidDate.year && item.month === paidDate.month);
+      if (previousEvaluation) return { job, performance: previousEvaluation, terminate: false };
+
+      const performance = getWorkPerformance(job, paidMonthIndex);
+      const evaluation = {
+        year: paidDate.year,
+        month: paidDate.month,
+        score: performance.score,
+        rawScore: performance.rawScore,
+        level: performance.level
+      };
+      job.performanceHistory.push(evaluation);
+      if (job.performanceHistory.length > 24) job.performanceHistory.shift();
+      job.performanceScore = performance.score;
+      job.performanceLevel = performance.level;
+      job.poorPerformanceMonths = performance.score < 10
+        ? (Number(job.poorPerformanceMonths) || 0) + 1
+        : 0;
+
+      if (job.performanceReview && performance.score >= 18) {
+        const reviewStartedAt = job.performanceReview.startedAt;
+        job.performanceReview = null;
+        if (typeof alertUpcomingBankFeature === 'function') {
+          alertUpcomingBankFeature('Revisión de desempeño superada', `Alcanzaste el nivel <strong>${performance.level}</strong> (${performance.score}/36). La revisión iniciada el ${formatCourseDate(reviewStartedAt)} queda cerrada.`);
+        }
+      } else if (job.performanceReview) {
+        const deadlineIndex = getSimulationMonthIndex(job.performanceReview.deadlineDate.year, job.performanceReview.deadlineDate.month);
+        if (currentMonthIndex >= deadlineIndex) return { job, performance: evaluation, terminate: true };
+      } else if (job.poorPerformanceMonths >= 3 && !job.isFreelance) {
+        job.performanceReview = {
+          startedAt: getSimulationDateForMonthIndex(currentMonthIndex),
+          deadlineDate: getSimulationDateForMonthIndex(currentMonthIndex + 6)
+        };
+        if (typeof alertUpcomingBankFeature === 'function') {
+          alertUpcomingBankFeature(
+            'Inicio de revisión de desempeño',
+            `El desempeño de los últimos 3 meses ha sido perjudicial para la empresa. Tienes 6 meses, hasta el ${formatCourseDate(job.performanceReview.deadlineDate)}, para alcanzar al menos el nivel Regular (18/36). De lo contrario, se cancelará tu contrato.`
+          );
+        }
+      }
+      return { job, performance: evaluation, terminate: false };
+    }
+
+    function processMonthlyJobIncome(evaluation = null) {
+      const job = state.currentJob;
+      if (!job) return;
+      const currentMonthIndex = getSimulationMonthIndex();
+      const paidMonthIndex = currentMonthIndex - 1;
+      const paidYear = Math.floor(paidMonthIndex / 12) + 1;
+      const paidMonth = paidMonthIndex % 12;
+      const paidMonthLength = [31, isSimulationLeapYear(paidYear) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][paidMonth];
+      const salaryPayment = getJobMonthlyPay(job, paidYear, paidMonth, 1, paidMonthLength, evaluation?.performance);
+      depositJobSalary(job, salaryPayment);
+      recordJobSalaryPayment(job, salaryPayment, getSimulationDateForMonthIndex(paidMonthIndex, paidMonthLength));
+      job.tenureMonths = job.tenureStartDate
+        ? getCurrentJobTenureMonths(job)
+        : (Number(job.tenureMonths) || 0) + 1;
+    }
+
+    function terminatePoorPerformanceJob() {
+      const job = state.currentJob;
+      if (!job) return;
+      if (!Array.isArray(state.jobHistory)) state.jobHistory = [];
+      if (!state.jobHistory.some(item => item.id === job.id && item.name === job.name)) {
+        state.jobHistory.push({ id: job.id, name: job.name });
+      }
+      if (typeof archiveCurrentJobExperience === 'function') archiveCurrentJobExperience();
+      state.currentJob = null;
+      if (typeof alertUpcomingBankFeature === 'function') {
+        alertUpcomingBankFeature('Contrato cancelado', `No alcanzaste el nivel Regular (18/36) antes del fin del plazo de mejora. Se canceló el contrato de <strong>${job.name}</strong>.`);
+      }
+      if (typeof renderTrabajoStage === 'function') renderTrabajoStage('main');
+    }
+
+    function processMonthlyLoanPayments() {
+      if (!Array.isArray(state.debts)) state.debts = [];
+      for (let index = state.debts.length - 1; index >= 0; index -= 1) {
+        const debt = state.debts[index];
+        if (!debt.loanType || !Number.isFinite(Number(debt.remainingBalance))) continue;
+        if (debt.loanType === 'hipotecario' && debt.propertyCatalogId) continue;
+
+        const balanceWithInterest = Math.ceil(Number(debt.remainingBalance) * (1 + (Number(debt.monthlyInterestRate) || 0)));
+        const due = Number(debt.remainingTermMonths) <= 1
+          ? balanceWithInterest
+          : Math.min(Number(debt.monthlyPayment) || 0, balanceWithInterest);
+        if (due <= 0 || (Number(state.cash) || 0) < due) {
+          debt.remainingBalance = balanceWithInterest;
+          debt.totalDebt = balanceWithInterest;
+          debt.amount = balanceWithInterest;
+          debt.missedPayments = (Number(debt.missedPayments) || 0) + 1;
+          continue;
+        }
+
+        withFinancialMovementDetail(`Pago de ${debt.name || 'crédito'}`, () => { state.cash -= due; });
+        debt.remainingBalance = Math.max(0, balanceWithInterest - due);
+        debt.totalDebt = debt.remainingBalance;
+        debt.amount = debt.remainingBalance;
+        debt.remainingTermMonths = Math.max(0, (Number(debt.remainingTermMonths) || 0) - 1);
+        if (debt.remainingBalance <= 1) {
+          state.debts.splice(index, 1);
+          state.insurances = (state.insurances || []).filter(policy => policy.loanId !== debt.id);
+        }
+      }
+      updateMonthlyDebtTotal();
+    }
+
+    function processDailyMortgagePayments() {
+      if (!Array.isArray(state.debts)) return;
+      const currentMonthIndex = getSimulationMonthIndex();
+      const currentDay = Number(state.simulationDay) || 1;
+
+      state.debts.forEach(debt => {
+        if (debt.loanType !== 'hipotecario' || !debt.propertyCatalogId
+          || currentDay < Number(debt.nextPaymentDay || 5)
+          || currentMonthIndex < Number(debt.nextPaymentMonthIndex)) return;
+
+        const monthIndex = Number(debt.nextPaymentMonthIndex);
+        const balanceWithInterest = Math.ceil(Number(debt.remainingBalance) * (1 + (Number(debt.monthlyInterestRate) || 0)));
+        const due = Number(debt.remainingTermMonths) <= 1
+          ? balanceWithInterest
+          : Math.min(Number(debt.monthlyPayment) || 0, balanceWithInterest);
+        const source = getMortgageFundingSource(debt.paymentSourceId || 'cash', true);
+        if (!source || source.get() < due) {
+          if (Number(debt.lastMissedPaymentMonthIndex) !== monthIndex) {
+            debt.missedPayments = (Number(debt.missedPayments) || 0) + 1;
+            debt.lastMissedPaymentMonthIndex = monthIndex;
+          }
+          return;
+        }
+
+        withFinancialMovementDetail(`Pago de dividendo hipotecario: ${debt.propertyName || 'propiedad'}`, () => source.set(source.get() - due));
+        debt.remainingBalance = Math.max(0, balanceWithInterest - due);
+        debt.totalDebt = debt.remainingBalance;
+        debt.amount = debt.remainingBalance;
+        debt.remainingTermMonths = Math.max(0, (Number(debt.remainingTermMonths) || 0) - 1);
+        debt.lastPaymentDate = { year: Number(state.simulationYear), month: Number(state.simulationMonth), day: currentDay };
+        debt.nextPaymentMonthIndex = monthIndex + 1;
+        if (debt.remainingBalance <= 1) {
+          const debtIndex = state.debts.findIndex(item => item.id === debt.id);
+          if (debtIndex >= 0) state.debts.splice(debtIndex, 1);
+          state.insurances = (state.insurances || []).filter(policy => policy.loanId !== debt.id);
+        }
+      });
+      updateMonthlyDebtTotal();
+    }
+
     function processDailyFinancialEvents() {
+      processDailyMortgagePayments();
+      accrueRevolvingCreditDailyInterest();
+      if (typeof processDailyCorredoraSales === 'function') processDailyCorredoraSales();
+      if (typeof processDailyCorredoraRentals === 'function') processDailyCorredoraRentals();
       if (typeof processDailyInvestmentEvents === 'function') processDailyInvestmentEvents();
       processDailyTermDeposits();
+      if (typeof processDailyCourseEvents === 'function') processDailyCourseEvents();
       if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
       if (typeof updateHUD === 'function') updateHUD();
     }
 
     function processMonthlyFinancialEvents() {
+      consolidateRevolvingCreditInterest();
+      const jobEvaluation = processMonthlyJobPerformance();
+      processMonthlyJobIncome(jobEvaluation);
+      if (jobEvaluation?.terminate) terminatePoorPerformanceJob();
       if (typeof processMonthlyInvestmentEvents === 'function') processMonthlyInvestmentEvents();
+      if (typeof processMonthlyCorredoraPayments === 'function') processMonthlyCorredoraPayments();
+      if (typeof processMonthlyCorredoraRentals === 'function') processMonthlyCorredoraRentals();
       processMonthlyBankCharges();
+      processMonthlyLoanPayments();
       if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
       if (typeof updateHUD === 'function') updateHUD();
     }
@@ -2695,7 +3614,7 @@
     }
 
     // ==========================================================================
-    // SEGUROS: CATÁLOGO DE 7 PÓLIZAS CONTRATABLES Y CANCELABLES
+    // SEGUROS: CATÁLOGO DE PÓLIZAS CONTRATABLES Y CANCELABLES
     // ==========================================================================
 
     function renderSegurosView() {
@@ -2732,7 +3651,7 @@
             </div>
           </div>
 
-          <!-- CATÁLOGO DE LOS 7 SEGUROS -->
+          <!-- CATÁLOGO DE SEGUROS -->
           <div style="display: flex; flex-direction: column; gap: 6px;">
             ${segurosCatalog.map(item => {
               const matchingPolicies = activeInsurances.filter(i => i.type === item.id || i.id === item.id || (i.id || '').startsWith('ins_' + item.id));
@@ -2980,7 +3899,8 @@
       const item = segurosCatalog.find(c => c.id === insuranceId);
       if (!item) return;
 
-      const activeIns = (state.insurances || []).find(i => i.id === insuranceId || i.type === insuranceId);
+      const activePolicies = (state.insurances || []).filter(i => i.id === insuranceId || i.type === insuranceId);
+      const activeIns = activePolicies.find(policy => policy.mandatory) || activePolicies[0];
       const assets = getUserInsuranceAssets(insuranceId);
 
       if (mode === 'contract') {
@@ -3092,7 +4012,7 @@
                 </div>
 
                 <div style="font-size: 0.62rem; color: #64748b; margin-bottom: 12px; line-height: 1.35;">
-                  En Chile la ley permite terminar o renunciar a tus seguros voluntarios en cualquier momento sin costo ni penalización.
+                    ${activeIns.mandatory ? 'Esta póliza está vinculada al crédito hipotecario y permanece vigente mientras exista saldo pendiente.' : 'Puedes terminar esta póliza voluntaria en cualquier momento desde el simulador.'}
                 </div>
 
                 <!-- BOTONES -->
@@ -3100,9 +4020,7 @@
                   <button type="button" onclick="closeBancoModal()" style="flex: 1; padding: 8px; font-size: 0.74rem; font-weight: 700; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">
                     Cerrar
                   </button>
-                  <button type="button" onclick="showConfirmCancelInsuranceModal('${activeIns ? activeIns.id : item.id}')" style="flex: 1.4; padding: 8px; font-size: 0.74rem; font-weight: 800; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #ffffff; border: none; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 3px rgba(185, 28, 28, 0.3);">
-                    Terminar seguro
-                  </button>
+                  ${activeIns.mandatory ? '<button type="button" disabled style="flex:1.4;padding:8px;font-size:.72rem;font-weight:800;background:#e2e8f0;color:#64748b;border:none;border-radius:6px;cursor:not-allowed;">Vinculado al crédito</button>' : `<button type="button" onclick="showConfirmCancelInsuranceModal('${activeIns.id}')" style="flex:1.4;padding:8px;font-size:.74rem;font-weight:800;background:linear-gradient(135deg,#ef4444 0%,#b91c1c 100%);color:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 1px 3px rgba(185,28,28,.3);">Terminar seguro</button>`}
                 </div>
               </div>
             </div>
@@ -3223,6 +4141,7 @@
       const coveragesMap = {
         automotriz: 'Daños materiales por choque, pérdida total y robo del vehículo.',
         vivienda: 'Incendio, terremoto y catástrofes estructurales (no cubre robos).',
+        incendio_sismo: 'Daños estructurales por incendio y sismo asociados al crédito hipotecario.',
         fraude: 'Robo de dinero por asalto en cajero y compras bajo intimidación.',
         desgravamen: 'Pago total del saldo deudor ante fallecimiento o invalidez.',
         cesantia: 'Pago de cuotas crediticias ante despido involuntario.',
@@ -3364,6 +4283,12 @@
     function executeCancelInsurance(policyId) {
       if (!Array.isArray(state.insurances)) return;
       const targetPolicy = state.insurances.find(i => i.id === policyId || i.type === policyId);
+      const linkedDebt = targetPolicy?.loanId && (state.debts || []).find(debt => debt.id === targetPolicy.loanId);
+      if (targetPolicy?.mandatory && linkedDebt) {
+        closeBancoModal();
+        alertUpcomingBankFeature('Póliza vigente', 'Esta póliza permanece activa mientras el crédito asociado tenga saldo pendiente.');
+        return;
+      }
       const policyType = targetPolicy ? targetPolicy.type : null;
 
       state.insurances = state.insurances.filter(i => i.id !== policyId && i.type !== policyId && !(i.name || '').toLowerCase().includes(policyId));

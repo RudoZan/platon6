@@ -46,7 +46,7 @@ Mandatory checks before closing any change in `platon6/sitio-web/educacionFinanc
 9. **Digital Wallet in `"Otras Inversiones"`:**
    - [ ] The wallet presents Cuenta Vista-style account status, available balance, rate, accrued interest, and daily-operation controls.
    - [ ] Opening creates a liquid zero-balance account; deposit, transfer, withdrawal, and closure reuse the bank modals and update cash/account balances.
-   - [ ] Simulating one day credits rounded effective daily interest based on the current balance, updates accrued interest/day count, and refreshes the account view.
+   - [ ] Each simulated day accrues rounded effective daily interest; monthly posting records one movement and refreshes the open account view.
    - [ ] Closing the wallet transfers its remaining balance to cash and removes the account; legacy wallet investment positions migrate once without duplicate balance.
 10. **Index Funds & ETFs in `"Otras Inversiones"`:**
    - [ ] Six examples render in a two-column grid with the supplied ticker, administrator, tracked index, TER, and minimum range.
@@ -61,3 +61,16 @@ Mandatory checks before closing any change in `platon6/sitio-web/educacionFinanc
    - [ ] Buying at the displayed minimum debits the total outlay and records the net share capital after the reference commission.
    - [ ] Brokerage fee uses the displayed reference amount at the minimum and the higher of the `$4,000` base or `0.35%` for larger orders, plus modeled rights/VAT.
    - [ ] Repeated purchases consolidate by alias; owned positions expose sale and use the same fee model on redemption.
+12. **`"Corredora"` Sales and Rentals:**
+   - [ ] The eight housing options show reference values and rents; owned properties can be listed for sale and rent independently.
+   - [ ] Sale listings can be edited or withdrawn; completing a sale deducts commission and any linked mortgage before crediting net proceeds.
+   - [ ] Rental matching creates a contract, records net receipts after commission, and includes receipts in subsequent mortgage income assessment.
+   - [ ] Tenant rent is charged monthly; contract closure settles the guarantee and any simulated damage deduction.
+13. **Credit Eligibility, Interest and Financial History:**
+   - [ ] Consumer credit enforces tenure requirements and full payoff clears balance and associated insurance.
+   - [ ] Mortgage eligibility averages recent net salary and rent receipts, applies first/subsequent mortgage limits, and subtracts existing dividends for subsequent loans.
+   - [ ] Credit-line and card interest accrue daily and consolidate monthly; Corriente deposits first cover line principal and unpaid interest.
+   - [ ] Cash and account mutations appear in the Personal ledger with a contextual description, correct direction/account, newest-first order and year filtering.
+14. **Simulation Clock and Persistence:**
+   - [ ] Simulated time advances while visible/focused, pauses in the background, and resumes without losing state.
+   - [ ] Daily/monthly events process at their scheduled boundary; reload restores the newest backup and restart clears both storage backups.

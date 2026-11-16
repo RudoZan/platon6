@@ -1,6 +1,6 @@
 // Personal (Mi Estado) Hub: Bienestar, 3-Col Budget, Net Worth, Investor Test & Secret Audit — educacionFinanciera
 
-    function renderPersonalStage(subView = 'main') {
+    function renderPersonalStage(subView = 'main', selectedMovementYear = null) {
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
 
@@ -152,6 +152,17 @@
                 <div class="personal-access-texts">
                   <div class="personal-access-name">Patrimonio & Liquidez</div>
                   <div class="personal-access-desc">Efectivo disponible, reservas e inversiones totales</div>
+                </div>
+              </div>
+              <span class="personal-access-arrow">➔</span>
+            </button>
+
+            <button type="button" class="personal-access-btn" onclick="renderPersonalStage('movimientos')">
+              <div class="personal-access-left">
+                <div class="personal-access-icon">🧾</div>
+                <div class="personal-access-texts">
+                  <div class="personal-access-name">Movimientos de cuentas y efectivo</div>
+                  <div class="personal-access-desc">Ingresos y egresos registrados por fecha y cuenta</div>
                 </div>
               </div>
               <span class="personal-access-arrow">➔</span>
@@ -526,15 +537,15 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                   <span style="font-size: 0.65rem; font-weight: 700; color: ${state.debts && state.debts.length > 0 ? '#b91c1c' : '#1e293b'};">💳 Deudas y Créditos</span>
                   <strong style="font-size: 0.82rem; font-weight: 800; color: ${state.debts && state.debts.length > 0 ? '#b91c1c' : '#059669'};">
-                    ${state.debts && state.debts.length > 0 ? `$${state.monthlyDebt.toLocaleString('es-CL')}/mes` : '$0'}
+                    ${state.debts && state.debts.length > 0 ? `Total: $${totalDebtBalance.toLocaleString('es-CL')}` : '$0'}
                   </strong>
                 </div>
                 ${state.debts && state.debts.length > 0 ? `
                   <div style="font-size: 0.68rem; color: #334155; display: flex; flex-direction: column; gap: 3px;">
                     ${state.debts.map(d => `
-                      <div style="display: flex; justify-content: space-between;">
-                        <span>• ${d.name}:</span>
-                        <strong style="color: #b91c1c;">$${(d.monthlyPayment || 0).toLocaleString('es-CL')}/mes</strong>
+                      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-top:1px solid #f1f5f9;padding-top:3px;">
+                        <span style="min-width:0;">• ${d.name}</span>
+                        <strong style="flex-shrink:0;text-align:right;color:#b91c1c;">Deuda total: $${Number(d.remainingBalance ?? d.totalDebt ?? d.amount ?? 0).toLocaleString('es-CL')}</strong>
                       </div>
                     `).join('')}
                   </div>
@@ -549,9 +560,20 @@
                   <span style="font-size: 0.65rem; font-weight: 700; color: #1e293b;">🏠 Propiedades y Vehículos</span>
                   <strong style="font-size: 0.78rem; font-weight: 800; color: #475569;">$${(propertiesValue + vehiclesValue).toLocaleString('es-CL')}</strong>
                 </div>
-                <div style="font-size: 0.62rem; color: #94a3b8; font-style: italic;">
-                  ${(propertiesValue + vehiclesValue) > 0 ? 'Bienes inscritos a tu nombre' : 'Sin bienes raíces ni vehículos registrados ($0)'}
-                </div>
+                ${(properties.length || vehicles.length) ? `
+                  <div style="display:grid;gap:3px;margin-top:5px;font-size:.62rem;color:#334155;">
+                    ${properties.map(property => `
+                      <div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #f1f5f9;padding-top:3px;">
+                        <span style="min-width:0;">🏠 ${typeof property === 'object' ? property.name || 'Propiedad' : property}</span>
+                        <strong style="flex-shrink:0;">$${Number(typeof property === 'object' ? property.value : 0).toLocaleString('es-CL')}</strong>
+                      </div>`).join('')}
+                    ${vehicles.map(vehicle => `
+                      <div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #f1f5f9;padding-top:3px;">
+                        <span style="min-width:0;">🚗 ${typeof vehicle === 'object' ? vehicle.name || 'Vehículo' : vehicle}</span>
+                        <strong style="flex-shrink:0;">$${Number(typeof vehicle === 'object' ? vehicle.value : 0).toLocaleString('es-CL')}</strong>
+                      </div>`).join('')}
+                  </div>
+                ` : '<div style="font-size:.62rem;color:#94a3b8;font-style:italic;margin-top:3px;">Sin bienes raíces ni vehículos registrados ($0)</div>'}
               </div>
 
             </div>
@@ -567,6 +589,56 @@
             </div>
           </div>
         `;
+      } else if (subView === 'movimientos') {
+        const monthLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const allMovements = Array.isArray(state.financialMovements) ? state.financialMovements : [];
+        const currentYear = Number(state.simulationYear) || 1;
+        const movementYears = [...new Set([currentYear, ...allMovements.map(movement => Number(movement.year) || 1)])]
+          .sort((left, right) => right - left);
+        const activeMovementYear = movementYears.includes(Number(selectedMovementYear))
+          ? Number(selectedMovementYear)
+          : currentYear;
+        const movements = allMovements
+          .filter(movement => (Number(movement.year) || 1) === activeMovementYear)
+          .slice()
+          .sort((left, right) => (Number(right.timestamp) || 0) - (Number(left.timestamp) || 0));
+        const formatMovementAmount = amount => Number(amount || 0).toLocaleString('es-CL');
+
+        container.innerHTML = `
+          <div class="personal-subview-box">
+            <div class="personal-subview-top">
+              <span style="font-size:.88rem;font-weight:800;color:#0284c7;">🧾 Movimientos de cuentas y efectivo</span>
+              <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('main')"><span>◀ Volver</span></button>
+            </div>
+            <label style="display:flex;align-items:center;justify-content:flex-end;gap:7px;margin-bottom:7px;font-size:.61rem;font-weight:700;color:#475569;">
+              Año
+              <select onchange="renderPersonalStage('movimientos',this.value)" style="min-width:100px;padding:6px 8px;border:1px solid #cbd5e1;border-radius:5px;background:#fff;color:#334155;font-size:.61rem;">
+                ${movementYears.map(year => `<option value="${year}" ${year === activeMovementYear ? 'selected' : ''}>Año ${year}</option>`).join('')}
+              </select>
+            </label>
+            <div style="width:100%;max-width:100%;overflow-x:auto;border:1px solid #e2e8f0;border-radius:7px;background:#fff;">
+              <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:.57rem;text-align:left;">
+                <colgroup><col style="width:18%;"><col style="width:28%;"><col style="width:18%;"><col style="width:18%;"><col style="width:18%;"></colgroup>
+                <thead><tr style="background:#f8fafc;color:#475569;">
+                  <th style="padding:6px 4px;border-bottom:1px solid #e2e8f0;overflow-wrap:anywhere;">Fecha</th>
+                  <th style="padding:6px 4px;border-bottom:1px solid #e2e8f0;overflow-wrap:anywhere;">Detalle</th>
+                  <th style="padding:6px 3px;border-bottom:1px solid #e2e8f0;text-align:right;overflow-wrap:anywhere;">Egresos</th>
+                  <th style="padding:6px 3px;border-bottom:1px solid #e2e8f0;text-align:right;overflow-wrap:anywhere;">Ingresos</th>
+                  <th style="padding:6px 4px;border-bottom:1px solid #e2e8f0;overflow-wrap:anywhere;">Cuenta</th>
+                </tr></thead>
+                <tbody>
+                  ${movements.length ? movements.map(movement => `
+                    <tr style="color:#334155;">
+                      <td style="padding:6px 4px;border-bottom:1px solid #f1f5f9;overflow-wrap:anywhere;">${String(movement.day || 1).padStart(2, '0')}-${monthLabels[Number(movement.month) || 0]}-${String(movement.year || 1).padStart(2, '0')}</td>
+                      <td style="padding:6px 4px;border-bottom:1px solid #f1f5f9;overflow-wrap:anywhere;">${movement.detail || 'Movimiento registrado'}</td>
+                      <td style="padding:6px 3px;border-bottom:1px solid #f1f5f9;text-align:right;overflow-wrap:anywhere;color:${Number(movement.expense) > 0 ? '#b91c1c' : '#94a3b8'};">${Number(movement.expense) > 0 ? `$${formatMovementAmount(movement.expense)}` : '—'}</td>
+                      <td style="padding:6px 3px;border-bottom:1px solid #f1f5f9;text-align:right;overflow-wrap:anywhere;color:${Number(movement.income) > 0 ? '#047857' : '#94a3b8'};">${Number(movement.income) > 0 ? `$${formatMovementAmount(movement.income)}` : '—'}</td>
+                      <td style="padding:6px 4px;border-bottom:1px solid #f1f5f9;overflow-wrap:anywhere;">${movement.accountName || 'Efectivo'}</td>
+                    </tr>`).join('') : `<tr><td colspan="5" style="padding:18px;text-align:center;color:#64748b;">No hay movimientos registrados en el Año ${activeMovementYear}.</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
       } else if (subView === 'secret_summary') {
         const hPhysical = state.healthPhysical !== undefined ? state.healthPhysical : 20;
         const hEmotional = state.healthEmotional !== undefined ? state.healthEmotional : 40;

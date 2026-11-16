@@ -3,35 +3,106 @@
     const SIMULATION_STORAGE_KEY = 'educacionFinanciera.simulationState.v1';
     let simulationPersistenceEnabled = true;
 
+    function readPersistedSimulationState() {
+      let newestState = null;
+      let newestTimestamp = -1;
+      for (const storageName of ['localStorage', 'sessionStorage']) {
+        try {
+          const serialized = window[storageName].getItem(SIMULATION_STORAGE_KEY);
+          const record = serialized ? JSON.parse(serialized) : null;
+          const savedState = record?.state && typeof record.state === 'object' ? record.state : record;
+          const timestamp = Number(record?.savedAt) || 0;
+          if (savedState && typeof savedState === 'object' && !Array.isArray(savedState) && timestamp >= newestTimestamp) {
+            newestState = savedState;
+            newestTimestamp = timestamp;
+          }
+        } catch (error) {
+          console.warn(`No se pudo leer el progreso desde ${storageName}.`, error);
+        }
+      }
+      return newestState;
+    }
+
+    function persistSimulationState(stateSnapshot) {
+      if (!simulationPersistenceEnabled) return false;
+      let serialized;
+      try {
+        serialized = JSON.stringify({ savedAt: Date.now(), state: stateSnapshot });
+      } catch (error) {
+        console.warn('No se pudo serializar el progreso de la simulación.', error);
+        return false;
+      }
+
+      try {
+        window.localStorage.setItem(SIMULATION_STORAGE_KEY, serialized);
+        return true;
+      } catch (error) {
+        console.warn('No se pudo guardar el progreso en localStorage.', error);
+      }
+      try {
+        window.sessionStorage.setItem(SIMULATION_STORAGE_KEY, serialized);
+        return true;
+      } catch (error) {
+        console.warn('No se pudo guardar el progreso en sessionStorage.', error);
+        return false;
+      }
+    }
+
+    function clearPersistedSimulationState() {
+      for (const storageName of ['localStorage', 'sessionStorage']) {
+        try {
+          window[storageName].removeItem(SIMULATION_STORAGE_KEY);
+        } catch (error) {
+          console.warn(`No se pudo borrar el progreso de ${storageName}.`, error);
+        }
+      }
+    }
+
+    let activeFinancialMovementDetail = '';
+
+    function withFinancialMovementDetail(detail, operation) {
+      const previousDetail = activeFinancialMovementDetail;
+      activeFinancialMovementDetail = String(detail || '').trim();
+      try {
+        return operation();
+      } finally {
+        activeFinancialMovementDetail = previousDetail;
+      }
+    }
+
+    function recordFinancialMovement({ detail, amount, direction, accountId, accountName }) {
+      const value = Math.max(0, Math.round(Number(amount) || 0));
+      if (!value) return;
+      if (!Array.isArray(state.financialMovements)) state.financialMovements = [];
+      state.financialMovements.push({
+        id: `movement_${Date.now()}_${Math.floor(Math.random() * 100000)}`,
+        timestamp: Date.now(),
+        year: Number(state.simulationYear) || 1,
+        month: Number(state.simulationMonth) || 0,
+        day: Number(state.simulationDay) || 1,
+        detail: String(detail || 'Movimiento financiero'),
+        expense: direction === 'expense' ? value : 0,
+        income: direction === 'income' ? value : 0,
+        accountId: accountId || 'cash',
+        accountName: accountName || 'Efectivo'
+      });
+    }
+
     function createPersistentState(defaultState) {
       let saveTimer = null;
       let rootProxy;
       const proxies = new WeakMap();
       let initialState = defaultState;
 
-      try {
-        const savedState = JSON.parse(window.localStorage.getItem(SIMULATION_STORAGE_KEY));
-        if (savedState && typeof savedState === 'object' && !Array.isArray(savedState)) {
-          initialState = { ...defaultState, ...savedState };
-        }
-      } catch (error) {
-        try {
-          window.localStorage.removeItem(SIMULATION_STORAGE_KEY);
-        } catch (storageError) {
-          console.warn('No se pudo acceder al progreso guardado.', storageError);
-        }
-      }
+      const savedState = readPersistedSimulationState();
+      if (savedState) initialState = { ...defaultState, ...savedState };
 
       const save = () => {
         if (!simulationPersistenceEnabled) return;
         window.clearTimeout(saveTimer);
         saveTimer = window.setTimeout(() => {
           if (!simulationPersistenceEnabled) return;
-          try {
-            window.localStorage.setItem(SIMULATION_STORAGE_KEY, JSON.stringify(rootProxy));
-          } catch (error) {
-            console.warn('No se pudo guardar el progreso de la simulación.', error);
-          }
+          persistSimulationState(rootProxy);
         }, 100);
       };
 
@@ -43,7 +114,28 @@
             return wrap(Reflect.get(target, property, receiver));
           },
           set(target, property, nextValue, receiver) {
+            const previousValue = Reflect.get(target, property, receiver);
             const changed = Reflect.set(target, property, nextValue, receiver);
+            if (changed && (property === 'cash' || property === 'balance')
+              && Number.isFinite(Number(previousValue)) && Number.isFinite(Number(nextValue))
+              && Number(previousValue) !== Number(nextValue)) {
+              const isCash = property === 'cash' && target === initialState;
+              const bankAccounts = isCash ? [] : rootProxy.bankAccounts;
+              const account = Array.isArray(bankAccounts)
+                ? bankAccounts.find(item => item === receiver)
+                : null;
+              if (isCash || account) {
+                const difference = Number(nextValue) - Number(previousValue);
+                const accountName = isCash ? 'Efectivo' : (account.name || 'Cuenta bancaria');
+                recordFinancialMovement({
+                  detail: activeFinancialMovementDetail || `${difference > 0 ? 'Ingreso a' : 'Egreso de'} ${accountName}`,
+                  amount: Math.abs(difference),
+                  direction: difference > 0 ? 'income' : 'expense',
+                  accountId: isCash ? 'cash' : (account.id || 'bank_account'),
+                  accountName
+                });
+              }
+            }
             save();
             return changed;
           },
@@ -86,6 +178,7 @@
       },
       cash: 5000000, // Dinero físico en efectivo inicial (siempre presente)
       bankAccounts: [], // Al partir no tiene cuentas bancarias contratadas (solo figuran si han sido contratadas)
+      financialMovements: [],
       creditCard: null, // Al partir no tiene tarjeta de crédito contratada
       creditLine: null, // Al partir no tiene línea de crédito contratada
       insurances: [], // Al partir no tiene seguros contratados
@@ -103,8 +196,13 @@
       mentalPeace: 100, // Bienestar Total (20 + 40 + 40 = 100)
       currentJob: null, // Al partir no tiene empleo
       courses: [], // Al partir no tiene cursos o especializaciones cursadas
+      enrolledCourses: [],
       jobHistory: [], // Historial de empleos previos desempeñados
+      workExperienceMonths: 0,
       properties: [],      // Al partir no tiene propiedades
+      propertyListings: [],
+      propertyRentalListings: [],
+      rentedProperties: [],
       vehicles: [],        // Al partir no tiene vehículos
       riskTestResult: null, // Al partir no ha hecho el test de perfil de riesgo
       budgetItems: [
@@ -177,6 +275,214 @@
       return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
     }
 
+    function getCurrentJobTenureMonths(job = state.currentJob) {
+      const start = job && job.tenureStartDate;
+      if (!start || !Number.isFinite(Number(start.year)) || !Number.isFinite(Number(start.month)) || !Number.isFinite(Number(start.day))) {
+        return Math.max(0, Number(job && job.tenureMonths) || 0);
+      }
+      const monthDifference = ((Number(state.simulationYear) - Number(start.year)) * 12)
+        + Number(state.simulationMonth) - Number(start.month);
+      return Math.max(0, monthDifference - (Number(state.simulationDay) < Number(start.day) ? 1 : 0));
+    }
+
+    function getSimulationMonthIndex(year = state.simulationYear, month = state.simulationMonth) {
+      return ((Number(year) || 1) - 1) * 12 + (Number(month) || 0);
+    }
+
+    function getCurrentJobMonthNumber(job = state.currentJob, monthIndex = getSimulationMonthIndex()) {
+      if (!job) return 0;
+      const start = job.tenureStartDate;
+      if (!start || !Number.isFinite(Number(start.year)) || !Number.isFinite(Number(start.month))) {
+        return Math.max(1, (Number(job.tenureMonths) || 0) + 1);
+      }
+      return Math.max(1, monthIndex - getSimulationMonthIndex(start.year, start.month) + 1);
+    }
+
+    function depositJobSalary(job, amount) {
+      const payment = Math.max(0, Math.round(Number(amount) || 0));
+      const account = job && job.salaryAccountId && job.salaryAccountId !== 'cash'
+        ? (state.bankAccounts || []).find(item => item.id === job.salaryAccountId && item.type !== 'credit')
+        : null;
+      if (account) {
+        withFinancialMovementDetail('Pago de sueldo', () => creditBankAccount(account.id, payment));
+        return;
+      }
+      if (job && job.salaryAccountId && job.salaryAccountId !== 'cash') job.salaryAccountId = 'cash';
+      withFinancialMovementDetail('Pago de sueldo', () => {
+        state.cash = (Number(state.cash) || 0) + payment;
+      });
+    }
+
+    function recordJobSalaryPayment(job, amount, date) {
+      if (!job) return;
+      if (!Array.isArray(job.salaryPaymentHistory)) job.salaryPaymentHistory = [];
+      const payment = Math.max(0, Math.round(Number(amount) || 0));
+      job.salaryPaymentHistory.push({
+        amount: payment,
+        year: Number(date?.year) || Number(state.simulationYear) || 1,
+        month: Number(date?.month) || 0,
+        day: Number(date?.day) || Number(state.simulationDay) || 1,
+        timestamp: Date.now()
+      });
+      if (job.salaryPaymentHistory.length > 12) job.salaryPaymentHistory.splice(0, job.salaryPaymentHistory.length - 12);
+      job.lastNetSalary = payment;
+      job.lastSalaryPaidDate = {
+        year: Number(date?.year) || Number(state.simulationYear) || 1,
+        month: Number(date?.month) || 0,
+        day: Number(date?.day) || Number(state.simulationDay) || 1
+      };
+    }
+
+    function debitBankAccountWithCreditLine(accountId, amount) {
+      const account = (state.bankAccounts || []).find(item => item.id === accountId && item.type !== 'credit');
+      const debit = Math.max(0, Math.round(Number(amount) || 0));
+      if (!account || debit <= 0) return false;
+      const balance = Number(account.balance) || 0;
+      if (balance >= debit) {
+        withFinancialMovementDetail(activeFinancialMovementDetail || 'Pago desde cuenta bancaria', () => {
+          account.balance = balance - debit;
+        });
+        return true;
+      }
+
+      const isCheckingAccount = account.id === 'acc_corriente' || account.type === 'corriente';
+      const line = state.creditLine;
+      const shortfall = debit - Math.max(0, balance);
+      const availableCredit = Math.max(0, (Number(line?.limit) || 0) - (Number(line?.used) || 0)
+        - (Number(line?.accruedInterest) || 0) - (Number(line?.currentDayInterest) || 0));
+      if (!isCheckingAccount || !line || shortfall > availableCredit) return false;
+
+      withFinancialMovementDetail(activeFinancialMovementDetail || 'Pago desde cuenta y Línea de Crédito', () => {
+        account.balance = 0;
+      });
+      line.used = (Number(line.used) || 0) + shortfall;
+      recordFinancialMovement({
+        detail: activeFinancialMovementDetail || 'Uso de Línea de Crédito para completar pago',
+        amount: shortfall,
+        direction: 'expense',
+        accountId: line.id,
+        accountName: 'Línea de Crédito'
+      });
+      return true;
+    }
+
+    function getBankAccountSpendableBalance(accountId) {
+      const account = (state.bankAccounts || []).find(item => item.id === accountId && item.type !== 'credit');
+      if (!account) return 0;
+      const balance = Math.max(0, Number(account.balance) || 0);
+      const isCheckingAccount = account.id === 'acc_corriente' || account.type === 'corriente';
+      if (!isCheckingAccount || !state.creditLine) return balance;
+      return balance + Math.max(0, (Number(state.creditLine.limit) || 0) - (Number(state.creditLine.used) || 0)
+        - (Number(state.creditLine.accruedInterest) || 0) - (Number(state.creditLine.currentDayInterest) || 0));
+    }
+
+    function creditBankAccount(accountId, amount) {
+      const account = (state.bankAccounts || []).find(item => item.id === accountId && item.type !== 'credit');
+      const credit = Math.max(0, Math.round(Number(amount) || 0));
+      if (!account || credit <= 0) return false;
+      let remainingCredit = credit;
+      const isCheckingAccount = account.id === 'acc_corriente' || account.type === 'corriente';
+      if (isCheckingAccount && state.creditLine) {
+        const accruedInterest = Number(state.creditLine.accruedInterest) || 0;
+        const interestPayment = Math.min(remainingCredit, accruedInterest);
+        state.creditLine.accruedInterest = accruedInterest - interestPayment;
+        remainingCredit -= interestPayment;
+
+        const currentDayInterest = Number(state.creditLine.currentDayInterest) || 0;
+        const currentInterestPayment = Math.min(remainingCredit, currentDayInterest);
+        state.creditLine.currentDayInterest = currentDayInterest - currentInterestPayment;
+        remainingCredit -= currentInterestPayment;
+
+        const repayment = Math.min(remainingCredit, Number(state.creditLine.used) || 0);
+        state.creditLine.used -= repayment;
+        remainingCredit -= repayment;
+        if (repayment > 0) {
+          recordFinancialMovement({
+            detail: activeFinancialMovementDetail
+              ? `${activeFinancialMovementDetail} aplicado a Línea de Crédito`
+              : 'Pago de Línea de Crédito',
+            amount: repayment,
+            direction: 'expense',
+            accountId: state.creditLine.id,
+            accountName: 'Línea de Crédito'
+          });
+        }
+      }
+      if (remainingCredit > 0) {
+        withFinancialMovementDetail(activeFinancialMovementDetail || 'Abono a cuenta bancaria', () => {
+          account.balance = (Number(account.balance) || 0) + remainingCredit;
+        });
+      }
+      return true;
+    }
+
+    function getWorkPerformance(job = state.currentJob, monthIndex = getSimulationMonthIndex()) {
+      const healthPhysical = Math.max(0, Math.min(20, Number(state.healthPhysical) || 0));
+      const healthEmotional = Math.max(0, Math.min(40, Number(state.healthEmotional) || 0));
+      const healthMental = Math.max(0, Math.min(40, Number(state.healthMental) || 0));
+      const rawScore = Math.round((healthMental * 0.5) + (healthEmotional * 0.3) + (healthPhysical * 0.2));
+      const jobMonth = getCurrentJobMonthNumber(job, monthIndex);
+      const maximumByTenure = jobMonth <= 3 ? 21 : jobMonth === 4 ? 25 : jobMonth === 5 ? 29 : 36;
+      const score = Math.min(rawScore, maximumByTenure);
+      const isFreelance = Boolean(job && job.isFreelance);
+      const level = score >= 34 ? 'Excepcional'
+        : score >= 30 ? 'Destacable'
+          : score >= 26 ? 'Bueno'
+            : score >= 22 ? 'Satisfactorio'
+              : score >= 18 ? 'Regular'
+                : score >= 14 ? 'Deficiente'
+                  : score >= 10 ? 'Paupérrimo'
+                    : isFreelance ? 'Perjudicial para uno mismo' : 'Perjudicial para la empresa';
+      return { score, rawScore, level, jobMonth, isCapped: score < rawScore };
+    }
+
+    function getFreelanceIncomeMultiplier(level) {
+      return {
+        Excepcional: 3,
+        Destacable: 2.5,
+        Bueno: 2,
+        Satisfactorio: 1.5,
+        Regular: 1,
+        Deficiente: 0.7,
+        Paupérrimo: 0.5,
+        'Perjudicial para uno mismo': 0.3
+      }[level] || 0.3;
+    }
+
+    function getCommercialCommissionMultiplier(level) {
+      return {
+        Excepcional: 1.5,
+        Destacable: 1.1,
+        Bueno: 0.6,
+        Satisfactorio: 0.3,
+        Regular: 0.2,
+        Deficiente: 0.1,
+        Paupérrimo: 0,
+        'Perjudicial para uno mismo': 0
+      }[level] || 0;
+    }
+
+    function getTotalWorkExperienceMonths() {
+      return Math.max(0, Number(state.workExperienceMonths) || 0) + getCurrentJobTenureMonths();
+    }
+
+    function archiveCurrentJobExperience() {
+      const job = state.currentJob;
+      if (!job) return 0;
+      const completedMonths = getCurrentJobTenureMonths(job);
+      state.workExperienceMonths = (Number(state.workExperienceMonths) || 0) + completedMonths;
+      return completedMonths;
+    }
+
+    function formatWorkExperience(months = getTotalWorkExperienceMonths()) {
+      const totalMonths = Math.max(0, Math.floor(Number(months) || 0));
+      const years = Math.floor(totalMonths / 12);
+      const remainingMonths = totalMonths % 12;
+      if (!years) return `${remainingMonths} ${remainingMonths === 1 ? 'mes' : 'meses'}`;
+      if (!remainingMonths) return `${years} ${years === 1 ? 'año' : 'años'}`;
+      return `${years} ${years === 1 ? 'año' : 'años'} y ${remainingMonths} ${remainingMonths === 1 ? 'mes' : 'meses'}`;
+    }
+
     function startSimulationClock() {
       if (simulationClockInterval) return;
       state.simulationClockRunning = true;
@@ -202,15 +508,16 @@
       stopSimulationClock();
     }
 
+    function handleSimulationVisibilityChange() {
+      syncSimulationClockVisibility();
+      if (document.visibilityState !== 'visible') persistSimulationState(state);
+    }
+
     function resetSimulators() {
       if (!window.confirm('Se reiniciarán la fecha y todas las decisiones de la simulación. ¿Continuar?')) return;
       stopSimulationClock();
       simulationPersistenceEnabled = false;
-      try {
-        window.localStorage.removeItem(SIMULATION_STORAGE_KEY);
-      } catch (error) {
-        console.warn('No se pudo borrar el progreso guardado.', error);
-      }
+      clearPersistedSimulationState();
       window.location.reload();
     }
 
@@ -274,15 +581,10 @@
     window.addEventListener('focus', syncSimulationClockVisibility);
     window.addEventListener('blur', syncSimulationClockVisibility);
     window.addEventListener('pageshow', syncSimulationClockVisibility);
-    document.addEventListener('visibilitychange', syncSimulationClockVisibility);
+    document.addEventListener('visibilitychange', handleSimulationVisibilityChange);
     window.addEventListener('pagehide', () => {
       stopSimulationClock();
-      if (!simulationPersistenceEnabled) return;
-      try {
-        window.localStorage.setItem(SIMULATION_STORAGE_KEY, JSON.stringify(state));
-      } catch (error) {
-        console.warn('No se pudo guardar el progreso de la simulación.', error);
-      }
+      persistSimulationState(state);
     });
 
 
@@ -335,6 +637,16 @@
           });
         }
         return list;
+      }
+      if (insuranceId === 'incendio_sismo') {
+        return (state.debts || [])
+          .filter(debt => debt.loanType === 'hipotecario')
+          .map(debt => ({
+            id: debt.id,
+            name: debt.name,
+            sub: 'Vivienda financiada con crédito hipotecario',
+            price: 11000
+          }));
       }
       if (insuranceId === 'fraude') {
         const list = [];
@@ -404,6 +716,11 @@
 
       if (tabName === 'inversiones') {
         renderInversionesStage('main');
+        return;
+      }
+
+      if (tabName === 'corredora') {
+        renderCorredoraMain();
         return;
       }
 

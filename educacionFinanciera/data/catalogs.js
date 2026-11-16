@@ -309,6 +309,49 @@
       { name: 'Parcela de agrado', sub: 'Espacio y naturaleza', icon: '🌲' }
     ];
 
+    const corredoraHousingCatalog = [
+      {
+        id: 'condominio_casa', preferenceIndex: 0, preferenceName: 'Condominio Elegante',
+        name: 'Casa en condominio', icon: '🏡', priceUF: 5500, monthlyRent: 1082500, value: 5500 * 41000, bedrooms: '4', bathrooms: 3,
+        desc: 'Casa ubicada en un condominio privado con acceso controlado, áreas comunes y un entorno cuidado. Combina seguridad, comodidad y calidad de vida.'
+      },
+      {
+        id: 'condominio_departamento', preferenceIndex: 0, preferenceName: 'Condominio Elegante',
+        name: 'Departamento en condominio', icon: '🏢', priceUF: 3250, monthlyRent: 655000, value: 3250 * 41000, bedrooms: '3', bathrooms: 2,
+        desc: 'Departamento moderno dentro de un condominio con espacios comunes y acceso controlado. Ofrece seguridad y un entorno residencial de buen nivel.'
+      },
+      {
+        id: 'central_departamento_grande', preferenceIndex: 1, preferenceName: 'Tipo Conectividad Central',
+        name: 'Departamento céntrico grande', icon: '🏙️', priceUF: 3750, monthlyRent: 830000, value: 3750 * 41000, bedrooms: '3', bathrooms: 2,
+        desc: 'Departamento amplio ubicado cerca de centros comerciales, servicios, transporte público, oficinas y espacios de recreación. Ideal para familias que privilegian la conectividad y la vida urbana.'
+      },
+      {
+        id: 'central_departamento_ambiente', preferenceIndex: 1, preferenceName: 'Tipo Conectividad Central',
+        name: 'Departamento céntrico de un ambiente', icon: '🏢', priceUF: 2000, monthlyRent: 410000, value: 2000 * 41000, bedrooms: '1 ambiente', bathrooms: 1,
+        desc: 'Departamento compacto en una ubicación céntrica, con acceso rápido a transporte, comercio y servicios esenciales. Ideal para una o dos personas.'
+      },
+      {
+        id: 'barrio_casa', preferenceIndex: 2, preferenceName: 'Vida de Barrio',
+        name: 'Casa en barrio residencial', icon: '🏘️', priceUF: 3000, monthlyRent: 725000, value: 3000 * 41000, bedrooms: '3', bathrooms: 2,
+        desc: 'Casa familiar situada en un barrio tranquilo, con acceso a colegios, comercio local y espacios comunitarios. Ideal para una vida estable y cercana a la comunidad.'
+      },
+      {
+        id: 'barrio_departamento', preferenceIndex: 2, preferenceName: 'Vida de Barrio',
+        name: 'Departamento en barrio residencial', icon: '🏢', priceUF: 1750, monthlyRent: 460000, value: 1750 * 41000, bedrooms: '3', bathrooms: 1,
+        desc: 'Departamento funcional en una zona residencial consolidada, con servicios básicos cercanos y un ambiente tranquilo.'
+      },
+      {
+        id: 'parcela_casa_5000', preferenceIndex: 3, preferenceName: 'Parcela de Agrado',
+        name: 'Parcela de agrado 5.000 m² con casa', icon: '🌲', priceUF: 4500, monthlyRent: 940000, value: 4500 * 41000, bedrooms: '4', bathrooms: 2, landArea: '5.000 m²',
+        desc: 'Amplia parcela de 5.000 m² con una cómoda vivienda de 4 dormitorios y 2 baños. Ofrece privacidad, contacto con la naturaleza y espacio para proyectos familiares, recreativos o agrícolas a pequeña escala.'
+      },
+      {
+        id: 'parcela_casa_3000', preferenceIndex: 3, preferenceName: 'Parcela de Agrado',
+        name: 'Terreno amplio con casa 3.000 m²', icon: '🌳', priceUF: 3750, monthlyRent: 815000, value: 3750 * 41000, bedrooms: '3', bathrooms: 1, landArea: '3.000 m²',
+        desc: 'Propiedad ubicada en un sector tranquilo y urbanizado, alejado del ruido de la ciudad. Cuenta con 3.000 m² de terreno y una casa de 3 dormitorios y 1 baño, ideal para quienes buscan calidad de vida y mayor espacio exterior.'
+      }
+    ];
+
     const jobOptions = [
       { name: 'Freelance', sub: 'Sueldo medio variable', icon: '⚡', salary: 1100000 },
       { name: 'Trabajo dependiente', sub: 'Sueldo medio', icon: '💼', salary: 1200000 },
@@ -341,8 +384,8 @@
             id: "rut_vista",
             name: "Cuenta RUT / Vista",
             icon: "💳",
-            desc: "Tu dinero del día a día siempre a mano, fácil y sin deudas.",
-            detailDesc: "La herramienta fundamental para administrar tus ingresos y gastos cotidianos. Te permite recibir depósitos, realizar transferencias y pagar en comercios utilizando solo tu saldo real disponible, garantizando control total sin intereses de crédito ni riesgo de endeudamiento."
+            desc: "Cuenta vista líquida para recibir, depositar y administrar tu dinero.",
+            detailDesc: "Cuenta sin requisitos de renta mínima, costo de apertura ni mantención mensual. Permite mantener fondos disponibles, depositar, girar y transferir dinero."
           },
           {
             id: "corriente",
@@ -364,6 +407,20 @@
             icon: "💳",
             desc: "Compra hoy lo que necesitas y fináncialo en cómodas cuotas.",
             detailDesc: "Instrumento de financiamiento rotativo que te permite adquirir bienes y servicios de inmediato, difiriendo el pago a fin de mes o en cuotas mensuales. Si pagas el total facturado a tiempo evitas intereses; si pagas el mínimo, se acumulan altos cargos financieros."
+          },
+          {
+            id: "credito_consumo",
+            name: "Crédito de Consumo",
+            icon: "💵",
+            desc: "Financia proyectos personales con cuotas mensuales.",
+            detailDesc: "Solicita un monto para tus proyectos y revisa una estimación de cuotas antes de confirmar."
+          },
+          {
+            id: "credito_hipotecario",
+            name: "Crédito Hipotecario",
+            icon: "🏠",
+            desc: "Financia una vivienda con pagos mensuales a largo plazo.",
+            detailDesc: "Revisa el monto solicitado, el plazo y el dividendo mensual estimado antes de confirmar."
           },
           {
             id: "fondos",
@@ -409,10 +466,9 @@
         title: "🏠 Corredora",
         subtitle: "Gestión inmobiliaria y corretaje de propiedades",
         sections: [
-          { name: "Ventas Ofrecidas", icon: "🏷️", desc: "Vivienda, Bodega, Oficina, Local, Terreno, Estac." },
-          { name: "Arriendos Ofrecidos", icon: "🔑", desc: "Vivienda, Bodega, Oficina, Local, Terreno, Estac." },
-          { name: "Gestionar Venta", icon: "🤝", desc: "Poner propiedades o activos en venta" },
-          { name: "Gestionar Arriendo", icon: "📝", desc: "Poner propiedades o activos en arriendo" }
+          { name: "Propiedades en venta y arriendo", icon: "🏘️", desc: "Amplia oferta de viviendas: departamentos y casas céntricos, en condominios, barrios residenciales, y parcelas.", action: "renderCorredoraStage('ambos')" },
+          { name: "Gestionar Venta", icon: "🤝", desc: "Publica una propiedad propia, define el precio y sigue el proceso de venta.", action: "renderCorredoraSalesManagement()" },
+          { name: "Gestionar Arriendo", icon: "📝", desc: "Publica tus propiedades en arriendo y administra los ingresos y comisiones.", action: "renderCorredoraRentalManagement()" }
         ]
       },
       comercio: {
@@ -476,6 +532,7 @@
         levelLabel: "Intermedio",
         price: 50000,
         hours: 24,
+        durationMonths: 1,
         desc: "Herramientas operativas y técnicas para el desarrollo de competencias laborales.",
         prereqId: null,
         favorsJobs: ["job_op2", "job_op3", "job_op4", "job_op5", "job_op6"],
@@ -494,7 +551,8 @@
         level: "avanzado",
         levelLabel: "Avanzado",
         price: 120000,
-        hours: 60,
+        hours: 160,
+        durationMonths: 6,
         desc: "Metodologías avanzadas de optimización y liderazgo de equipos técnicos.",
         prereqId: "cap_intermedio",
         favorsJobs: ["job_op2", "job_op3", "job_op6"],
@@ -516,6 +574,7 @@
         levelLabel: "Intermedio",
         price: 250000,
         hours: 30,
+        durationMonths: 1,
         desc: "Técnicas de negociación, prospección de clientes y gestión de relaciones comerciales.",
         prereqId: null,
         favorsJobs: ["job_op1", "job_op4", "job_op5"],
@@ -534,7 +593,8 @@
         level: "avanzado",
         levelLabel: "Avanzado",
         price: 1750000,
-        hours: 75,
+        hours: 176,
+        durationMonths: 8,
         desc: "Estrategias de expansión comercial, dirección de cuentas clave y cierre de negocios.",
         prereqId: "com_intermedio",
         favorsJobs: ["job_op4"],
@@ -555,7 +615,8 @@
         level: "intermedio",
         levelLabel: "Intermedio",
         price: 350000,
-        hours: 32,
+        hours: 38,
+        durationMonths: 2,
         desc: "Control presupuestario, gestión documental y coordinación de procesos operativos.",
         prereqId: null,
         favorsJobs: ["job_op1", "job_op3", "job_op5", "job_op6"],
@@ -574,7 +635,8 @@
         level: "avanzado",
         levelLabel: "Avanzado",
         price: 1550000,
-        hours: 80,
+        hours: 180,
+        durationMonths: 8,
         desc: "Planificación estratégica corporativa, gobierno interno y gestión organizacional.",
         prereqId: "adm_intermedio",
         favorsJobs: ["job_op1", "job_op3"],
@@ -596,6 +658,7 @@
         levelLabel: "Intermedio",
         price: 550000,
         hours: 36,
+        durationMonths: 2,
         desc: "Profundización técnica aplicada y metodologías analíticas de especialidad.",
         prereqId: null,
         favorsJobs: ["job_op1", "job_op2", "job_op4", "job_op5", "job_op6"],
@@ -614,7 +677,8 @@
         level: "avanzado",
         levelLabel: "Avanzado",
         price: 1350000,
-        hours: 90,
+        hours: 190,
+        durationMonths: 10,
         desc: "Innovación aplicada, arquitectura técnica compleja y dirección de proyectos clave.",
         prereqId: "esp_intermedio",
         favorsJobs: ["job_op2"],
@@ -636,15 +700,15 @@
         grossSalary: 3125000,
         salary: 2500000,
         conditions: "Contrato formal, gestión estratégica y toma de decisiones, sin horario fijo.",
-        requirements: "Requiere experiencia laboral previa y al menos la certificación de un curso.",
+        requirements: "Requiere un año de experiencia laboral acumulada y al menos la certificación de un curso.",
         hasExpReq: true,
         hasCourseReq: true,
         reqs: [
           {
             id: 'exp',
             label: 'Experiencia laboral previa',
-            desc: 'Se requiere contar con experiencia laboral previa en al menos un empleo.',
-            check: () => Boolean((state.jobHistory && state.jobHistory.length > 0) || state.currentJob)
+            desc: 'La experiencia se suma entre trabajos y períodos; no tiene que ser continua.',
+            check: () => getTotalWorkExperienceMonths() >= 12
           },
           {
             id: 'course',
@@ -664,15 +728,15 @@
         grossSalary: 2625000,
         salary: 2100000,
         conditions: "Contrato formal, funciones técnicas avanzadas, horario flexible.",
-        requirements: "Requiere experiencia laboral previa y al menos la certificación de un curso.",
+        requirements: "Requiere un año de experiencia laboral acumulada y al menos la certificación de un curso.",
         hasExpReq: true,
         hasCourseReq: true,
         reqs: [
           {
             id: 'exp',
             label: 'Experiencia laboral previa',
-            desc: 'Se requiere contar con experiencia laboral previa en al menos un empleo.',
-            check: () => Boolean((state.jobHistory && state.jobHistory.length > 0) || state.currentJob)
+            desc: 'La experiencia se suma entre trabajos y períodos; no tiene que ser continua.',
+            check: () => getTotalWorkExperienceMonths() >= 12
           },
           {
             id: 'course',
@@ -767,6 +831,11 @@
           '✓ Inundaciones y desastres climáticos naturales.',
           '⛔ IMPORTANTE: NO cubre robos ni perdida de muebles o pertenencias.'
         ],
+        incendio_sismo: [
+          '✓ Daños estructurales por incendio.',
+          '✓ Daños estructurales por sismo y terremoto.',
+          '✓ Protección vinculada al crédito hipotecario activo.'
+        ],
         fraude: [
           '✓ Robo de dinero en efectivo extraído por asalto físico en cajeros automáticos.',
           '✓ Giros, compras o transferencias forzadas bajo intimidación o coacción física.',
@@ -856,6 +925,18 @@
         isMultiAsset: true,
         checkEligible: () => getUserInsuranceAssets('vivienda').length > 0,
         note: 'Tarifa individual por inmueble según valor asegurable. No cubre robos ni perdida de muebles o pertenencias.'
+      },
+      {
+        id: 'incendio_sismo',
+        name: 'Seguro de Incendio y Sismo Hipotecario',
+        icon: '🏠',
+        costMonthly: 11000,
+        costDisplay: '$11.000/mes (referencial)',
+        desc: 'Protección estructural ante incendio y sismo asociada a un crédito hipotecario activo.',
+        requirementDesc: 'Se mantiene mientras exista un crédito hipotecario activo.',
+        isMultiAsset: false,
+        checkEligible: () => getUserInsuranceAssets('incendio_sismo').length > 0,
+        note: 'Póliza obligatoria vinculada al crédito hipotecario; no se puede terminar antes de liquidar el crédito.'
       },
       {
         id: 'vida',

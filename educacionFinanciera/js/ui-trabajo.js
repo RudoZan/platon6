@@ -23,6 +23,23 @@
       if (subtitleElem) subtitleElem.innerText = 'Desarrollo profesional e ingresos laborales';
 
       const curJob = state.currentJob;
+      const salaryAccounts = (state.bankAccounts || []).filter(account => account.type !== 'credit');
+      const salaryAccountId = curJob && salaryAccounts.some(account => account.id === curJob.salaryAccountId)
+        ? curJob.salaryAccountId
+        : 'cash';
+      const currentPerformance = curJob ? getWorkPerformance(curJob) : null;
+      const currentIncomeMultiplier = curJob && curJob.isFreelance
+        ? getFreelanceIncomeMultiplier(currentPerformance.level)
+        : curJob && curJob.isCommercial
+          ? 1 + getCommercialCommissionMultiplier(currentPerformance.level)
+          : 1;
+      const currentMonthlyIncome = curJob ? Math.round((Number(curJob.salary) || 0) * currentIncomeMultiplier) : 0;
+      const currentTenureMonths = curJob ? getCurrentJobTenureMonths(curJob) : 0;
+      const currentTenureYears = Math.floor(currentTenureMonths / 12);
+      const remainingTenureMonths = currentTenureMonths % 12;
+      const currentTenureLabel = currentTenureYears === 0
+        ? `${remainingTenureMonths} ${remainingTenureMonths === 1 ? 'mes' : 'meses'}`
+        : `${currentTenureYears} ${currentTenureYears === 1 ? 'año' : 'años'}${remainingTenureMonths ? ` y ${remainingTenureMonths} ${remainingTenureMonths === 1 ? 'mes' : 'meses'}` : ''}`;
 
       if (subView === 'busqueda') {
         const curJobId = curJob ? curJob.id : null;
@@ -38,16 +55,17 @@
             </div>
 
             <!-- SITUACIÓN LABORAL ACTUAL DEL PERSONAJE -->
-            <div style="background: ${curJob ? '#f0fdf4' : '#f8fafc'}; border: 1.5px solid ${curJob ? '#a7f3d0' : '#e2e8f0'}; border-radius: 8px; padding: 7px 9px; margin-bottom: 7px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="background: ${curJob ? '#f0fdf4' : '#f8fafc'}; border: 1.5px solid ${curJob ? '#a7f3d0' : '#e2e8f0'}; border-radius: 8px; padding: 7px 9px; margin-bottom: 7px; display: flex; justify-content: space-between; align-items: flex-start;">
               <div>
                 <div style="font-size: 0.58rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Estado Laboral Actual</div>
                 <div style="font-size: 0.82rem; font-weight: 800; color: ${curJob ? '#15803d' : '#0f172a'};">
                   ${curJob ? `${curJob.icon || '💼'} ${curJob.name}` : '💼 Sin empleo activo ($0)'}
                 </div>
+                ${curJob ? `<div style="font-size:.64rem;color:#475569;margin-top:3px;">Sueldo líquido último mes: <strong style="color:#059669;">$${(Number(curJob.lastNetSalary) || 0).toLocaleString('es-CL')}</strong></div>` : ''}
+                <div style="font-size: 0.66rem; color: #475569; margin-top: 2px;">Experiencia acumulada: ${formatWorkExperience()}</div>
               </div>
               ${curJob ? `
                 <div style="text-align: right;">
-                  <div style="font-size: 0.84rem; font-weight: 800; color: #059669;">$${(curJob.salary || 0).toLocaleString('es-CL')} líquido</div>
                   <button type="button" onclick="confirmResignationModal()" style="background: none; border: none; font-size: 0.74rem; color: #b91c1c; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 2px 0; margin-top: 2px; display: inline-block;">${curJob.isFreelance ? 'Dejar actividad independiente' : 'Renunciar al empleo'}</button>
                 </div>
               ` : `
@@ -123,7 +141,7 @@
           <div class="personal-subview-box">
             <!-- PANEL SUPERIOR: SITUACIÓN LABORAL ACTUAL -->
             <div style="background: ${curJob ? '#f0fdf4' : '#f8fafc'}; border: 1.5px solid ${curJob ? '#a7f3d0' : '#e2e8f0'}; border-radius: 9px; padding: 9px 12px; margin-bottom: 9px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; flex-direction: column; align-items: stretch; gap: 5px;">
                 <div>
                   <div style="font-size: 0.58rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;">
                     Situación Laboral Actual
@@ -132,20 +150,38 @@
                     <span>${curJob ? (curJob.icon || '💼') : '💼'}</span>
                     <span>${curJob ? curJob.name : 'Sin empleo activo'}</span>
                   </div>
+                  ${curJob && curJob.conditions ? `<div style="font-size:.62rem;color:#475569;margin-top:3px;">${curJob.conditions}</div>` : ''}
                 </div>
-                <div style="text-align: right;">
-                  ${curJob ? `
-                    <div style="font-size: 0.86rem; font-weight: 800; color: #059669;">
-                      $${(curJob.salary || 0).toLocaleString('es-CL')} líquido
-                    </div>
-                    <button type="button" onclick="confirmResignationModal()" style="background: none; border: none; font-size: 0.74rem; color: #b91c1c; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 2px 0; margin-top: 2px; display: inline-block;">
-                      ${curJob.isFreelance ? 'Dejar actividad independiente' : 'Renunciar al empleo'}
-                    </button>
-                  ` : `
+                ${curJob ? `
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #d1fae5;padding-top:5px;">
+                    <span style="font-size:.63rem;color:#475569;font-weight:700;">${curJob.isFreelance || curJob.isCommercial ? 'Ingreso líquido proyectado a fin de mes:' : 'Sueldo líquido mensual'}</span>
+                    <strong style="font-size:.86rem;color:#059669;">$${currentMonthlyIncome.toLocaleString('es-CL')}</strong>
+                  </div>
+                  ${curJob.isCommercial ? '<div style="font-size:.57rem;color:#64748b;">Comisión variable según desempeño</div>' : ''}
+                  <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:3px 8px;font-size:.57rem;color:#64748b;">
+                    <span>Inicio: ${formatCourseDate(curJob.tenureStartDate)}</span>
+                    <span>Antigüedad: ${currentTenureLabel}</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.64rem;">
+                    <span style="color:#475569;">Desempeño: ${currentPerformance.level}</span>
+                  </div>
+                  <label style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:5px 8px;border-top:1px solid #d1fae5;padding-top:5px;font-size:.62rem;color:#475569;font-weight:700;">
+                    Depositar sueldo en
+                    <select onchange="setCurrentJobSalaryAccount(this.value)" style="min-width:145px;max-width:100%;padding:5px 7px;border:1px solid #cbd5e1;border-radius:5px;background:#fff;color:#334155;font-size:.61rem;font-weight:600;">
+                      <option value="cash" ${salaryAccountId === 'cash' ? 'selected' : ''}>Efectivo</option>
+                      ${salaryAccounts.map(account => `<option value="${account.id}" ${salaryAccountId === account.id ? 'selected' : ''}>${account.icon || '🏦'} ${account.name}</option>`).join('')}
+                    </select>
+                  </label>
+                  ${curJob.performanceReview ? `<div style="font-size:.59rem;line-height:1.35;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:5px 7px;">Revisión de desempeño activa. Debes alcanzar nivel Regular (18/36) antes del ${formatCourseDate(curJob.performanceReview.deadlineDate)}.</div>` : ''}
+                  <div style="display:flex;justify-content:flex-end;">
+                    <button type="button" onclick="confirmResignationModal()" style="background:none;border:none;font-size:.68rem;color:#b91c1c;font-weight:700;cursor:pointer;text-decoration:underline;padding:1px 0;">${curJob.isFreelance ? 'Dejar actividad independiente' : 'Renunciar al empleo'}</button>
+                  </div>
+                ` : `
+                  <div style="text-align:right;">
                     <div style="font-size: 0.80rem; font-weight: 800; color: #64748b;">$0 ingresos</div>
                     <div style="font-size: 0.63rem; color: #0284c7; font-weight: 600;">Disponible para contratación</div>
-                  `}
-                </div>
+                  </div>
+                `}
               </div>
             </div>
 
@@ -177,6 +213,7 @@
       } else if (subView === 'capacitacion') {
         // VISTA DE CAPACITACIÓN Y CERTIFICACIONES
         const completedCourseIds = (state.courses || []).map(c => typeof c === 'string' ? c : c.id);
+        const enrolledCourses = Array.isArray(state.enrolledCourses) ? state.enrolledCourses : [];
 
         container.innerHTML = `
           <div class="personal-subview-box">
@@ -192,6 +229,7 @@
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
               ${coursesCatalogData.map(course => {
                 const isCompleted = completedCourseIds.includes(course.id);
+                const enrollment = enrolledCourses.find(item => item.id === course.id);
                 const isLocked = Boolean(course.prereqId && !completedCourseIds.includes(course.prereqId));
 
                 return `
@@ -201,16 +239,19 @@
                         ${course.areaIcon} ${course.name}
                       </div>
                       <div style="font-size: 0.60rem; color: #64748b; margin-bottom: 4px;">
-                        ⏱️ ${course.hours} hrs • <strong style="color: #0284c7;">$${course.price.toLocaleString('es-CL')}</strong>
+                        ⏱️ ${course.hours} hrs. (${course.durationMonths} ${course.durationMonths === 1 ? 'mes' : 'meses'}) • <strong style="color: #0284c7;">$${course.price.toLocaleString('es-CL')}</strong>
                       </div>
                       <div style="font-size: 0.58rem; color: #475569; line-height: 1.25; margin-bottom: 7px;">
                         ${course.desc}
                       </div>
+                      ${enrollment ? `<div style="font-size:0.58rem;color:#0369a1;background:#eff6ff;border:1px solid #bfdbfe;border-radius:5px;padding:5px;margin-bottom:6px;">En curso · Comienza: ${formatCourseDate(enrollment.startDate)} · Término: ${formatCourseDate(enrollment.completionDate)}</div>` : ''}
                     </div>
 
                     <div style="margin-top: auto;">
                       ${isCompleted ? `
                         <button type="button" class="btn-course-completed" disabled>✓ Curso completado</button>
+                      ` : enrollment ? `
+                        <button type="button" class="btn-course-locked" disabled>En curso</button>
                       ` : isLocked ? `
                         <button type="button" class="btn-course-locked" disabled>🔒 No disponible</button>
                       ` : `
@@ -312,16 +353,43 @@
     // ==========================================================================
     // LÓGICA DE MATRÍCULA Y PAGO DE CURSOS DE CAPACITACIÓN
     // ==========================================================================
+    function getCourseSchedule(course) {
+      const currentMonthIndex = (Number(state.simulationYear) - 1) * 12 + Number(state.simulationMonth);
+      const startMonthIndex = currentMonthIndex + 1;
+      const endMonthIndex = currentMonthIndex + Number(course.durationMonths);
+      const toDate = (monthIndex, day) => ({
+        year: Math.floor(monthIndex / 12) + 1,
+        month: monthIndex % 12,
+        day
+      });
+      const endMonth = toDate(endMonthIndex, 1);
+      const monthLength = [31, isSimulationLeapYear(endMonth.year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][endMonth.month];
+      const completionDate = { ...endMonth, day: monthLength };
+      return {
+        startDate: toDate(startMonthIndex, 1),
+        completionDate,
+        startLabel: formatCourseDate(toDate(startMonthIndex, 1)),
+        completionLabel: formatCourseDate(completionDate)
+      };
+    }
+
+    function formatCourseDate(date) {
+      if (!date) return 'Fecha no disponible';
+      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      return `${String(date.day).padStart(2, '0')}-${monthNames[date.month]}-Año ${date.year}`;
+    }
+
     function openEnrollCourseModal(courseId) {
       const course = coursesCatalogData.find(c => c.id === courseId);
       if (!course) return;
+      const schedule = getCourseSchedule(course);
 
       const modalRoot = document.getElementById('job-modal-root');
       if (!modalRoot) return;
 
       const cash = state.cash || 0;
       const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
-      const totalAvailable = cash + bankAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
+      const totalAvailable = cash + bankAccounts.reduce((sum, account) => sum + getBankAccountSpendableBalance(account.id), 0);
       const canAfford = totalAvailable >= course.price;
 
       let paymentOptionsHtml = '';
@@ -334,10 +402,16 @@
               <span>💵 Dinero en Efectivo ($${cash.toLocaleString('es-CL')}${cash < course.price ? ' - Saldo insuficiente' : ''})</span>
             </label>
             ${bankAccounts.map((acc, idx) => `
+              ${(() => {
+                const spendable = getBankAccountSpendableBalance(acc.id);
+                const lineAvailable = Math.max(0, spendable - (Number(acc.balance) || 0));
+                return `
               <label style="display: flex; align-items: center; gap: 6px; font-size: 0.68rem; color: #1e293b; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 8px; cursor: pointer;">
-                <input type="radio" name="payment_source" value="account_${idx}" ${cash < course.price && acc.balance >= course.price ? 'checked' : (acc.balance >= course.price ? '' : 'disabled')} />
-                <span>🏦 ${acc.name || 'Cuenta Bancaria'} ($${(acc.balance || 0).toLocaleString('es-CL')}${acc.balance < course.price ? ' - Saldo insuficiente' : ''})</span>
+                <input type="radio" name="payment_source" value="account_${idx}" ${cash < course.price && spendable >= course.price ? 'checked' : (spendable >= course.price ? '' : 'disabled')} />
+                <span>🏦 ${acc.name || 'Cuenta Bancaria'} ($${(acc.balance || 0).toLocaleString('es-CL')}${lineAvailable > 0 ? ` + $${lineAvailable.toLocaleString('es-CL')} Línea` : ''}${spendable < course.price ? ' - Saldo insuficiente' : ''})</span>
               </label>
+                `;
+              })()}
             `).join('')}
           </div>
         `;
@@ -369,9 +443,10 @@
                   ${course.desc}
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #e2e8f0; padding-top: 6px; margin-top: 4px;">
-                  <span style="font-size: 0.68rem; color: #475569;">⏱️ Duración: <strong>${course.hours} horas cronológicas</strong></span>
+                  <span style="font-size: 0.68rem; color: #475569;">⏱️ Duración: <strong>${course.hours} horas (${course.durationMonths} ${course.durationMonths === 1 ? 'mes' : 'meses'})</strong></span>
                   <span style="font-size: 0.86rem; font-weight: 800; color: #0284c7;">$${course.price.toLocaleString('es-CL')}</span>
                 </div>
+                <div style="font-size:0.62rem;color:#475569;margin-top:5px;">El curso comienza el <strong>${schedule.startLabel}</strong> y termina el <strong>${schedule.completionLabel}</strong>.</div>
               </div>
 
               ${paymentOptionsHtml}
@@ -399,6 +474,8 @@
     function confirmCourseEnrollment(courseId) {
       const course = coursesCatalogData.find(c => c.id === courseId);
       if (!course) return;
+      if ((state.courses || []).some(item => (typeof item === 'string' ? item : item.id) === course.id)
+        || (state.enrolledCourses || []).some(item => item.id === course.id)) return;
 
       const selectedInput = document.querySelector('input[name="payment_source"]:checked');
       const paymentSource = selectedInput ? selectedInput.value : 'cash';
@@ -412,43 +489,75 @@
         state.cash -= course.price;
       } else if (paymentSource.startsWith('account_')) {
         const accIdx = parseInt(paymentSource.replace('account_', ''), 10);
-        if (!state.bankAccounts || !state.bankAccounts[accIdx] || (state.bankAccounts[accIdx].balance || 0) < course.price) {
+        const account = state.bankAccounts && state.bankAccounts[accIdx];
+        if (!account || getBankAccountSpendableBalance(account.id) < course.price) {
           alert('La cuenta seleccionada no tiene saldo suficiente.');
           return;
         }
-        state.bankAccounts[accIdx].balance -= course.price;
+        debitBankAccountWithCreditLine(account.id, course.price);
       }
 
-      // Registrar curso aprobado en el personaje
-      if (!Array.isArray(state.courses)) state.courses = [];
-      if (!state.courses.some(c => (typeof c === 'string' ? c : c.id) === course.id)) {
-        state.courses.push({
-          id: course.id,
-          code: course.code,
-          name: course.name,
-          area: course.area,
-          level: course.level,
-          hours: course.hours
-        });
-      }
-
-      // CASO INDEPENDIENTE / FREELANCE: AUMENTOS AUTOMÁTICOS
-      let freelanceMsg = '';
-      if (state.currentJob && state.currentJob.isFreelance) {
-        const isFavored = course.favorsJobs.includes(state.currentJob.id);
-        const gainRate = isFavored ? course.gainFavored : course.gainBase;
-        const raiseAmount = Math.round((state.currentJob.salary || 950000) * gainRate);
-        state.currentJob.salary = (state.currentJob.salary || 950000) + raiseAmount;
-        if (!Array.isArray(state.appliedCourseRaises)) state.appliedCourseRaises = [];
-        state.appliedCourseRaises.push(course.id);
-        freelanceMsg = `\n\n🚀 Como trabajador independiente, tus ingresos aumentan automáticamente un ${(gainRate * 100).toFixed(0)}% (+$${raiseAmount.toLocaleString('es-CL')}). Nuevo ingreso estimado: $${state.currentJob.salary.toLocaleString('es-CL')} Aprox.`;
-      }
+      const schedule = getCourseSchedule(course);
+      if (!Array.isArray(state.enrolledCourses)) state.enrolledCourses = [];
+      state.enrolledCourses.push({
+        id: course.id,
+        code: course.code,
+        name: course.name,
+        area: course.area,
+        level: course.level,
+        hours: course.hours,
+        durationMonths: course.durationMonths,
+        startDate: schedule.startDate,
+        completionDate: schedule.completionDate
+      });
 
       closeJobModal();
       renderTrabajoStage('capacitacion');
       if (typeof updateHUD === 'function') updateHUD();
 
-      alert(`¡Felicitaciones! Has completado con éxito '${course.name}'.${freelanceMsg}`);
+      if (typeof alertUpcomingBankFeature === 'function') {
+        alertUpcomingBankFeature('Matrícula confirmada', `El curso comienza el <strong>${schedule.startLabel}</strong> y termina el <strong>${schedule.completionLabel}</strong>. Recibirás tu certificación al completar el plazo.`);
+      }
+    }
+
+    function processDailyCourseEvents() {
+      if (!Array.isArray(state.enrolledCourses) || !state.enrolledCourses.length) return;
+      const currentDate = { year: Number(state.simulationYear), month: Number(state.simulationMonth), day: Number(state.simulationDay) };
+      const completed = [];
+      state.enrolledCourses = state.enrolledCourses.filter(enrollment => {
+        const endDate = enrollment.completionDate;
+        const hasFinished = currentDate.year > endDate.year
+          || (currentDate.year === endDate.year && currentDate.month > endDate.month)
+          || (currentDate.year === endDate.year && currentDate.month === endDate.month && currentDate.day >= endDate.day);
+        if (hasFinished) completed.push(enrollment);
+        return !hasFinished;
+      });
+
+      if (!completed.length) return;
+      if (!Array.isArray(state.courses)) state.courses = [];
+      const messages = completed.map(enrollment => {
+        const course = coursesCatalogData.find(item => item.id === enrollment.id);
+        if (!state.courses.some(item => (typeof item === 'string' ? item : item.id) === enrollment.id)) {
+          state.courses.push({ ...enrollment, completedAt: currentDate });
+        }
+        if (course && state.currentJob && state.currentJob.isFreelance) {
+          const performance = getWorkPerformance(state.currentJob);
+          if (performance.score < 18) {
+            return `<div>¡Felicitaciones! Has completado el curso de <strong>${enrollment.name}</strong>. Tu nivel de desempeño (${performance.level}) no permite aplicar todavía el aumento asociado al curso.</div>`;
+          }
+          const gainRate = course.favorsJobs.includes(state.currentJob.id) ? course.gainFavored : course.gainBase;
+          const raiseAmount = Math.round((state.currentJob.salary || 950000) * gainRate);
+          state.currentJob.salary = (state.currentJob.salary || 950000) + raiseAmount;
+          if (!Array.isArray(state.appliedCourseRaises)) state.appliedCourseRaises = [];
+          if (!state.appliedCourseRaises.includes(course.id)) state.appliedCourseRaises.push(course.id);
+          return `<div>¡Felicitaciones! Has completado el curso de <strong>${enrollment.name}</strong>. Tus ingresos independientes aumentan $${raiseAmount.toLocaleString('es-CL')}.</div>`;
+        }
+        return `<div>¡Felicitaciones! Has completado el curso de <strong>${enrollment.name}</strong>.</div>`;
+      });
+      if (typeof alertUpcomingBankFeature === 'function') {
+        alertUpcomingBankFeature('¡Felicitaciones!', messages.join('<br><br>'));
+      }
+      if (typeof updateHUD === 'function') updateHUD();
     }
 
     // ==========================================================================
@@ -672,6 +781,15 @@
         renderNegChatMessages();
 
         setTimeout(() => {
+          const performance = getWorkPerformance(state.currentJob);
+          if (performance.score < 18) {
+            negChatMessages.push({ sender: 'boss', text: `Tu nivel actual es <strong>${performance.level}</strong> (${performance.score}/36). Para optar a un aumento necesitas alcanzar al menos el nivel Regular (18/36).` });
+            negChatStep = 'ended';
+            renderNegChatMessages();
+            renderNegChatOptions();
+            return;
+          }
+
           // 1. Validar salud mental o emocional
           if ((state.healthMental || 40) < 20 || (state.healthEmotional || 40) < 20) {
             const healthLowReplies = [
@@ -746,6 +864,15 @@
         renderNegChatMessages();
 
         setTimeout(() => {
+          const performance = getWorkPerformance(state.currentJob);
+          if (performance.score < 26) {
+            negChatMessages.push({ sender: 'boss', text: `Tu nivel actual es <strong>${performance.level}</strong> (${performance.score}/36). Para postular a un ascenso necesitas alcanzar al menos el nivel Bueno (26/36).` });
+            negChatStep = 'ended';
+            renderNegChatMessages();
+            renderNegChatOptions();
+            return;
+          }
+
           // 1. Validar salud mental y emocional
           if ((state.healthMental || 40) < 20 || (state.healthEmotional || 40) < 20) {
             const healthLowReplies = [
@@ -1044,7 +1171,7 @@
                         <span>❌ Requisito pendiente:</span> <span>${req.label}</span>
                       </div>
                       <div style="font-size: 0.63rem; color: #7f1d1d; margin-top: 2px; line-height: 1.3;">
-                        ${req.desc}
+                        ${req.id === 'exp' ? `${formatWorkExperience()} acumulados de 12 meses. ` : ''}${req.desc}
                       </div>
                     </div>
                   `).join('')}
@@ -1064,20 +1191,42 @@
       }
     }
 
+    function setCurrentJobSalaryAccount(accountId) {
+      const job = state.currentJob;
+      if (!job) return;
+      const accountExists = accountId === 'cash'
+        || (state.bankAccounts || []).some(account => account.id === accountId && account.type !== 'credit');
+      if (!accountExists) return;
+      job.salaryAccountId = accountId;
+    }
+
     // CONFIRMAR Y ACEPTAR EMPLEO
     function confirmJobAcceptance(jobId) {
       const job = jobOffersData.find(j => j.id === jobId);
       if (!job) return;
 
       if (!Array.isArray(state.jobHistory)) state.jobHistory = [];
-      if (state.currentJob && !state.jobHistory.some(h => h.id === state.currentJob.id)) {
-        state.jobHistory.push({ id: state.currentJob.id, name: state.currentJob.name });
+      if (state.currentJob) {
+        payCurrentJobThroughToday();
+        archiveCurrentJobExperience();
+        if (!state.jobHistory.some(h => h.id === state.currentJob.id)) {
+          state.jobHistory.push({ id: state.currentJob.id, name: state.currentJob.name });
+        }
       }
 
       state.currentJob = {
         id: job.id,
         name: job.name,
         salary: job.salary,
+        tenureStartDate: {
+          year: Number(state.simulationYear) || 1,
+          month: Number(state.simulationMonth) || 0,
+          day: Number(state.simulationDay) || 1
+        },
+        tenureMonths: 0,
+        performanceHistory: [],
+        poorPerformanceMonths: 0,
+        performanceReview: null,
         grossSalary: job.isFreelance ? null : job.grossSalary,
         isFreelance: Boolean(job.isFreelance),
         isCommercial: Boolean(job.isCommercial),
@@ -1157,7 +1306,10 @@
 
     // EJECUTAR RENUNCIA TRAS CONFIRMACIÓN
     function executeResignation() {
+      let finalSalaryPayment = 0;
       if (state.currentJob) {
+        finalSalaryPayment = payCurrentJobThroughToday();
+        archiveCurrentJobExperience();
         if (!Array.isArray(state.jobHistory)) state.jobHistory = [];
         if (!state.jobHistory.some(h => h.id === state.currentJob.id)) {
           state.jobHistory.push({ id: state.currentJob.id, name: state.currentJob.name });
@@ -1170,6 +1322,9 @@
         renderTrabajoStage('busqueda');
       } else {
         renderTrabajoStage('main');
+      }
+      if (finalSalaryPayment > 0 && typeof alertUpcomingBankFeature === 'function') {
+        alertUpcomingBankFeature('Sueldo proporcional abonado', `Se abonaron $${finalSalaryPayment.toLocaleString('es-CL')} por los días trabajados este mes hasta la fecha de renuncia.`);
       }
     }
 

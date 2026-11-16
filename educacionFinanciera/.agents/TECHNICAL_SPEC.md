@@ -5,15 +5,16 @@
 - **Frontend:** Pure Vanilla HTML5, CSS3, ES6+ JS (zero bundlers; works via local `file://` and GitHub Pages).
 - **Backend/BaaS:** Supabase JS SDK v2 (`../js/supabaseClient.js` via `getPlaton6Supabase()`).
 - **Modular File Architecture:**
-  - `index.html` (`400 lines`): Clean HTML shell (3 zones, onboarding containers, modals, HUD Dock).
+  - `index.html` (`401 lines`): Clean HTML shell (3 zones, onboarding containers, modals, HUD Dock and module script order).
   - `css/styles.css` (`2,390 lines`): Design tokens, 3D perspective background, and component styles.
-  - `data/catalogs.js` (`924 lines`): Static templates/JSON catalogs (`slidesData`, `homeOptions`, `jobOptions`, `transportOptions`, `hubsData`, `coursesCatalogData`, `jobOffersData`, `segurosCatalog`, `getInsuranceCoverages`, `officialRiskQuestions`).
-  - `js/state.js` (`349 lines`): Shared global `state` in memory + cross-module helpers (`checkProfileCompletion`, `syncDefaultAnchorsUI`, `getAssetInsurancePricing`, `getUserInsuranceAssets`, `getBienestarFace`, `renderHeartsMeter`, `renderHubCentralStage`, `selectHudTab`, `updateHUD`).
+  - `data/catalogs.js` (`1,013 lines`): Static catalogs, including eight Corredora housing options, prices and reference rents.
+  - `js/state.js` (`829 lines`): Persistent shared state, balance mutation tracking, financial history, credit helpers and simulated daily/monthly event scheduler.
   - `js/ui-carousel-onboarding.js` (`607 lines`): Top PPT carousel (with `N° 1`–`N° 42` badges) and 3-step Onboarding (`#view-step-4`, `#view-anchors`, `#view-character-summary`).
-  - `js/ui-trabajo.js` (`1,183 lines`): `"Trabajo"` hub (`renderTrabajoStage`, courses, boss negotiation chat `initNegChat`/`handleNegChatOption`, job hire/resignation).
-  - `js/ui-banco-seguros.js` (`3,381 lines`): `"Banco"` & `"Seguros"` hub (`renderBancoStage`, accounts, `"Cuenta Corriente"` multi-step bundle, credit line/card, `"Fondos Mutuos (FFMM)"`, `"Depósitos a Plazo (DAP)"`, multi-asset insurance).
-  - `js/ui-personal.js` (`1,308 lines`): `"Mi Estado"` (`Personal`) hub (`"Bienestar"`, 3-col budget, net worth & liquidity, 5-Q Investor Test, secret audit `secret_summary`).
-  - `js/ui-inversiones.js` (`renderInversionesStage`, `renderOtherInvestmentCategoryView`, `openContractOtherInvModal`, `openRedeemOtherInvModal`, `executeRedeemOtherInv`).
+  - `js/ui-trabajo.js` (`1,338 lines`): `"Trabajo"` hub, employment/performance, course lifecycle, salary routing and payment history.
+  - `js/ui-banco-seguros.js` (`4,309 lines`): `"Banco"` & `"Seguros"`; account operations, consumer/mortgage credit, revolving credit, FFMM, DAP, insurance and financial event handlers.
+  - `js/ui-personal.js` (`1,380 lines`): `"Mi Estado"`; wellbeing, budget, assets/liabilities and financial movement history.
+  - `js/ui-inversiones.js` (`3,031 lines`): Other investments, wallet, shared purchase/redemption flows and investment returns.
+  - `js/ui-corredora.js` (`879 lines`): Property sale/rental listings, matching, settlement and contracts.
 
 ## 2. State Model (`state`) & Character Variables
 ### 2.1. Unified `"Bienestar"` Breakdown (100 Points)
@@ -87,6 +88,22 @@
 ### Other Investments — Digital Wallet
 - The remunerated wallet is a liquid account in `state.bankAccounts`, opened at zero balance and managed through the shared deposit, withdrawal and closure flows. Legacy wallet investment positions migrate once to the account.
 - Daily simulated interest uses the effective daily rate `(1 + annualInterestRate) ** (1 / 365) - 1`, rounded to CLP on the current balance, and records accrued interest and simulated days.
+
+### Corredora — Property Sales and Rentals
+- `js/ui-corredora.js` manages owner sale listings (`state.propertyListings`) and rental listings (`state.propertyRentalListings`) independently. The same property may appear in both.
+- The catalog supplies eight housing options, reference values at UF `$41,000`, and market rents. Completed sales deduct 2% commission and any linked mortgage before net proceeds are credited.
+- Rental listings use simulated tenant matching, monthly rent, 5% brokerage commission and net payment history. Rental history contributes to subsequent mortgage income assessment.
+- `state.rentedProperties` represents the user's tenant obligations, including monthly charges and guarantee settlement when a contract ends.
+
+### Credit, Salary History and Financial Movements
+- `state.financialMovements` stores dated cash/account changes. The persistent-state proxy detects balance mutations; `withFinancialMovementDetail()` attaches a contextual cause, while `recordFinancialMovement()` records credit-product events not represented as cash transfers.
+- `job.salaryPaymentHistory` retains recent net salary records. Mortgage assessment averages up to three recent salary months and net rent receipts: first-mortgage capacity is 33% of salary average; subsequent capacity is 50% of salary and net rent averages less existing mortgage payments.
+- Revolving credit daily rates are 0.09% for the credit line and 0.08% for the card, consolidated monthly. Corriente deposits are applied to outstanding line principal and unpaid interest first.
+- Consumer credit supports amortized terms and full payoff. Mortgage payments are scheduled monthly against a selected eligible source.
+
+### Simulation Clock and Persistence
+- The simulated calendar advances one day every two seconds while the page is visible/focused. Daily processing handles accrued interest and scheduled events; monthly processing consolidates credit interest and runs monthly account, investment, rent, and debt events.
+- Persistent state is restored from the newest timestamped localStorage/sessionStorage backup; hiding or leaving the page forces a save, and restart clears both.
 
 ## 3. Session Room ID & Supabase Tables
 - **Room ID:** `YYYYMM` + 4-digit code (`1000`–`9999`), e.g. `2026101042`.

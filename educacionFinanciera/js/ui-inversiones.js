@@ -1247,12 +1247,12 @@
         icon: '📱',
         actionLabel: 'Cargar Saldo',
         requiresRiskProfile: false,
-        ruleNote: 'La billetera funciona como una cuenta vista líquida: permite depositar, transferir, girar y cerrar la cuenta. Además, abona interés diario simulado sobre el saldo disponible; el rendimiento es referencial y puede variar.',
+        ruleNote: 'La billetera funciona como una cuenta vista líquida: permite depositar, transferir, girar y cerrar la cuenta. El interés se calcula diariamente sobre el saldo y se abona en un solo movimiento al inicio de cada mes simulado; la tasa es referencial.',
         items: [
           {
             id: 'wallet_remunerada',
             name: 'Billetera Digital con Rendimiento Diario Automático',
-            shortName: 'Billetera Digital Remunerada',
+            shortName: 'Billetera Digital',
             icon: '📱',
             expectedMonthlyRate: 0.0038,
             monthlyVolatility: 0.0005,
@@ -1484,13 +1484,15 @@
       if (!Array.isArray(state.bankAccounts)) state.bankAccounts = [];
       state.bankAccounts.push({
         id: 'acc_wallet_remunerada',
-        name: 'Billetera Digital Remunerada',
+        name: 'Billetera Digital',
         type: 'digital_wallet',
         icon: '📱',
         isLiquid: true,
         balance,
         interestEarned: Math.max(0, balance - (Number(position.contributedCapital) || 0)),
         simulatedInterestDays: 0,
+        accruedInterest: 0,
+        currentDayInterest: 0,
         openedAt: new Date().toISOString()
       });
       state.otherInvestments.splice(positionIndex, 1);
@@ -1507,50 +1509,57 @@
       if (!Array.isArray(state.bankAccounts)) state.bankAccounts = [];
       state.bankAccounts.push({
         id: 'acc_wallet_remunerada',
-        name: 'Billetera Digital Remunerada',
+        name: 'Billetera Digital',
         type: 'digital_wallet',
         icon: '📱',
         isLiquid: true,
         balance: 0,
         interestEarned: 0,
         simulatedInterestDays: 0,
+        accruedInterest: 0,
+        currentDayInterest: 0,
         openedAt: new Date().toISOString()
       });
       renderDigitalWalletView();
       if (typeof updateHUD === 'function') updateHUD();
-      alertUpcomingBankFeature('Billetera digital abierta', 'Tu billetera está activa. Puedes depositar desde efectivo u otras cuentas y simular el abono diario de intereses.');
+      alertUpcomingBankFeature('Billetera digital abierta', 'Tu billetera está activa. El interés se calcula diariamente y se abona en un solo movimiento al inicio de cada mes simulado.');
+    }
+
+    function accrueDigitalWalletDailyInterest(account) {
+      const product = findOtherInvCatalogItem('wallet_remunerada')?.item;
+      const annualRate = Number(product?.annualInterestRate) || 0.0465;
+      const dailyRate = Math.pow(1 + annualRate, 1 / 365) - 1;
+      const currentDayInterest = Number(account.currentDayInterest) || 0;
+      const accruedInterest = Number(account.accruedInterest) || 0;
+      const dailyBase = (Number(account.balance) || 0) + accruedInterest + currentDayInterest;
+      const interest = Math.round(dailyBase * dailyRate);
+      if (Number(state.simulationDay) === 1) {
+        account.currentDayInterest = currentDayInterest + interest;
+      } else {
+        account.accruedInterest = accruedInterest + interest;
+      }
+      account.simulatedInterestDays = (Number(account.simulatedInterestDays) || 0) + 1;
+      return interest;
     }
 
     function simulateDigitalWalletDay() {
       const account = getDigitalWalletAccount();
       if (!account) return;
 
-      const product = findOtherInvCatalogItem('wallet_remunerada')?.item;
-      const annualRate = Number(product?.annualInterestRate) || 0.0465;
-      const dailyRate = Math.pow(1 + annualRate, 1 / 365) - 1;
-      const interest = Math.round((Number(account.balance) || 0) * dailyRate);
-      account.balance = (Number(account.balance) || 0) + interest;
-      account.interestEarned = (Number(account.interestEarned) || 0) + interest;
-      account.simulatedInterestDays = (Number(account.simulatedInterestDays) || 0) + 1;
+      const interest = accrueDigitalWalletDailyInterest(account);
 
       if (typeof updateHUD === 'function') updateHUD();
       renderDigitalWalletView();
       alertUpcomingBankFeature(
-        'Interés diario abonado',
-        `Día simulado #${account.simulatedInterestDays}: se abonaron $${interest.toLocaleString('es-CL')} de interés. Saldo actualizado: $${Number(account.balance).toLocaleString('es-CL')}.`
+        'Interés diario calculado',
+        `Día simulado #${account.simulatedInterestDays}: se acumularon $${interest.toLocaleString('es-CL')} de interés. El monto se abonará junto al cierre mensual.`
       );
     }
 
     function processDailyInvestmentEvents() {
       const account = getDigitalWalletAccount();
       if (!account) return;
-      const product = findOtherInvCatalogItem('wallet_remunerada')?.item;
-      const annualRate = Number(product?.annualInterestRate) || 0.0465;
-      const dailyRate = Math.pow(1 + annualRate, 1 / 365) - 1;
-      const interest = Math.round((Number(account.balance) || 0) * dailyRate);
-      account.balance = (Number(account.balance) || 0) + interest;
-      account.interestEarned = (Number(account.interestEarned) || 0) + interest;
-      account.simulatedInterestDays = (Number(account.simulatedInterestDays) || 0) + 1;
+      accrueDigitalWalletDailyInterest(account);
     }
 
     function getMonthlyInvestmentRate(accountType, fund, regime = 'A') {
@@ -1572,13 +1581,29 @@
       if (!account?.monthlyActive || !account.monthlyContribution || !account.debitAccountId) return;
       const source = (state.bankAccounts || []).find(item => item.id === account.debitAccountId);
       const amount = Math.round(Number(account.monthlyContribution) || 0);
-      if (!source || amount <= 0 || (Number(source.balance) || 0) < amount) return;
-      source.balance -= amount;
+      if (!source || amount <= 0 || getBankAccountSpendableBalance(source.id) < amount) return;
+      debitBankAccountWithCreditLine(source.id, amount);
       account.balance = (Number(account.balance) || 0) + amount;
       account.contributedCapital = (Number(account.contributedCapital) || 0) + amount;
     }
 
     function processMonthlyInvestmentEvents() {
+      const walletAccount = getDigitalWalletAccount();
+      if (walletAccount) {
+        const monthlyInterest = Math.max(0, Math.round(Number(walletAccount.accruedInterest) || 0));
+        if (monthlyInterest > 0) {
+          withFinancialMovementDetail('Interés mensual acumulado — Billetera Digital', () => {
+            walletAccount.balance = (Number(walletAccount.balance) || 0) + monthlyInterest;
+          });
+          walletAccount.interestEarned = (Number(walletAccount.interestEarned) || 0) + monthlyInterest;
+        }
+        walletAccount.accruedInterest = Number(walletAccount.currentDayInterest) || 0;
+        walletAccount.currentDayInterest = 0;
+        if (state.activeHudTab === 'inversiones' && state.activeInvestmentSubView === 'billeteras') {
+          renderDigitalWalletView();
+        }
+      }
+
       if (!Array.isArray(state.otherInvestments)) state.otherInvestments = [];
       state.otherInvestments.forEach(position => {
         const monthlyReturn = randomMonthlyReturn(
@@ -1631,9 +1656,11 @@
     function renderDigitalWalletView() {
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
+      state.activeInvestmentSubView = 'billeteras';
       migrateDigitalWalletPosition();
 
       const account = getDigitalWalletAccount();
+      if (account) account.name = 'Billetera Digital';
       const product = findOtherInvCatalogItem('wallet_remunerada')?.item;
       const annualRate = Number(product?.annualInterestRate) || 0.0465;
       const dailyRate = Math.pow(1 + annualRate, 1 / 365) - 1;
@@ -1647,8 +1674,8 @@
             <button type="button" class="personal-subview-back-btn" onclick="renderInversionesStage('main')"><span>◀ Volver</span></button>
           </div>
           <div style="background:#fff;border:1.5px solid #cbd5e1;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
-            <div style="font-size:.66rem;font-weight:800;color:#0f172a;margin-bottom:3px;">Billetera Digital Remunerada</div>
-            <div style="font-size:.59rem;color:#475569;line-height:1.4;">Cuenta líquida para depositar, transferir y girar. El interés se calcula diariamente sobre el saldo disponible; la tasa es una referencia educativa.</div>
+            <div style="font-size:.66rem;font-weight:800;color:#0f172a;margin-bottom:3px;">Billetera Digital</div>
+            <div style="font-size:.59rem;color:#475569;line-height:1.4;">Cuenta líquida para depositar, transferir y girar. El interés se calcula diariamente y se abona en un solo movimiento al inicio de cada mes simulado.</div>
           </div>
           ${account ? `
             <div style="background:linear-gradient(135deg,#ecfdf5 0%,#f0fdf4 100%);border:1.5px solid #a7f3d0;border-radius:9px;padding:10px 12px;margin-bottom:8px;">
@@ -1662,8 +1689,6 @@
             <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:8px;">
               <div style="background:#fff;border:1px solid #d1d5db;border-radius:7px;padding:8px;"><div style="font-size:.56rem;color:#64748b;">Tasa anual referencial</div><strong style="font-size:.68rem;color:#047857;">${(annualRate * 100).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</strong></div>
               <div style="background:#fff;border:1px solid #d1d5db;border-radius:7px;padding:8px;"><div style="font-size:.56rem;color:#64748b;">Tasa diaria efectiva aprox.</div><strong style="font-size:.68rem;color:#047857;">${dailyRateLabel}%</strong></div>
-              <div style="background:#fff;border:1px solid #d1d5db;border-radius:7px;padding:8px;"><div style="font-size:.56rem;color:#64748b;">Intereses abonados</div><strong style="font-size:.68rem;color:#047857;">$${Number(account.interestEarned || 0).toLocaleString('es-CL')}</strong></div>
-              <div style="background:#fff;border:1px solid #d1d5db;border-radius:7px;padding:8px;"><div style="font-size:.56rem;color:#64748b;">Días simulados</div><strong style="font-size:.68rem;color:#0f172a;">${Number(account.simulatedInterestDays || 0)}</strong></div>
             </div>
             <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;">
               <button type="button" onclick="promptDepositModal('${account.id}')" style="padding:9px 6px;background:#fff;border:1.5px solid #86efac;border-radius:7px;color:#166534;font-size:.64rem;font-weight:800;cursor:pointer;">📥 Depositar / transferir</button>
@@ -1672,7 +1697,7 @@
             </div>
           ` : `
             <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:9px 11px;margin-bottom:8px;font-size:.62rem;color:#475569;line-height:1.4;">
-              Apertura sin costo, mantención $0 y giros sin comisión. Tasa anual efectiva referencial: <strong>~${(annualRate * 100).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</strong>, abonada automáticamente cada día simulado.
+              Apertura sin costo, mantención $0 y giros sin comisión. Tasa anual efectiva referencial: <strong>~${(annualRate * 100).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</strong>. El interés se calcula cada día y se abona mensualmente.
             </div>
             <button type="button" onclick="openDigitalWalletAccount()" style="width:100%;padding:9px;border:none;border-radius:6px;background:#047857;color:#fff;font-size:.70rem;font-weight:800;cursor:pointer;">Abrir billetera</button>
           `}
@@ -1682,6 +1707,7 @@
     function renderInversionesStage(subView = 'main') {
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
+      state.activeInvestmentSubView = subView;
 
       const titleElem = document.getElementById('hub-stage-title');
       const subtitleElem = document.getElementById('hub-stage-subtitle');
@@ -1936,14 +1962,14 @@
         state.cash = available - totalCLP;
       } else {
         const acc = (state.bankAccounts || []).find(a => a.id === sourceId);
-        if (!acc || (Number(acc.balance) || 0) < totalCLP) {
+        if (!acc || getBankAccountSpendableBalance(acc.id) < totalCLP) {
           if (errorEl) {
             errorEl.style.display = 'block';
             errorEl.textContent = '⚠️ Saldo insuficiente en la cuenta bancaria seleccionada.';
           }
           return;
         }
-        acc.balance = (Number(acc.balance) || 0) - totalCLP;
+        debitBankAccountWithCreditLine(acc.id, totalCLP);
       }
 
       if (!state.foreignCurrencies || typeof state.foreignCurrencies !== 'object') {
@@ -2085,7 +2111,7 @@
           }
           return;
         }
-        acc.balance = (Number(acc.balance) || 0) + totalCLP;
+        creditBankAccount(acc.id, totalCLP);
       }
 
       state.foreignCurrencies[curr.id] = (Number(state.foreignCurrencies[curr.id]) || 0) - units;
@@ -2306,14 +2332,14 @@
         state.cash = available - amount;
       } else {
         const acc = (state.bankAccounts || []).find(a => a.id === sourceId);
-        if (!acc || (Number(acc.balance) || 0) < amount) {
+        if (!acc || getBankAccountSpendableBalance(acc.id) < amount) {
           if (errorEl) {
             errorEl.style.display = 'block';
             errorEl.textContent = '⚠️ Saldo insuficiente en la cuenta bancaria seleccionada.';
           }
           return;
         }
-        acc.balance = (Number(acc.balance) || 0) - amount;
+        debitBankAccountWithCreditLine(acc.id, amount);
       }
 
       const entryFee = calculateOtherInvTransactionFee(item, amount);
@@ -2552,7 +2578,7 @@
         state.cash = (Number(state.cash) || 0) + net;
       } else {
         const account = (state.bankAccounts || []).find(a => a.id === destId);
-        if (account) account.balance = (Number(account.balance) || 0) + net;
+        if (account) creditBankAccount(account.id, net);
         else state.cash = (Number(state.cash) || 0) + net;
       }
 
@@ -2664,8 +2690,8 @@
         state.cash -= amount;
       } else {
         const account = (state.bankAccounts || []).find(item => item.id === sourceId);
-        if (!account || amount > (Number(account.balance) || 0)) return;
-        account.balance -= amount;
+        if (!account || getBankAccountSpendableBalance(account.id) < amount) return;
+        debitBankAccountWithCreditLine(account.id, amount);
       }
       apv.balance = (Number(apv.balance) || 0) + amount;
       apv.contributedCapital = (Number(apv.contributedCapital) || 0) + amount;
@@ -2785,8 +2811,8 @@
         state.cash -= amount;
       } else {
         const bank = (state.bankAccounts || []).find(item => item.id === sourceId);
-        if (!bank || amount > (Number(bank.balance) || 0)) return;
-        bank.balance -= amount;
+        if (!bank || getBankAccountSpendableBalance(bank.id) < amount) return;
+        debitBankAccountWithCreditLine(bank.id, amount);
       }
       account.balance = (Number(account.balance) || 0) + amount;
       account.contributedCapital = (Number(account.contributedCapital) || 0) + amount;
@@ -2993,7 +3019,7 @@
                   <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">
                     ${sec.id === 'cripto' ? `<div style="font-size:.60rem; color:#64748b;">Tienes:<br/><strong style="color:${ownedBalance > 0 ? '#0f172a' : '#94a3b8'}; font-size:.72rem;">$${ownedBalance.toLocaleString('es-CL')}</strong></div>` : ''}
                     <div style="display:flex; flex-direction:${sec.id === 'cripto' ? 'column' : 'row'}; gap:5px; ${sec.id === 'cripto' ? 'width:105px;' : ''}">
-                      <button type="button" onclick="openContractOtherInvModal('${item.id}')" style="width:100%; padding:5px 11px; font-size:.64rem; font-weight:800; background:#0284c7; color:#fff; border:none; border-radius:6px;">${sec.id === 'apv' ? 'Aportar' : 'Comprar'}</button>
+                      <button type="button" onclick="openContractOtherInvModal('${item.id}')" style="width:100%; padding:5px 11px; font-size:.64rem; font-weight:800; background:#0284c7; color:#fff; border:none; border-radius:6px;">${sec.id === 'apv' ? 'Aportar' : sec.id === 'startups' ? 'Participar' : 'Comprar'}</button>
                       ${sec.id === 'cripto' ? `<button type="button" onclick="${sellPosition ? `openRedeemOtherInvModal('${sellPosition.id}')` : ''}" style="width:100%; padding:5px 11px; font-size:.64rem; font-weight:800; background:${ownedBalance > 0 ? '#047857' : '#cbd5e1'}; color:#fff; border:none; border-radius:6px;" ${ownedBalance > 0 ? '' : 'disabled'}>Vender</button>` : ''}
                     </div>
                   </div>
