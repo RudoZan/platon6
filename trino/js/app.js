@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.2.0027';
+const APP_VERSION = 'v1.2.0028';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -137,6 +137,12 @@ const CHORD_LEVELS = [
 
 // Notas naturales de inicio para los Bloques 2 y 3 (Do3 a Mi4: Do, Re, Mi, Fa, Sol, La, Si)
 const NATURAL_TONIC_MIDIS = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64];
+const PROGRESSIVE_INTERVAL_TONICS = [
+  [48],
+  [60],
+  [36, 48, 60],
+  [43, 55],
+];
 
 // Bloque 1 — Nivel 1: Tónicas Do, Re, Sol (Octavas 3 y 4) -> 100% notas naturales
 const LEVEL_1_RESTRICTED_PAIRS = {
@@ -385,7 +391,7 @@ const SCALE_LEVELS = [
     block: 0,
     isProgressive: true,
     title: 'Nivel Progresivo',
-    desc: 'Comienza en el Nivel 1. Avanza cada 10 buenas consecutivas y retrocede cada 10 malas sin importar si son consecutivas.',
+    desc: 'Comienza en el Nivel 1. En los niveles 1 a 11, avanza al lograr dos respuestas buenas seguidas por cada opción de respuesta; en los niveles 12 a 14, avanza con 10 buenas seguidas. Para avanzar, la lista de ejercicios fallidos debe estar vacía. Al superar 10 fallos pendientes, retrocede un nivel o subnivel.',
     options: ['major', 'naturalMinor'],
     tonicPcs: [0, 7],
   },
@@ -628,8 +634,11 @@ class TrinoShell {
     const progState = this.loadProgressiveState();
     this.progressiveDayKey = progState.dayKey;
     this.progressiveSubLevelId = progState.subLevelId;
+    this.progressiveTonicSubLevelId = progState.tonicSubLevelId;
     this.progressiveConsecutiveGood = progState.consecutiveGood;
-    this.progressiveAccumBad = progState.accumBad;
+    this.progressiveExerciseNumber = progState.exerciseNumber;
+    this.progressiveBadExercises = progState.badExercises;
+    this.lastIntervalUnisonMidi = progState.lastUnisonMidi;
     this.progressiveFlashTimer = null;
     const scaleProgState = this.loadScaleProgressiveState();
     this.scaleProgressiveDayKey = scaleProgState.dayKey;
@@ -651,6 +660,8 @@ class TrinoShell {
     this.activeModule = null; // 'intervals' | 'singing' | 'chords' | 'scales'
     this.activeLevel = null;
     this.currentQuestion = null;
+    this.directIntervalCycle = null;
+    this.lastIntervalUnisonMidi = null;
     this.delayedPlayTimer = null;
     this.autoNextTimer = null;
     this.intervalAnswerTimeout = null;
@@ -927,13 +938,33 @@ class TrinoShell {
         const parsed = JSON.parse(raw);
         if (parsed && parsed.dayKey === currentDayKey) {
           const subId = parseInt(parsed.subLevelId, 10);
+          const tonicSubId = parseInt(parsed.tonicSubLevelId, 10);
           const cGood = parseInt(parsed.consecutiveGood, 10);
-          const aBad = parseInt(parsed.accumBad, 10);
+          const exerciseNumber = parseInt(parsed.exerciseNumber, 10);
+          const lastUnisonMidi = parseInt(parsed.lastUnisonMidi, 10);
+          const badExercises = Array.isArray(parsed.badExercises)
+            ? parsed.badExercises.filter((item) =>
+              item &&
+              Number.isInteger(item.id) &&
+              Number.isInteger(item.midi1) &&
+              Number.isInteger(item.midi2) &&
+              typeof item.intervalKey === 'string' &&
+              Boolean(INTERVAL_CATALOG[item.intervalKey]) &&
+              Number.isInteger(item.failedAtExercise) &&
+              Number.isInteger(item.retryByExercise)
+            ).map((item) => ({
+              ...item,
+              retryByExercise: item.failedAtExercise + 4,
+            })).slice(0, 10)
+            : [];
           return {
             dayKey: currentDayKey,
             subLevelId: subId >= 1 && subId <= maxSubLevelId ? subId : 1,
-            consecutiveGood: cGood >= 0 && cGood < 10 ? cGood : 0,
-            accumBad: aBad >= 0 && aBad < 10 ? aBad : 0,
+            tonicSubLevelId: tonicSubId >= 1 && tonicSubId <= 5 ? tonicSubId : 1,
+            consecutiveGood: cGood >= 0 && cGood < 14 ? cGood : 0,
+            exerciseNumber: Number.isInteger(exerciseNumber) && exerciseNumber >= 0 ? exerciseNumber : 0,
+            badExercises,
+            lastUnisonMidi: Number.isInteger(lastUnisonMidi) ? lastUnisonMidi : null,
           };
         }
       }
@@ -941,8 +972,11 @@ class TrinoShell {
     return {
       dayKey: currentDayKey,
       subLevelId: 1,
+      tonicSubLevelId: 1,
       consecutiveGood: 0,
-      accumBad: 0,
+      exerciseNumber: 0,
+      badExercises: [],
+      lastUnisonMidi: null,
     };
   }
 
@@ -953,8 +987,11 @@ class TrinoShell {
         JSON.stringify({
           dayKey: this.progressiveDayKey,
           subLevelId: this.progressiveSubLevelId,
+          tonicSubLevelId: this.progressiveTonicSubLevelId,
           consecutiveGood: this.progressiveConsecutiveGood,
-          accumBad: this.progressiveAccumBad,
+          exerciseNumber: this.progressiveExerciseNumber,
+          badExercises: this.progressiveBadExercises,
+          lastUnisonMidi: this.lastIntervalUnisonMidi,
         })
       );
     } catch (_) { }
@@ -965,8 +1002,11 @@ class TrinoShell {
     if (this.progressiveDayKey !== currentDayKey) {
       this.progressiveDayKey = currentDayKey;
       this.progressiveSubLevelId = 1;
+      this.progressiveTonicSubLevelId = 1;
       this.progressiveConsecutiveGood = 0;
-      this.progressiveAccumBad = 0;
+      this.progressiveExerciseNumber = 0;
+      this.progressiveBadExercises = [];
+      this.lastIntervalUnisonMidi = null;
       this.saveProgressiveState();
       return true;
     }
@@ -1073,6 +1113,20 @@ class TrinoShell {
     const n = Number(val) || 0;
     if (n === 0) return `<td class="stats-val-zero">-</td>`;
     return `<td class="${colorCls}">${n}</td>`;
+  }
+
+  accumulateObservedDifficulty(summary, item) {
+    if (!Number.isFinite(item?.observedDifficulty)) return;
+    summary.difficultySum = (summary.difficultySum || 0) + item.observedDifficulty;
+    summary.difficultyCount = (summary.difficultyCount || 0) + 1;
+  }
+
+  formatObservedDifficultyCell(summary) {
+    const count = Number(summary?.difficultyCount) || 0;
+    if (!count) return '<td class="stats-val-zero">-</td>';
+    const labels = ['Muy fácil', 'Fácil', 'Regular', 'Difícil', 'Muy difícil'];
+    const roundedAverage = Math.max(1, Math.min(5, Math.round(summary.difficultySum / count)));
+    return `<td class="stats-val-difficulty">${labels[roundedAverage - 1]}</td>`;
   }
 
   getStatsRowBgClass(goodCount, badCount, totalCount) {
@@ -1207,16 +1261,18 @@ class TrinoShell {
         if (!resolved) return;
         const { midi1, midi2, intervalKey, isCorrect } = resolved;
 
-        if (!m1Abs[intervalKey]) m1Abs[intervalKey] = { good: 0, bad: 0 };
+        if (!m1Abs[intervalKey]) m1Abs[intervalKey] = { good: 0, bad: 0, difficultySum: 0, difficultyCount: 0 };
         if (isCorrect) m1Abs[intervalKey].good += 1;
         else m1Abs[intervalKey].bad += 1;
+        this.accumulateObservedDifficulty(m1Abs[intervalKey], item);
 
         const pairId = `${midi1}-${midi2}-${intervalKey}`;
         if (!m1ByNote[pairId]) {
-          m1ByNote[pairId] = { midi1, midi2, intervalKey, good: 0, bad: 0 };
+          m1ByNote[pairId] = { midi1, midi2, intervalKey, good: 0, bad: 0, difficultySum: 0, difficultyCount: 0 };
         }
         if (isCorrect) m1ByNote[pairId].good += 1;
         else m1ByNote[pairId].bad += 1;
+        this.accumulateObservedDifficulty(m1ByNote[pairId], item);
       });
     });
 
@@ -1279,6 +1335,7 @@ class TrinoShell {
             <td><strong>${cat.label}</strong></td>
             ${this.formatStatCell(entry.good, 'stats-val-good')}
             ${this.formatStatCell(entry.bad, 'stats-val-bad')}
+            ${this.formatObservedDifficultyCell(entry)}
           </tr>
         `;
       })
@@ -1292,6 +1349,7 @@ class TrinoShell {
               <th>Intervalo</th>
               <th>Buenas</th>
               <th>Fallidas</th>
+              <th>Dificultad observada</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1334,6 +1392,7 @@ class TrinoShell {
             <td>${label}</td>
             ${this.formatStatCell(it.good, 'stats-val-good')}
             ${this.formatStatCell(it.bad, 'stats-val-bad')}
+            ${this.formatObservedDifficultyCell(it)}
           </tr>
         `;
       })
@@ -1348,6 +1407,7 @@ class TrinoShell {
               <th>Intervalo</th>
               <th>Buenas</th>
               <th>Fallidas</th>
+              <th>Dificultad observada</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1417,16 +1477,18 @@ class TrinoShell {
         if (!resolved) return;
         const { chordId, rootMidi, isCorrect } = resolved;
 
-        if (!m3Abs[chordId]) m3Abs[chordId] = { good: 0, bad: 0 };
+        if (!m3Abs[chordId]) m3Abs[chordId] = { good: 0, bad: 0, difficultySum: 0, difficultyCount: 0 };
         if (isCorrect) m3Abs[chordId].good += 1;
         else m3Abs[chordId].bad += 1;
+        this.accumulateObservedDifficulty(m3Abs[chordId], item);
 
         const pairId = `${rootMidi}-${chordId}`;
         if (!m3ByNote[pairId]) {
-          m3ByNote[pairId] = { rootMidi, chordId, good: 0, bad: 0 };
+          m3ByNote[pairId] = { rootMidi, chordId, good: 0, bad: 0, difficultySum: 0, difficultyCount: 0 };
         }
         if (isCorrect) m3ByNote[pairId].good += 1;
         else m3ByNote[pairId].bad += 1;
+        this.accumulateObservedDifficulty(m3ByNote[pairId], item);
       });
     });
 
@@ -1447,6 +1509,7 @@ class TrinoShell {
             <td><strong>${cat.label}</strong></td>
             ${this.formatStatCell(entry.good, 'stats-val-good')}
             ${this.formatStatCell(entry.bad, 'stats-val-bad')}
+            ${this.formatObservedDifficultyCell(entry)}
           </tr>
         `;
       })
@@ -1460,6 +1523,7 @@ class TrinoShell {
               <th>Acorde / Díada</th>
               <th>Buenas</th>
               <th>Fallidas</th>
+              <th>Dificultad observada</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1498,6 +1562,7 @@ class TrinoShell {
             <td>${label}</td>
             ${this.formatStatCell(it.good, 'stats-val-good')}
             ${this.formatStatCell(it.bad, 'stats-val-bad')}
+            ${this.formatObservedDifficultyCell(it)}
           </tr>
         `;
       })
@@ -1512,6 +1577,7 @@ class TrinoShell {
               <th>Acorde / Díada</th>
               <th>Buenas</th>
               <th>Fallidas</th>
+              <th>Dificultad observada</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1538,17 +1604,19 @@ class TrinoShell {
         const scaleKey = unifyKey(item.scaleKey);
         const isCorrect = Boolean(item.isCorrect);
 
-        if (!m5Abs[scaleKey]) m5Abs[scaleKey] = { good: 0, bad: 0 };
+        if (!m5Abs[scaleKey]) m5Abs[scaleKey] = { good: 0, bad: 0, difficultySum: 0, difficultyCount: 0 };
         if (isCorrect) m5Abs[scaleKey].good += 1;
         else m5Abs[scaleKey].bad += 1;
+        this.accumulateObservedDifficulty(m5Abs[scaleKey], item);
 
         const rootMidi = Number.isFinite(item.rootMidi) ? Math.round(item.rootMidi) : 60;
         const pairId = `${rootMidi}-${scaleKey}`;
         if (!m5ByTonic[pairId]) {
-          m5ByTonic[pairId] = { rootMidi, scaleKey, good: 0, bad: 0 };
+          m5ByTonic[pairId] = { rootMidi, scaleKey, good: 0, bad: 0, difficultySum: 0, difficultyCount: 0 };
         }
         if (isCorrect) m5ByTonic[pairId].good += 1;
         else m5ByTonic[pairId].bad += 1;
+        this.accumulateObservedDifficulty(m5ByTonic[pairId], item);
       });
     });
 
@@ -1568,6 +1636,7 @@ class TrinoShell {
             <td><strong>${label}</strong></td>
             ${this.formatStatCell(entry.good, 'stats-val-good')}
             ${this.formatStatCell(entry.bad, 'stats-val-bad')}
+            ${this.formatObservedDifficultyCell(entry)}
           </tr>
         `;
       })
@@ -1581,6 +1650,7 @@ class TrinoShell {
               <th>Escala</th>
               <th>Buenas</th>
               <th>Fallidas</th>
+              <th>Dificultad observada</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1617,6 +1687,7 @@ class TrinoShell {
             <td>${scaleLabel}</td>
             ${this.formatStatCell(it.good, 'stats-val-good')}
             ${this.formatStatCell(it.bad, 'stats-val-bad')}
+            ${this.formatObservedDifficultyCell(it)}
           </tr>
         `;
       })
@@ -1631,6 +1702,7 @@ class TrinoShell {
               <th>Escala</th>
               <th>Buenas</th>
               <th>Fallidas</th>
+              <th>Dificultad observada</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1773,6 +1845,147 @@ class TrinoShell {
     return this.dayLogs[moduleType][levelId];
   }
 
+  getOptionWeightSnapshot(moduleType, levelToken, options) {
+    const token = `${moduleType}:${levelToken}`;
+    if (this.optionWeightSnapshot?.token === token) return this.optionWeightSnapshot;
+
+    const dayKey = this.getProgressiveDayKey();
+    const moduleLogs = this.dayLogs[moduleType] || {};
+    const optionStats = Object.fromEntries(options.map((option) => [option, { count: 0, difficultyTotal: 0 }]));
+    Object.values(moduleLogs).flat().forEach((entry) => {
+      const entryDayKey = entry.difficultyDayKey || entry.date;
+      if (entryDayKey !== dayKey) return;
+      const option = moduleType === 'intervals'
+        ? entry.intervalKey
+        : moduleType === 'chords'
+          ? entry.chordId
+          : entry.scaleKey;
+      const stats = optionStats[option];
+      if (!stats) return;
+      stats.count += 1;
+      stats.difficultyTotal += Number(entry.observedDifficulty) || 3;
+    });
+
+    const weighted = options.length > 0 && options.every((option) => optionStats[option].count >= 5);
+    const weights = {};
+    options.forEach((option) => {
+      const stats = optionStats[option];
+      const averageDifficulty = (15 + stats.difficultyTotal) / (5 + stats.count);
+      stats.averageDifficulty = averageDifficulty;
+      weights[option] = weighted ? 1 + (averageDifficulty - 1) / 4 : 1;
+    });
+
+    this.optionWeightSnapshot = { token, weighted, weights, optionStats };
+    return this.optionWeightSnapshot;
+  }
+
+  getCurrentOptionWeightSnapshot() {
+    if (!this.activeLevel || !['intervals', 'chords', 'scales'].includes(this.activeModule)) return null;
+    const effectiveLevel = this.activeModule === 'intervals'
+      ? this.getEffectiveIntervalLevel()
+      : this.activeModule === 'scales'
+        ? this.getEffectiveScaleLevel()
+        : this.activeLevel;
+    const tonicToken = this.activeModule === 'intervals' && this.activeLevel.isProgressive
+      ? `-${this.progressiveTonicSubLevelId}`
+      : '';
+    const token = `${effectiveLevel.id}${tonicToken}`;
+    return this.getOptionWeightSnapshot(this.activeModule, token, effectiveLevel.options || []);
+  }
+
+  pickWeightedOption(options) {
+    if (!options.length) return undefined;
+    const weights = this.getCurrentOptionWeightSnapshot()?.weights || {};
+    const totalWeight = options.reduce((total, option) => total + (weights[option] || 1), 0);
+    let threshold = Math.random() * totalWeight;
+    for (const option of options) {
+      threshold -= weights[option] || 1;
+      if (threshold < 0) return option;
+    }
+    return options[options.length - 1];
+  }
+
+  getDailyOptionAppearanceCount(moduleType, option) {
+    const dayKey = this.getProgressiveDayKey();
+    const optionField = moduleType === 'intervals'
+      ? 'intervalKey'
+      : moduleType === 'chords'
+        ? 'chordId'
+        : 'scaleKey';
+    return Object.values(this.dayLogs[moduleType] || {}).flat().filter((entry) =>
+      (entry.difficultyDayKey || entry.date) === dayKey && entry[optionField] === option
+    ).length;
+  }
+
+  buildOptionWeightDebugHtml() {
+    if (!this.activeLevel || !['intervals', 'chords', 'scales'].includes(this.activeModule)) return '';
+    const effectiveLevel = this.activeModule === 'intervals'
+      ? this.getEffectiveIntervalLevel()
+      : this.activeModule === 'scales'
+        ? this.getEffectiveScaleLevel()
+        : this.activeLevel;
+    const options = effectiveLevel?.options || [];
+    const snapshot = this.getCurrentOptionWeightSnapshot();
+    if (!snapshot || options.length === 0) return '';
+
+    const optionField = this.activeModule === 'intervals'
+      ? 'intervalKey'
+      : this.activeModule === 'chords'
+        ? 'chordId'
+        : 'scaleKey';
+    const optionLabel = (option) => this.activeModule === 'intervals'
+      ? INTERVAL_CATALOG[option]?.label || option
+      : this.activeModule === 'chords'
+        ? CHORD_CATALOG[option]?.label || option
+        : this.getScaleButtonLabel(option, effectiveLevel.id);
+    const moduleLabel = this.activeModule === 'intervals'
+      ? 'Módulo 1 · Intervalos'
+      : this.activeModule === 'chords'
+        ? 'Módulo 3 · Acordes'
+        : 'Módulo 5 · Escalas';
+    const levelLabel = this.activeLevel.isProgressive && this.activeModule === 'intervals'
+      ? `N${this.progressiveSubLevelId}${this.progressiveSubLevelId <= 11 ? `-S${this.progressiveTonicSubLevelId}` : ''}`
+      : `Nivel ${effectiveLevel.id}`;
+    const rows = options.map((option) => {
+      const count = this.getDailyOptionAppearanceCount(this.activeModule, option);
+      const averageDifficulty = snapshot.optionStats[option]?.averageDifficulty ?? 3;
+      const weight = snapshot.weighted ? snapshot.weights[option] : 1;
+      return `<tr><td>${optionLabel(option)}</td><td>${count}</td><td>${averageDifficulty.toFixed(2)}</td><td>${weight.toFixed(2)}</td></tr>`;
+    }).join('');
+    const badExercisesHtml = this.activeModule === 'intervals' && this.activeLevel.isProgressive
+      ? `<section class="dbg-section dbg-option-weight-section">
+          <div class="dbg-section-title">Malas pendientes · ${this.progressiveBadExercises.length}/10 · orden FIFO</div>
+          <div class="dbg-option-weight-scroll"><table class="dbg-option-weight-table">
+            <thead><tr><th>#</th><th>Intervalo</th><th>Notas</th><th>Falló en</th><th>Repetir antes de</th><th>Restan</th></tr></thead>
+            <tbody>${this.progressiveBadExercises.length > 0
+              ? this.progressiveBadExercises.map((item, index) => {
+                const remaining = Math.max(0, item.retryByExercise - this.progressiveExerciseNumber);
+                const notePair = `${this.midiToNoteWithOctaveEs(item.midi1)} - ${this.midiToNoteWithOctaveEs(item.midi2)}`;
+                return `<tr><td>${index + 1}</td><td>${INTERVAL_CATALOG[item.intervalKey]?.label || item.intervalKey}</td><td>${notePair}</td><td>${item.failedAtExercise}</td><td>${item.retryByExercise}</td><td>${remaining}</td></tr>`;
+              }).join('')
+              : '<tr><td colspan="6">No hay malas pendientes.</td></tr>'}</tbody>
+          </table></div>
+        </section>`
+      : '';
+    const weightingStatus = snapshot.weighted
+      ? 'Ponderación activa'
+      : 'Sorteo uniforme hasta que cada opción llegue a 5 apariciones';
+    return `<section class="dbg-section dbg-option-weight-section">
+      <div class="dbg-section-title">${moduleLabel} · ${levelLabel} · ${weightingStatus}</div>
+      <div class="dbg-option-weight-scroll"><table class="dbg-option-weight-table">
+        <thead><tr><th>Opción</th><th>Apariciones hoy</th><th>Dificultad</th><th>Peso</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </section>${badExercisesHtml}`;
+  }
+
+  refreshOptionWeightDebugTable() {
+    const optionStatsHtml = this.buildOptionWeightDebugHtml();
+    const container = document.getElementById('debug-option-weight-content');
+    if (container) container.innerHTML = optionStatsHtml;
+    this.syncDebugPopupWindow();
+  }
+
   getDailyTypeCounts(moduleType) {
     const today = this.getTodayKey();
     const yesterday = this.getYesterdayKey();
@@ -1832,6 +2045,7 @@ class TrinoShell {
     const list = this.getLevelDayLog(moduleType, levelId);
     list.unshift(entry);
     this.saveDayLogs();
+    this.refreshOptionWeightDebugTable();
   }
 
   loadDailyMin(settingKey = 'dailyMin') {
@@ -2359,6 +2573,7 @@ class TrinoShell {
     // Ventana grande flotante y ventana aparte para el Debug
     if (this.btnDebugModal) {
       this.btnDebugModal.addEventListener('click', () => {
+        this.refreshOptionWeightDebugTable();
         if (this.debugLargeModal) this.debugLargeModal.classList.remove('hidden');
       });
     }
@@ -2377,11 +2592,15 @@ class TrinoShell {
     if (this.menuDebugPopupBtn) {
       this.menuDebugPopupBtn.addEventListener('click', () => {
         this.menuDrawer.classList.add('hidden');
+        this.refreshOptionWeightDebugTable();
         this.openDebugPopupWindow();
       });
     }
     if (this.btnDebugPopupFromModal) {
-      this.btnDebugPopupFromModal.addEventListener('click', () => this.openDebugPopupWindow());
+      this.btnDebugPopupFromModal.addEventListener('click', () => {
+        this.refreshOptionWeightDebugTable();
+        this.openDebugPopupWindow();
+      });
     }
 
     if (this.btnLevelInfoClose) {
@@ -3585,6 +3804,7 @@ class TrinoShell {
     if (level.isProgressive) {
       this.syncScaleProgressiveDayState();
     }
+    this.optionWeightSnapshot = null;
     this.scaleSessionLog = this.getLevelDayLog('scales', levelId);
     this.renderLogTable(this.scaleSessionLogWrapper, this.scaleSessionLogTbody, this.scaleSessionLog, 'scales');
     this.generateNextQuestion();
@@ -3604,6 +3824,161 @@ class TrinoShell {
     return this.activeLevel;
   }
 
+  getIntervalTonicCandidates(level) {
+    if (level?.restrictedPairs) {
+      return [...new Set((level.options || []).flatMap((key) =>
+        (level.restrictedPairs[key] || []).map(([midi]) => midi)
+      ))];
+    }
+    if (level?.naturalTonicsOnly) {
+      const naturalPitches = [0, 2, 4, 5, 7, 9, 11];
+      const tonicCandidates = new Set();
+      (level.options || []).forEach((key) => {
+        const semitones = INTERVAL_CATALOG[key]?.semitones;
+        if (!Number.isFinite(semitones)) return;
+        const maxStart = Math.max(48, 72 - semitones);
+        for (let midi = 48; midi <= maxStart; midi++) {
+          if (naturalPitches.includes(((midi % 12) + 12) % 12)) {
+            tonicCandidates.add(midi);
+          }
+        }
+      });
+      return [...tonicCandidates];
+    }
+    return [];
+  }
+
+  getIntervalKeysForTonic(level, tonicMidi) {
+    if (level?.restrictedPairs) {
+      return (level.options || []).filter((key) =>
+        (level.restrictedPairs[key] || []).some(([midi]) => midi === tonicMidi)
+      );
+    }
+    if (level?.naturalTonicsOnly) {
+      return (level.options || []).filter((key) => {
+        const semitones = INTERVAL_CATALOG[key]?.semitones;
+        return Number.isFinite(semitones) && tonicMidi + semitones <= 72;
+      });
+    }
+    return level?.options || [];
+  }
+
+  getRecentProgressiveIntervalQuestions() {
+    const dayKey = this.getProgressiveDayKey();
+    return (this.dayLogs.intervals?.['0'] || [])
+      .filter((entry) =>
+        entry.progressiveLevel &&
+        Number.isInteger(entry.midi1) &&
+        Number.isInteger(entry.midi2) &&
+        (entry.difficultyDayKey || entry.date) === dayKey
+      )
+      .slice(0, 2);
+  }
+
+  isThirdConsecutiveProgressiveInterval(intervalKey, midi1, midi2, recentQuestions) {
+    return recentQuestions.length >= 2 && recentQuestions.every((entry) =>
+      entry.intervalKey === intervalKey && entry.midi1 === midi1 && entry.midi2 === midi2
+    );
+  }
+
+  advanceDirectIntervalCycle() {
+    const cycle = this.directIntervalCycle;
+    if (
+      this.activeModule !== 'intervals' ||
+      this.activeLevel?.isProgressive ||
+      !cycle ||
+      cycle.levelId !== this.activeLevel?.id
+    ) return;
+
+    cycle.questionsInGroup += 1;
+    const groupSize = cycle.groupIndex === 4 ? 20 : 5;
+    if (cycle.questionsInGroup >= groupSize) {
+      cycle.groupIndex = cycle.groupIndex === 4 ? 0 : cycle.groupIndex + 1;
+      cycle.questionsInGroup = 0;
+      cycle.tonicMidi = null;
+    }
+  }
+
+  recordProgressiveIntervalAnswer(isCorrect) {
+    if (!this.activeLevel?.isProgressive) return;
+    this.syncProgressiveDayState();
+    let flashType = null;
+    const question = this.currentQuestion;
+    const badExercises = this.progressiveBadExercises;
+
+    if (isCorrect) {
+      const matchingBadIndex = badExercises.findIndex((item) =>
+        item.midi1 === question.midi1 &&
+        item.midi2 === question.midi2 &&
+        item.intervalKey === question.targetIntervalKey
+      );
+      if (matchingBadIndex >= 0) badExercises.splice(matchingBadIndex, 1);
+
+      const effectiveLevel = this.getEffectiveIntervalLevel();
+      const goodAnswersRequired = this.progressiveSubLevelId <= 11
+        ? (effectiveLevel.options || []).length * 2
+        : 10;
+      this.progressiveConsecutiveGood = Math.min(
+        goodAnswersRequired,
+        this.progressiveConsecutiveGood + 1
+      );
+
+      if (this.progressiveConsecutiveGood >= goodAnswersRequired && badExercises.length === 0) {
+        this.progressiveConsecutiveGood = 0;
+        if (this.progressiveSubLevelId <= 11) {
+          if (this.progressiveTonicSubLevelId < 5) {
+            this.progressiveTonicSubLevelId += 1;
+          } else if (this.progressiveSubLevelId < 11) {
+            this.progressiveSubLevelId += 1;
+            this.progressiveTonicSubLevelId = 1;
+          } else {
+            this.progressiveSubLevelId = 12;
+            this.progressiveTonicSubLevelId = 1;
+          }
+          flashType = 'up';
+        } else if (this.progressiveSubLevelId < 14) {
+          this.progressiveSubLevelId += 1;
+          flashType = 'up';
+        }
+      }
+    } else {
+      this.progressiveConsecutiveGood = 0;
+      badExercises.push({
+        id: question.exerciseNumber,
+        midi1: question.midi1,
+        midi2: question.midi2,
+        intervalKey: question.targetIntervalKey,
+        failedAtExercise: question.exerciseNumber,
+        retryByExercise: question.exerciseNumber + 4,
+      });
+
+      if (badExercises.length > 10) {
+        badExercises.length = 0;
+        this.progressiveConsecutiveGood = 0;
+        if (this.progressiveSubLevelId <= 11) {
+          if (this.progressiveTonicSubLevelId > 1) {
+            this.progressiveTonicSubLevelId -= 1;
+            flashType = 'down';
+          } else if (this.progressiveSubLevelId > 1) {
+            this.progressiveSubLevelId -= 1;
+            this.progressiveTonicSubLevelId = 5;
+            flashType = 'down';
+          }
+        } else if (this.progressiveSubLevelId === 12) {
+          this.progressiveSubLevelId = 11;
+          this.progressiveTonicSubLevelId = 5;
+          flashType = 'down';
+        } else if (this.progressiveSubLevelId > 12) {
+          this.progressiveSubLevelId -= 1;
+          flashType = 'down';
+        }
+      }
+    }
+
+    this.saveProgressiveState();
+    if (flashType) this.updateExerciseUi(flashType);
+  }
+
   startIntervalLevel(levelId) {
     const level = INTERVAL_LEVELS.find((l) => l.id === levelId);
     if (!level) return;
@@ -3613,7 +3988,18 @@ class TrinoShell {
     this.activeLevel = level;
     if (level.isProgressive) {
       this.syncProgressiveDayState();
+      this.directIntervalCycle = null;
+    } else if (level.id >= 1 && level.id <= 11) {
+      this.directIntervalCycle = {
+        levelId: level.id,
+        groupIndex: 0,
+        questionsInGroup: 0,
+        tonicMidi: null,
+      };
+    } else {
+      this.directIntervalCycle = null;
     }
+    this.optionWeightSnapshot = null;
     this.sessionLog = this.getLevelDayLog('intervals', levelId);
     this.renderSessionLog();
     this.generateNextQuestion();
@@ -3644,6 +4030,7 @@ class TrinoShell {
     this.activeModule = 'chords';
     this.exerciseStarted = false;
     this.activeLevel = level;
+    this.optionWeightSnapshot = null;
     this.chordSessionLog = this.getLevelDayLog('chords', levelId);
     this.renderLogTable(this.chordSessionLogWrapper, this.chordSessionLogTbody, this.chordSessionLog, 'chords');
     this.generateNextQuestion();
@@ -3704,6 +4091,7 @@ class TrinoShell {
     }
 
     const effectiveLevel = this.getEffectiveScaleLevel();
+    this.getCurrentOptionWeightSnapshot();
     const opts = effectiveLevel.options || [];
     this.scaleAnswersContainer.innerHTML = opts
       .map((scaleKey, idx) => {
@@ -3729,7 +4117,7 @@ class TrinoShell {
     if (!this.activeLevel) return;
     const effectiveLevel = this.getEffectiveScaleLevel();
     const opts = effectiveLevel.options || ['major', 'naturalMinor'];
-    const scaleKey = opts[Math.floor(Math.random() * opts.length)];
+    const scaleKey = this.pickWeightedOption(opts);
     const scale = SCALE_CATALOG[scaleKey] || SCALE_CATALOG.major;
     const tonicPcs = effectiveLevel.tonicPcs || [0, 7];
 
@@ -3750,6 +4138,9 @@ class TrinoShell {
       scaleKey,
       rootMidi,
       scaleMidis,
+      fullPlaybackCount: 0,
+      replayCount: 0,
+      responseStartedAt: null,
       answered: false,
       firstButtonEl: null,
       firstClass: null,
@@ -3780,12 +4171,13 @@ class TrinoShell {
     const noteDur = 0.30;
     const upMidis = this.currentQuestion.scaleMidis;
     const midis = [...upMidis, ...[...upMidis].reverse()];
+    const totalPlayMs = Math.round(((midis.length - 1) * stepSec + 0.50) * 1000);
+    this.recordQuestionPlayback(totalPlayMs);
     midis.forEach((midi, idx) => {
       const hz = 440 * Math.pow(2, (midi - 69) / 12);
       const isLast = idx === midis.length - 1;
       this.playTone(hz, now + idx * stepSec, isLast ? 0.50 : noteDur);
     });
-    const totalPlayMs = Math.round(((midis.length - 1) * stepSec + 0.50) * 1000);
     if (!this.currentQuestion.answered) {
       this.startIntervalAnswerTimer(totalPlayMs);
     }
@@ -3798,6 +4190,7 @@ class TrinoShell {
       ? 'Escucha las dos notas e identifica el intervalo.'
       : 'Escucha las notas simultáneas e identifica el acorde.';
     const opts = this.activeLevel.options || [];
+    this.getCurrentOptionWeightSnapshot();
     this.chordAnswersContainer.innerHTML = opts
       .map((chordId, idx) => {
         const isLastOdd = opts.length % 2 === 1 && idx === opts.length - 1;
@@ -3820,7 +4213,7 @@ class TrinoShell {
   generateNextChordQuestion() {
     if (!this.activeLevel) return;
     const targetTypes = this.activeLevel.targets || this.activeLevel.options;
-    const chordId = targetTypes[Math.floor(Math.random() * targetTypes.length)];
+    const chordId = this.pickWeightedOption(targetTypes);
     const chord = CHORD_CATALOG[chordId];
     const maxInterval = Math.max(...chord.intervals);
     const maxRoot = Math.min(72, 84 - maxInterval);
@@ -3830,6 +4223,9 @@ class TrinoShell {
       chordId,
       rootMidi,
       chordMidis: chord.intervals.map((interval) => rootMidi + interval),
+      fullPlaybackCount: 0,
+      replayCount: 0,
+      responseStartedAt: null,
       answered: false,
     };
     this.stopIntervalAnswerTimer();
@@ -3854,6 +4250,7 @@ class TrinoShell {
     });
     const now = this.audioCtx.currentTime;
     const duration = 1.25;
+    this.recordQuestionPlayback(Math.round(duration * 1000));
     const gainScale = 1 / Math.sqrt(this.currentQuestion.chordMidis.length);
     this.currentQuestion.chordMidis.forEach((midi) => {
       const frequency = 440 * Math.pow(2, (midi - 69) / 12);
@@ -3912,6 +4309,37 @@ class TrinoShell {
     return true;
   }
 
+  avoidImmediateIntervalUnison(level, intervalKey, midi1, midi2, isRequiredRetry) {
+    if (
+      this.activeModule !== 'intervals' ||
+      isRequiredRetry ||
+      intervalKey !== '1J' ||
+      this.lastIntervalUnisonMidi !== midi1
+    ) {
+      return { intervalKey, midi2 };
+    }
+
+    const alternativeKeys = this.getIntervalKeysForTonic(level, midi1)
+      .filter((key) => key !== '1J' && (INTERVAL_CATALOG[key]?.semitones || 0) > 0)
+      .filter((key) => !level?.midiRange || midi1 + INTERVAL_CATALOG[key].semitones <= level.midiRange.maxEnd);
+    if (alternativeKeys.length === 0) return { intervalKey, midi2 };
+
+    const nextKey = alternativeKeys[Math.floor(Math.random() * alternativeKeys.length)];
+    if (level?.restrictedPairs) {
+      const pairs = (level.restrictedPairs[nextKey] || []).filter(([startMidi]) => startMidi === midi1);
+      if (pairs.length > 0) {
+        return {
+          intervalKey: nextKey,
+          midi2: pairs[Math.floor(Math.random() * pairs.length)][1],
+        };
+      }
+    }
+    return {
+      intervalKey: nextKey,
+      midi2: midi1 + INTERVAL_CATALOG[nextKey].semitones,
+    };
+  }
+
   generateNextQuestion() {
     if (!this.activeLevel) return;
     if (this.autoNextTimer) {
@@ -3934,63 +4362,174 @@ class TrinoShell {
       : this.activeLevel;
 
     const opts = effectiveLevel.options;
-    const randomKey = opts[Math.floor(Math.random() * opts.length)];
-
+    const isSinging = this.activeModule === 'singing';
+    const isProgressiveIntervals = this.activeModule === 'intervals' && this.activeLevel.isProgressive;
+    const progressiveExerciseNumber = isProgressiveIntervals
+      ? this.progressiveExerciseNumber + 1
+      : null;
+    if (isProgressiveIntervals) this.progressiveExerciseNumber = progressiveExerciseNumber;
+    const oldestBadExercise = isProgressiveIntervals ? this.progressiveBadExercises[0] : null;
+    const recentProgressiveQuestions = isProgressiveIntervals
+      ? this.getRecentProgressiveIntervalQuestions()
+      : [];
+    let retryExercise = oldestBadExercise && progressiveExerciseNumber >= oldestBadExercise.retryByExercise
+      ? oldestBadExercise
+      : null;
+    if (retryExercise && this.isThirdConsecutiveProgressiveInterval(
+      retryExercise.intervalKey,
+      retryExercise.midi1,
+      retryExercise.midi2,
+      recentProgressiveQuestions
+    )) {
+      retryExercise = this.progressiveBadExercises.find((item) =>
+        item !== retryExercise &&
+        !this.isThirdConsecutiveProgressiveInterval(
+          item.intervalKey,
+          item.midi1,
+          item.midi2,
+          recentProgressiveQuestions
+        )
+      ) || null;
+    }
+    const isRequiredRetry = Boolean(retryExercise);
+    const progressiveTonicChoices = isProgressiveIntervals && this.progressiveSubLevelId <= 11
+      ? PROGRESSIVE_INTERVAL_TONICS[this.progressiveTonicSubLevelId - 1] || null
+      : null;
+    const directCycle = this.activeModule === 'intervals' && !this.activeLevel.isProgressive
+      ? this.directIntervalCycle
+      : null;
+    const useFixedDirectTonic = directCycle?.levelId === this.activeLevel.id && directCycle.groupIndex < 4;
     let midi1;
     let midi2;
-
-    const semitones = INTERVAL_CATALOG[randomKey].semitones;
-    const isSinging = this.activeModule === 'singing';
     const minAllowed = isSinging ? this.vocalMinMidi : 48;
-    const maxAllowed = isSinging ? Math.max(minAllowed + semitones, this.vocalMaxMidi) : 72;
+    let randomKey;
 
-    if (effectiveLevel.restrictedPairs && effectiveLevel.restrictedPairs[randomKey]) {
-      const basePairs = effectiveLevel.restrictedPairs[randomKey];
-      // Si es el módulo de canto, adaptar los pares restringidos a las octavas del rango vocal del usuario
-      const adaptedPairs = [];
-      if (isSinging) {
-        basePairs.forEach(([m1, m2]) => {
-          for (const shift of [-24, -12, 0, 12, 24]) {
-            const s1 = m1 + shift;
-            const s2 = m2 + shift;
-            if (s1 >= minAllowed && s2 <= maxAllowed) {
-              adaptedPairs.push([s1, s2]);
-            }
-          }
-        });
+    if (isRequiredRetry) {
+      randomKey = retryExercise.intervalKey;
+      midi1 = retryExercise.midi1;
+      midi2 = retryExercise.midi2;
+    } else if (progressiveTonicChoices) {
+      randomKey = this.pickWeightedOption(opts);
+      midi1 = progressiveTonicChoices[Math.floor(Math.random() * progressiveTonicChoices.length)];
+      midi2 = midi1 + INTERVAL_CATALOG[randomKey].semitones;
+    } else if (useFixedDirectTonic) {
+      const tonicCandidates = this.getIntervalTonicCandidates(effectiveLevel);
+      if (directCycle.tonicMidi === null) {
+        directCycle.tonicMidi = tonicCandidates[Math.floor(Math.random() * tonicCandidates.length)];
       }
-      const pairs = adaptedPairs.length > 0 ? adaptedPairs : basePairs;
-      const chosen = pairs[Math.floor(Math.random() * pairs.length)];
-      midi1 = chosen[0];
-      midi2 = chosen[1];
-    } else if (effectiveLevel.naturalTonicsOnly) {
-      const naturalPitches = [0, 2, 4, 5, 7, 9, 11]; // Do, Re, Mi, Fa, Sol, La, Si
-      const maxStart = Math.max(minAllowed, maxAllowed - semitones);
-      const validTonics = [];
-      for (let m = minAllowed; m <= maxStart; m++) {
-        if (naturalPitches.includes(((m % 12) + 12) % 12)) {
-          validTonics.push(m);
+      const tonicKeys = this.getIntervalKeysForTonic(effectiveLevel, directCycle.tonicMidi);
+      if (tonicKeys.length > 0) {
+        randomKey = this.pickWeightedOption(tonicKeys);
+        midi1 = directCycle.tonicMidi;
+        if (effectiveLevel.restrictedPairs) {
+          const matchingPairs = effectiveLevel.restrictedPairs[randomKey]
+            .filter(([startMidi]) => startMidi === midi1);
+          const pair = matchingPairs[Math.floor(Math.random() * matchingPairs.length)];
+          midi2 = pair[1];
+        } else {
+          midi2 = midi1 + INTERVAL_CATALOG[randomKey].semitones;
         }
       }
-      const pool = validTonics.length > 0 ? validTonics : NATURAL_TONIC_MIDIS;
-      midi1 = pool[Math.floor(Math.random() * pool.length)];
-      midi2 = midi1 + semitones;
-    } else if (effectiveLevel.midiRange) {
-      const minStart = isSinging
-        ? Math.max(effectiveLevel.midiRange.minStart, minAllowed)
-        : effectiveLevel.midiRange.minStart;
-      const effMaxEnd = isSinging
-        ? Math.min(effectiveLevel.midiRange.maxEnd, maxAllowed)
-        : effectiveLevel.midiRange.maxEnd;
-      const fallbackMin = effMaxEnd - semitones >= minStart ? minStart : minAllowed;
-      const fallbackMax = effMaxEnd - semitones >= minStart ? effMaxEnd : maxAllowed;
-      const maxStart = Math.max(fallbackMin, fallbackMax - semitones);
-      midi1 = fallbackMin + Math.floor(Math.random() * (maxStart - fallbackMin + 1));
-      midi2 = midi1 + semitones;
-    } else {
-      const maxStart = Math.max(minAllowed, maxAllowed - semitones);
-      midi1 = minAllowed + Math.floor(Math.random() * (maxStart - minAllowed + 1));
-      midi2 = midi1 + semitones;
+    }
+
+    if (randomKey === undefined) {
+      randomKey = this.pickWeightedOption(opts);
+      const semitones = INTERVAL_CATALOG[randomKey].semitones;
+      const maxAllowed = isSinging ? Math.max(minAllowed + semitones, this.vocalMaxMidi) : 72;
+
+      if (effectiveLevel.restrictedPairs && effectiveLevel.restrictedPairs[randomKey]) {
+        const basePairs = effectiveLevel.restrictedPairs[randomKey];
+        const adaptedPairs = [];
+        if (isSinging) {
+          basePairs.forEach(([m1, m2]) => {
+            for (const shift of [-24, -12, 0, 12, 24]) {
+              const s1 = m1 + shift;
+              const s2 = m2 + shift;
+              if (s1 >= minAllowed && s2 <= maxAllowed) {
+                adaptedPairs.push([s1, s2]);
+              }
+            }
+          });
+        }
+        const pairs = adaptedPairs.length > 0 ? adaptedPairs : basePairs;
+        const chosen = pairs[Math.floor(Math.random() * pairs.length)];
+        midi1 = chosen[0];
+        midi2 = chosen[1];
+      } else if (effectiveLevel.naturalTonicsOnly) {
+        const naturalPitches = [0, 2, 4, 5, 7, 9, 11];
+        const maxStart = Math.max(minAllowed, maxAllowed - semitones);
+        const validTonics = [];
+        for (let midi = minAllowed; midi <= maxStart; midi++) {
+          if (naturalPitches.includes(((midi % 12) + 12) % 12)) {
+            validTonics.push(midi);
+          }
+        }
+        const pool = validTonics.length > 0 ? validTonics : NATURAL_TONIC_MIDIS;
+        midi1 = pool[Math.floor(Math.random() * pool.length)];
+        midi2 = midi1 + semitones;
+      } else if (effectiveLevel.midiRange) {
+        const minStart = isSinging
+          ? Math.max(effectiveLevel.midiRange.minStart, minAllowed)
+          : effectiveLevel.midiRange.minStart;
+        const effMaxEnd = isSinging
+          ? Math.min(effectiveLevel.midiRange.maxEnd, maxAllowed)
+          : effectiveLevel.midiRange.maxEnd;
+        const fallbackMin = effMaxEnd - semitones >= minStart ? minStart : minAllowed;
+        const fallbackMax = effMaxEnd - semitones >= minStart ? effMaxEnd : maxAllowed;
+        const maxStart = Math.max(fallbackMin, fallbackMax - semitones);
+        midi1 = fallbackMin + Math.floor(Math.random() * (maxStart - fallbackMin + 1));
+        midi2 = midi1 + semitones;
+      } else {
+        const maxStart = Math.max(minAllowed, maxAllowed - semitones);
+        midi1 = minAllowed + Math.floor(Math.random() * (maxStart - minAllowed + 1));
+        midi2 = midi1 + semitones;
+      }
+    }
+
+    if (this.activeModule === 'intervals') {
+      const adjustedQuestion = this.avoidImmediateIntervalUnison(
+        effectiveLevel,
+        randomKey,
+        midi1,
+        midi2,
+        isRequiredRetry
+      );
+      randomKey = adjustedQuestion.intervalKey;
+      midi2 = adjustedQuestion.midi2;
+    }
+
+    if (isProgressiveIntervals && !isRequiredRetry && this.isThirdConsecutiveProgressiveInterval(
+      randomKey,
+      midi1,
+      midi2,
+      recentProgressiveQuestions
+    )) {
+      const alternativeCandidates = [];
+      opts.forEach((key) => {
+        const semitones = INTERVAL_CATALOG[key].semitones;
+        const tonicCandidates = progressiveTonicChoices
+          ? progressiveTonicChoices
+          : Array.from({ length: Math.max(1, 73 - 48 - semitones) }, (_, index) => 48 + index)
+            .filter((tonicMidi) => tonicMidi + semitones <= 72);
+        tonicCandidates.forEach((tonicMidi) => {
+          const nextMidi = tonicMidi + semitones;
+          const repeatsImmediateUnison = key === '1J' && this.lastIntervalUnisonMidi === tonicMidi;
+          if (
+            !repeatsImmediateUnison &&
+            !this.isThirdConsecutiveProgressiveInterval(key, tonicMidi, nextMidi, recentProgressiveQuestions)
+          ) {
+            alternativeCandidates.push({ intervalKey: key, midi1: tonicMidi, midi2: nextMidi });
+          }
+        });
+      });
+      if (alternativeCandidates.length > 0) {
+        const selectedKey = this.pickWeightedOption(alternativeCandidates.map((candidate) => candidate.intervalKey));
+        const matchingCandidates = alternativeCandidates.filter((candidate) => candidate.intervalKey === selectedKey);
+        const alternative = matchingCandidates[Math.floor(Math.random() * matchingCandidates.length)];
+        randomKey = alternative.intervalKey;
+        midi1 = alternative.midi1;
+        midi2 = alternative.midi2;
+      }
     }
 
     let midis = [midi1, midi2];
@@ -4039,10 +4578,24 @@ class TrinoShell {
       midi2: midis[1] ?? midis[0],
       midis,
       targetIntervalKey: randomKey,
+      exerciseNumber: progressiveExerciseNumber,
+      progressiveLevelLabel: isProgressiveIntervals
+        ? this.progressiveSubLevelId <= 11
+          ? `N${this.progressiveSubLevelId}-S${this.progressiveTonicSubLevelId}`
+          : `N${this.progressiveSubLevelId}`
+        : null,
+      fullPlaybackCount: 0,
+      replayCount: 0,
+      responseStartedAt: null,
       answered: false,
       firstButtonEl: null,
       firstClass: null,
     };
+
+    if (this.activeModule === 'intervals') {
+      this.lastIntervalUnisonMidi = randomKey === '1J' ? midi1 : null;
+      this.saveProgressiveState();
+    }
 
     if (this.activeModule === 'singing') {
       this.lastNoteDetails = null;
@@ -4117,8 +4670,11 @@ class TrinoShell {
     if (this.levelInfoModalModule) this.levelInfoModalModule.textContent = moduleLabel;
     if (this.levelInfoModalTitle) {
       const subId = moduleType === 'scales' ? this.scaleProgressiveSubLevelId : this.progressiveSubLevelId;
+      const progressionLabel = moduleType === 'intervals' && subId <= 11
+        ? `(N${subId}-S${this.progressiveTonicSubLevelId})`
+        : `(N${subId})`;
       this.levelInfoModalTitle.textContent = showConfig ? 'Configuración' : lvl.isProgressive
-        ? `${lvl.title} - (N${subId})`
+        ? `${lvl.title} - ${progressionLabel}`
         : lvl.title;
     }
 
@@ -4276,7 +4832,7 @@ class TrinoShell {
         ? `
           <div class="level-info-section">
             <span class="level-info-label">Regla de progresión (Nivel actual: N${this.scaleProgressiveSubLevelId})</span>
-            <p class="level-info-value">Inicia en el Nivel 1 y se reinicia de un día para otro a las 2:00 AM. Con 10 respuestas buenas consecutivas avanza al siguiente nivel (hasta N14), y cada 10 respuestas malas acumuladas retrocede un nivel.</p>
+            <p class="level-info-value">Inicia en el Nivel 1 y se reinicia de un día para otro a las 2:00 AM. Los ejercicios fallidos se repiten en orden de antigüedad; el más antiguo debe aparecer dentro de su plazo de 4 ejercicios. Se permiten hasta 10 fallos pendientes. El fallo número 11 hace retroceder un nivel o subnivel y vacía la lista. Para avanzar se requiere la racha de buenas correspondiente y no tener fallos pendientes.</p>
           </div>
         `
         : '';
@@ -4332,8 +4888,8 @@ class TrinoShell {
     const progressiveExplainHtml = lvl.isProgressive
       ? `
         <div class="level-info-section">
-          <span class="level-info-label">Regla de progresión (Nivel actual: N${this.progressiveSubLevelId})</span>
-          <p class="level-info-value">Inicia en el Nivel 1 y se reinicia de un día para otro a las 2:00 AM. Con 10 respuestas buenas seguidas avanza al siguiente nivel (hasta N14), y cada 10 respuestas fallidas acumuladas retrocede un nivel.</p>
+          <span class="level-info-label">Regla de progresión (Nivel actual: N${this.progressiveSubLevelId}${this.progressiveSubLevelId <= 11 ? `-S${this.progressiveTonicSubLevelId}` : ''})</span>
+          <p class="level-info-value">En N1–N11, se necesitan dos respuestas buenas seguidas por cada opción del nivel para avanzar un subnivel de tónica, con la lista de fallos vacía. Los fallos se conservan en orden de antigüedad y el más antiguo debe aparecer dentro de su plazo de 4 ejercicios. El fallo número 11 hace retroceder un subnivel y vacía la lista. Al completar S5 pasa al siguiente nivel. N12–N14 conservan el avance con 10 buenas seguidas y también requieren la lista vacía. El progreso se reinicia a las 2:00 AM al cambiar el día.</p>
         </div>
       `
       : '';
@@ -4549,6 +5105,7 @@ class TrinoShell {
   async playMysteryNote(noteIndex) {
     if (!this.currentQuestion) return;
     await this.ensureAudioReady();
+    this.recordQuestionReplay(650);
 
     const noteElement = noteIndex === 0 ? this.mysteryNote1 : this.mysteryNote2;
     const midi = noteIndex === 0 ? this.currentQuestion.midi1 : this.currentQuestion.midi2;
@@ -4593,7 +5150,10 @@ class TrinoShell {
   updateExerciseUi(flashType = null) {
     if (!this.activeLevel) return;
     if (this.activeLevel.isProgressive) {
-      this.exLevelTitle.innerHTML = `${this.activeLevel.title} - <span class="prog-sublevel-badge" id="prog-sublevel-badge">(N${this.progressiveSubLevelId})</span>`;
+      const progressionLabel = this.progressiveSubLevelId <= 11
+        ? `(N${this.progressiveSubLevelId}-S${this.progressiveTonicSubLevelId})`
+        : `(N${this.progressiveSubLevelId})`;
+      this.exLevelTitle.innerHTML = `${this.activeLevel.title} - <span class="prog-sublevel-badge" id="prog-sublevel-badge">${progressionLabel}</span>`;
       if (flashType) {
         const badgeEl = document.getElementById('prog-sublevel-badge');
         if (badgeEl) {
@@ -4611,6 +5171,7 @@ class TrinoShell {
     }
 
     const effectiveLevel = this.getEffectiveIntervalLevel();
+    this.getCurrentOptionWeightSnapshot();
     const wideKeysByLevel = {
       2: ['3M'],
       5: ['1J'],
@@ -4649,6 +5210,46 @@ class TrinoShell {
     return this.exTimeBarFill;
   }
 
+  recordQuestionPlayback(playbackDurationMs) {
+    const question = this.currentQuestion;
+    if (!question) return;
+    if (question.fullPlaybackCount > 0) {
+      question.replayCount += 1;
+    } else {
+      question.fullPlaybackCount = 1;
+      question.responseStartedAt = performance.now() + playbackDurationMs;
+    }
+  }
+
+  recordQuestionReplay(playbackDurationMs) {
+    const question = this.currentQuestion;
+    if (!question) return;
+    question.replayCount = (question.replayCount || 0) + 1;
+    if (!Number.isFinite(question.responseStartedAt)) {
+      question.responseStartedAt = performance.now() + playbackDurationMs;
+    }
+  }
+
+  getQuestionResponseMetrics(isCorrect) {
+    const question = this.currentQuestion;
+    const elapsedSeconds = Number.isFinite(question?.responseStartedAt)
+      ? Math.max(0, (performance.now() - question.responseStartedAt) / 1000)
+      : 0;
+    const replayCount = Number(question?.replayCount) || 0;
+    const observedDifficulty = !isCorrect
+      ? replayCount > 1 ? 5 : 4
+      : replayCount > 1
+        ? 4
+        : replayCount === 1
+          ? 3
+          : elapsedSeconds < 3
+            ? 1
+            : elapsedSeconds < 5
+              ? 2
+              : 3;
+    return { elapsedSeconds, replayCount, observedDifficulty };
+  }
+
   stopIntervalAnswerTimer() {
     if (this.intervalAnswerTimeout) {
       clearTimeout(this.intervalAnswerTimeout);
@@ -4667,11 +5268,11 @@ class TrinoShell {
   }
 
   startIntervalAnswerTimer(delayAfterStartMs = 0) {
-    this.stopIntervalAnswerTimer();
     const isScaleMod = this.activeModule === 'scales';
     const isChordMod = this.activeModule === 'chords';
     if ((this.activeModule !== 'intervals' && !isChordMod && !isScaleMod) || !this.exerciseStarted) return;
     if (!this.currentQuestion || this.currentQuestion.answered) return;
+    if (this.currentQuestion.answerTimerStarted) return;
     const rawLimit = isScaleMod
       ? this.scaleTimeLimit
       : isChordMod
@@ -4680,6 +5281,7 @@ class TrinoShell {
     const sec = Number(rawLimit);
     if (rawLimit === 'none' || !Number.isFinite(sec) || sec <= 0) return;
 
+    this.currentQuestion.answerTimerStarted = true;
     const totalMs = sec * 1000;
     const fillEl = this.getActiveTimeBarFillEl();
     if (fillEl) {
@@ -4730,6 +5332,7 @@ class TrinoShell {
 
     if (this.activeModule === 'chords') {
       const stats = this.getLevelStats(this.activeLevel.id, 'chords');
+      const responseMetrics = this.getQuestionResponseMetrics(false);
       this.currentQuestion.answered = true;
       stats.bad += 1;
 
@@ -4741,12 +5344,14 @@ class TrinoShell {
       const chordNotes = (this.currentQuestion.chordMidis || []).map((midi) => this.midiToNoteNameEs(midi));
       this.pushLevelDayLog('chords', this.activeLevel.id, {
         date: todayKey,
+        difficultyDayKey: this.getProgressiveDayKey(),
         index: todayCount + 1,
         notes: chordNotes.join(' - '),
         chordId: this.currentQuestion.chordId,
         rootMidi: this.currentQuestion.rootMidi,
         answer: 'Tiempo agotado',
         isCorrect: false,
+        ...responseMetrics,
       });
       this.chordSessionLog = this.getLevelDayLog('chords', this.activeLevel.id);
       this.renderLogTable(this.chordSessionLogWrapper, this.chordSessionLogTbody, this.chordSessionLog, 'chords');
@@ -4765,6 +5370,7 @@ class TrinoShell {
 
     if (this.activeModule === 'scales') {
       const stats = this.getLevelStats(this.activeLevel.id, 'scales');
+      const responseMetrics = this.getQuestionResponseMetrics(false);
       this.currentQuestion.answered = true;
       stats.bad += 1;
 
@@ -4790,12 +5396,14 @@ class TrinoShell {
       const scaleNotes = (this.currentQuestion.scaleMidis || []).map((m) => this.midiToNoteNameEs(m)).join(' ');
       this.pushLevelDayLog('scales', this.activeLevel.id, {
         date: todayKey,
+        difficultyDayKey: this.getProgressiveDayKey(),
         index: todayCount + 1,
         notes: `${this.midiToNoteWithOctaveEs(this.currentQuestion.rootMidi)}: ${scaleNotes}`,
         scaleKey: this.currentQuestion.scaleKey,
         rootMidi: this.currentQuestion.rootMidi,
         answer: 'Tiempo agotado',
         isCorrect: false,
+        ...responseMetrics,
       });
       this.scaleSessionLog = this.getLevelDayLog('scales', this.activeLevel.id);
       this.renderLogTable(this.scaleSessionLogWrapper, this.scaleSessionLogTbody, this.scaleSessionLog, 'scales');
@@ -4815,21 +5423,14 @@ class TrinoShell {
     }
 
     const stats = this.getLevelStats(this.activeLevel.id, 'intervals');
+    const responseMetrics = this.getQuestionResponseMetrics(false);
     this.currentQuestion.answered = true;
     stats.bad += 1;
 
     if (this.activeLevel.isProgressive) {
-      this.syncProgressiveDayState();
-      this.progressiveConsecutiveGood = 0;
-      this.progressiveAccumBad += 1;
-      if (this.progressiveAccumBad >= 10) {
-        this.progressiveAccumBad = 0;
-        if (this.progressiveSubLevelId >= 2) {
-          this.progressiveSubLevelId -= 1;
-          this.updateExerciseUi('down');
-        }
-      }
-      this.saveProgressiveState();
+      this.recordProgressiveIntervalAnswer(false);
+    } else {
+      this.advanceDirectIntervalCycle();
     }
 
     this.scheduleAutoNextByDelay(this.intervalBadDelay);
@@ -4840,13 +5441,16 @@ class TrinoShell {
     const todayCount = this.sessionLog.filter((it) => (it.date || todayKey) === todayKey).length;
     this.pushLevelDayLog('intervals', this.activeLevel.id, {
       date: todayKey,
+      difficultyDayKey: this.getProgressiveDayKey(),
       index: todayCount + 1,
       notes: `${note1} - ${note2}`,
       midi1: this.currentQuestion.midi1,
       midi2: this.currentQuestion.midi2,
       intervalKey: this.currentQuestion.targetIntervalKey,
+      progressiveLevel: this.currentQuestion.progressiveLevelLabel,
       answer: 'Tiempo agotado',
       isCorrect: false,
+      ...responseMetrics,
     });
     this.sessionLog = this.getLevelDayLog('intervals', this.activeLevel.id);
     this.renderSessionLog();
@@ -4887,6 +5491,7 @@ class TrinoShell {
     }
     const stats = this.getLevelStats(this.activeLevel.id, 'intervals');
     const isCorrect = selectedKey === this.currentQuestion.targetIntervalKey;
+    const responseMetrics = this.getQuestionResponseMetrics(isCorrect);
     const colorClass = isCorrect ? 'flash-correct' : 'flash-wrong';
 
     if (isCorrect) {
@@ -4907,29 +5512,9 @@ class TrinoShell {
       }
 
       if (this.activeLevel.isProgressive) {
-        this.syncProgressiveDayState();
-        const maxSubLevelId = Math.max(...INTERVAL_LEVELS.filter((l) => !l.isProgressive).map((l) => l.id));
-        if (isCorrect) {
-          this.progressiveConsecutiveGood += 1;
-          if (this.progressiveConsecutiveGood >= 10) {
-            this.progressiveConsecutiveGood = 0;
-            if (this.progressiveSubLevelId < maxSubLevelId) {
-              this.progressiveSubLevelId += 1;
-              this.updateExerciseUi('up');
-            }
-          }
-        } else {
-          this.progressiveConsecutiveGood = 0;
-          this.progressiveAccumBad += 1;
-          if (this.progressiveAccumBad >= 10) {
-            this.progressiveAccumBad = 0;
-            if (this.progressiveSubLevelId >= 2) {
-              this.progressiveSubLevelId -= 1;
-              this.updateExerciseUi('down');
-            }
-          }
-        }
-        this.saveProgressiveState();
+        this.recordProgressiveIntervalAnswer(isCorrect);
+      } else {
+        this.advanceDirectIntervalCycle();
       }
 
       const delaySetting = isCorrect ? this.intervalGoodDelay : this.intervalBadDelay;
@@ -4941,13 +5526,16 @@ class TrinoShell {
       const todayCount = this.sessionLog.filter((it) => (it.date || todayKey) === todayKey).length;
       this.pushLevelDayLog('intervals', this.activeLevel.id, {
         date: todayKey,
+        difficultyDayKey: this.getProgressiveDayKey(),
         index: todayCount + 1,
         notes: `${note1} - ${note2}`,
         midi1: this.currentQuestion.midi1,
         midi2: this.currentQuestion.midi2,
         intervalKey: this.currentQuestion.targetIntervalKey,
+        progressiveLevel: this.currentQuestion.progressiveLevelLabel,
         answer: INTERVAL_CATALOG[selectedKey]?.label || selectedKey,
         isCorrect,
+        ...responseMetrics,
       });
       this.sessionLog = this.getLevelDayLog('intervals', this.activeLevel.id);
       this.renderSessionLog();
@@ -4994,6 +5582,7 @@ class TrinoShell {
     this.stopIntervalAnswerTimer();
     const stats = this.getLevelStats(this.activeLevel.id, 'chords');
     const isCorrect = selectedChordId === this.currentQuestion.chordId;
+    const responseMetrics = this.getQuestionResponseMetrics(isCorrect);
     button.classList.add(isCorrect ? 'flash-correct' : 'flash-wrong');
     this.currentQuestion.answered = true;
     this.currentQuestion.firstButtonEl = button;
@@ -5007,12 +5596,14 @@ class TrinoShell {
     const chordNotes = this.currentQuestion.chordMidis.map((midi) => this.midiToNoteNameEs(midi));
     this.pushLevelDayLog('chords', this.activeLevel.id, {
       date: todayKey,
+      difficultyDayKey: this.getProgressiveDayKey(),
       index: todayCount + 1,
       notes: chordNotes.join(' - '),
       chordId: this.currentQuestion.chordId,
       rootMidi: this.currentQuestion.rootMidi,
       answer: CHORD_CATALOG[selectedChordId]?.label || selectedChordId,
       isCorrect,
+      ...responseMetrics,
     });
     this.chordSessionLog = this.getLevelDayLog('chords', this.activeLevel.id);
     this.renderLogTable(this.chordSessionLogWrapper, this.chordSessionLogTbody, this.chordSessionLog, 'chords');
@@ -5048,6 +5639,7 @@ class TrinoShell {
 
     this.stopIntervalAnswerTimer();
     const stats = this.getLevelStats(this.activeLevel.id, 'scales');
+    const responseMetrics = this.getQuestionResponseMetrics(isCorrect);
     this.currentQuestion.answered = true;
     this.currentQuestion.firstButtonEl = button;
     this.currentQuestion.firstClass = colorClass;
@@ -5094,12 +5686,14 @@ class TrinoShell {
     const scaleNotes = (this.currentQuestion.scaleMidis || []).map((m) => this.midiToNoteNameEs(m)).join(' ');
     this.pushLevelDayLog('scales', this.activeLevel.id, {
       date: todayKey,
+      difficultyDayKey: this.getProgressiveDayKey(),
       index: todayCount + 1,
       notes: `${this.midiToNoteWithOctaveEs(this.currentQuestion.rootMidi)}: ${scaleNotes}`,
       scaleKey: this.currentQuestion.scaleKey,
       rootMidi: this.currentQuestion.rootMidi,
       answer: answerLabel,
       isCorrect,
+      ...responseMetrics,
     });
     this.scaleSessionLog = this.getLevelDayLog('scales', this.activeLevel.id);
     this.renderLogTable(this.scaleSessionLogWrapper, this.scaleSessionLogTbody, this.scaleSessionLog, 'scales');
@@ -5127,7 +5721,7 @@ class TrinoShell {
     this.renderLogTable(this.vtSessionLogWrapper, this.vtSessionLogTbody, this.vtSessionLog, 'voiceTest');
   }
 
-  buildDaySummaryHtml(dayLabel, items, isSinging, dailyGoal, moduleType = 'intervals') {
+  buildDaySummaryHtml(dayLabel, items, isSinging, dailyGoal, moduleType = 'intervals', isProgressiveIntervals = false) {
     const totalEx = items.length;
     if (totalEx === 0) return '';
     const isVoiceTest = moduleType === 'voiceTest';
@@ -5222,7 +5816,7 @@ class TrinoShell {
       }
     }
 
-    const colSpan = isVoiceTest ? 5 : isSinging ? 6 : 4;
+    const colSpan = isVoiceTest ? 5 : isSinging ? 6 : isProgressiveIntervals ? 5 : 4;
     const headersRowHtml = isVoiceTest
       ? `<tr class="log-col-headers">
            <th>#</th>
@@ -5240,7 +5834,15 @@ class TrinoShell {
              <th>Voz</th>
              <th></th>
            </tr>`
-        : `<tr class="log-col-headers">
+        : isProgressiveIntervals
+          ? `<tr class="log-col-headers">
+               <th>#</th>
+               <th>Nivel</th>
+               <th>Notas</th>
+               <th>Tu respuesta</th>
+               <th></th>
+             </tr>`
+          : `<tr class="log-col-headers">
              <th>#</th>
              <th>Notas</th>
              <th>Tu respuesta</th>
@@ -5312,6 +5914,10 @@ class TrinoShell {
     if (!wrapperEl || !tbodyEl) return;
     const isVoiceTest = moduleType === 'voiceTest';
     const isSinging = moduleType === 'singing' || isVoiceTest;
+    const isProgressiveIntervals = moduleType === 'intervals' && (
+      this.activeLevel?.isProgressive ||
+      (Array.isArray(list) && list.some((item) => item?.progressiveLevel))
+    );
     const dailyGoal = isSinging
       ? this.dailySingingMin
       : moduleType === 'chords'
@@ -5328,10 +5934,14 @@ class TrinoShell {
           ? `<tr class="log-col-headers">
                <th>#</th><th>Nota</th><th></th><th>Centro tonal</th><th>Voz</th><th></th>
              </tr>`
-          : `<tr class="log-col-headers">
+          : isProgressiveIntervals
+            ? `<tr class="log-col-headers">
+                 <th>#</th><th>Nivel</th><th>Notas</th><th>Tu respuesta</th><th></th>
+               </tr>`
+            : `<tr class="log-col-headers">
                <th>#</th><th>Notas</th><th>Tu respuesta</th><th></th>
              </tr>`;
-      const colSpan = isVoiceTest ? 5 : isSinging ? 6 : 4;
+      const colSpan = isVoiceTest ? 5 : isSinging ? 6 : isProgressiveIntervals ? 5 : 4;
       tbodyEl.innerHTML = `${emptyHeaders}
         <tr class="log-empty-row"><td colspan="${colSpan}">Aún no hay ejercicios registrados.</td></tr>`;
       wrapperEl.classList.remove('hidden');
@@ -5440,10 +6050,17 @@ class TrinoShell {
                    ${item.isCorrect ? '✓' : '✕'}
                  </span>
                </td>`;
+          const progressiveLevelCell = isProgressiveIntervals
+            ? `<td class="log-progressive-level">${item.progressiveLevel || '&nbsp;'}</td>`
+            : '';
+          const intervalNotesLabel = Number.isFinite(item.midi1) && Number.isFinite(item.midi2)
+            ? `${this.midiToNoteWithOctaveEs(item.midi1)} - ${this.midiToNoteWithOctaveEs(item.midi2)}`
+            : item.notes;
           return `
             <tr${latestRowClass ? ` class="${latestRowClass}"` : ''}>
               <td>${item.index}</td>
-              <td>${item.notes}</td>
+              ${progressiveLevelCell}
+              <td>${intervalNotesLabel}</td>
               <td>${item.answer}</td>
               ${statusCell}
             </tr>
@@ -5465,7 +6082,14 @@ class TrinoShell {
       const dayItems = groupsByDate.get(dKey) || [];
       if (dayItems.length > 0) {
         const bannerLabel = this.formatDateBannerLabel(dKey);
-        html += this.buildDaySummaryHtml(bannerLabel, dayItems, isSinging, dailyGoal, moduleType);
+        html += this.buildDaySummaryHtml(
+          bannerLabel,
+          dayItems,
+          isSinging,
+          dailyGoal,
+          moduleType,
+          isProgressiveIntervals
+        );
         html += renderRows(dayItems);
       }
     });
@@ -7509,7 +8133,7 @@ class TrinoShell {
 
   syncDebugPopupWindow() {
     if (!this.debugPopupWin || this.debugPopupWin.closed) return;
-    const cssHref = new URL('./css/styles.css?v=57', window.location.href).href;
+    const cssHref = new URL('./css/styles.css?v=88', window.location.href).href;
     const doc = this.debugPopupWin.document;
     doc.open();
     doc.write(`<!DOCTYPE html>
@@ -7553,6 +8177,7 @@ class TrinoShell {
 </head>
 <body>
   ${this.lastDebugHtml || '<p style="color:#94a3b8;">Aún no hay datos de análisis. Canta un ejercicio en Trino.</p>'}
+  ${this.buildOptionWeightDebugHtml()}
 </body>
 </html>`);
     doc.close();
@@ -7617,6 +8242,7 @@ class TrinoShell {
     const hz2 = 440 * Math.pow(2, (midi2 - 69) / 12);
 
     const now = this.audioCtx.currentTime;
+    this.recordQuestionPlayback(1300);
     this.playTone(hz1, now, 0.55);
     this.playTone(hz2, now + 0.65, 0.65);
 

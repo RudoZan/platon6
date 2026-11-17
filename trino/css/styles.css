@@ -1284,6 +1284,10 @@ body {
   color: var(--text-main);
 }
 
+.session-log-table .log-progressive-level {
+  white-space: nowrap;
+}
+
 .session-log-table tr.log-latest-admirable td,
 .session-log-table tr.log-latest-bueno td,
 .session-log-table tr.log-latest-aceptable td {
@@ -2240,6 +2244,15 @@ body {
   color: #cbd5e1;
 }
 
+#debug-option-weight-content {
+  flex: 0 0 auto;
+  max-height: 32vh;
+  overflow: auto;
+  padding: 0 1rem 0.8rem;
+  font-family: 'Courier New', Courier, monospace;
+  color: #cbd5e1;
+}
+
 .debug-large-body .dbg-frame-table th,
 .debug-large-body .dbg-frame-table td {
   min-width: 42px;
@@ -2331,6 +2344,40 @@ body {
   font-size: 0.63rem;
   color: #64748b;
   font-style: italic;
+}
+
+.dbg-option-weight-scroll {
+  overflow-x: auto;
+  margin-top: 0.3rem;
+}
+
+.dbg-option-weight-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Courier New', monospace;
+  font-size: 0.66rem;
+}
+
+.dbg-option-weight-table th,
+.dbg-option-weight-table td {
+  padding: 0.24rem 0.4rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dbg-option-weight-table th:first-child,
+.dbg-option-weight-table td:first-child {
+  text-align: left;
+}
+
+.dbg-option-weight-table th {
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.dbg-option-weight-table td {
+  color: #94a3b8;
 }
 
 /* ─── Tabla de frames ─── */
@@ -2787,7 +2834,7 @@ body {
   background: #172554;
   color: #e2e8f0;
   font-weight: 700;
-  padding: 0.42rem 0.45rem;
+  padding: 0.32rem 0.45rem;
   text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -2799,7 +2846,7 @@ body {
 }
 
 .stats-data-table td {
-  padding: 0.38rem 0.45rem;
+  padding: 0.28rem 0.45rem;
   text-align: center;
   color: #f1f5f9;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);

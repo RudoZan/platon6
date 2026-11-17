@@ -84,3 +84,9 @@
 3. `Intervalos absolutos` displays all 13 intervals with `Buenas` and `Fallidas` counts (`-` for `0`).
 4. `Intervalos por nota` displays only note pairs with recorded answers, ordered first by interval (`1J..8J`) and then by starting pitch with octave ascending.
 5. Module 2 and Module 4 `Canto de Notas` tables span from the lowest to the highest recorded note (with octave), keeping empty natural notes in between and omitting empty sharp notes.
+
+## UC-14: Daily Weighted Recognition & Progressive Bad Queue
+1. Modules 1, 3, and 5 aggregate appearances and observed difficulty by answer option across all levels for the operational day, which changes at 02:00 local time.
+2. On entering/re-entering a level, selection is uniform until every available option has at least five appearances. Otherwise, a frozen per-visit snapshot applies smoothed difficulty and weights from 1 to 2; changing level/sublevel creates a new snapshot.
+3. M1 progressive required-bad exercises remain in their independent FIFO queue and are due four exercises after failure. The exact same interval and MIDI pair never appears three times consecutively; if the oldest retry would do so, use another eligible pending bad, or a random alternative.
+4. The debug window shows one active-module table with option, daily appearances, observed difficulty, and applied weight. For M1 progressive it also shows pending bad exercises, their MIDI note octaves, FIFO position, and retry deadline. These diagnostics are absent from answer buttons.
