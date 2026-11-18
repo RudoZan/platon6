@@ -3,7 +3,7 @@
  */
 
 /** Versión de la aplicación — incrementar con cada release. */
-const APP_VERSION = 'v1.2.0028';
+const APP_VERSION = 'v1.2.0032';
 
 const VIEWS = {
   home: { id: 'view-home', badge: 'Inicio' },
@@ -141,67 +141,21 @@ const PROGRESSIVE_INTERVAL_TONICS = [
   [48],
   [60],
   [36, 48, 60],
-  [43, 55],
+  [43, 55, 67],
 ];
 
-// Bloque 1 — Nivel 1: Tónicas Do, Re, Sol (Octavas 3 y 4) -> 100% notas naturales
-const LEVEL_1_RESTRICTED_PAIRS = {
-  '1J': [
-    [48, 48], [50, 50], [55, 55], // Do3-Do3, Re3-Re3, Sol3-Sol3
-    [60, 60], [62, 62], [67, 67], // Do4-Do4, Re4-Re4, Sol4-Sol4
-  ],
-  '2M': [
-    [48, 50], [50, 52], [55, 57], // Do3-Re3, Re3-Mi3, Sol3-La3
-    [60, 62], [62, 64], [67, 69], // Do4-Re4, Re4-Mi4, Sol4-La4
-  ],
-};
+const LEVEL_1_4_TONIC_MIDIS = [36, 38, 40, 41, 43, 45, 48, 50, 52, 53, 55, 57, 60, 62, 64, 65, 67, 69];
+const NATURAL_PITCH_CLASSES = [0, 2, 4, 5, 7, 9, 11];
 
-// Bloque 1 — Niveles 2 y 3: Tónicas Do, Re, Fa, Sol (Octavas 3 y 4) -> 100% notas naturales
-const LEVEL_2_3_RESTRICTED_PAIRS = {
-  '1J': [
-    [48, 48], [50, 50], [53, 53], [55, 55],
-    [60, 60], [62, 62], [65, 65], [67, 67],
-  ],
-  '2M': [
-    [48, 50], [50, 52], [53, 55], [55, 57], // Do-Re, Re-Mi, Fa-Sol, Sol-La
-    [60, 62], [62, 64], [65, 67], [67, 69],
-  ],
-  '3M': [
-    [48, 52], [53, 57], [55, 59], // Do-Mi, Fa-La, Sol-Si
-    [60, 64], [65, 69], [67, 71],
-  ],
-  '5J': [
-    [48, 55], [50, 57], [53, 60], [55, 62], // Do-Sol, Re-La, Fa-Do, Sol-Re
-    [60, 67], [62, 69], [65, 72], [67, 74],
-  ],
-};
-
-// Bloque 1 — Nivel 4: Tónicas Do, Re, Mi, Fa, Sol, La (Octavas 3 y 4) -> 100% notas naturales
-const LEVEL_4_RESTRICTED_PAIRS = {
-  '1J': [
-    [48, 48], [50, 50], [52, 52], [53, 53], [55, 55], [57, 57],
-    [60, 60], [62, 62], [64, 64], [65, 65], [67, 67], [69, 69],
-  ],
-  '2M': [
-    [48, 50], [50, 52], [53, 55], [55, 57], [57, 59], // Do-Re, Re-Mi, Fa-Sol, Sol-La, La-Si
-    [60, 62], [62, 64], [65, 67], [67, 69], [69, 71],
-  ],
-  '3M': [
-    [48, 52], [53, 57], [55, 59], // Do-Mi, Fa-La, Sol-Si
-    [60, 64], [65, 69], [67, 71],
-  ],
-  '4J': [
-    [48, 53], [50, 55], [52, 57], [55, 60], [57, 62], // Do-Fa, Re-Sol, Mi-La, Sol-Do, La-Re
-    [60, 65], [62, 67], [64, 69], [67, 72], [69, 74],
-  ],
-  '5J': [
-    [48, 55], [50, 57], [52, 59], [53, 60], [55, 62], [57, 64], // Do-Sol, Re-La, Mi-Si, Fa-Do, Sol-Re, La-Mi
-    [60, 67], [62, 69], [64, 71], [65, 72], [67, 74],
-  ],
-  '8J': [
-    [48, 60], [50, 62], [52, 64], [53, 65], [55, 67], [57, 69], [60, 72],
-  ],
-};
+function buildNaturalIntervalPairs(options, tonicMidis = LEVEL_1_4_TONIC_MIDIS) {
+  return Object.fromEntries(options.map((key) => {
+    const semitones = INTERVAL_CATALOG[key].semitones;
+    const pairs = tonicMidis
+      .map((tonicMidi) => [tonicMidi, tonicMidi + semitones])
+      .filter(([, endMidi]) => NATURAL_PITCH_CLASSES.includes(((endMidi % 12) + 12) % 12));
+    return [key, pairs];
+  }));
+}
 
 /**
  * Progresión pedagógica de 14 niveles en 4 bloques:
@@ -226,33 +180,33 @@ const INTERVAL_LEVELS = [
     id: 1,
     block: 1,
     title: 'Nivel 1 · Unísono y 2ª Mayor',
-    desc: 'Base inicial: Unísono y 2ª Mayor con tónicas Do, Re y Sol.',
+    desc: 'Base inicial: Unísono y 2ª Mayor con tónicas naturales de Do2 a La4.',
     options: ['1J', '2M'],
-    restrictedPairs: LEVEL_1_RESTRICTED_PAIRS,
+    restrictedPairs: buildNaturalIntervalPairs(['1J', '2M']),
   },
   {
     id: 2,
     block: 1,
     title: 'Nivel 2 · Unísono, 2ª y 3ª Mayor',
-    desc: 'Mayores cortos con tónicas Do, Re, Fa y Sol.',
+    desc: 'Mayores cortos con tónicas naturales de Do2 a La4.',
     options: ['1J', '2M', '3M'],
-    restrictedPairs: LEVEL_2_3_RESTRICTED_PAIRS,
+    restrictedPairs: buildNaturalIntervalPairs(['1J', '2M', '3M']),
   },
   {
     id: 3,
     block: 1,
     title: 'Nivel 3 · Unísono, 2ª M, 3ª M y 5ª Justa',
-    desc: 'Incorpora la 5ª Justa con tónicas Do, Re, Fa y Sol.',
+    desc: 'Incorpora la 5ª Justa con tónicas naturales de Do2 a La4.',
     options: ['1J', '2M', '3M', '5J'],
-    restrictedPairs: LEVEL_2_3_RESTRICTED_PAIRS,
+    restrictedPairs: buildNaturalIntervalPairs(['1J', '2M', '3M', '5J']),
   },
   {
     id: 4,
     block: 1,
     title: 'Nivel 4 · Mayores y Justos',
-    desc: 'Suma 4ª Justa y 8ª Justa con tónicas Do, Re, Mi, Fa, Sol y La.',
+    desc: 'Suma 4ª Justa y 8ª Justa con tónicas naturales de Do2 a La4.',
     options: ['1J', '2M', '3M', '4J', '5J', '8J'],
-    restrictedPairs: LEVEL_4_RESTRICTED_PAIRS,
+    restrictedPairs: buildNaturalIntervalPairs(['1J', '2M', '3M', '4J', '5J', '8J']),
   },
 
   // Bloque 2: Contraste Menor vs. Mayor (Tónicas naturales Do..Si, 2ª nota libre)
@@ -260,7 +214,7 @@ const INTERVAL_LEVELS = [
     id: 5,
     block: 2,
     title: 'Nivel 5 · Unísono, 2ª Menor y 2ª Mayor',
-    desc: 'Semitono vs. tono partiendo de cualquier nota natural de la escala de Do.',
+    desc: 'Semitono vs. tono partiendo de notas naturales desde Do2.',
     options: ['1J', '2m', '2M'],
     naturalTonicsOnly: true,
   },
@@ -268,7 +222,7 @@ const INTERVAL_LEVELS = [
     id: 6,
     block: 2,
     title: 'Nivel 6 · Segundas y Terceras Completas',
-    desc: 'Unísono, 2ªm, 2ªM, 3ªm y 3ªM partiendo de tónicas naturales (Do a Si).',
+    desc: 'Unísono, 2ªm, 2ªM, 3ªm y 3ªM partiendo de tónicas naturales desde Do2.',
     options: ['1J', '2m', '2M', '3m', '3M'],
     naturalTonicsOnly: true,
   },
@@ -276,7 +230,7 @@ const INTERVAL_LEVELS = [
     id: 7,
     block: 2,
     title: 'Nivel 7 · Primera Mitad de la Octava',
-    desc: 'Desde Unísono hasta 5ª Justa partiendo de tónicas naturales (Do a Si).',
+    desc: 'Desde Unísono hasta 5ª Justa partiendo de tónicas naturales desde Do2.',
     options: ['1J', '2m', '2M', '3m', '3M', '4J', '5J'],
     naturalTonicsOnly: true,
   },
@@ -286,7 +240,7 @@ const INTERVAL_LEVELS = [
     id: 8,
     block: 3,
     title: 'Nivel 8 · 4ª Justa, Tritono y 5ª Justa',
-    desc: 'Foco en los 3 intervalos centrales partiendo de tónicas naturales (Do a Si).',
+    desc: 'Foco en los 3 intervalos centrales partiendo de tónicas naturales desde Do2.',
     options: ['4J', '4A', '5J'],
     naturalTonicsOnly: true,
   },
@@ -294,7 +248,7 @@ const INTERVAL_LEVELS = [
     id: 9,
     block: 3,
     title: 'Nivel 9 · Quinta y Sextas (6ª m y 6ª M)',
-    desc: 'Distingue 6ª Menor y 6ª Mayor desde tónicas naturales (Do a Si).',
+    desc: 'Distingue 6ª Menor y 6ª Mayor desde tónicas naturales desde Do2.',
     options: ['5J', '6m', '6M'],
     naturalTonicsOnly: true,
   },
@@ -302,7 +256,7 @@ const INTERVAL_LEVELS = [
     id: 10,
     block: 3,
     title: 'Nivel 10 · Séptimas y Octava (7ª m, 7ª M y 8ª J)',
-    desc: 'Reconoce 7ª Menor, 7ª Mayor y 8ª Justa desde tónicas naturales (Do a Si).',
+    desc: 'Reconoce 7ª Menor, 7ª Mayor y 8ª Justa desde tónicas naturales desde Do2.',
     options: ['7m', '7M', '8J'],
     naturalTonicsOnly: true,
   },
@@ -310,7 +264,7 @@ const INTERVAL_LEVELS = [
     id: 11,
     block: 3,
     title: 'Nivel 11 · Intervalos Amplios (5ª a 8ª)',
-    desc: 'Saltos amplios (5ªJ, 6ªm, 6ªM, 7ªm, 7ªM y 8ªJ) desde tónicas naturales.',
+    desc: 'Saltos amplios (5ªJ, 6ªm, 6ªM, 7ªm, 7ªM y 8ªJ) desde tónicas naturales desde Do2.',
     options: ['5J', '6m', '6M', '7m', '7M', '8J'],
     naturalTonicsOnly: true,
   },
@@ -322,23 +276,23 @@ const INTERVAL_LEVELS = [
     title: 'Nivel 12 · Escala Mayor / Justos (1 Octava)',
     desc: 'Intervalos mayores y justos usando las 12 notas cromáticas en 1 octava (Do4–Do5).',
     options: ['1J', '2M', '3M', '4J', '5J', '6M', '7M', '8J'],
-    midiRange: { minStart: 60, maxEnd: 72, label: '1 Octava (Do4 a Do5)' },
+    midiRange: { minStart: 36, maxEnd: 72, label: 'De Do2 a Do5' },
   },
   {
     id: 13,
     block: 4,
     title: 'Nivel 13 · Todos los Intervalos (1 Octava)',
-    desc: 'Los 13 intervalos con las 12 notas cromáticas dentro de 1 octava (Do4–Do5).',
+    desc: 'Los 13 intervalos con las 12 notas cromáticas desde Do2 hasta Do5.',
     options: ALL_OCTAVE_INTERVALS,
-    midiRange: { minStart: 60, maxEnd: 72, label: '1 Octava (Do4 a Do5)' },
+    midiRange: { minStart: 36, maxEnd: 72, label: 'De Do2 a Do5' },
   },
   {
     id: 14,
     block: 4,
     title: 'Nivel 14 · De 5ª a 13ª (Intervalos Compuestos)',
-    desc: 'Desde 5ª Justa hasta 13ª Mayor (novenas, décimas, oncenas y trecenas) con las 12 notas cromáticas (Do3–Do5).',
+    desc: 'Desde 5ª Justa hasta 13ª Mayor (novenas, décimas, oncenas y trecenas) con las 12 notas cromáticas desde Do2.',
     options: LEVEL_14_INTERVALS,
-    midiRange: { minStart: 48, maxEnd: 72, label: '2 Octavas (Do3 a Do5)' },
+    midiRange: { minStart: 36, maxEnd: 72, label: 'De Do2 a Do5' },
   },
 ];
 
@@ -1123,7 +1077,7 @@ class TrinoShell {
 
   formatObservedDifficultyCell(summary) {
     const count = Number(summary?.difficultyCount) || 0;
-    if (!count) return '<td class="stats-val-zero">-</td>';
+    if (count < 10) return '<td class="stats-val-zero">-</td>';
     const labels = ['Muy fácil', 'Fácil', 'Regular', 'Difícil', 'Muy difícil'];
     const roundedAverage = Math.max(1, Math.min(5, Math.round(summary.difficultySum / count)));
     return `<td class="stats-val-difficulty">${labels[roundedAverage - 1]}</td>`;
@@ -1915,6 +1869,18 @@ class TrinoShell {
     return Object.values(this.dayLogs[moduleType] || {}).flat().filter((entry) =>
       (entry.difficultyDayKey || entry.date) === dayKey && entry[optionField] === option
     ).length;
+  }
+
+  getRecentRootedQuestions(moduleType, levelId, optionField) {
+    return (this.dayLogs[moduleType]?.[String(levelId)] || [])
+      .filter((entry) => typeof entry?.[optionField] === 'string' && Number.isInteger(entry.rootMidi))
+      .slice(0, 2);
+  }
+
+  isThirdConsecutiveRootedQuestion(optionField, option, rootMidi, recentQuestions) {
+    return recentQuestions.length >= 2 && recentQuestions.every((entry) =>
+      entry[optionField] === option && entry.rootMidi === rootMidi
+    );
   }
 
   buildOptionWeightDebugHtml() {
@@ -3831,14 +3797,14 @@ class TrinoShell {
       ))];
     }
     if (level?.naturalTonicsOnly) {
-      const naturalPitches = [0, 2, 4, 5, 7, 9, 11];
+      const minTonicMidi = level.id >= 5 ? 36 : 48;
       const tonicCandidates = new Set();
       (level.options || []).forEach((key) => {
         const semitones = INTERVAL_CATALOG[key]?.semitones;
         if (!Number.isFinite(semitones)) return;
-        const maxStart = Math.max(48, 72 - semitones);
-        for (let midi = 48; midi <= maxStart; midi++) {
-          if (naturalPitches.includes(((midi % 12) + 12) % 12)) {
+        const maxStart = Math.max(minTonicMidi, 72 - semitones);
+        for (let midi = minTonicMidi; midi <= maxStart; midi++) {
+          if (NATURAL_PITCH_CLASSES.includes(((midi % 12) + 12) % 12)) {
             tonicCandidates.add(midi);
           }
         }
@@ -3875,7 +3841,17 @@ class TrinoShell {
       .slice(0, 2);
   }
 
-  isThirdConsecutiveProgressiveInterval(intervalKey, midi1, midi2, recentQuestions) {
+  getRecentLevelIntervalQuestions(levelId) {
+    return (this.dayLogs.intervals?.[String(levelId)] || [])
+      .filter((entry) =>
+        typeof entry.intervalKey === 'string' &&
+        Number.isInteger(entry.midi1) &&
+        Number.isInteger(entry.midi2)
+      )
+      .slice(0, 2);
+  }
+
+  isThirdConsecutiveInterval(intervalKey, midi1, midi2, recentQuestions) {
     return recentQuestions.length >= 2 && recentQuestions.every((entry) =>
       entry.intervalKey === intervalKey && entry.midi1 === midi1 && entry.midi2 === midi2
     );
@@ -4120,6 +4096,7 @@ class TrinoShell {
     const scaleKey = this.pickWeightedOption(opts);
     const scale = SCALE_CATALOG[scaleKey] || SCALE_CATALOG.major;
     const tonicPcs = effectiveLevel.tonicPcs || [0, 7];
+    const recentQuestions = this.getRecentRootedQuestions('scales', this.activeLevel.id, 'scaleKey');
 
     // Octavas 3 y 4 para la tónica (MIDI 48..71, más Do5=72 cuando incluye Do)
     const candidateRoots = [];
@@ -4131,7 +4108,15 @@ class TrinoShell {
     if (tonicPcs.includes(0)) {
       candidateRoots.push(36);
     }
-    const rootMidi = candidateRoots[Math.floor(Math.random() * candidateRoots.length)];
+    let rootMidi = candidateRoots[Math.floor(Math.random() * candidateRoots.length)];
+    if (this.isThirdConsecutiveRootedQuestion('scaleKey', scaleKey, rootMidi, recentQuestions)) {
+      const alternativeRoots = candidateRoots.filter((candidateRoot) =>
+        !this.isThirdConsecutiveRootedQuestion('scaleKey', scaleKey, candidateRoot, recentQuestions)
+      );
+      if (alternativeRoots.length > 0) {
+        rootMidi = alternativeRoots[Math.floor(Math.random() * alternativeRoots.length)];
+      }
+    }
     const scaleMidis = scale.intervals.map((st) => rootMidi + st);
 
     this.currentQuestion = {
@@ -4217,7 +4202,17 @@ class TrinoShell {
     const chord = CHORD_CATALOG[chordId];
     const maxInterval = Math.max(...chord.intervals);
     const maxRoot = Math.min(72, 84 - maxInterval);
-    const rootMidi = 48 + Math.floor(Math.random() * (maxRoot - 48 + 1));
+    const candidateRoots = Array.from({ length: maxRoot - 48 + 1 }, (_, index) => 48 + index);
+    const recentQuestions = this.getRecentRootedQuestions('chords', this.activeLevel.id, 'chordId');
+    let rootMidi = candidateRoots[Math.floor(Math.random() * candidateRoots.length)];
+    if (this.isThirdConsecutiveRootedQuestion('chordId', chordId, rootMidi, recentQuestions)) {
+      const alternativeRoots = candidateRoots.filter((candidateRoot) =>
+        !this.isThirdConsecutiveRootedQuestion('chordId', chordId, candidateRoot, recentQuestions)
+      );
+      if (alternativeRoots.length > 0) {
+        rootMidi = alternativeRoots[Math.floor(Math.random() * alternativeRoots.length)];
+      }
+    }
 
     this.currentQuestion = {
       chordId,
@@ -4375,7 +4370,7 @@ class TrinoShell {
     let retryExercise = oldestBadExercise && progressiveExerciseNumber >= oldestBadExercise.retryByExercise
       ? oldestBadExercise
       : null;
-    if (retryExercise && this.isThirdConsecutiveProgressiveInterval(
+    if (retryExercise && this.isThirdConsecutiveInterval(
       retryExercise.intervalKey,
       retryExercise.midi1,
       retryExercise.midi2,
@@ -4383,7 +4378,7 @@ class TrinoShell {
     )) {
       retryExercise = this.progressiveBadExercises.find((item) =>
         item !== retryExercise &&
-        !this.isThirdConsecutiveProgressiveInterval(
+        !this.isThirdConsecutiveInterval(
           item.intervalKey,
           item.midi1,
           item.midi2,
@@ -4399,9 +4394,18 @@ class TrinoShell {
       ? this.directIntervalCycle
       : null;
     const useFixedDirectTonic = directCycle?.levelId === this.activeLevel.id && directCycle.groupIndex < 4;
+    const recentIntervalQuestions = this.activeModule === 'intervals'
+      ? isProgressiveIntervals
+        ? recentProgressiveQuestions
+        : this.getRecentLevelIntervalQuestions(this.activeLevel.id)
+      : [];
     let midi1;
     let midi2;
-    const minAllowed = isSinging ? this.vocalMinMidi : 48;
+    const minAllowed = isSinging
+      ? this.vocalMinMidi
+      : this.activeModule === 'intervals' && effectiveLevel.id >= 5
+        ? 36
+        : 48;
     let randomKey;
 
     if (isRequiredRetry) {
@@ -4498,30 +4502,44 @@ class TrinoShell {
       midi2 = adjustedQuestion.midi2;
     }
 
-    if (isProgressiveIntervals && !isRequiredRetry && this.isThirdConsecutiveProgressiveInterval(
+    if (this.activeModule === 'intervals' && !isRequiredRetry && this.isThirdConsecutiveInterval(
       randomKey,
       midi1,
       midi2,
-      recentProgressiveQuestions
+      recentIntervalQuestions
     )) {
-      const alternativeCandidates = [];
-      opts.forEach((key) => {
+      const fixedTonicChoices = progressiveTonicChoices ||
+        (useFixedDirectTonic ? [directCycle.tonicMidi] : null);
+      const collectAlternativeCandidates = (tonicChoices) => opts.flatMap((key) => {
         const semitones = INTERVAL_CATALOG[key].semitones;
-        const tonicCandidates = progressiveTonicChoices
-          ? progressiveTonicChoices
-          : Array.from({ length: Math.max(1, 73 - 48 - semitones) }, (_, index) => 48 + index)
-            .filter((tonicMidi) => tonicMidi + semitones <= 72);
-        tonicCandidates.forEach((tonicMidi) => {
-          const nextMidi = tonicMidi + semitones;
-          const repeatsImmediateUnison = key === '1J' && this.lastIntervalUnisonMidi === tonicMidi;
-          if (
-            !repeatsImmediateUnison &&
-            !this.isThirdConsecutiveProgressiveInterval(key, tonicMidi, nextMidi, recentProgressiveQuestions)
-          ) {
-            alternativeCandidates.push({ intervalKey: key, midi1: tonicMidi, midi2: nextMidi });
-          }
-        });
+        const minStart = effectiveLevel.midiRange?.minStart ?? minAllowed;
+        const maxEnd = effectiveLevel.midiRange?.maxEnd ?? 72;
+        const tonicCandidates = effectiveLevel.restrictedPairs
+          ? (effectiveLevel.restrictedPairs[key] || [])
+            .filter(([tonicMidi]) => !tonicChoices || tonicChoices.includes(tonicMidi))
+            .map(([tonicMidi]) => tonicMidi)
+          : (tonicChoices || Array.from({
+            length: Math.max(1, maxEnd - minStart - semitones + 1),
+          }, (_, index) => minStart + index))
+            .filter((tonicMidi) => tonicMidi + semitones <= maxEnd &&
+              (!effectiveLevel.naturalTonicsOnly || NATURAL_PITCH_CLASSES.includes(((tonicMidi % 12) + 12) % 12)));
+
+        return tonicCandidates
+          .map((tonicMidi) => ({ intervalKey: key, midi1: tonicMidi, midi2: tonicMidi + semitones }))
+          .filter((candidate) => {
+            const hasRestrictedPair = !effectiveLevel.restrictedPairs ||
+              (effectiveLevel.restrictedPairs[key] || []).some(([startMidi, endMidi]) =>
+                startMidi === candidate.midi1 && endMidi === candidate.midi2
+              );
+            const repeatsImmediateUnison = key === '1J' && this.lastIntervalUnisonMidi === candidate.midi1;
+            return hasRestrictedPair && !repeatsImmediateUnison &&
+              !this.isThirdConsecutiveInterval(key, candidate.midi1, candidate.midi2, recentIntervalQuestions);
+          });
       });
+      let alternativeCandidates = collectAlternativeCandidates(fixedTonicChoices);
+      if (alternativeCandidates.length === 0 && fixedTonicChoices) {
+        alternativeCandidates = collectAlternativeCandidates(null);
+      }
       if (alternativeCandidates.length > 0) {
         const selectedKey = this.pickWeightedOption(alternativeCandidates.map((candidate) => candidate.intervalKey));
         const matchingCandidates = alternativeCandidates.filter((candidate) => candidate.intervalKey === selectedKey);
@@ -4939,10 +4957,10 @@ class TrinoShell {
         </div>
       `;
     } else if (effectiveLvl.naturalTonicsOnly) {
-      const maxSemitones = Math.max(...(effectiveLvl.options || []).map((k) => INTERVAL_CATALOG[k]?.semitones || 0));
-      const minMidi = NATURAL_TONIC_MIDIS[0]; // Do3
-      const maxStartMidi = NATURAL_TONIC_MIDIS[NATURAL_TONIC_MIDIS.length - 1]; // Mi4
-      const maxEndMidi = maxStartMidi + maxSemitones;
+      const tonicCandidates = this.getIntervalTonicCandidates(effectiveLvl);
+      const minMidi = tonicCandidates[0] ?? 36;
+      const maxStartMidi = tonicCandidates[tonicCandidates.length - 1] ?? minMidi;
+      const maxEndMidi = effectiveLvl.midiRange?.maxEnd ?? 72;
 
       rangeText = `Tónica entre ${this.midiToNoteWithOctaveEs(minMidi)} y ${this.midiToNoteWithOctaveEs(maxStartMidi)} · 2ª nota hasta ${this.midiToNoteWithOctaveEs(maxEndMidi)}`;
       notesText = `Tónica (1ª nota): solo escala de Do natural (Do, Re, Mi, Fa, Sol, La, Si) · 2ª nota: libre según el intervalo (incluye ♯)`;
