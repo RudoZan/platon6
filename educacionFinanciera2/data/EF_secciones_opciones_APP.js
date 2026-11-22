@@ -53,7 +53,7 @@ window.EF_DATA["EF_secciones_opciones_APP"] =   {
       },
       {
         "id": "situacion_actual",
-        "nombre": "Situación actual",
+        "nombre": "Mi Situación",
         "orden": 2,
         "subsecciones": [
           {

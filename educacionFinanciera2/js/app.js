@@ -1,6 +1,9 @@
 const menuToggle = document.querySelector("#menu-toggle");
 const topMenu = document.querySelector("#top-menu");
 const sectionNav = document.querySelector(".section-nav");
+const mainContent = document.querySelector(".main-content");
+const welcomePanel = document.querySelector(".welcome-panel");
+const brand = document.querySelector(".brand");
 
 const sectionIcons = {
   mi_perfil: '<circle cx="12" cy="8" r="3.25"/><path d="M5 20c0-3.7 2.9-6 7-6s7 2.3 7 6"/>',
@@ -13,18 +16,41 @@ const sectionIcons = {
 
 const sectionLabels = {
   mi_perfil: "Mi perfil",
-  situacion_actual: "Situación",
+  situacion_actual: "Mi Situación",
   trabajo_estudios: "Trabajo y capacitación",
   finanzas: "Finanzas Cuentas e Inversión",
   comercio_vida_cotidiana: "Productos y Servicios",
   asesor_financiero: "Asesor financiero",
 };
 
+function renderHome() {
+  mainContent.classList.remove("is-section-view");
+  mainContent.replaceChildren(welcomePanel);
+  sectionNav.querySelectorAll(".nav-item").forEach((item) => item.removeAttribute("aria-current"));
+}
+
+function renderSection(section, item) {
+  const sectionPage = document.createElement("section");
+  sectionPage.className = "section-page";
+  sectionPage.setAttribute("aria-labelledby", "section-title");
+
+  const title = document.createElement("h1");
+  title.id = "section-title";
+  title.textContent = sectionLabels[section.id] || section.nombre;
+  sectionPage.append(title);
+
+  mainContent.classList.add("is-section-view");
+  mainContent.replaceChildren(sectionPage);
+  sectionNav.querySelectorAll(".nav-item").forEach((navItem) => navItem.removeAttribute("aria-current"));
+  item.setAttribute("aria-current", "page");
+}
+
 for (const section of window.EF_DATA.EF_secciones_opciones_APP.secciones) {
   const item = document.createElement("button");
   item.className = "nav-item";
   item.type = "button";
-  item.title = section.nombre;
+  const sectionLabel = sectionLabels[section.id] || section.nombre;
+  item.title = sectionLabel;
 
   const icon = document.createElement("span");
   icon.className = "nav-icon";
@@ -40,12 +66,18 @@ for (const section of window.EF_DATA.EF_secciones_opciones_APP.secciones) {
   icon.append(iconSvg);
 
   const label = document.createElement("span");
-  label.textContent = sectionLabels[section.id] || section.nombre;
-  item.setAttribute("aria-label", section.nombre);
+  label.textContent = sectionLabel;
+  item.setAttribute("aria-label", sectionLabel);
 
   item.append(icon, label);
+  item.addEventListener("click", () => renderSection(section, item));
   sectionNav.append(item);
 }
+
+brand.addEventListener("click", (event) => {
+  event.preventDefault();
+  renderHome();
+});
 
 menuToggle.addEventListener("click", () => {
   const isExpanded = menuToggle.getAttribute("aria-expanded") === "true";

@@ -156,6 +156,12 @@ button, a { font: inherit; }
   padding: calc(var(--header-height) + 38px) 22px calc(var(--footer-height) + 24px);
 }
 
+.main-content.is-section-view { justify-content: flex-start; align-items: stretch; }
+
+.section-page { width: 100%; animation: rise-in 350ms ease-out both; }
+
+.section-page h1 { font-size: 2rem; }
+
 .welcome-panel {
   position: relative;
   width: 100%;
@@ -267,8 +273,14 @@ blockquote cite span { padding: 0 4px; color: var(--soft); }
   font-weight: 600;
   line-height: 1.05;
   text-align: center;
-  cursor: default;
+  cursor: pointer;
 }
+
+.nav-item:hover,
+.nav-item[aria-current="page"] { border-top-color: var(--mint); color: var(--mint); }
+
+.nav-item:hover .nav-icon,
+.nav-item[aria-current="page"] .nav-icon { color: var(--mint); }
 
 .nav-icon { display: grid; width: 27px; height: 27px; flex: 0 0 27px; place-items: center; color: #d8e6f3; }
 .nav-icon svg { display: block; width: 24px; height: 24px; }
