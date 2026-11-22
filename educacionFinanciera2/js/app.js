@@ -28,6 +28,7 @@ const riskTestState = { view: "intro", questionIndex: 0, answers: {}, result: nu
 const dilemmasConfig = window.EF_DATA.EF_catalogo_perfil.tests.dilemasFinancieros;
 const dilemmaAnswers = {};
 const profileSummaryConfig = window.EF_DATA.EF_catalogo_perfil.resumen;
+const employmentState = { currentJob: null, grossSalary: null, netSalary: null };
 
 const sectionIcons = {
   mi_perfil: '<circle cx="12" cy="8" r="3.25"/><path d="M5 20c0-3.7 2.9-6 7-6s7 2.3 7 6"/>',
@@ -500,6 +501,78 @@ function renderHome() {
   sectionNav.querySelectorAll(".nav-item").forEach((item) => item.removeAttribute("aria-current"));
 }
 
+function renderWorkSection(container) {
+  const summary = document.createElement("section");
+  summary.className = "work-summary";
+  summary.setAttribute("aria-label", "Situación laboral actual");
+
+  const summaryHeader = document.createElement("div");
+  summaryHeader.className = "work-summary-header";
+  const summaryTitle = document.createElement("h2");
+  summaryTitle.textContent = "Mi trabajo actual";
+  const status = document.createElement("span");
+  status.className = `work-status${employmentState.currentJob ? " is-employed" : ""}`;
+  status.textContent = employmentState.currentJob ? "Con empleo" : "Sin empleo activo";
+  summaryHeader.append(summaryTitle, status);
+
+  const details = document.createElement("dl");
+  details.className = "work-summary-details";
+  const fields = [
+    ["Cargo", employmentState.currentJob?.titulo || "No registrado"],
+    ["Sueldo bruto", employmentState.grossSalary === null ? "No definido" : formatWorkSalary(employmentState.grossSalary)],
+    ["Sueldo líquido", employmentState.netSalary === null ? "No definido" : formatWorkSalary(employmentState.netSalary)],
+  ];
+
+  for (const [labelText, valueText] of fields) {
+    const field = document.createElement("div");
+    field.className = "work-summary-field";
+    const label = document.createElement("dt");
+    label.textContent = labelText;
+    const value = document.createElement("dd");
+    value.textContent = valueText;
+    field.append(label, value);
+    details.append(field);
+  }
+
+  summary.append(summaryHeader, details);
+
+  const actions = document.createElement("div");
+  actions.className = "work-actions";
+  actions.setAttribute("aria-label", "Opciones de trabajo y capacitación");
+  const workOptions = [
+    { id: "negociacion", icon: "↗", title: "Negociación", description: "Aumentos y ascensos" },
+    { id: "capacitacion", icon: "▤", title: "Capacitación", description: "Cursos y certificaciones" },
+    { id: "busqueda", icon: "⌕", title: "Buscar empleo", description: "Ofertas y postulaciones" },
+  ];
+
+  for (const option of workOptions) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "work-action-button";
+    button.dataset.workAction = option.id;
+
+    const icon = document.createElement("span");
+    icon.className = "work-action-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = option.icon;
+    const title = document.createElement("span");
+    title.className = "work-action-title";
+    title.textContent = option.title;
+    const description = document.createElement("span");
+    description.className = "work-action-description";
+    description.textContent = option.description;
+
+    button.append(icon, title, description);
+    actions.append(button);
+  }
+
+  container.append(summary, actions);
+}
+
+function formatWorkSalary(amount) {
+  return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(amount);
+}
+
 function renderSection(section, item, profileSubsection = null) {
   if (section.id === "mi_perfil" && !profileSubsection) {
     profileSubsection = section.subsecciones?.find((subsection) => subsection.id === "perfil_resumen") || null;
@@ -530,7 +603,24 @@ function renderSection(section, item, profileSubsection = null) {
       const subsectionButton = document.createElement("button");
       subsectionButton.type = "button";
       subsectionButton.className = "subsection-nav-item";
-      subsectionButton.textContent = subsection.nombre;
+      if (subsection.id === "perfil_resumen") {
+        subsectionButton.classList.add("subsection-nav-item--icon");
+        subsectionButton.setAttribute("aria-label", subsection.nombre);
+        subsectionButton.title = subsection.nombre;
+        const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        icon.setAttribute("viewBox", "0 0 24 24");
+        icon.setAttribute("fill", "none");
+        icon.setAttribute("stroke", "currentColor");
+        icon.setAttribute("stroke-width", "1.8");
+        icon.setAttribute("stroke-linecap", "round");
+        icon.setAttribute("stroke-linejoin", "round");
+        icon.setAttribute("aria-hidden", "true");
+        icon.classList.add("profile-summary-tab-icon");
+        icon.innerHTML = sectionIcons.mi_perfil;
+        subsectionButton.append(icon);
+      } else {
+        subsectionButton.textContent = subsection.nombre;
+      }
       if (subsection.id === profileSubsection?.id) {
         subsectionButton.setAttribute("aria-current", "page");
       }
@@ -585,6 +675,10 @@ function renderSection(section, item, profileSubsection = null) {
 
   if (section.id === "mi_perfil" && !profileSubsection) {
     sectionPage.setAttribute("aria-label", "Mi perfil");
+  }
+
+  if (section.id === "trabajo_estudios") {
+    renderWorkSection(sectionPage);
   }
 
   mainContent.classList.add("is-section-view");
