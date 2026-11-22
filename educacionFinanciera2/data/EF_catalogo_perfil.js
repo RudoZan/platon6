@@ -11,66 +11,107 @@ window.EF_DATA["EF_catalogo_perfil"] =   {
         "interesesPrioritariosMinimos": 1,
         "estrellasMinimasParaPriorizar": 2
       },
+      "textos": {
+        "instruccion": "Marca con estrellas las actividades y aspectos que te motivan y te hacen sentir bien.",
+        "distribucion": "Distribuye hasta {{maximo}} estrellas (no es necesario ocuparlas todas).",
+        "interaccion": "Pincha las estrellas para agregar o quitar.",
+        "contador": "{{asignadas}} / {{maximo}} estrellas",
+        "prioridadPendiente": "Por favor, prioriza al menos un interés asignándole {{minimoPrioridad}} o más estrellas.",
+        "prioridadCompleta": "Ya priorizaste al menos un interés.",
+        "maximoAlcanzado": "Has alcanzado el máximo de {{maximo}} estrellas disponibles.",
+        "agregarEstrella": "Agregar estrella a {{interes}}",
+        "quitarOajustarEstrellas": "Pincha las estrellas para agregar o quitar."
+      },
       "opciones": [
         {
           "id": "vivienda",
-          "nombre": "Hogar y Decoración"
+          "nombre": "Hogar y Decoración",
+          "icono": "🏠",
+          "estrellasIniciales": 1
         },
         {
           "id": "movilidad",
-          "nombre": "Comodidad al movilizarse"
+          "nombre": "Comodidad al movilizarse",
+          "icono": "🚗",
+          "estrellasIniciales": 1
         },
         {
           "id": "mascotas",
-          "nombre": "Mascotas y Animales"
+          "nombre": "Mascotas y Animales",
+          "icono": "🐾",
+          "estrellasIniciales": 1
         },
         {
           "id": "tech",
-          "nombre": "Tecnología y Herramientas"
+          "nombre": "Tecnología y Herramientas",
+          "icono": "💻",
+          "estrellasIniciales": 1
         },
         {
           "id": "viajes",
-          "nombre": "Viajes y Vacaciones"
+          "nombre": "Viajes y Vacaciones",
+          "icono": "✈️",
+          "estrellasIniciales": 1
         },
         {
           "id": "gastronomia",
-          "nombre": "Gastronomía y Salidas"
+          "nombre": "Gastronomía y Salidas",
+          "icono": "🍽️",
+          "estrellasIniciales": 1
         },
         {
           "id": "conciertos",
-          "nombre": "Conciertos y Festivales"
+          "nombre": "Conciertos y Festivales",
+          "icono": "🎸",
+          "estrellasIniciales": 1
         },
         {
           "id": "educacion",
-          "nombre": "Educación y Aprendizaje"
+          "nombre": "Educación y Aprendizaje",
+          "icono": "📚",
+          "estrellasIniciales": 1
         },
         {
           "id": "seguridad",
-          "nombre": "Paz Financiera y Reservas"
+          "nombre": "Paz Financiera y Reservas",
+          "icono": "🛡️",
+          "estrellasIniciales": 1
         },
         {
           "id": "hobbies",
-          "nombre": "Hobbies y Pasatiempos"
+          "nombre": "Hobbies y Pasatiempos",
+          "icono": "🎨",
+          "estrellasIniciales": 1
         },
         {
           "id": "deporte",
-          "nombre": "Deporte y Salud Física"
+          "nombre": "Deporte y Salud Física",
+          "icono": "🏋️",
+          "estrellasIniciales": 1
         },
         {
           "id": "naturaleza",
-          "nombre": "Naturaleza y Vida al Aire Libre"
+          "nombre": "Naturaleza y Vida al Aire Libre",
+          "icono": "🏕️",
+          "estrellasIniciales": 1
         },
         {
           "id": "moda",
-          "nombre": "Moda, Imagen y Estilo"
+          "nombre": "Moda, Imagen y Estilo",
+          "icono": "👗",
+          "estrellasIniciales": 1
         },
         {
           "id": "gaming",
-          "nombre": "Gaming y Ocio Digital"
+          "nombre": "Gaming y Ocio Digital",
+          "icono": "🎮",
+          "estrellasIniciales": 1
         },
         {
           "id": "familia",
-          "nombre": "Familia y Amigos"
+          "nombre": "Familia y Amigos",
+          "icono": "🤝",
+          "estrellasIniciales": 1
         }
       ]
     },
@@ -89,58 +130,85 @@ window.EF_DATA["EF_catalogo_perfil"] =   {
           "maximas": 2
         }
       },
+      "textos": {
+        "instruccion": "Elige las opciones de vivienda, trabajo y transporte que más te acomodan. Selecciona 2 en cada caso: no refleja tu situación actual, sino lo que prefieres o valoras más."
+      },
       "vivienda": [
         {
           "id": "condominio_elegante",
-          "nombre": "Condominio Elegante"
+          "nombre": "Condominio elegante",
+          "icono": "🏠",
+          "descripcion": "Casa o departamento. Seguridad y espacios comunes."
         },
         {
           "id": "conectividad_central",
-          "nombre": "Conectividad Central"
+          "nombre": "Departamento Céntrico",
+          "icono": "🏙️",
+          "descripcion": "Cerca de servicios y transporte."
         },
         {
           "id": "vida_de_barrio",
-          "nombre": "Vida de Barrio"
+          "nombre": "Casa o departamento en vida de barrio",
+          "icono": "🏡",
+          "descripcion": "Comercio local y vida de barrio."
         },
         {
           "id": "parcela_agrado",
-          "nombre": "Parcela de Agrado"
+          "nombre": "Parcela de agrado",
+          "icono": "🌳",
+          "descripcion": "Espacio y naturaleza."
         }
       ],
       "trabajo": [
         {
           "id": "tener_gente_a_cargo",
-          "nombre": "Tener personal o gente a cargo"
+          "nombre": "Tener personal o gente a cargo",
+          "icono": "👥",
+          "descripcion": "Liderar y coordinar un equipo."
         },
         {
           "id": "relacionarse_con_publico_o_clientes",
-          "nombre": "Relacionarse con público o clientes"
+          "nombre": "Relacionarse con público o clientes",
+          "icono": "🤝",
+          "descripcion": "Atención y trato directo."
         },
         {
           "id": "ingresos_estables",
-          "nombre": "Ingresos estables mensuales"
+          "nombre": "Ingresos estables mensuales",
+          "icono": "💰",
+          "descripcion": "Ingresos fijo y previsibles."
         },
         {
           "id": "trabajo_practico_terreno_menos_administrativo",
-          "nombre": "Trabajo más práctico o de terreno y menos administrativo"
+          "nombre": "Labores de oficio o dinámicas",
+          "icono": "🛠️",
+          "descripcion": "Trabajo más práctico o de terreno y menos administrativo"
         }
       ],
       "transporte": [
         {
           "id": "suv_camioneta",
-          "nombre": "SUV o camioneta"
+          "nombre": "SUV o camioneta",
+          "icono": "🚙",
+          "descripcion": "Espacio para pasajeros y carga."
         },
         {
           "id": "citycar_moto",
-          "nombre": "City Car o Moto"
+          "nombre": "City Car o Moto",
+          "icono": "🛵",
+          "descripcion": "Traslado ágil y económico."
         },
         {
           "id": "locomocion_colectiva",
-          "nombre": "Locomoción colectiva"
+          "nombre": "Locomoción colectiva",
+          "icono": "🚌",
+          "descripcion": "Bus, metro y transporte compartido."
         },
         {
           "id": "deportivo_lujo",
-          "nombre": "Deportivo o de lujo"
+          "nombre": "Deportivo o de lujo",
+          "icono": "🏎️",
+          "descripcion": "Diseño, comodidad y alto rendimiento."
         }
       ]
     },

@@ -10,11 +10,11 @@ window.EF_DATA["EF_secciones_opciones_APP"] =   {
         "orden": 1,
         "subsecciones": [
           {
-            "id": "configuracion_perfil",
-            "nombre": "Configuración del perfil",
+            "id": "perfil_intereses",
+            "nombre": "Intereses",
             "grupos": [
               {
-                "id": "perfil_datos_personales",
+                "id": "perfil_datos_intereses",
                 "opciones": [
                   {
                     "tipo": "opcion",
@@ -22,25 +22,58 @@ window.EF_DATA["EF_secciones_opciones_APP"] =   {
                     "nombre": "Intereses y prioridades",
                     "requeridaParaIniciar": true,
                     "editableDuranteSimulacion": true
-                  },
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "perfil_preferencias",
+            "nombre": "Preferencias",
+            "grupos": [
+              {
+                "id": "perfil_datos_preferencias",
+                "opciones": [
                   {
                     "tipo": "opcion",
                     "id": "preferencias",
                     "nombre": "Preferencias de vida",
                     "requeridaParaIniciar": true,
-                    "editableDuranteSimulacion": true
-                  },
+                    "editableDuranteSimulacion": true,
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "perfil_riesgo",
+            "nombre": "Perfil de riesgo",
+            "grupos": [
+              {
+                "id": "perfil_datos_riesgo",
+                "opciones": [
                   {
                     "tipo": "opcion",
                     "id": "perfil_riesgo",
                     "nombre": "Perfil de riesgo",
                     "requeridaParaIniciar": false,
                     "editableDuranteSimulacion": true
-                  },
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "perfil_dilemas_financieros",
+            "nombre": "Dilemas Financieros",
+            "grupos": [
+              {
+                "id": "perfil_datos_dilemas",
+                "opciones": [
                   {
                     "tipo": "opcion",
                     "id": "reflexiones_personales",
-                    "nombre": "Reflexiones sobre decisiones personales",
+                    "nombre": "Dilemas Financieros",
                     "requeridaParaIniciar": false,
                     "editableDuranteSimulacion": true,
                     "contribuyeAlPerfil": true
@@ -48,6 +81,11 @@ window.EF_DATA["EF_secciones_opciones_APP"] =   {
                 ]
               }
             ]
+          },
+          {
+            "id": "perfil_resumen",
+            "nombre": "Resumen",
+            "grupos": []
           }
         ]
       },
