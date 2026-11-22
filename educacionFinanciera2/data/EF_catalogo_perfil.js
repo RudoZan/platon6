@@ -212,10 +212,44 @@ window.EF_DATA["EF_catalogo_perfil"] =   {
         }
       ]
     },
+    "resumen": {
+      "maximoInteresesMostrados": 4,
+      "textos": {
+        "titulo": "Resumen de tu perfil",
+        "intereses": "En tu vida personal, priorizas dedicar tiempo y recursos a ",
+        "entreOtros": ", entre otros",
+        "sinIntereses": "(no has marcado intereses)",
+        "vivienda": "para vivir prefieres ",
+        "trabajo": "en lo laboral prefieres ",
+        "transporte": "para movilizarte, ",
+        "sinPreferencias": "(no has marcado tus preferencias)",
+        "perfilInversionista": "Tu perfil de inversionista es ",
+        "sinPerfilInversionista": "(no has hecho el test de perfil de riesgo de inversionista)"
+      }
+    },
     "tests": {
       "perfilInversionista": {
         "nombre": "Test de Perfil de Inversionista",
+        "icono": "📝",
         "tipo": "puntaje",
+        "textos": {
+          "descripcion": "El perfil de inversionista evalúa tu tolerancia a las fluctuaciones del mercado y el plazo de tus inversiones. Con estas respuestas, clasifica tu perfil en tres categorías: Conservador, Moderado o Arriesgado.",
+          "sinResultado": "Aún no has realizado el test de perfil de inversionista",
+          "sinResultadoDetalle": "Responde 5 breves preguntas para identificar tu tolerancia a la volatilidad y los instrumentos recomendados.",
+          "irAlTest": "Ir al test",
+          "salirDelTest": "Salir del test",
+          "pregunta": "Pregunta {{actual}} de {{total}}",
+          "preguntaNumero": "Pregunta {{numero}}",
+          "respondidas": "{{respondidas}} de {{total}} respondidas",
+          "anterior": "◀ Anterior",
+          "siguiente": "Siguiente ▶",
+          "puntoAbreviado": "pto",
+          "puntosAbreviado": "pts",
+          "perfilDeterminado": "Tu Perfil Determinado",
+          "puntaje": "Puntaje obtenido: {{puntaje}} de {{maximo}} puntos",
+          "incompleto": "Aún no has completado el test",
+          "preguntasPendientes": "Preguntas pendientes: {{lista}}"
+        },
         "preguntas": [
           {
             "id": "objetivo_inversion",
@@ -329,16 +363,22 @@ window.EF_DATA["EF_catalogo_perfil"] =   {
           "categorias": [
             {
               "id": "conservador",
+              "nombre": "Conservador",
+              "descripcion": "Priorizas la seguridad y preservación de tu capital por sobre la rentabilidad. Prefieres retornos garantizados y estabilidad sin sobresaltos.",
               "puntajeMinimo": 5,
               "puntajeMaximo": 8
             },
             {
               "id": "moderado",
+              "nombre": "Moderado",
+              "descripcion": "Buscas rentabilidad por encima de la inflación aceptando oscilaciones moderadas a mediano plazo. Equilibras crecimiento y seguridad.",
               "puntajeMinimo": 9,
               "puntajeMaximo": 11
             },
             {
               "id": "arriesgado",
+              "nombre": "Arriesgado",
+              "descripcion": "Buscas maximizar el crecimiento de tu patrimonio a largo plazo y toleras caídas temporales sabiendo que el tiempo compensa la volatilidad.",
               "puntajeMinimo": 12,
               "puntajeMaximo": 15
             }
@@ -348,55 +388,109 @@ window.EF_DATA["EF_catalogo_perfil"] =   {
       },
       "dilemasFinancieros": {
         "nombre": "Dilemas Financieros",
+        "textos": {
+          "cerrar": "Cerrar"
+        },
         "preguntas": [
           {
             "id": "compra_computador",
-            "texto": "Tu computador tiene varios años, es lento y debes reiniciarlo con frecuencia. Decides comprar uno nuevo. ¿Qué haces?",
+            "nombre": "Compra de computador",
+            "icono": "💻",
+            "texto": "Tienes un computador de varios años que está lento y debes reiniciarlo con frecuencia. Decides comprar uno nuevo que cuesta $600.000 y tiene todo lo que necesitas. ¿Qué haces?",
             "opciones": [
               {
                 "id": "comprar_a_credito",
-                "texto": "Lo compraría a crédito en 12 cuotas mensuales de $57800."
+                "texto": "Lo compraría a crédito en 12 cuotas mensuales de $57.800."
               },
               {
                 "id": "ahorrar_antes_de_comprar",
-                "texto": "Juntaría $50000 cada mes durante un año antes de comprarlo."
+                "texto": "Ahorraría $50.000 cada mes durante un año antes de comprarlo."
               }
             ]
-          },
+          },         
           {
             "id": "ahorro_sorpresa",
-            "texto": "Cuando entraste a trabajar, aceptaste que se descontara automáticamente de tu sueldo un monto destinado a la Cuenta 2 de tu AFP. Lo olvidaste y recién descubres que, después de muchos meses, tienes $1.200.000. Es tu único ahorro y no tienes deudas. ¿Qué haces?",
+            "nombre": "Ahorro sorpresa",
+            "icono": "💰",
+            "texto": "Cuando empezaste a trabajar, aceptaste que se descontara automáticamente de tu sueldo un monto destinado a la Cuenta 2 de tu AFP. Olvidaste ese ahorro y recién descubres que, después de varios meses, tienes $1.200.000. Es tu único ahorro y no tienes deudas. ¿Qué haces?",
             "opciones": [
               {
                 "id": "mantener_fondo_emergencia",
-                "texto": "Lo mantengo ahí como fondo de emergencia."
+                "texto": "Lo dejaría ahí como fondo de emergencia."
               },
               {
                 "id": "retirar_parte_para_un_gusto",
-                "texto": "Saco una buena parte para darme un gusto."
+                "texto": "Retiraría una parte para darme un gusto."
               },
               {
                 "id": "retirar_todo_para_invertir",
-                "texto": "Retiro todo el dinero para invertirlo en algo más rentable."
+                "texto": "Retiraría todo el dinero para invertirlo en algo más rentable."
               }
             ]
           },
           {
             "id": "aumento_de_sueldo",
+            "nombre": "Aumento de sueldo",
+            "icono": "📈",
             "texto": "Recibes un aumento de sueldo de $200.000 mensuales. No tienes deudas, pero vives al justo. ¿Qué haces?",
             "opciones": [
               {
                 "id": "aumentar_gastos_mensuales",
-                "texto": "Mejoro inmediatamente mi estilo de vida e incorporo la mayor parte del aumento a mis gastos mensuales."
+                "texto": "Mejoraría inmediatamente mi estilo de vida e incorporaría la mayor parte del aumento a mis gastos mensuales."
               },
               {
                 "id": "destinar_aumento_ahorro_inversion",
-                "texto": "Mantengo mi nivel de gastos actual y uso el aumento para ahorrar o invertir."
+                "texto": "Mantendría mi nivel de gastos actual y usaría el aumento para ahorrar o invertir."
               }
             ]
+          },
+          {
+            "id": "auto_nuevo",
+            "nombre": "El auto",
+            "icono": "🚗",
+            "texto": "Tienes un automóvil que funciona bien, pero tiene muchos años. ¿Qué haces?",
+            "opciones": [
+              {
+                "id": "actualizar_auto",
+                "texto": "Lo cambiaría por uno más nuevo, aunque tuviera que comprarlo a crédito."
+              },
+              {
+                "id": "retirar_parte_para_un_gusto",
+                "texto": "Seguiría usando el mío mientras funcione para priorizar otros gastos o inversiones."
+              }            ]
+          }, 
+          {
+            "id": "series_de_streaming",
+            "nombre": "Series y películas",
+            "icono": "📺",
+            "texto": "Te gustan varias series que están repartidas entre dos plataformas de streaming. ¿Qué haces?",
+            "opciones": [
+              {
+                "id": "contrato_las_dos",
+                "texto": "Contrataría ambas plataformas para no perderme ninguna serie o película."
+              },
+              {
+                "id": "alterno_entre_las_dos",
+                "texto": "Alternaría entre las dos plataformas. Contrataría una por unos meses y luego cancelaría el servicio para contratar la otra."
+              }            ]
+          },    
+                    {
+            "id": "tarjetas",
+            "nombre": "Las Tarjetas",
+            "icono": "💳",
+            "texto": "Tienes tres tarjetas, de débito y crédito. ¿Qué haces?",
+            "opciones": [
+              {
+                "id": "ando_con_todas",
+                "texto": "Ando siempre con todas las tarjetas por si las necesitara."
+              },
+              {
+                "id": "solo_la_que_uso",
+                "texto": "Saldría solo con la tarjeta o las tarjetas que sé que usaré."
+              }       
+            ]
           }
-        ],
-        "interpretacion": "Pendiente de definir a partir de las preguntas y criterios del test."
+        ]
       }
     }
   };

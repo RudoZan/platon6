@@ -22,6 +22,12 @@ const profilePreferenceSelections = {
   trabajo: [],
   transporte: [],
 };
+const riskTestConfig = window.EF_DATA.EF_catalogo_perfil.tests.perfilInversionista;
+const riskTestTexts = riskTestConfig.textos;
+const riskTestState = { view: "intro", questionIndex: 0, answers: {}, result: null };
+const dilemmasConfig = window.EF_DATA.EF_catalogo_perfil.tests.dilemasFinancieros;
+const dilemmaAnswers = {};
+const profileSummaryConfig = window.EF_DATA.EF_catalogo_perfil.resumen;
 
 const sectionIcons = {
   mi_perfil: '<circle cx="12" cy="8" r="3.25"/><path d="M5 20c0-3.7 2.9-6 7-6s7 2.3 7 6"/>',
@@ -197,6 +203,296 @@ function updateProfilePreference(groupId, optionId, container) {
   renderProfilePreferences(container);
 }
 
+function fillText(template, values) {
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => values[key]);
+}
+
+function createRiskElement(tag, className, text) {
+  const element = document.createElement(tag);
+  element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
+function createRiskButton(className, text, onClick) {
+  const button = createRiskElement("button", className, text);
+  button.type = "button";
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+function showRiskView(view, container, questionIndex = riskTestState.questionIndex) {
+  riskTestState.view = view;
+  riskTestState.questionIndex = questionIndex;
+  renderRiskProfile(container);
+}
+
+function getRiskPendingQuestions() {
+  return riskTestConfig.preguntas.flatMap((question, index) => (riskTestState.answers[question.id] ? [] : [index + 1]));
+}
+
+function calculateRiskResult() {
+  const score = riskTestConfig.preguntas.reduce((sum, question) => {
+    const option = question.opciones.find((candidate) => candidate.id === riskTestState.answers[question.id]);
+    return sum + (option?.puntaje || 0);
+  }, 0);
+  const category = riskTestConfig.resultado.categorias.find((candidate) => score >= candidate.puntajeMinimo && score <= candidate.puntajeMaximo);
+  return { score, category };
+}
+
+function createRiskResultCard(result) {
+  const card = createRiskElement("div", `risk-result-card is-${result.category.id}`);
+  const description = createRiskElement("p", "risk-result-description", result.category.descripcion);
+  card.append(
+    createRiskElement("div", "risk-result-kicker", riskTestTexts.perfilDeterminado),
+    createRiskElement("div", "risk-result-label", result.category.nombre),
+    createRiskElement("div", "risk-result-score", fillText(riskTestTexts.puntaje, { puntaje: result.score, maximo: riskTestConfig.resultado.puntajeMaximo })),
+    description,
+  );
+  return card;
+}
+
+function renderRiskProfile(container) {
+  const total = riskTestConfig.preguntas.length;
+
+  if (riskTestState.view === "intro") {
+    const children = [createRiskElement("p", "risk-description", riskTestTexts.descripcion)];
+    if (riskTestState.result) {
+      children.push(createRiskResultCard(riskTestState.result));
+    } else {
+      const status = createRiskElement("div", "risk-status-box");
+      status.append(
+        createRiskElement("div", "risk-status-title", riskTestTexts.sinResultado),
+        createRiskElement("div", "risk-status-detail", riskTestTexts.sinResultadoDetalle),
+      );
+      children.push(status);
+    }
+    children.push(createRiskButton("risk-primary-button", riskTestTexts.irAlTest, () => showRiskView("question", container, 0)));
+    container.replaceChildren(...children);
+    return;
+  }
+
+  const header = createRiskElement("div", "risk-test-header");
+  header.append(
+    createRiskElement("span", "risk-test-title", `${riskTestConfig.icono} ${riskTestConfig.nombre}`),
+    createRiskButton("risk-exit-button", riskTestTexts.salirDelTest, () => showRiskView("intro", container)),
+  );
+
+  if (riskTestState.view === "question") {
+    const index = riskTestState.questionIndex;
+    const question = riskTestConfig.preguntas[index];
+    const answered = Object.keys(riskTestState.answers).length;
+
+    const progress = createRiskElement("div", "risk-progress-row");
+    progress.append(
+      createRiskElement("span", "risk-progress-label", fillText(riskTestTexts.pregunta, { actual: index + 1, total })),
+      createRiskElement("span", "risk-progress-count", fillText(riskTestTexts.respondidas, { respondidas: answered, total })),
+    );
+    const bar = createRiskElement("div", "risk-progress-bar");
+    const barFill = createRiskElement("div", "risk-progress-fill");
+    barFill.style.width = `${((index + 1) / total) * 100}%`;
+    bar.append(barFill);
+
+    const options = createRiskElement("div", "risk-options");
+    for (const option of question.opciones) {
+      const isSelected = riskTestState.answers[question.id] === option.id;
+      const optionButton = createRiskElement("button", `risk-option${isSelected ? " is-selected" : ""}`);
+      optionButton.type = "button";
+      optionButton.setAttribute("aria-pressed", String(isSelected));
+      optionButton.append(
+        createRiskElement("span", "risk-option-text", option.texto),
+        createRiskElement("span", "risk-option-points", `${option.puntaje} ${option.puntaje === 1 ? riskTestTexts.puntoAbreviado : riskTestTexts.puntosAbreviado}`),
+      );
+      optionButton.addEventListener("click", () => {
+        riskTestState.answers[question.id] = option.id;
+        renderRiskProfile(container);
+      });
+      options.append(optionButton);
+    }
+
+    const nav = createRiskElement("div", "risk-nav");
+    const isLast = index === total - 1;
+    nav.append(
+      createRiskButton("risk-nav-button is-previous", riskTestTexts.anterior, () => showRiskView(index > 0 ? "question" : "intro", container, Math.max(index - 1, 0))),
+      createRiskButton("risk-nav-button is-next", riskTestTexts.siguiente, () => showRiskView(isLast ? "final" : "question", container, isLast ? index : index + 1)),
+    );
+
+    container.replaceChildren(header, progress, bar, createRiskElement("p", "risk-question", question.texto), options, nav);
+    return;
+  }
+
+  const pending = getRiskPendingQuestions();
+  const nav = createRiskElement("div", "risk-nav");
+  nav.append(createRiskButton("risk-nav-button is-previous", riskTestTexts.anterior, () => showRiskView("question", container, total - 1)));
+
+  if (pending.length) {
+    const warning = createRiskElement("div", "risk-incomplete-box");
+    warning.append(
+      createRiskElement("div", "risk-incomplete-title", riskTestTexts.incompleto),
+      createRiskElement("div", "risk-incomplete-detail", fillText(riskTestTexts.preguntasPendientes, { lista: pending.map((number) => fillText(riskTestTexts.preguntaNumero, { numero: number })).join(", ") })),
+    );
+    container.replaceChildren(header, warning, nav);
+    return;
+  }
+
+  riskTestState.result = calculateRiskResult();
+  container.replaceChildren(header, createRiskResultCard(riskTestState.result), nav);
+}
+
+function createSummaryParagraph(parts) {
+  const paragraph = document.createElement("p");
+  paragraph.className = "profile-summary-paragraph";
+  for (const part of parts) {
+    if (typeof part === "string") {
+      paragraph.append(part);
+    } else {
+      const strong = document.createElement("strong");
+      strong.textContent = part.strong;
+      paragraph.append(strong);
+    }
+  }
+  return paragraph;
+}
+
+function summaryNameParts(names, closeWithAnd = true) {
+  return names.flatMap((name, index) => {
+    const isLast = index === names.length - 1;
+    const separator = index === 0 ? "" : closeWithAnd && isLast ? " y " : ", ";
+    return [separator, { strong: name }];
+  });
+}
+
+function createInterestsSummary() {
+  const texts = profileSummaryConfig.textos;
+  const ranked = profileInterests.filter((interest) => interest.stars > 0).sort((a, b) => b.stars - a.stars);
+  if (!ranked.length) return createSummaryParagraph([texts.sinIntereses]);
+
+  const shown = ranked.slice(0, profileSummaryConfig.maximoInteresesMostrados);
+  const hasMore = ranked.length > shown.length;
+  return createSummaryParagraph([
+    texts.intereses,
+    ...summaryNameParts(shown.map((interest) => interest.nombre), !hasMore),
+    hasMore ? texts.entreOtros : "",
+    ".",
+  ]);
+}
+
+function createPreferencesSummary() {
+  const texts = profileSummaryConfig.textos;
+  const clauses = profilePreferenceGroups.flatMap((group) => {
+    const names = profilePreferenceSelections[group.id]
+      .map((id) => profilePreferencesConfig[group.id].find((option) => option.id === id)?.nombre)
+      .filter(Boolean);
+    return names.length ? [{ prefix: texts[group.id], names }] : [];
+  });
+  if (!clauses.length) return createSummaryParagraph([texts.sinPreferencias]);
+
+  const parts = clauses.flatMap((clause, index) => {
+    const separator = index === 0 ? "" : index === clauses.length - 1 ? ", y " : ", ";
+    const prefix = index === 0 ? clause.prefix[0].toUpperCase() + clause.prefix.slice(1) : clause.prefix;
+    return [separator, prefix, ...summaryNameParts(clause.names)];
+  });
+  return createSummaryParagraph([...parts, "."]);
+}
+
+function createRiskSummary() {
+  const texts = profileSummaryConfig.textos;
+  const category = riskTestState.result?.category;
+  if (!category) return createSummaryParagraph([texts.sinPerfilInversionista]);
+  return createSummaryParagraph([texts.perfilInversionista, { strong: category.nombre }, `. ${category.descripcion}`]);
+}
+
+function renderProfileDilemmas(container) {
+  const grid = document.createElement("div");
+  grid.className = "dilemma-grid";
+
+  for (const question of dilemmasConfig.preguntas) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "dilemma-button";
+
+    const icon = document.createElement("span");
+    icon.className = "dilemma-button-icon";
+    icon.textContent = question.icono;
+    icon.setAttribute("aria-hidden", "true");
+
+    const name = document.createElement("span");
+    name.className = "dilemma-button-name";
+    name.textContent = question.nombre;
+
+    const answerSummary = document.createElement("span");
+    answerSummary.className = "dilemma-button-answer";
+    const selectedOption = question.opciones.find((option) => option.id === dilemmaAnswers[question.id]);
+    answerSummary.textContent = selectedOption ? `Respuesta: ${selectedOption.texto}` : "";
+
+    button.append(icon, name, answerSummary);
+    button.addEventListener("click", () => openDilemmaDialog(question, answerSummary));
+    grid.append(button);
+  }
+
+  container.replaceChildren(grid);
+}
+
+function openDilemmaDialog(question, answerSummary) {
+  const dialog = document.createElement("dialog");
+  dialog.className = "dilemma-dialog";
+  const titleId = `dilemma-${question.id}-title`;
+  dialog.setAttribute("aria-labelledby", titleId);
+
+  const body = document.createElement("div");
+  body.className = "dilemma-dialog-body";
+
+  const title = document.createElement("h2");
+  title.id = titleId;
+  title.className = "dilemma-title";
+  title.textContent = `${question.icono} ${question.nombre}`;
+
+  const text = document.createElement("p");
+  text.className = "dilemma-text";
+  text.textContent = question.texto;
+
+  const options = document.createElement("div");
+  options.className = "dilemma-options";
+  const optionButtons = question.opciones.map((option) => {
+    const optionButton = document.createElement("button");
+    optionButton.type = "button";
+    optionButton.className = "dilemma-option";
+    optionButton.textContent = option.texto;
+    optionButton.addEventListener("click", () => {
+      dilemmaAnswers[question.id] = option.id;
+      answerSummary.textContent = `Respuesta: ${option.texto}`;
+      markSelectedOption();
+    });
+    options.append(optionButton);
+    return { option, optionButton };
+  });
+
+  function markSelectedOption() {
+    for (const { option, optionButton } of optionButtons) {
+      const isSelected = dilemmaAnswers[question.id] === option.id;
+      optionButton.classList.toggle("is-selected", isSelected);
+      optionButton.setAttribute("aria-pressed", String(isSelected));
+    }
+  }
+  markSelectedOption();
+
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.className = "dilemma-close";
+  closeButton.textContent = dilemmasConfig.textos.cerrar;
+  closeButton.addEventListener("click", () => dialog.close());
+
+  dialog.addEventListener("close", () => dialog.remove());
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+
+  body.append(title, text, options, closeButton);
+  dialog.append(body);
+  document.body.append(dialog);
+  dialog.showModal();
+}
+
 function renderHome() {
   mainContent.classList.remove("is-section-view");
   mainContent.classList.remove("is-profile-view");
@@ -213,7 +509,7 @@ function renderSection(section, item, profileSubsection = null) {
   sectionPage.className = "section-page";
   const isProfileRoot = section.id === "mi_perfil" && !profileSubsection;
   sectionPage.setAttribute(isProfileRoot ? "aria-label" : "aria-labelledby", isProfileRoot ? "Mi perfil" : "section-title");
-  if (profileSubsection?.id === "perfil_preferencias") {
+  if (["perfil_preferencias", "perfil_riesgo", "perfil_dilemas_financieros"].includes(profileSubsection?.id)) {
     sectionPage.removeAttribute("aria-labelledby");
     sectionPage.setAttribute("aria-label", profileSubsection.nombre);
   }
@@ -247,7 +543,7 @@ function renderSection(section, item, profileSubsection = null) {
     if (profileSubsection) {
       const tabContent = document.createElement("div");
       tabContent.className = "profile-tab-content";
-      if (["perfil_intereses", "perfil_preferencias"].includes(profileSubsection.id)) {
+      if (["perfil_intereses", "perfil_preferencias", "perfil_riesgo", "perfil_dilemas_financieros"].includes(profileSubsection.id)) {
         tabContent.classList.add("profile-tab-content--compact");
       }
 
@@ -261,11 +557,26 @@ function renderSection(section, item, profileSubsection = null) {
         preferenceContent.className = "profile-preferences-content";
         tabContent.append(preferenceContent);
         renderProfilePreferences(preferenceContent);
+      } else if (profileSubsection.id === "perfil_riesgo") {
+        const riskContent = document.createElement("div");
+        riskContent.className = "profile-risk-content";
+        tabContent.append(riskContent);
+        renderRiskProfile(riskContent);
+      } else if (profileSubsection.id === "perfil_dilemas_financieros") {
+        const dilemmaContent = document.createElement("div");
+        dilemmaContent.className = "profile-dilemmas-content";
+        tabContent.append(dilemmaContent);
+        renderProfileDilemmas(dilemmaContent);
       } else {
         const title = document.createElement("h1");
         title.id = "section-title";
         title.textContent = profileSubsection.nombre;
         tabContent.append(title);
+        if (profileSubsection.id === "perfil_resumen") {
+          title.textContent = profileSummaryConfig.textos.titulo;
+          title.classList.add("profile-summary-title");
+          tabContent.append(createInterestsSummary(), createPreferencesSummary(), createRiskSummary());
+        }
       }
 
       sectionPage.append(tabContent);
