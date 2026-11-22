@@ -65,7 +65,7 @@ window.EF_DATA["EF_secciones_opciones_APP"] =   {
           },
           {
             "id": "perfil_dilemas_financieros",
-            "nombre": "Dilemas Financieros",
+            "nombre": "Dilemas",
             "grupos": [
               {
                 "id": "perfil_datos_dilemas",
@@ -73,7 +73,7 @@ window.EF_DATA["EF_secciones_opciones_APP"] =   {
                   {
                     "tipo": "opcion",
                     "id": "reflexiones_personales",
-                    "nombre": "Dilemas Financieros",
+                    "nombre": "Dilemas",
                     "requeridaParaIniciar": false,
                     "editableDuranteSimulacion": true,
                     "contribuyeAlPerfil": true

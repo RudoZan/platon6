@@ -387,7 +387,7 @@ window.EF_DATA["EF_catalogo_perfil"] =   {
         "fuente": "Código de la aplicación: data/catalogs.js y js/ui-personal.js"
       },
       "dilemasFinancieros": {
-        "nombre": "Dilemas Financieros",
+        "nombre": "Dilemas",
         "textos": {
           "cerrar": "Cerrar"
         },
