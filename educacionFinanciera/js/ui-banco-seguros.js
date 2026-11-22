@@ -153,7 +153,7 @@
       const shortDesc = secData ? secData.desc : '';
       const detailDesc = secData ? secData.detailDesc : '';
 
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
       const acc = isAhorro
         ? bankAccounts.find(a => (a.id || '').includes('ahorro') || (a.type || '').includes('ahorro'))
         : bankAccounts.find(a => (a.id || '').includes('rut') || (a.id || '').includes('vista') || (a.name || '').includes('RUT'));
@@ -225,7 +225,7 @@
 
       // CUENTA CONTRATADA Y ACTIVA
       const balance = acc.balance || 0;
-      const cash = state.cash || 0;
+      const cash = state.finances.cash || 0;
 
       container.innerHTML = `
         <div class="personal-subview-box">
@@ -278,11 +278,11 @@
     }
 
     function openBankAccountAction(accountKey) {
-      if (!Array.isArray(state.bankAccounts)) state.bankAccounts = [];
+      if (!Array.isArray(state.finances.bankAccounts)) state.finances.bankAccounts = [];
 
       if (accountKey === 'ahorro') {
-        if (!state.bankAccounts.some(a => a.id === 'acc_ahorro')) {
-          state.bankAccounts.push({
+        if (!state.finances.bankAccounts.some(a => a.id === 'acc_ahorro')) {
+          state.finances.bankAccounts.push({
             id: 'acc_ahorro',
             name: 'Cuenta de Ahorro',
             type: 'ahorro',
@@ -295,8 +295,8 @@
         renderBancoStage('cuenta_ahorro');
         alertUpcomingBankFeature('¡Cuenta de Ahorro abierta!', 'Tu Cuenta de Ahorro ha sido activada con costo $0. Ya puedes realizar depósitos desde tu efectivo o transferencias.');
       } else if (accountKey === 'rut_vista') {
-        if (!state.bankAccounts.some(a => a.id === 'acc_rut_vista')) {
-          state.bankAccounts.push({
+        if (!state.finances.bankAccounts.some(a => a.id === 'acc_rut_vista')) {
+          state.finances.bankAccounts.push({
             id: 'acc_rut_vista',
             name: 'Cuenta RUT / Vista',
             type: 'vista',
@@ -313,13 +313,13 @@
     }
 
     function promptDepositModal(accId) {
-      const acc = (state.bankAccounts || []).find(a => a.id === accId);
+      const acc = (state.finances.bankAccounts || []).find(a => a.id === accId);
       if (!acc) return;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!modalRoot) return;
 
-      const cash = state.cash || 0;
-      const otherAccounts = (state.bankAccounts || []).filter(a => a.id !== acc.id);
+      const cash = state.finances.cash || 0;
+      const otherAccounts = (state.finances.bankAccounts || []).filter(a => a.id !== acc.id);
 
       modalRoot.innerHTML = `
         <div class="job-modal-backdrop" onclick="if(event.target === this) closeBancoModal()">
@@ -369,7 +369,7 @@
     }
 
     function executeBankDeposit(destId) {
-      const destAcc = (state.bankAccounts || []).find(a => a.id === destId);
+      const destAcc = (state.finances.bankAccounts || []).find(a => a.id === destId);
       if (!destAcc) return;
 
       const sourceRadio = document.querySelector('input[name="bank_deposit_source"]:checked');
@@ -384,17 +384,17 @@
       }
 
       if (sourceVal === 'cash') {
-        const available = state.cash || 0;
+        const available = state.finances.cash || 0;
         if (available < amount) {
           alertUpcomingBankFeature('Saldo insuficiente', `No tienes suficiente efectivo ($${available.toLocaleString('es-CL')}) para depositar $${amount.toLocaleString('es-CL')}.`);
           return;
         }
         withFinancialMovementDetail(`Depósito en ${destAcc.name}`, () => {
-          state.cash -= amount;
+          state.finances.cash -= amount;
           creditBankAccount(destAcc.id, amount);
         });
       } else {
-        const srcAcc = (state.bankAccounts || []).find(a => a.id === sourceVal);
+        const srcAcc = (state.finances.bankAccounts || []).find(a => a.id === sourceVal);
         const transferred = srcAcc && withFinancialMovementDetail(`Transferencia de ${srcAcc.name} a ${destAcc.name}`, () => {
           if (!debitBankAccountWithCreditLine(srcAcc.id, amount)) return false;
           creditBankAccount(destAcc.id, amount);
@@ -414,12 +414,12 @@
     }
 
     function promptWithdrawModal(accId) {
-      const acc = (state.bankAccounts || []).find(a => a.id === accId);
+      const acc = (state.finances.bankAccounts || []).find(a => a.id === accId);
       if (!acc) return;
       const isCheckingAccount = acc.id === 'acc_corriente' || acc.type === 'corriente';
-      const lineAvailable = isCheckingAccount && state.creditLine
-        ? Math.max(0, (Number(state.creditLine.limit) || 0) - (Number(state.creditLine.used) || 0)
-          - (Number(state.creditLine.accruedInterest) || 0) - (Number(state.creditLine.currentDayInterest) || 0))
+      const lineAvailable = isCheckingAccount && state.finances.creditLine
+        ? Math.max(0, (Number(state.finances.creditLine.limit) || 0) - (Number(state.finances.creditLine.used) || 0)
+          - (Number(state.finances.creditLine.accruedInterest) || 0) - (Number(state.finances.creditLine.currentDayInterest) || 0))
         : 0;
       const totalAvailable = (Number(acc.balance) || 0) + lineAvailable;
       if (totalAvailable <= 0) {
@@ -464,7 +464,7 @@
     }
 
     function executeBankWithdraw(accId) {
-      const acc = (state.bankAccounts || []).find(a => a.id === accId);
+      const acc = (state.finances.bankAccounts || []).find(a => a.id === accId);
       if (!acc) return;
 
       const amountInput = document.getElementById('bank-withdraw-amount');
@@ -482,7 +482,7 @@
       }
 
       withFinancialMovementDetail(`Giro de ${acc.name} a efectivo`, () => {
-        state.cash = (state.cash || 0) + amount;
+        state.finances.cash = (state.finances.cash || 0) + amount;
       });
 
       closeBancoModal();
@@ -494,17 +494,17 @@
     }
 
     function promptCloseBankAccount(accId) {
-      const acc = (state.bankAccounts || []).find(a => a.id === accId);
+      const acc = (state.finances.bankAccounts || []).find(a => a.id === accId);
       if (!acc) return;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!modalRoot) return;
 
       const balance = acc.balance || 0;
       const isCorriente = accId.includes('corriente') || (acc.type || '') === 'corriente';
-      const lineaDebt = (isCorriente && state.creditLine) ? (Number(state.creditLine.used) || 0) : 0;
-      const tarjetaDebt = (isCorriente && state.creditCard) ? (Number(state.creditCard.used) || 0) : 0;
+      const lineaDebt = (isCorriente && state.finances.creditLine) ? (Number(state.finances.creditLine.used) || 0) : 0;
+      const tarjetaDebt = (isCorriente && state.finances.creditCard) ? (Number(state.finances.creditCard.used) || 0) : 0;
       const totalDebtToClose = lineaDebt + tarjetaDebt;
-      const availableFunds = balance + (Number(state.cash) || 0);
+      const availableFunds = balance + (Number(state.finances.cash) || 0);
       const canPayDebts = availableFunds >= totalDebtToClose;
 
       modalRoot.innerHTML = `
@@ -561,20 +561,20 @@
     }
 
     function executeCloseBankAccount(accId) {
-      const accIdx = (state.bankAccounts || []).findIndex(a => a.id === accId);
+      const accIdx = (state.finances.bankAccounts || []).findIndex(a => a.id === accId);
       if (accIdx === -1) {
         closeBancoModal();
         return;
       }
-      const acc = state.bankAccounts[accIdx];
+      const acc = state.finances.bankAccounts[accIdx];
       let balance = acc.balance || 0;
       const isCorriente = accId.includes('corriente') || (acc.type || '') === 'corriente';
 
       if (isCorriente) {
-        const lineaDebt = state.creditLine ? (Number(state.creditLine.used) || 0) : 0;
-        const tarjetaDebt = state.creditCard ? (Number(state.creditCard.used) || 0) : 0;
+        const lineaDebt = state.finances.creditLine ? (Number(state.finances.creditLine.used) || 0) : 0;
+        const tarjetaDebt = state.finances.creditCard ? (Number(state.finances.creditCard.used) || 0) : 0;
         const totalDebt = lineaDebt + tarjetaDebt;
-        const totalAvailable = balance + (Number(state.cash) || 0);
+        const totalAvailable = balance + (Number(state.finances.cash) || 0);
         if (totalDebt > totalAvailable) {
           closeBancoModal();
           alertUpcomingBankFeature('Cierre bloqueado por deuda', 'Debes contar con fondos suficientes para liquidar las deudas de Línea de Crédito y Tarjeta de Crédito antes de cerrar la cuenta.');
@@ -586,25 +586,25 @@
           } else {
             const remainder = totalDebt - balance;
             balance = 0;
-            state.cash = Math.max(0, (Number(state.cash) || 0) - remainder);
+            state.finances.cash = Math.max(0, (Number(state.finances.cash) || 0) - remainder);
           }
-          if (state.creditLine) state.creditLine.used = 0;
-          if (state.creditCard) state.creditCard.used = 0;
+          if (state.finances.creditLine) state.finances.creditLine.used = 0;
+          if (state.finances.creditCard) state.finances.creditCard.used = 0;
         }
       }
 
       if (balance > 0) {
-        state.cash = (state.cash || 0) + balance;
+        state.finances.cash = (state.finances.cash || 0) + balance;
       }
-      state.bankAccounts.splice(accIdx, 1);
+      state.finances.bankAccounts.splice(accIdx, 1);
 
       if (isCorriente) {
-        if (state.creditLine && state.creditLine.associatedTo === 'acc_corriente') {
-          state.creditLine = null;
-          state.insurances = (state.insurances || []).filter(i => i.id !== 'desgravamen_linea');
+        if (state.finances.creditLine && state.finances.creditLine.associatedTo === 'acc_corriente') {
+          state.finances.creditLine = null;
+          state.finances.insurances = (state.finances.insurances || []).filter(i => i.id !== 'desgravamen_linea');
         }
-        if (state.creditCard && state.creditCard.associatedTo === 'acc_corriente') {
-          state.creditCard = null;
+        if (state.finances.creditCard && state.finances.creditCard.associatedTo === 'acc_corriente') {
+          state.finances.creditCard = null;
         }
       }
 
@@ -647,7 +647,7 @@
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
 
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
       const acc = bankAccounts.find(a => (a.id || '').includes('corriente') || (a.type || '').includes('corriente') || (a.name || '').includes('Corriente'));
 
       if (!acc) {
@@ -701,9 +701,9 @@
 
       // CUENTA CORRIENTE ACTIVA
       const balance = acc.balance || 0;
-      const hasLinea = !!state.creditLine;
-      const hasTarjeta = !!state.creditCard;
-      const hasFraude = (state.insurances || []).some(i => i.id === 'fraude_corriente' || i.type === 'fraude');
+      const hasLinea = !!state.finances.creditLine;
+      const hasTarjeta = !!state.finances.creditCard;
+      const hasFraude = (state.finances.insurances || []).some(i => i.id === 'fraude_corriente' || i.type === 'fraude');
 
       container.innerHTML = `
         <div class="personal-subview-box">
@@ -774,10 +774,10 @@
 
     function startCuentaCorrienteContractFlow() {
       ccDraftPlan = {
-        linea: !!state.creditLine,
-        lineaReviewed: !!state.creditLine,
-        tarjeta: !!state.creditCard,
-        tarjetaReviewed: !!state.creditCard
+        linea: !!state.finances.creditLine,
+        lineaReviewed: !!state.finances.creditLine,
+        tarjeta: !!state.finances.creditCard,
+        tarjetaReviewed: !!state.finances.creditCard
       };
       openCCPlanOfferModal();
     }
@@ -848,15 +848,15 @@
                   <div>
                     <div style="display: flex; align-items: center; gap: 5px;">
                       <strong style="font-size: 0.72rem; color: #0f172a;">💳 Tarjeta de Crédito ($950.000)</strong>
-                      ${state.creditCard
+                      ${state.finances.creditCard
                         ? `<span style="font-size: 0.55rem; font-weight: 800; background: #dcfce7; color: #166534; padding: 1px 6px; border-radius: 4px;">✓ Ya contratada (se suma al plan)</span>`
                         : (hasT ? `<span style="font-size: 0.55rem; font-weight: 800; background: #dcfce7; color: #166534; padding: 1px 6px; border-radius: 4px;">✓ Aceptada</span>` : (ccDraftPlan.tarjetaReviewed ? `<span style="font-size: 0.55rem; font-weight: 700; background: #f1f5f9; color: #64748b; padding: 1px 6px; border-radius: 4px;">Rechazada</span>` : ''))}
                     </div>
                     <div style="font-size: 0.60rem; color: #047857; font-weight: 700; margin-top: 1px;">
-                      ${state.creditCard ? 'Tu tarjeta actual se asocia automáticamente y rebaja $7.000/mes tu mantención' : 'Rebaja $7.000/mes en la mantención de tu Cuenta Corriente'}
+                      ${state.finances.creditCard ? 'Tu tarjeta actual se asocia automáticamente y rebaja $7.000/mes tu mantención' : 'Rebaja $7.000/mes en la mantención de tu Cuenta Corriente'}
                     </div>
                   </div>
-                  ${state.creditCard ? '' : `
+                  ${state.finances.creditCard ? '' : `
                     <button type="button" onclick="openCCAddonDetailModal('tarjeta')" style="padding: 5px 10px; font-size: 0.64rem; font-weight: 800; background: ${hasT ? '#ffffff' : '#0284c7'}; color: ${hasT ? '#0f172a' : '#ffffff'}; border: ${hasT ? '1px solid #cbd5e1' : 'none'}; border-radius: 6px; cursor: pointer; white-space: nowrap;">
                       ${hasT ? 'Ver / Cambiar' : 'Aceptar oferta'}
                     </button>
@@ -983,11 +983,11 @@
     }
 
     function recalcCuentaCorrienteMaintenance() {
-      if (!Array.isArray(state.bankAccounts)) return;
-      const cc = state.bankAccounts.find(a => a.id === 'acc_corriente');
+      if (!Array.isArray(state.finances.bankAccounts)) return;
+      const cc = state.finances.bankAccounts.find(a => a.id === 'acc_corriente');
       if (!cc) return;
-      const hasL = !!state.creditLine;
-      const hasT = !!state.creditCard;
+      const hasL = !!state.finances.creditLine;
+      const hasT = !!state.finances.creditCard;
       if (hasL && hasT) {
         cc.maintenance = 0;
       } else if (hasL || hasT) {
@@ -998,7 +998,7 @@
     }
 
     function submitOpenCuentaCorriente() {
-      const alreadyHasFraud = (state.insurances || []).some(i => i.id === 'fraude_corriente' || i.id === 'fraude' || i.type === 'fraude');
+      const alreadyHasFraud = (state.finances.insurances || []).some(i => i.id === 'fraude_corriente' || i.id === 'fraude' || i.type === 'fraude');
       if (!alreadyHasFraud) {
         openCCFraudOfferModal();
         return;
@@ -1060,12 +1060,12 @@
       const lineaChecked = !!ccDraftPlan.linea;
       const tarjetaChecked = !!ccDraftPlan.tarjeta;
 
-      if (!Array.isArray(state.bankAccounts)) state.bankAccounts = [];
-      if (!Array.isArray(state.insurances)) state.insurances = [];
+      if (!Array.isArray(state.finances.bankAccounts)) state.finances.bankAccounts = [];
+      if (!Array.isArray(state.finances.insurances)) state.finances.insurances = [];
 
       const initialMaintenance = (lineaChecked && tarjetaChecked) ? 0 : ((lineaChecked || tarjetaChecked) ? 7000 : 14000);
 
-      state.bankAccounts.push({
+      state.finances.bankAccounts.push({
         id: 'acc_corriente',
         name: 'Cuenta Corriente',
         type: 'corriente',
@@ -1077,7 +1077,7 @@
       });
 
       if (lineaChecked) {
-        state.creditLine = {
+        state.finances.creditLine = {
           id: 'linea_credito',
           name: 'Línea de Crédito',
           limit: 500000,
@@ -1088,8 +1088,8 @@
           interestConsolidatedTotal: 0,
           associatedTo: 'acc_corriente'
         };
-        if (!state.insurances.some(i => i.id === 'desgravamen_linea' || i.id === 'desgravamen')) {
-          state.insurances.push({
+        if (!state.finances.insurances.some(i => i.id === 'desgravamen_linea' || i.id === 'desgravamen')) {
+          state.finances.insurances.push({
             id: 'desgravamen_linea',
             type: 'desgravamen',
             name: 'Seguro de Desgravamen (Línea de Crédito)',
@@ -1101,12 +1101,12 @@
       }
 
       if (tarjetaChecked) {
-        if (state.creditCard) {
-          state.creditCard.isIndependent = false;
-          state.creditCard.associatedTo = 'acc_corriente';
-          state.creditCard.maintenance = 6900;
+        if (state.finances.creditCard) {
+          state.finances.creditCard.isIndependent = false;
+          state.finances.creditCard.associatedTo = 'acc_corriente';
+          state.finances.creditCard.maintenance = 6900;
         } else {
-          state.creditCard = {
+          state.finances.creditCard = {
             id: 'tarjeta_credito',
             name: 'Tarjeta de Crédito',
             isIndependent: false,
@@ -1124,9 +1124,9 @@
       }
 
       if (fraudeAccepted) {
-        if (!state.insurances.some(i => i.id === 'fraude_corriente' || i.id === 'fraude' || i.type === 'fraude')) {
+        if (!state.finances.insurances.some(i => i.id === 'fraude_corriente' || i.id === 'fraude' || i.type === 'fraude')) {
           const todayStr = new Date().toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
-          state.insurances.push({
+          state.finances.insurances.push({
             id: 'fraude_corriente',
             type: 'fraude',
             name: 'Seguro de Fraude',
@@ -1169,17 +1169,17 @@
       const currentDay = Number(product.currentDayInterest) || 0;
       const dailyBase = (Number(product.used) || 0) + accrued + currentDay;
       const interest = dailyBase * dailyRate;
-      if (Number(state.simulationDay) === 1) product.currentDayInterest = currentDay + interest;
+      if (Number(state.simulation.day) === 1) product.currentDayInterest = currentDay + interest;
       else product.accruedInterest = accrued + interest;
     }
 
     function accrueRevolvingCreditDailyInterest() {
-      accrueRevolvingCreditInterest(state.creditLine, revolvingCreditDailyRates.linea);
-      accrueRevolvingCreditInterest(state.creditCard, revolvingCreditDailyRates.tarjeta);
+      accrueRevolvingCreditInterest(state.finances.creditLine, revolvingCreditDailyRates.linea);
+      accrueRevolvingCreditInterest(state.finances.creditCard, revolvingCreditDailyRates.tarjeta);
     }
 
     function consolidateRevolvingCreditInterest() {
-      [[state.creditLine, 'Línea de Crédito'], [state.creditCard, 'Tarjeta de Crédito']].forEach(([product, productName]) => {
+      [[state.finances.creditLine, 'Línea de Crédito'], [state.finances.creditCard, 'Tarjeta de Crédito']].forEach(([product, productName]) => {
         if (!product) return;
         const interest = Math.max(0, Math.round(Number(product.accruedInterest) || 0));
         if (interest > 0) {
@@ -1202,7 +1202,7 @@
     }
 
     function findActiveLoan(loanType, propertyId = null) {
-      return (state.debts || []).find(debt => debt.loanType === loanType
+      return (state.finances.debts || []).find(debt => debt.loanType === loanType
         && (propertyId === null || debt.propertyCatalogId === propertyId)) || null;
     }
 
@@ -1213,8 +1213,8 @@
     }
 
     function getMortgageFundingOptions() {
-      const options = [{ id: 'cash', label: `Efectivo ($${(Number(state.cash) || 0).toLocaleString('es-CL')})` }];
-      (state.bankAccounts || []).filter(account => account.type !== 'credit').forEach(account => {
+      const options = [{ id: 'cash', label: `Efectivo ($${(Number(state.finances.cash) || 0).toLocaleString('es-CL')})` }];
+      (state.finances.bankAccounts || []).filter(account => account.type !== 'credit').forEach(account => {
         options.push({
           id: account.id,
           label: `${account.icon || '🏦'} ${account.name} ($${(Number(account.balance) || 0).toLocaleString('es-CL')})`
@@ -1224,8 +1224,8 @@
     }
 
     function getMortgageFundingSource(sourceId, allowCreditLine = false) {
-      if (sourceId === 'cash') return { get: () => Number(state.cash) || 0, set: value => { state.cash = value; } };
-      const account = (state.bankAccounts || []).find(item => item.id === sourceId && item.type !== 'credit');
+      if (sourceId === 'cash') return { get: () => Number(state.finances.cash) || 0, set: value => { state.finances.cash = value; } };
+      const account = (state.finances.bankAccounts || []).find(item => item.id === sourceId && item.type !== 'credit');
       if (!account) return null;
       return {
         get: () => allowCreditLine ? getBankAccountSpendableBalance(account.id) : Number(account.balance) || 0,
@@ -1251,7 +1251,7 @@
 
     function getCreditLoanOffer(loanType, termMonths) {
       const settings = creditLoanSettings[loanType];
-      const job = state.currentJob;
+      const job = state.work.currentJob;
       if (!settings || !job || Number(job.salary) <= 0 || getCurrentJobTenureMonths(job) < settings.minimumTenureMonths) return null;
       if (loanType === 'consumo') return Math.floor(Number(job.salary) * 5 / 10000) * 10000;
       const paymentLimit = getMortgagePaymentCapacity(job);
@@ -1260,7 +1260,7 @@
       return Math.floor(paymentLimit / factor / 10000) * 10000;
     }
 
-    function getMortgageQualifyingIncome(job = state.currentJob) {
+    function getMortgageQualifyingIncome(job = state.work.currentJob) {
       if (!job) return 0;
       const payments = (Array.isArray(job.salaryPaymentHistory) ? job.salaryPaymentHistory : [])
         .map(payment => Number(payment.amount) || 0)
@@ -1279,7 +1279,7 @@
       return Math.round(recentPayments.reduce((sum, amount) => sum + amount, 0) / recentPayments.length);
     }
 
-    function getMortgageIncomeAssessment(job = state.currentJob) {
+    function getMortgageIncomeAssessment(job = state.work.currentJob) {
       const currentMonthIndex = getSimulationMonthIndex();
       const recentMonthIndexes = [currentMonthIndex - 2, currentMonthIndex - 1, currentMonthIndex];
       const recentMonthSet = new Set(recentMonthIndexes);
@@ -1289,12 +1289,12 @@
       if (!salaryPayments.length) salaryTotal = getMortgageQualifyingIncome(job) * 3;
       const salaryAverage = Math.round(salaryTotal / 3);
 
-      const rentalTotal = (Array.isArray(state.propertyRentalListings) ? state.propertyRentalListings : [])
+      const rentalTotal = (Array.isArray(state.assets.propertyRentalListings) ? state.assets.propertyRentalListings : [])
         .reduce((sum, listing) => sum + (Array.isArray(listing.rentPaymentHistory) ? listing.rentPaymentHistory : [])
           .filter(payment => recentMonthSet.has(getSimulationMonthIndex(payment.year, payment.month)))
           .reduce((listingSum, payment) => listingSum + (Number(payment.amount) || 0), 0), 0);
       const rentalAverage = Math.round(rentalTotal / 3);
-      const activeMortgages = (state.debts || []).filter(debt => debt.loanType === 'hipotecario' && Number(debt.remainingBalance) > 0);
+      const activeMortgages = (state.finances.debts || []).filter(debt => debt.loanType === 'hipotecario' && Number(debt.remainingBalance) > 0);
       const existingDividends = activeMortgages.reduce((sum, debt) => sum + (Number(debt.monthlyPayment) || 0), 0);
       const isFirstMortgage = activeMortgages.length === 0;
       const combinedIncomeAverage = salaryAverage + rentalAverage;
@@ -1305,7 +1305,7 @@
       return { salaryAverage, rentalAverage, combinedIncomeAverage, existingDividends, isFirstMortgage, paymentCapacity };
     }
 
-    function getMortgagePaymentCapacity(job = state.currentJob) {
+    function getMortgagePaymentCapacity(job = state.work.currentJob) {
       return getMortgageIncomeAssessment(job).paymentCapacity;
     }
 
@@ -1318,7 +1318,7 @@
         && Array.isArray(corredoraHousingCatalog)
         && corredoraHousingCatalog.length > 0;
       const properties = propertyContext ? corredoraHousingCatalog : [];
-      const activeMortgagedPropertyIds = new Set((state.debts || [])
+      const activeMortgagedPropertyIds = new Set((state.finances.debts || [])
         .filter(debt => debt.loanType === 'hipotecario' && Number(debt.remainingBalance) > 0)
         .map(debt => debt.propertyCatalogId));
       const mortgageableProperties = properties.filter(property => !activeMortgagedPropertyIds.has(property.id));
@@ -1337,7 +1337,7 @@
         const overdueInstallments = Number(activeLoan.missedPayments) || 0;
         const paymentSourceName = activeLoan.paymentSourceId === 'cash'
           ? 'Efectivo'
-          : (state.bankAccounts || []).find(account => account.id === activeLoan.paymentSourceId)?.name || 'Efectivo';
+          : (state.finances.bankAccounts || []).find(account => account.id === activeLoan.paymentSourceId)?.name || 'Efectivo';
         const paymentLabel = loanType === 'consumo' ? 'Cuota mensual' : 'Dividendo mensual';
         container.innerHTML = `<div class="personal-subview-box">${header}${propertySelector}<div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:8px;padding:10px 12px;margin-bottom:8px;"><div style="font-size:.60rem;font-weight:800;color:#1e40af;">Crédito activo${activeLoan.propertyName ? ` · ${activeLoan.propertyName}` : ''}</div><div style="font-size:1.08rem;font-weight:800;color:#1d4ed8;">Saldo: $${Number(activeLoan.remainingBalance).toLocaleString('es-CL')}</div><div style="font-size:.63rem;color:#334155;line-height:1.5;">${paymentLabel}: <strong>$${Number(activeLoan.monthlyPayment).toLocaleString('es-CL')}</strong><br/>Plazo restante: <strong>${Number(activeLoan.remainingTermMonths)} meses</strong><br/>Dividendos pagados: <strong>${paidInstallments}</strong>${overdueInstallments > 0 ? `<br/><span style="color:#b91c1c;">Dividendos morosos: <strong>${overdueInstallments}</strong></span>` : ''}${activeLoan.propertyCatalogId ? `<br/>Cargo desde: <strong>${paymentSourceName}</strong><br/>Próximo cobro: día 5 del mes` : ''}</div></div>${loanType === 'consumo' ? `<button type="button" onclick="openPayOffConsumerLoan('${activeLoan.id}')" style="width:100%;padding:8px;border:1px solid #047857;border-radius:6px;background:#fff;color:#047857;font-size:.64rem;font-weight:800;cursor:pointer;">Pagar todo el crédito</button>` : ''}</div>`;
         return;
@@ -1389,13 +1389,13 @@
     }
 
     function openPayOffConsumerLoan(debtId) {
-      const debt = (state.debts || []).find(item => item.id === debtId && item.loanType === 'consumo');
+      const debt = (state.finances.debts || []).find(item => item.id === debtId && item.loanType === 'consumo');
       const modalRoot = document.getElementById('banco-modal-root');
       if (!debt || !modalRoot) return;
       const payoffAmount = Math.max(0, Math.ceil(Number(debt.remainingBalance) || 0));
       const sources = [
-        { id: 'cash', label: `Efectivo ($${(Number(state.cash) || 0).toLocaleString('es-CL')})` },
-        ...(state.bankAccounts || []).filter(account => account.type !== 'credit').map(account => ({
+        { id: 'cash', label: `Efectivo ($${(Number(state.finances.cash) || 0).toLocaleString('es-CL')})` },
+        ...(state.finances.bankAccounts || []).filter(account => account.type !== 'credit').map(account => ({
           id: account.id,
           label: `${account.icon || '🏦'} ${account.name} ($${(Number(account.balance) || 0).toLocaleString('es-CL')})`
         }))
@@ -1421,9 +1421,9 @@
     }
 
     function confirmPayOffConsumerLoan(debtId) {
-      const debtIndex = (state.debts || []).findIndex(item => item.id === debtId && item.loanType === 'consumo');
+      const debtIndex = (state.finances.debts || []).findIndex(item => item.id === debtId && item.loanType === 'consumo');
       if (debtIndex < 0) return;
-      const debt = state.debts[debtIndex];
+      const debt = state.finances.debts[debtIndex];
       const amount = Math.max(0, Math.ceil(Number(debt.remainingBalance) || 0));
       const sourceId = document.getElementById('consumer-loan-payoff-source')?.value || 'cash';
       const error = document.getElementById('consumer-loan-payoff-error');
@@ -1437,8 +1437,8 @@
       }
 
       withFinancialMovementDetail('Pago total de Crédito de Consumo', () => source.set(source.get() - amount));
-      state.debts.splice(debtIndex, 1);
-      state.insurances = (state.insurances || []).filter(policy => policy.loanId !== debt.id);
+      state.finances.debts.splice(debtIndex, 1);
+      state.finances.insurances = (state.finances.insurances || []).filter(policy => policy.loanId !== debt.id);
       updateMonthlyDebtTotal();
       closeBancoModal();
       renderBancoStage('credito_consumo');
@@ -1480,12 +1480,12 @@
         upfrontPreview.innerHTML = `Pie (${Math.round(downPaymentRate * 100)}%): <strong>$${downPayment.toLocaleString('es-CL')}</strong><br/>Tasación (0,10% estimado): $${closingCosts.appraisal.toLocaleString('es-CL')}<br/>Gastos operacionales (0,20% estimado): $${closingCosts.operatingCosts.toLocaleString('es-CL')}<div style="font-size:.54rem;color:#64748b;">Notaría, inscripción en el Conservador de Bienes Raíces, estudio de títulos y trámites asociados.</div><br/>Comisión de compraventa (2,00% estimada): $${closingCosts.commission.toLocaleString('es-CL')}<br/>Total inicial a pagar: <strong>$${upfrontTotal.toLocaleString('es-CL')}</strong>`;
       }
       const offer = getCreditLoanOffer(loanType, termMonths);
-      const currentTenureMonths = state.currentJob ? getCurrentJobTenureMonths(state.currentJob) : 0;
+      const currentTenureMonths = state.work.currentJob ? getCurrentJobTenureMonths(state.work.currentJob) : 0;
       const mortgageAssessment = loanType === 'hipotecario' ? getMortgageIncomeAssessment() : null;
       const mortgageIncomeAverage = mortgageAssessment
         ? mortgageAssessment.isFirstMortgage ? mortgageAssessment.salaryAverage : mortgageAssessment.combinedIncomeAverage
         : 0;
-      const mortgageJobEligible = Boolean(state.currentJob && Number(state.currentJob.salary) > 0
+      const mortgageJobEligible = Boolean(state.work.currentJob && Number(state.work.currentJob.salary) > 0
         && currentTenureMonths >= settings.minimumTenureMonths);
       const affordabilityNote = selectedProperty && !mortgageJobEligible
         ? `<br/><span style="color:#b45309;">Para pedir este crédito necesitas un empleo vigente y al menos ${settings.minimumTenureMonths} meses de antigüedad.</span>`
@@ -1494,7 +1494,7 @@
             ? `No puedes pedir el crédito ya que tu dividendo sería muy alto para tu sueldo. Promedio líquido de sueldo: $${mortgageAssessment.salaryAverage.toLocaleString('es-CL')}.`
             : `No puedes pedir el crédito: la suma de dividendos supera el 50% de tus ingresos promedio. Sueldo y arriendos netos: $${mortgageAssessment.combinedIncomeAverage.toLocaleString('es-CL')}; dividendos hipotecarios vigentes: $${mortgageAssessment.existingDividends.toLocaleString('es-CL')}/mes.`}</span>`
         : loanType === 'consumo' && (!offer || amount > offer)
-          ? `<br/><span style="color:#b45309;">${!state.currentJob || Number(state.currentJob.salary) <= 0
+          ? `<br/><span style="color:#b45309;">${!state.work.currentJob || Number(state.work.currentJob.salary) <= 0
             ? 'Para solicitarlo necesitas un empleo vigente con sueldo.'
             : currentTenureMonths < settings.minimumTenureMonths
               ? `La oferta requiere 6 meses de antigüedad laboral; tienes ${currentTenureMonths} meses.`
@@ -1512,8 +1512,8 @@
     function createCreditLoanPolicy(debt, insuranceType, mandatory) {
       const item = segurosCatalog.find(policy => policy.id === insuranceType);
       if (!item) return;
-      if (!mandatory && (state.insurances || []).some(policy => policy.type === insuranceType && !policy.mandatory)) return;
-      state.insurances.push({
+      if (!mandatory && (state.finances.insurances || []).some(policy => policy.type === insuranceType && !policy.mandatory)) return;
+      state.finances.insurances.push({
         id: `${debt.id}_${insuranceType}`, type: insuranceType, name: `${item.name} (${debt.name})`,
         icon: item.icon, costMonthly: item.costMonthly, costDisplay: item.costDisplay,
         associatedTo: debt.name, loanId: debt.id, mandatory, contractedAt: new Date().toISOString()
@@ -1524,13 +1524,13 @@
       const firePolicy = segurosCatalog.find(policy => policy.id === 'incendio_sismo');
       const lifePolicy = segurosCatalog.find(policy => policy.id === 'desgravamen');
       if (!firePolicy || !lifePolicy) return;
-      state.insurances.push({
+      state.finances.insurances.push({
         id: `${debt.id}_incendio_sismo`, type: 'incendio_sismo', name: `${firePolicy.name} (${property.name})`,
         icon: firePolicy.icon, costMonthly: Math.ceil(property.value * 0.000175), costRateMonthly: 0.000175,
         premiumBase: 'insured_value', insuredValue: property.value, costDisplay: '0,0175% mensual del valor asegurado',
         associatedTo: property.name, loanId: debt.id, mandatory: true, contractedAt: new Date().toISOString()
       });
-      state.insurances.push({
+      state.finances.insurances.push({
         id: `${debt.id}_desgravamen`, type: 'desgravamen', name: `${lifePolicy.name} (${property.name})`,
         icon: lifePolicy.icon, costMonthly: Math.ceil(debt.remainingBalance * 0.00025), costRateMonthly: 0.00025,
         premiumBase: 'loan_balance', insuredValue: 0, costDisplay: '0,025% mensual del saldo de la deuda',
@@ -1539,7 +1539,7 @@
     }
 
     function updateMonthlyDebtTotal() {
-      state.monthlyDebt = (state.debts || []).reduce((sum, debt) => sum + (Number(debt.monthlyPayment) || 0), 0);
+      state.finances.monthlyDebt = (state.finances.debts || []).reduce((sum, debt) => sum + (Number(debt.monthlyPayment) || 0), 0);
     }
 
     function executeCreditLoan(loanType, propertyId = null) {
@@ -1581,7 +1581,7 @@
           error.style.display = 'block';
           error.textContent = propertyContext && upfrontSource && upfrontSource.get() < upfrontTotal
             ? `La fuente seleccionada no tiene fondos suficientes. El pie y los gastos de cierre suman $${upfrontTotal.toLocaleString('es-CL')}.`
-            : loanType === 'hipotecario' && (!state.currentJob || Number(state.currentJob.salary) <= 0 || getCurrentJobTenureMonths(state.currentJob) < settings.minimumTenureMonths)
+            : loanType === 'hipotecario' && (!state.work.currentJob || Number(state.work.currentJob.salary) <= 0 || getCurrentJobTenureMonths(state.work.currentJob) < settings.minimumTenureMonths)
               ? `Para pedir este crédito necesitas un empleo vigente y al menos ${settings.minimumTenureMonths} meses de antigüedad.`
               : loanType === 'hipotecario' && installment > getMortgagePaymentCapacity()
                 ? (() => {
@@ -1627,20 +1627,20 @@
         monthlyPayment: installment, monthlyInterestRate: settings.monthlyRate,
         originalTermMonths: termMonths, remainingTermMonths: termMonths, missedPayments: 0
       };
-      if (!Array.isArray(state.debts)) state.debts = [];
-      if (!Array.isArray(state.insurances)) state.insurances = [];
-      state.debts.push(debt);
+      if (!Array.isArray(state.finances.debts)) state.finances.debts = [];
+      if (!Array.isArray(state.finances.insurances)) state.finances.insurances = [];
+      state.finances.debts.push(debt);
       if (loanType === 'hipotecario') {
         if (propertyContext) {
           createPropertyMortgagePolicies(debt, property);
-          if (!Array.isArray(state.properties)) state.properties = [];
-          state.properties.push({
+          if (!Array.isArray(state.assets.properties)) state.assets.properties = [];
+          state.assets.properties.push({
             id: `corredora_${property.id}_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
             catalogId: property.id, name: property.name, sub: property.preferenceName,
             icon: property.icon, value: property.value, priceUF: property.priceUF,
             bedrooms: property.bedrooms, bathrooms: property.bathrooms,
             landArea: property.landArea || null, mortgageDebtId: debt.id,
-            purchaseDate: { year: Number(state.simulationYear) || 1, month: Number(state.simulationMonth) || 0, day: Number(state.simulationDay) || 1 }
+            purchaseDate: { year: Number(state.simulation.year) || 1, month: Number(state.simulation.month) || 0, day: Number(state.simulation.day) || 1 }
           });
         } else {
           createCreditLoanPolicy(debt, 'desgravamen', true);
@@ -1651,7 +1651,7 @@
       }
       if (document.getElementById('loan-insurance-cesantia')?.checked) createCreditLoanPolicy(debt, 'cesantia', false);
 
-      if (!propertyContext) state.cash = (Number(state.cash) || 0) + amount;
+      if (!propertyContext) state.finances.cash = (Number(state.finances.cash) || 0) + amount;
       updateMonthlyDebtTotal();
       closeBancoModal();
       renderBancoStage(loanType === 'consumo' ? 'credito_consumo' : 'credito_hipotecario');
@@ -1665,8 +1665,8 @@
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
 
-      const hasCuentaCorriente = (state.bankAccounts || []).some(a => (a.id || '').includes('corriente') || (a.type || '').includes('corriente'));
-      const line = state.creditLine;
+      const hasCuentaCorriente = (state.finances.bankAccounts || []).some(a => (a.id || '').includes('corriente') || (a.type || '').includes('corriente'));
+      const line = state.finances.creditLine;
 
       container.innerHTML = `
         <div class="personal-subview-box">
@@ -1762,7 +1762,7 @@
     }
 
     function activateCreditLineAction() {
-      state.creditLine = {
+      state.finances.creditLine = {
         id: 'linea_credito',
         name: 'Línea de Crédito',
         limit: 500000,
@@ -1773,9 +1773,9 @@
         interestConsolidatedTotal: 0,
         associatedTo: 'acc_corriente'
       };
-      if (!Array.isArray(state.insurances)) state.insurances = [];
-      if (!state.insurances.some(i => i.id === 'desgravamen_linea' || i.id === 'desgravamen')) {
-        state.insurances.push({
+      if (!Array.isArray(state.finances.insurances)) state.finances.insurances = [];
+      if (!state.finances.insurances.some(i => i.id === 'desgravamen_linea' || i.id === 'desgravamen')) {
+        state.finances.insurances.push({
           id: 'desgravamen_linea',
           type: 'desgravamen',
           name: 'Seguro de Desgravamen (Línea de Crédito)',
@@ -1791,13 +1791,13 @@
     }
 
     function promptCancelCreditLine() {
-      if (!state.creditLine) return;
+      if (!state.finances.creditLine) return;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!modalRoot) return;
 
-      const debt = Math.ceil((Number(state.creditLine.used) || 0) + (Number(state.creditLine.accruedInterest) || 0) + (Number(state.creditLine.currentDayInterest) || 0));
-      const ccAcc = (state.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
-      const availableFunds = (ccAcc ? (Number(ccAcc.balance) || 0) : 0) + (Number(state.cash) || 0);
+      const debt = Math.ceil((Number(state.finances.creditLine.used) || 0) + (Number(state.finances.creditLine.accruedInterest) || 0) + (Number(state.finances.creditLine.currentDayInterest) || 0));
+      const ccAcc = (state.finances.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
+      const availableFunds = (ccAcc ? (Number(ccAcc.balance) || 0) : 0) + (Number(state.finances.cash) || 0);
       const canPay = availableFunds >= debt;
 
       modalRoot.innerHTML = `
@@ -1840,12 +1840,12 @@
     }
 
     function executeCancelCreditLine() {
-      if (!state.creditLine) return;
-      const debt = Math.ceil((Number(state.creditLine.used) || 0) + (Number(state.creditLine.accruedInterest) || 0) + (Number(state.creditLine.currentDayInterest) || 0));
+      if (!state.finances.creditLine) return;
+      const debt = Math.ceil((Number(state.finances.creditLine.used) || 0) + (Number(state.finances.creditLine.accruedInterest) || 0) + (Number(state.finances.creditLine.currentDayInterest) || 0));
       if (debt > 0) {
-        const ccAcc = (state.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
+        const ccAcc = (state.finances.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
         const ccBal = ccAcc ? (Number(ccAcc.balance) || 0) : 0;
-        if (ccBal + (Number(state.cash) || 0) < debt) {
+        if (ccBal + (Number(state.finances.cash) || 0) < debt) {
           closeBancoModal();
           return;
         }
@@ -1854,11 +1854,11 @@
         } else {
           const rem = debt - ccBal;
           if (ccAcc) ccAcc.balance = 0;
-          state.cash = Math.max(0, (Number(state.cash) || 0) - rem);
+          state.finances.cash = Math.max(0, (Number(state.finances.cash) || 0) - rem);
         }
       }
-      state.creditLine = null;
-      state.insurances = (state.insurances || []).filter(i => i.id !== 'desgravamen_linea' && i.id !== 'desgravamen');
+      state.finances.creditLine = null;
+      state.finances.insurances = (state.finances.insurances || []).filter(i => i.id !== 'desgravamen_linea' && i.id !== 'desgravamen');
       recalcCuentaCorrienteMaintenance();
       closeBancoModal();
       renderBancoStage('linea');
@@ -1873,8 +1873,8 @@
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
 
-      const card = state.creditCard;
-      const hasCuentaCorriente = (state.bankAccounts || []).some(a => (a.id || '').includes('corriente') || (a.type || '').includes('corriente'));
+      const card = state.finances.creditCard;
+      const hasCuentaCorriente = (state.finances.bankAccounts || []).some(a => (a.id || '').includes('corriente') || (a.type || '').includes('corriente'));
 
       container.innerHTML = `
         <div class="personal-subview-box">
@@ -1971,7 +1971,7 @@
     }
 
     function openCreditCardPurchaseModal() {
-      const card = state.creditCard;
+      const card = state.finances.creditCard;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!card || !modalRoot) return;
       const available = Math.max(0, (Number(card.limit) || 950000) - (Number(card.used) || 0) - (Number(card.accruedInterest) || 0) - (Number(card.currentDayInterest) || 0));
@@ -1998,7 +1998,7 @@
     }
 
     function executeCreditCardPurchase() {
-      const card = state.creditCard;
+      const card = state.finances.creditCard;
       if (!card) return;
       const amount = Math.round(Number(document.getElementById('credit-card-purchase-amount')?.value) || 0);
       const error = document.getElementById('credit-card-purchase-error');
@@ -2020,9 +2020,9 @@
         id: `card_purchase_${Date.now()}`,
         detail,
         amount,
-        year: Number(state.simulationYear) || 1,
-        month: Number(state.simulationMonth) || 0,
-        day: Number(state.simulationDay) || 1
+        year: Number(state.simulation.year) || 1,
+        month: Number(state.simulation.month) || 0,
+        day: Number(state.simulation.day) || 1
       });
       recordFinancialMovement({
         detail: `Compra con Tarjeta de Crédito: ${detail}`,
@@ -2038,14 +2038,14 @@
     }
 
     function openCreditCardPaymentModal() {
-      const card = state.creditCard;
+      const card = state.finances.creditCard;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!card || !modalRoot) return;
       const accrued = Math.round((Number(card.accruedInterest) || 0) + (Number(card.currentDayInterest) || 0));
       const totalDebt = (Number(card.used) || 0) + accrued;
       const sources = [
-        { id: 'cash', name: `Efectivo ($${(Number(state.cash) || 0).toLocaleString('es-CL')})` },
-        ...(state.bankAccounts || []).filter(account => account.type !== 'credit').map(account => ({
+        { id: 'cash', name: `Efectivo ($${(Number(state.finances.cash) || 0).toLocaleString('es-CL')})` },
+        ...(state.finances.bankAccounts || []).filter(account => account.type !== 'credit').map(account => ({
           id: account.id,
           name: `${account.icon || '🏦'} ${account.name} ($${(Number(account.balance) || 0).toLocaleString('es-CL')})`
         }))
@@ -2067,7 +2067,7 @@
     }
 
     function executeCreditCardPayment() {
-      const card = state.creditCard;
+      const card = state.finances.creditCard;
       if (!card) return;
       const amount = Math.round(Number(document.getElementById('credit-card-payment-amount')?.value) || 0);
       const sourceId = document.getElementById('credit-card-payment-source')?.value || 'cash';
@@ -2100,8 +2100,8 @@
     }
 
     function activateCreditCardAction() {
-      const hasCuentaCorriente = (state.bankAccounts || []).some(a => (a.id || '').includes('corriente') || (a.type || '').includes('corriente'));
-      state.creditCard = {
+      const hasCuentaCorriente = (state.finances.bankAccounts || []).some(a => (a.id || '').includes('corriente') || (a.type || '').includes('corriente'));
+      state.finances.creditCard = {
         id: 'tarjeta_credito',
         name: 'Tarjeta de Crédito',
         isIndependent: !hasCuentaCorriente,
@@ -2125,13 +2125,13 @@
     }
 
     function promptCancelCreditCard() {
-      if (!state.creditCard) return;
+      if (!state.finances.creditCard) return;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!modalRoot) return;
 
-      const debt = Math.ceil((Number(state.creditCard.used) || 0) + (Number(state.creditCard.accruedInterest) || 0) + (Number(state.creditCard.currentDayInterest) || 0));
-      const ccAcc = (state.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
-      const availableFunds = (ccAcc ? (Number(ccAcc.balance) || 0) : 0) + (Number(state.cash) || 0);
+      const debt = Math.ceil((Number(state.finances.creditCard.used) || 0) + (Number(state.finances.creditCard.accruedInterest) || 0) + (Number(state.finances.creditCard.currentDayInterest) || 0));
+      const ccAcc = (state.finances.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
+      const availableFunds = (ccAcc ? (Number(ccAcc.balance) || 0) : 0) + (Number(state.finances.cash) || 0);
       const canPay = availableFunds >= debt;
 
       modalRoot.innerHTML = `
@@ -2174,12 +2174,12 @@
     }
 
     function executeCancelCreditCard() {
-      if (!state.creditCard) return;
-      const debt = Math.ceil((Number(state.creditCard.used) || 0) + (Number(state.creditCard.accruedInterest) || 0) + (Number(state.creditCard.currentDayInterest) || 0));
+      if (!state.finances.creditCard) return;
+      const debt = Math.ceil((Number(state.finances.creditCard.used) || 0) + (Number(state.finances.creditCard.accruedInterest) || 0) + (Number(state.finances.creditCard.currentDayInterest) || 0));
       if (debt > 0) {
-        const ccAcc = (state.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
+        const ccAcc = (state.finances.bankAccounts || []).find(a => a.id === 'acc_corriente' || a.type === 'corriente');
         const ccBal = ccAcc ? (Number(ccAcc.balance) || 0) : 0;
-        if (ccBal + (Number(state.cash) || 0) < debt) {
+        if (ccBal + (Number(state.finances.cash) || 0) < debt) {
           closeBancoModal();
           return;
         }
@@ -2188,10 +2188,10 @@
         } else {
           const rem = debt - ccBal;
           if (ccAcc) ccAcc.balance = 0;
-          state.cash = Math.max(0, (Number(state.cash) || 0) - rem);
+          state.finances.cash = Math.max(0, (Number(state.finances.cash) || 0) - rem);
         }
       }
-      state.creditCard = null;
+      state.finances.creditCard = null;
       recalcCuentaCorrienteMaintenance();
       closeBancoModal();
       renderBancoStage('tarjeta');
@@ -2239,12 +2239,12 @@
     ];
 
     function syncInvestedTotal() {
-      const dapSum = (state.termDeposits || []).reduce((acc, d) => acc + (Number(d.principal) || 0), 0);
-      const ffmmSum = (state.mutualFunds || []).reduce((acc, f) => acc + (Number(f.currentBalance) || 0), 0);
-      const otherSum = (state.otherInvestments || []).reduce((acc, inv) => acc + (Number(inv.currentBalance) || 0), 0);
-      const retirementAccountsSum = (Number(state.apvAccount?.balance) || 0) + (Number(state.cuenta2Account?.balance) || 0);
+      const dapSum = (state.finances.termDeposits || []).reduce((acc, d) => acc + (Number(d.principal) || 0), 0);
+      const ffmmSum = (state.finances.mutualFunds || []).reduce((acc, f) => acc + (Number(f.currentBalance) || 0), 0);
+      const otherSum = (state.finances.otherInvestments || []).reduce((acc, inv) => acc + (Number(inv.currentBalance) || 0), 0);
+      const retirementAccountsSum = (Number(state.finances.apvAccount?.balance) || 0) + (Number(state.finances.cuenta2Account?.balance) || 0);
       const fxSum = typeof getForeignCurrenciesTotalCLP === 'function' ? getForeignCurrenciesTotalCLP() : 0;
-      state.invested = dapSum + ffmmSum + otherSum + retirementAccountsSum + fxSum;
+      state.finances.invested = dapSum + ffmmSum + otherSum + retirementAccountsSum + fxSum;
     }
 
     // ==========================================================================
@@ -2312,8 +2312,8 @@
     ];
 
     function getUserRiskLevelNumber() {
-      if (!state.riskTestResult || !state.riskTestResult.label) return 0;
-      const lbl = state.riskTestResult.label.toLowerCase();
+      if (!state.wellbeing.riskTestResult || !state.wellbeing.riskTestResult.label) return 0;
+      const lbl = state.wellbeing.riskTestResult.label.toLowerCase();
       if (lbl.includes('conservador')) return 1;
       if (lbl.includes('moderado')) return 2;
       if (lbl.includes('arriesgado')) return 3;
@@ -2335,10 +2335,10 @@
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
 
-      if (!Array.isArray(state.mutualFunds)) state.mutualFunds = [];
+      if (!Array.isArray(state.finances.mutualFunds)) state.finances.mutualFunds = [];
       syncInvestedTotal();
 
-      const activeFunds = state.mutualFunds;
+      const activeFunds = state.finances.mutualFunds;
       const totalContributed = activeFunds.reduce((sum, f) => sum + (Number(f.contributedCapital) || 0), 0);
       const totalCurrentBalance = activeFunds.reduce((sum, f) => sum + (Number(f.currentBalance) || 0), 0);
       const netGainLoss = totalCurrentBalance - totalContributed;
@@ -2446,8 +2446,8 @@
       const fund = fondosMutuosCatalog.find(f => f.id === fundId);
       if (!fund) return;
 
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
-      const cash = Number(state.cash) || 0;
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
+      const cash = Number(state.finances.cash) || 0;
 
       const fundingOptions = [
         { id: 'cash', label: `💵 Dinero en Efectivo (Disponible: $${cash.toLocaleString('es-CL')})`, balance: cash, name: 'Dinero en Efectivo' },
@@ -2566,7 +2566,7 @@
       }
 
       if (sourceId === 'cash') {
-        const available = Number(state.cash) || 0;
+        const available = Number(state.finances.cash) || 0;
         if (amount > available) {
           if (errorEl) {
             errorEl.style.display = 'block';
@@ -2574,9 +2574,9 @@
           }
           return;
         }
-        state.cash = available - amount;
+        state.finances.cash = available - amount;
       } else {
-        const acc = (state.bankAccounts || []).find(a => a.id === sourceId);
+        const acc = (state.finances.bankAccounts || []).find(a => a.id === sourceId);
         if (!acc || getBankAccountSpendableBalance(acc.id) < amount) {
           if (errorEl) {
             errorEl.style.display = 'block';
@@ -2587,10 +2587,10 @@
         debitBankAccountWithCreditLine(acc.id, amount);
       }
 
-      if (!Array.isArray(state.mutualFunds)) state.mutualFunds = [];
+      if (!Array.isArray(state.finances.mutualFunds)) state.finances.mutualFunds = [];
       const sharesBought = amount / fund.initialSharePrice;
 
-      state.mutualFunds.push({
+      state.finances.mutualFunds.push({
         id: 'ffmm_pos_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
         fundTypeId: fund.id,
         name: fund.shortName,
@@ -2618,8 +2618,8 @@
     }
 
     function simulateMonthFFMM(posId) {
-      if (!Array.isArray(state.mutualFunds)) return;
-      const pos = state.mutualFunds.find(f => f.id === posId);
+      if (!Array.isArray(state.finances.mutualFunds)) return;
+      const pos = state.finances.mutualFunds.find(f => f.id === posId);
       if (!pos) return;
 
       // Generador normal estándar aproximado (Box-Muller) para volatilidad realista
@@ -2649,16 +2649,16 @@
 
     function openRedeemFFMMModal(posId, presetAmount = null, presetDestId = null) {
       const modalRoot = document.getElementById('banco-modal-root');
-      if (!modalRoot || !Array.isArray(state.mutualFunds)) return;
+      if (!modalRoot || !Array.isArray(state.finances.mutualFunds)) return;
 
-      const pos = state.mutualFunds.find(f => f.id === posId);
+      const pos = state.finances.mutualFunds.find(f => f.id === posId);
       if (!pos) return;
 
       const catalogFund = fondosMutuosCatalog.find(f => f.id === pos.fundTypeId);
       const minStayBalance = pos.minAmount || (catalogFund ? catalogFund.minAmount : 5000);
       const minPartialRedeem = 5000;
 
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
       const destOptions = [
         { id: 'cash', label: '💵 Dinero en Efectivo' },
         ...bankAccounts.map(a => ({
@@ -2756,8 +2756,8 @@
     }
 
     function promptConfirmRedeemFFMM(posId) {
-      if (!Array.isArray(state.mutualFunds)) return;
-      const pos = state.mutualFunds.find(f => f.id === posId);
+      if (!Array.isArray(state.finances.mutualFunds)) return;
+      const pos = state.finances.mutualFunds.find(f => f.id === posId);
       if (!pos) return;
 
       const amountInput = document.getElementById('ffmm-redeem-amount');
@@ -2801,7 +2801,7 @@
 
       let destName = '💵 Dinero en Efectivo';
       if (destId !== 'cash') {
-        const acc = (state.bankAccounts || []).find(a => a.id === destId);
+        const acc = (state.finances.bankAccounts || []).find(a => a.id === destId);
         if (acc) destName = `${acc.icon || '🏦'} ${acc.name}`;
       }
 
@@ -2873,11 +2873,11 @@
     }
 
     function executeRedeemFFMM(posId, confirmedAmount, confirmedDestId) {
-      if (!Array.isArray(state.mutualFunds)) return;
-      const idx = state.mutualFunds.findIndex(f => f.id === posId);
+      if (!Array.isArray(state.finances.mutualFunds)) return;
+      const idx = state.finances.mutualFunds.findIndex(f => f.id === posId);
       if (idx === -1) return;
 
-      const pos = state.mutualFunds[idx];
+      const pos = state.finances.mutualFunds[idx];
       const redeemAmount = Math.round(Number(confirmedAmount || 0));
       const destId = confirmedDestId || 'cash';
 
@@ -2887,20 +2887,20 @@
 
       let destName = 'Dinero en Efectivo';
       if (destId === 'cash') {
-        state.cash = (Number(state.cash) || 0) + redeemAmount;
+        state.finances.cash = (Number(state.finances.cash) || 0) + redeemAmount;
       } else {
-        const acc = (state.bankAccounts || []).find(a => a.id === destId);
+        const acc = (state.finances.bankAccounts || []).find(a => a.id === destId);
         if (acc) {
           acc.balance = (Number(acc.balance) || 0) + redeemAmount;
           destName = acc.name;
         } else {
-          state.cash = (Number(state.cash) || 0) + redeemAmount;
+          state.finances.cash = (Number(state.finances.cash) || 0) + redeemAmount;
         }
       }
 
       const isFullRedeem = redeemAmount >= pos.currentBalance;
       if (isFullRedeem) {
-        state.mutualFunds.splice(idx, 1);
+        state.finances.mutualFunds.splice(idx, 1);
       } else {
         const fractionRedeemed = redeemAmount / pos.currentBalance;
         pos.shares = pos.shares * (1 - fractionRedeemed);
@@ -2923,10 +2923,10 @@
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
 
-      if (!Array.isArray(state.termDeposits)) state.termDeposits = [];
+      if (!Array.isArray(state.finances.termDeposits)) state.finances.termDeposits = [];
       syncInvestedTotal();
 
-      const activeDAPs = state.termDeposits;
+      const activeDAPs = state.finances.termDeposits;
       const totalCapital = activeDAPs.reduce((sum, d) => sum + (Number(d.principal) || 0), 0);
       const totalExpectedInterest = activeDAPs.reduce((sum, d) => sum + (Number(d.expectedInterest) || 0), 0);
 
@@ -3030,8 +3030,8 @@
       const item = dapCatalog.find(d => d.id === dapTypeId);
       if (!item) return;
 
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
-      const cash = Number(state.cash) || 0;
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
+      const cash = Number(state.finances.cash) || 0;
 
       const fundingOptions = [
         { id: 'cash', label: `💵 Dinero en Efectivo (Disponible: $${cash.toLocaleString('es-CL')})`, balance: cash, name: 'Dinero en Efectivo' },
@@ -3166,16 +3166,16 @@
 
       let payoutAccountName = 'Dinero en Efectivo';
       if (sourceId === 'cash') {
-        if ((Number(state.cash) || 0) < amount) {
+        if ((Number(state.finances.cash) || 0) < amount) {
           if (errEl) {
             errEl.style.display = 'block';
-            errEl.innerText = `⚠️ No tienes suficiente Dinero en Efectivo ($${(state.cash || 0).toLocaleString('es-CL')}) para invertir $${amount.toLocaleString('es-CL')}.`;
+            errEl.innerText = `⚠️ No tienes suficiente Dinero en Efectivo ($${(state.finances.cash || 0).toLocaleString('es-CL')}) para invertir $${amount.toLocaleString('es-CL')}.`;
           }
           return;
         }
-        state.cash -= amount;
+        state.finances.cash -= amount;
       } else {
-        const acc = (state.bankAccounts || []).find(a => a.id === sourceId);
+        const acc = (state.finances.bankAccounts || []).find(a => a.id === sourceId);
         if (!acc || getBankAccountSpendableBalance(acc.id) < amount) {
           if (errEl) {
             errEl.style.display = 'block';
@@ -3187,10 +3187,10 @@
         payoutAccountName = acc.name;
       }
 
-      if (!Array.isArray(state.termDeposits)) state.termDeposits = [];
+      if (!Array.isArray(state.finances.termDeposits)) state.finances.termDeposits = [];
       const expectedInterest = Math.round(amount * item.ratePeriod);
 
-      state.termDeposits.push({
+      state.finances.termDeposits.push({
         id: 'dap_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
         typeId: item.id,
         name: item.shortName,
@@ -3220,9 +3220,9 @@
     }
 
     function simulateMaturityDAP(dapId) {
-      const idx = (state.termDeposits || []).findIndex(d => d.id === dapId);
+      const idx = (state.finances.termDeposits || []).findIndex(d => d.id === dapId);
       if (idx === -1) return;
-      const dap = state.termDeposits[idx];
+      const dap = state.finances.termDeposits[idx];
       const totalPayout = (Number(dap.principal) || 0) + (Number(dap.expectedInterest) || 0);
 
       if (dap.isRenewable) {
@@ -3275,15 +3275,15 @@
       } else {
         // DAP FIJO: ABONO AUTOMÁTICO EN LA CUENTA ASOCIADA O EFECTIVO
         let targetName = 'Dinero en Efectivo';
-        const targetAcc = (state.bankAccounts || []).find(a => a.id === dap.payoutAccountId);
+        const targetAcc = (state.finances.bankAccounts || []).find(a => a.id === dap.payoutAccountId);
         if (targetAcc) {
           creditBankAccount(targetAcc.id, totalPayout);
           targetName = targetAcc.name;
         } else {
-          state.cash = (Number(state.cash) || 0) + totalPayout;
+          state.finances.cash = (Number(state.finances.cash) || 0) + totalPayout;
         }
 
-        state.termDeposits.splice(idx, 1);
+        state.finances.termDeposits.splice(idx, 1);
         syncInvestedTotal();
         renderBancoStage('depositos');
         if (typeof updateHUD === 'function') updateHUD();
@@ -3295,20 +3295,20 @@
     }
 
     function getSimulationWeekday() {
-      const year = Number(state.simulationYear) || 1;
+      const year = Number(state.simulation.year) || 1;
       const priorYear = year - 1;
       const daysBeforeYear = priorYear * 365 + Math.floor(priorYear / 4) - Math.floor(priorYear / 100) + Math.floor(priorYear / 400);
       const monthLengths = [31, isSimulationLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-      const daysBeforeMonth = monthLengths.slice(0, state.simulationMonth).reduce((sum, days) => sum + days, 0);
-      return (daysBeforeYear + daysBeforeMonth + state.simulationDay - 1) % 7;
+      const daysBeforeMonth = monthLengths.slice(0, state.simulation.month).reduce((sum, days) => sum + days, 0);
+      return (daysBeforeYear + daysBeforeMonth + state.simulation.day - 1) % 7;
     }
 
     function settleTermDeposit(dap, index) {
       const totalPayout = (Number(dap.principal) || 0) + (Number(dap.expectedInterest) || 0);
-      const targetAccount = (state.bankAccounts || []).find(account => account.id === dap.payoutAccountId);
+      const targetAccount = (state.finances.bankAccounts || []).find(account => account.id === dap.payoutAccountId);
       if (targetAccount) creditBankAccount(targetAccount.id, totalPayout);
-      else state.cash = (Number(state.cash) || 0) + totalPayout;
-      state.termDeposits.splice(index, 1);
+      else state.finances.cash = (Number(state.finances.cash) || 0) + totalPayout;
+      state.finances.termDeposits.splice(index, 1);
     }
 
     function renewTermDeposit(dap) {
@@ -3321,10 +3321,10 @@
     }
 
     function processDailyTermDeposits() {
-      if (!Array.isArray(state.termDeposits)) state.termDeposits = [];
+      if (!Array.isArray(state.finances.termDeposits)) state.finances.termDeposits = [];
       const weekday = getSimulationWeekday();
-      for (let index = state.termDeposits.length - 1; index >= 0; index -= 1) {
-        const dap = state.termDeposits[index];
+      for (let index = state.finances.termDeposits.length - 1; index >= 0; index -= 1) {
+        const dap = state.finances.termDeposits[index];
         if (dap.maturityPending) {
           if (weekday < 5) dap.graceBusinessDaysElapsed = (Number(dap.graceBusinessDaysElapsed) || 0) + 1;
           if (dap.graceBusinessDaysElapsed >= 3) renewTermDeposit(dap);
@@ -3342,23 +3342,23 @@
     }
 
     function processMonthlyBankCharges() {
-      const cashBalance = () => Number(state.cash) || 0;
-      (state.bankAccounts || []).forEach(account => {
+      const cashBalance = () => Number(state.finances.cash) || 0;
+      (state.finances.bankAccounts || []).forEach(account => {
         const maintenance = Math.max(0, Number(account.maintenance) || 0);
         if (maintenance > 0 && cashBalance() >= maintenance) {
-          withFinancialMovementDetail(`Mantención mensual de ${account.name}`, () => { state.cash -= maintenance; });
+          withFinancialMovementDetail(`Mantención mensual de ${account.name}`, () => { state.finances.cash -= maintenance; });
         }
       });
-      if (state.creditCard && ((Number(state.creditCard.used) || 0) + (Number(state.creditCard.accruedInterest) || 0) + (Number(state.creditCard.currentDayInterest) || 0)) > 0) {
-        const maintenance = Math.max(0, Number(state.creditCard.maintenance) || 0);
+      if (state.finances.creditCard && ((Number(state.finances.creditCard.used) || 0) + (Number(state.finances.creditCard.accruedInterest) || 0) + (Number(state.finances.creditCard.currentDayInterest) || 0)) > 0) {
+        const maintenance = Math.max(0, Number(state.finances.creditCard.maintenance) || 0);
         if (maintenance > 0 && cashBalance() >= maintenance) {
-          withFinancialMovementDetail('Mantención mensual de Tarjeta de Crédito', () => { state.cash -= maintenance; });
+          withFinancialMovementDetail('Mantención mensual de Tarjeta de Crédito', () => { state.finances.cash -= maintenance; });
         }
       }
-      (state.insurances || []).forEach(policy => {
+      (state.finances.insurances || []).forEach(policy => {
         let premium = Math.max(0, Number(policy.costMonthly) || 0);
         if (Number(policy.costRateMonthly) > 0) {
-          const debt = (state.debts || []).find(item => item.id === policy.loanId);
+          const debt = (state.finances.debts || []).find(item => item.id === policy.loanId);
           const insuredValue = Number(policy.insuredValue) || 0;
           const premiumBase = policy.premiumBase === 'loan_balance'
             ? Number(debt?.remainingBalance) || 0
@@ -3367,7 +3367,7 @@
           policy.costMonthly = premium;
         }
         if (premium > 0 && cashBalance() >= premium) {
-          withFinancialMovementDetail(`Pago de seguro: ${policy.name}`, () => { state.cash -= premium; });
+          withFinancialMovementDetail(`Pago de seguro: ${policy.name}`, () => { state.finances.cash -= premium; });
         }
       });
     }
@@ -3401,26 +3401,26 @@
     }
 
     function payCurrentJobThroughToday() {
-      const job = state.currentJob;
+      const job = state.work.currentJob;
       if (!job) return 0;
       const amount = getJobMonthlyPay(
         job,
-        Number(state.simulationYear),
-        Number(state.simulationMonth),
+        Number(state.simulation.year),
+        Number(state.simulation.month),
         1,
-        Number(state.simulationDay)
+        Number(state.simulation.day)
       );
       depositJobSalary(job, amount);
       recordJobSalaryPayment(job, amount, {
-        year: Number(state.simulationYear),
-        month: Number(state.simulationMonth),
-        day: Number(state.simulationDay)
+        year: Number(state.simulation.year),
+        month: Number(state.simulation.month),
+        day: Number(state.simulation.day)
       });
       return amount;
     }
 
     function processMonthlyJobPerformance() {
-      const job = state.currentJob;
+      const job = state.work.currentJob;
       if (!job) return null;
       if (!Array.isArray(job.performanceHistory)) job.performanceHistory = [];
       const currentMonthIndex = getSimulationMonthIndex();
@@ -3470,7 +3470,7 @@
     }
 
     function processMonthlyJobIncome(evaluation = null) {
-      const job = state.currentJob;
+      const job = state.work.currentJob;
       if (!job) return;
       const currentMonthIndex = getSimulationMonthIndex();
       const paidMonthIndex = currentMonthIndex - 1;
@@ -3486,14 +3486,14 @@
     }
 
     function terminatePoorPerformanceJob() {
-      const job = state.currentJob;
+      const job = state.work.currentJob;
       if (!job) return;
-      if (!Array.isArray(state.jobHistory)) state.jobHistory = [];
-      if (!state.jobHistory.some(item => item.id === job.id && item.name === job.name)) {
-        state.jobHistory.push({ id: job.id, name: job.name });
+      if (!Array.isArray(state.work.jobHistory)) state.work.jobHistory = [];
+      if (!state.work.jobHistory.some(item => item.id === job.id && item.name === job.name)) {
+        state.work.jobHistory.push({ id: job.id, name: job.name });
       }
       if (typeof archiveCurrentJobExperience === 'function') archiveCurrentJobExperience();
-      state.currentJob = null;
+      state.work.currentJob = null;
       if (typeof alertUpcomingBankFeature === 'function') {
         alertUpcomingBankFeature('Contrato cancelado', `No alcanzaste el nivel Regular (18/36) antes del fin del plazo de mejora. Se canceló el contrato de <strong>${job.name}</strong>.`);
       }
@@ -3501,9 +3501,9 @@
     }
 
     function processMonthlyLoanPayments() {
-      if (!Array.isArray(state.debts)) state.debts = [];
-      for (let index = state.debts.length - 1; index >= 0; index -= 1) {
-        const debt = state.debts[index];
+      if (!Array.isArray(state.finances.debts)) state.finances.debts = [];
+      for (let index = state.finances.debts.length - 1; index >= 0; index -= 1) {
+        const debt = state.finances.debts[index];
         if (!debt.loanType || !Number.isFinite(Number(debt.remainingBalance))) continue;
         if (debt.loanType === 'hipotecario' && debt.propertyCatalogId) continue;
 
@@ -3511,7 +3511,7 @@
         const due = Number(debt.remainingTermMonths) <= 1
           ? balanceWithInterest
           : Math.min(Number(debt.monthlyPayment) || 0, balanceWithInterest);
-        if (due <= 0 || (Number(state.cash) || 0) < due) {
+        if (due <= 0 || (Number(state.finances.cash) || 0) < due) {
           debt.remainingBalance = balanceWithInterest;
           debt.totalDebt = balanceWithInterest;
           debt.amount = balanceWithInterest;
@@ -3519,25 +3519,25 @@
           continue;
         }
 
-        withFinancialMovementDetail(`Pago de ${debt.name || 'crédito'}`, () => { state.cash -= due; });
+        withFinancialMovementDetail(`Pago de ${debt.name || 'crédito'}`, () => { state.finances.cash -= due; });
         debt.remainingBalance = Math.max(0, balanceWithInterest - due);
         debt.totalDebt = debt.remainingBalance;
         debt.amount = debt.remainingBalance;
         debt.remainingTermMonths = Math.max(0, (Number(debt.remainingTermMonths) || 0) - 1);
         if (debt.remainingBalance <= 1) {
-          state.debts.splice(index, 1);
-          state.insurances = (state.insurances || []).filter(policy => policy.loanId !== debt.id);
+          state.finances.debts.splice(index, 1);
+          state.finances.insurances = (state.finances.insurances || []).filter(policy => policy.loanId !== debt.id);
         }
       }
       updateMonthlyDebtTotal();
     }
 
     function processDailyMortgagePayments() {
-      if (!Array.isArray(state.debts)) return;
+      if (!Array.isArray(state.finances.debts)) return;
       const currentMonthIndex = getSimulationMonthIndex();
-      const currentDay = Number(state.simulationDay) || 1;
+      const currentDay = Number(state.simulation.day) || 1;
 
-      state.debts.forEach(debt => {
+      state.finances.debts.forEach(debt => {
         if (debt.loanType !== 'hipotecario' || !debt.propertyCatalogId
           || currentDay < Number(debt.nextPaymentDay || 5)
           || currentMonthIndex < Number(debt.nextPaymentMonthIndex)) return;
@@ -3561,12 +3561,12 @@
         debt.totalDebt = debt.remainingBalance;
         debt.amount = debt.remainingBalance;
         debt.remainingTermMonths = Math.max(0, (Number(debt.remainingTermMonths) || 0) - 1);
-        debt.lastPaymentDate = { year: Number(state.simulationYear), month: Number(state.simulationMonth), day: currentDay };
+        debt.lastPaymentDate = { year: Number(state.simulation.year), month: Number(state.simulation.month), day: currentDay };
         debt.nextPaymentMonthIndex = monthIndex + 1;
         if (debt.remainingBalance <= 1) {
-          const debtIndex = state.debts.findIndex(item => item.id === debt.id);
-          if (debtIndex >= 0) state.debts.splice(debtIndex, 1);
-          state.insurances = (state.insurances || []).filter(policy => policy.loanId !== debt.id);
+          const debtIndex = state.finances.debts.findIndex(item => item.id === debt.id);
+          if (debtIndex >= 0) state.finances.debts.splice(debtIndex, 1);
+          state.finances.insurances = (state.finances.insurances || []).filter(policy => policy.loanId !== debt.id);
         }
       });
       updateMonthlyDebtTotal();
@@ -3599,12 +3599,12 @@
     }
 
     function executeRenewableDAPDecision(dapId, decision) {
-      const idx = (state.termDeposits || []).findIndex(d => d.id === dapId);
+      const idx = (state.finances.termDeposits || []).findIndex(d => d.id === dapId);
       if (idx === -1) {
         closeBancoModal();
         return;
       }
-      const dap = state.termDeposits[idx];
+      const dap = state.finances.termDeposits[idx];
       closeBancoModal();
       if (decision !== 'collect' || !dap.isRenewable || !dap.maturityPending) return;
       settleTermDeposit(dap, idx);
@@ -3621,9 +3621,9 @@
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
 
-      if (!Array.isArray(state.insurances)) state.insurances = [];
+      if (!Array.isArray(state.finances.insurances)) state.finances.insurances = [];
 
-      const activeInsurances = state.insurances;
+      const activeInsurances = state.finances.insurances;
       const totalMonthlyCost = activeInsurances.reduce((sum, ins) => {
         return sum + (Number(ins.costMonthly) || 0);
       }, 0);
@@ -3761,7 +3761,7 @@
       if (!item) return;
 
       const allAssets = getUserInsuranceAssets(insuranceId);
-      const activePolicies = (state.insurances || []).filter(i => i.type === insuranceId || i.id === insuranceId || (i.id || '').startsWith('ins_' + insuranceId));
+      const activePolicies = (state.finances.insurances || []).filter(i => i.type === insuranceId || i.id === insuranceId || (i.id || '').startsWith('ins_' + insuranceId));
       const contractedAssetIds = activePolicies.map(p => p.assetId || p.associatedId);
       const availableAssets = allAssets.filter(a => !contractedAssetIds.includes(a.id));
 
@@ -3899,7 +3899,7 @@
       const item = segurosCatalog.find(c => c.id === insuranceId);
       if (!item) return;
 
-      const activePolicies = (state.insurances || []).filter(i => i.id === insuranceId || i.type === insuranceId);
+      const activePolicies = (state.finances.insurances || []).filter(i => i.id === insuranceId || i.type === insuranceId);
       const activeIns = activePolicies.find(policy => policy.mandatory) || activePolicies[0];
       const assets = getUserInsuranceAssets(insuranceId);
 
@@ -3940,7 +3940,7 @@
                   ` : (item.id === 'cesantia' ? `
                     <div style="font-size: 0.68rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">💼 Empleo y deuda asegurada:</div>
                     <div style="font-size: 0.65rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 9px; color: #334155;">
-                      • Empleo actual: <strong>${state.currentJob ? state.currentJob.name : 'Trabajador dependiente'}</strong><br/>
+                      • Empleo actual: <strong>${state.work.currentJob ? state.work.currentJob.name : 'Trabajador dependiente'}</strong><br/>
                       • Cobertura: Pago de hasta 6 cuotas de tu crédito ante despido involuntario.
                     </div>
                   ` : (item.id === 'vida' ? `
@@ -4131,7 +4131,7 @@
       const modalRoot = document.getElementById('banco-modal-root');
       if (!modalRoot) return;
 
-      const policy = (state.insurances || []).find(i => i.id === policyId || i.type === policyId);
+      const policy = (state.finances.insurances || []).find(i => i.id === policyId || i.type === policyId);
       if (!policy) return;
 
       const isMulti = policy.type === 'automotriz' || policy.type === 'vivienda';
@@ -4205,7 +4205,7 @@
 
     // CONTRATAR PÓLIZA PARA UN BIEN ESPECÍFICO (AUTOMOTRIZ / VIVIENDA)
     function executeContractAssetInsurance(insuranceId, assetId, assetName, assetSub, assetPrice) {
-      if (!Array.isArray(state.insurances)) state.insurances = [];
+      if (!Array.isArray(state.finances.insurances)) state.finances.insurances = [];
       const item = segurosCatalog.find(c => c.id === insuranceId);
       if (!item) return;
 
@@ -4220,14 +4220,14 @@
 
       const policyId = `ins_${insuranceId}_${assetId}`;
       // Evitar duplicados para el mismo bien
-      if (state.insurances.some(i => i.id === policyId || i.assetId === assetId)) {
+      if (state.finances.insurances.some(i => i.id === policyId || i.assetId === assetId)) {
         alertUpcomingBankFeature('Póliza ya existente', 'Este bien ya cuenta con una póliza de seguro activa.');
         return;
       }
 
       const todayStr = new Date().toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
 
-      state.insurances.push({
+      state.finances.insurances.push({
         id: policyId,
         type: insuranceId,
         name: assetSub ? `${item.name} (${assetName} - ${assetSub})` : `${item.name} (${assetName})`,
@@ -4250,18 +4250,18 @@
 
     // CONTRATAR SEGURO UNITARIO
     function executeContractSingleInsurance(insuranceId) {
-      if (!Array.isArray(state.insurances)) state.insurances = [];
+      if (!Array.isArray(state.finances.insurances)) state.finances.insurances = [];
       const item = segurosCatalog.find(c => c.id === insuranceId);
       if (!item) return;
 
       let associatedAsset = 'Titular / Cuentas personales';
       if (insuranceId === 'fraude') associatedAsset = 'Cuentas y Tarjetas';
-      else if (insuranceId === 'desgravamen') associatedAsset = state.creditLine ? 'Línea de Crédito' : 'Crédito personal';
-      else if (insuranceId === 'cesantia') associatedAsset = state.currentJob ? state.currentJob.name : 'Crédito personal';
+      else if (insuranceId === 'desgravamen') associatedAsset = state.finances.creditLine ? 'Línea de Crédito' : 'Crédito personal';
+      else if (insuranceId === 'cesantia') associatedAsset = state.work.currentJob ? state.work.currentJob.name : 'Crédito personal';
 
       const todayStr = new Date().toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
 
-      state.insurances.push({
+      state.finances.insurances.push({
         id: item.id,
         type: item.id,
         name: item.name,
@@ -4281,9 +4281,9 @@
 
     // TERMINAR PÓLIZA INDIVIDUAL
     function executeCancelInsurance(policyId) {
-      if (!Array.isArray(state.insurances)) return;
-      const targetPolicy = state.insurances.find(i => i.id === policyId || i.type === policyId);
-      const linkedDebt = targetPolicy?.loanId && (state.debts || []).find(debt => debt.id === targetPolicy.loanId);
+      if (!Array.isArray(state.finances.insurances)) return;
+      const targetPolicy = state.finances.insurances.find(i => i.id === policyId || i.type === policyId);
+      const linkedDebt = targetPolicy?.loanId && (state.finances.debts || []).find(debt => debt.id === targetPolicy.loanId);
       if (targetPolicy?.mandatory && linkedDebt) {
         closeBancoModal();
         alertUpcomingBankFeature('Póliza vigente', 'Esta póliza permanece activa mientras el crédito asociado tenga saldo pendiente.');
@@ -4291,7 +4291,7 @@
       }
       const policyType = targetPolicy ? targetPolicy.type : null;
 
-      state.insurances = state.insurances.filter(i => i.id !== policyId && i.type !== policyId && !(i.name || '').toLowerCase().includes(policyId));
+      state.finances.insurances = state.finances.insurances.filter(i => i.id !== policyId && i.type !== policyId && !(i.name || '').toLowerCase().includes(policyId));
 
       renderBancoStage('seguros');
       if (typeof updateHUD === 'function') updateHUD();

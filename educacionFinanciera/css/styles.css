@@ -2350,6 +2350,11 @@
       text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
     }
 
+    #tab-comercio .dock-tab-title {
+      white-space: normal;
+      line-height: 1;
+    }
+
     @media (min-width: 400px) {
       .dock-tab-title {
         font-size: 0.55rem;

@@ -84,8 +84,8 @@ function getCorredoraProratedRent(rental, year, month, lastDay) {
 
 function getCorredoraFundingSources() {
   return [
-    { id: 'cash', label: `Efectivo ($${(Number(state.cash) || 0).toLocaleString('es-CL')})` },
-    ...(Array.isArray(state.bankAccounts) ? state.bankAccounts : [])
+    { id: 'cash', label: `Efectivo ($${(Number(state.finances.cash) || 0).toLocaleString('es-CL')})` },
+    ...(Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [])
       .filter(account => account.type !== 'credit')
       .map(account => ({
         id: account.id,
@@ -116,7 +116,7 @@ function renderCorredoraMain() {
   }
 
   const [propertyOption, ...otherOptions] = hubsData.corredora.sections;
-  const activeRentals = (state.rentedProperties || []).filter(rental => rental.active);
+  const activeRentals = (state.assets.rentedProperties || []).filter(rental => rental.active);
   const fundingSources = getCorredoraFundingSources();
   container.innerHTML = `
     <div class="personal-subview-box">
@@ -153,7 +153,7 @@ function renderCorredoraMain() {
 }
 
 function changeCorredoraRentalSource(rentalId, sourceId) {
-  const rental = (state.rentedProperties || []).find(item => item.id === rentalId && item.active);
+  const rental = (state.assets.rentedProperties || []).find(item => item.id === rentalId && item.active);
   if (!rental || !getCorredoraFundingSources().some(source => source.id === sourceId)) return;
   rental.paymentSourceId = sourceId;
   renderCorredoraMain();
@@ -168,8 +168,8 @@ function renderCorredoraSalesManagement() {
   if (titleElem) titleElem.innerText = 'Gestionar Venta';
   if (subtitleElem) subtitleElem.innerText = 'Publica y administra la venta de tus propiedades';
 
-  const properties = Array.isArray(state.properties) ? state.properties : [];
-  const listings = Array.isArray(state.propertyListings) ? state.propertyListings : [];
+  const properties = Array.isArray(state.assets.properties) ? state.assets.properties : [];
+  const listings = Array.isArray(state.assets.propertyListings) ? state.assets.propertyListings : [];
   const activePropertyIds = new Set(listings.filter(listing => listing.status === 'active').map(listing => listing.propertyInstanceId));
   const availableProperties = properties.filter(property => !activePropertyIds.has(property.id));
   const activeListings = listings.filter(listing => listing.status === 'active');
@@ -236,9 +236,9 @@ function getCorredoraSaleProbabilityLabel(askingPrice, referenceValue) {
 }
 
 function openCorredoraSaleModal(propertyId, listingId = null) {
-  const property = (state.properties || []).find(item => item.id === propertyId);
+  const property = (state.assets.properties || []).find(item => item.id === propertyId);
   const listing = listingId
-    ? (state.propertyListings || []).find(item => item.id === listingId && item.status === 'active')
+    ? (state.assets.propertyListings || []).find(item => item.id === listingId && item.status === 'active')
     : null;
   const modalRoot = document.getElementById('banco-modal-root');
   if (!property || !modalRoot || (listingId && !listing)) return;
@@ -273,26 +273,26 @@ function openCorredoraSaleModal(propertyId, listingId = null) {
 }
 
 function updateCorredoraSalePreview(propertyId) {
-  const property = (state.properties || []).find(item => item.id === propertyId);
+  const property = (state.assets.properties || []).find(item => item.id === propertyId);
   const preview = document.getElementById('corredora-sale-preview');
   if (!property || !preview) return;
   const price = Math.max(0, Number(document.getElementById('corredora-sale-price')?.value) || 0);
   const commission = Math.round(price * 0.02);
-  const mortgage = (state.debts || []).find(debt => debt.id === property.mortgageDebtId);
+  const mortgage = (state.finances.debts || []).find(debt => debt.id === property.mortgageDebtId);
   const estimatedNet = Math.max(0, price - commission - (Number(mortgage?.remainingBalance) || 0));
   const probabilityLabel = getCorredoraSaleProbabilityLabel(price, property.value);
   preview.innerHTML = `Tasación comercial de la propiedad: <strong>$${Number(property.value).toLocaleString('es-CL')}</strong><br/>Probabilidad de venta estimada: <strong>${probabilityLabel}</strong><br/>Comisión de venta (2%): <strong>$${commission.toLocaleString('es-CL')}</strong>${property.mortgageDebtId ? `<br/>Saldo hipotecario pendiente estimado: $${(Number(mortgage?.remainingBalance) || 0).toLocaleString('es-CL')}` : ''}<br/>Monto neto estimado: <strong>$${estimatedNet.toLocaleString('es-CL')}</strong>`;
 }
 
 function publishCorredoraSale(propertyId, listingId = '') {
-  const property = (state.properties || []).find(item => item.id === propertyId);
+  const property = (state.assets.properties || []).find(item => item.id === propertyId);
   if (!property) return;
-  if (!Array.isArray(state.propertyListings)) state.propertyListings = [];
+  if (!Array.isArray(state.assets.propertyListings)) state.assets.propertyListings = [];
   const existingListing = listingId
-    ? state.propertyListings.find(listing => listing.id === listingId && listing.status === 'active')
+    ? state.assets.propertyListings.find(listing => listing.id === listingId && listing.status === 'active')
     : null;
   if (listingId && !existingListing) return;
-  if (!existingListing && state.propertyListings.some(listing => listing.propertyInstanceId === property.id && listing.status === 'active')) return;
+  if (!existingListing && state.assets.propertyListings.some(listing => listing.propertyInstanceId === property.id && listing.status === 'active')) return;
   const askingPrice = Math.round(Number(document.getElementById('corredora-sale-price')?.value) || 0);
   const payoutAccountId = document.getElementById('corredora-sale-payout')?.value || 'cash';
   const error = document.getElementById('corredora-sale-error');
@@ -309,7 +309,7 @@ function publishCorredoraSale(propertyId, listingId = '') {
     existingListing.payoutAccountId = payoutAccountId;
     existingListing.propertyName = property.name;
   } else {
-    state.propertyListings.push({
+    state.assets.propertyListings.push({
       id: `sale_listing_${property.id}_${Date.now()}`,
       propertyInstanceId: property.id,
       propertyCatalogId: property.catalogId || null,
@@ -320,7 +320,7 @@ function publishCorredoraSale(propertyId, listingId = '') {
       payoutAccountId,
       elapsedMonths: 0,
       status: 'active',
-      listedDate: { year: Number(state.simulationYear) || 1, month: Number(state.simulationMonth) || 0, day: Number(state.simulationDay) || 1 }
+      listedDate: { year: Number(state.simulation.year) || 1, month: Number(state.simulation.month) || 0, day: Number(state.simulation.day) || 1 }
     });
   }
   closeBancoModal();
@@ -328,64 +328,64 @@ function publishCorredoraSale(propertyId, listingId = '') {
 }
 
 function cancelCorredoraSaleListing(listingId) {
-  const listing = (state.propertyListings || []).find(item => item.id === listingId && item.status === 'active');
+  const listing = (state.assets.propertyListings || []).find(item => item.id === listingId && item.status === 'active');
   if (!listing) return;
   listing.status = 'withdrawn';
-  listing.withdrawnDate = { year: Number(state.simulationYear) || 1, month: Number(state.simulationMonth) || 0, day: Number(state.simulationDay) || 1 };
+  listing.withdrawnDate = { year: Number(state.simulation.year) || 1, month: Number(state.simulation.month) || 0, day: Number(state.simulation.day) || 1 };
   renderCorredoraSalesManagement();
 }
 
 function processDailyCorredoraSales() {
   const evaluationDays = [6, 15, 28];
-  const currentDay = Number(state.simulationDay) || 1;
+  const currentDay = Number(state.simulation.day) || 1;
   if (!evaluationDays.includes(currentDay)) return;
-  if (!Array.isArray(state.propertyListings)) state.propertyListings = [];
+  if (!Array.isArray(state.assets.propertyListings)) state.assets.propertyListings = [];
   const completedSales = [];
-  state.propertyListings.forEach(listing => {
+  state.assets.propertyListings.forEach(listing => {
     if (listing.status !== 'active') return;
-    const evaluationKey = `${Number(state.simulationYear) || 1}-${Number(state.simulationMonth) || 0}-${currentDay}`;
+    const evaluationKey = `${Number(state.simulation.year) || 1}-${Number(state.simulation.month) || 0}-${currentDay}`;
     if (listing.lastEvaluationDate === evaluationKey) return;
     listing.lastEvaluationDate = evaluationKey;
-    const property = (state.properties || []).find(item => item.id === listing.propertyInstanceId);
+    const property = (state.assets.properties || []).find(item => item.id === listing.propertyInstanceId);
     if (!property) {
       listing.status = 'withdrawn';
       return;
     }
     const listingStart = listing.listedDate || {};
-    listing.elapsedMonths = Math.max(0, (((Number(state.simulationYear) || 1) - (Number(listingStart.year) || 1)) * 12)
-      + (Number(state.simulationMonth) || 0) - (Number(listingStart.month) || 0));
+    listing.elapsedMonths = Math.max(0, (((Number(state.simulation.year) || 1) - (Number(listingStart.year) || 1)) * 12)
+      + (Number(state.simulation.month) || 0) - (Number(listingStart.month) || 0));
     if (Math.random() >= getCorredoraSaleProbability(listing.askingPrice, listing.referenceValue)) return;
 
     const price = Math.round(Number(listing.askingPrice) || 0);
     const commission = Math.round(price * (Number(listing.commissionRate) || 0.02));
-    const mortgage = (state.debts || []).find(debt => debt.id === property.mortgageDebtId);
+    const mortgage = (state.finances.debts || []).find(debt => debt.id === property.mortgageDebtId);
     const mortgagePayoff = Math.max(0, Number(mortgage?.remainingBalance) || 0);
     const netProceeds = price - commission - mortgagePayoff;
     if (netProceeds < 0) return;
 
     withFinancialMovementDetail(`Venta de propiedad: ${property.name}`, () => {
-      state.cash = (Number(state.cash) || 0) + price;
+      state.finances.cash = (Number(state.finances.cash) || 0) + price;
     });
     withFinancialMovementDetail(`Comisión por venta de ${property.name}`, () => chargeCorredoraSource('cash', commission, `Comisión por venta de ${property.name}`));
     if (mortgagePayoff > 0) {
       withFinancialMovementDetail(`Pago de saldo hipotecario por venta de ${property.name}`, () => chargeCorredoraSource('cash', mortgagePayoff, `Pago de saldo hipotecario por venta de ${property.name}`));
-      state.debts = state.debts.filter(debt => debt.id !== mortgage.id);
-      state.insurances = (state.insurances || []).filter(policy => policy.loanId !== mortgage.id);
+      state.finances.debts = state.finances.debts.filter(debt => debt.id !== mortgage.id);
+      state.finances.insurances = (state.finances.insurances || []).filter(policy => policy.loanId !== mortgage.id);
     }
     if (listing.payoutAccountId !== 'cash' && netProceeds > 0) {
-      const payoutAccount = (state.bankAccounts || []).find(account => account.id === listing.payoutAccountId && account.type !== 'credit');
+      const payoutAccount = (state.finances.bankAccounts || []).find(account => account.id === listing.payoutAccountId && account.type !== 'credit');
       if (payoutAccount) {
         withFinancialMovementDetail(`Abono neto de venta de ${property.name}`, () => {
-          state.cash = Math.max(0, (Number(state.cash) || 0) - netProceeds);
+          state.finances.cash = Math.max(0, (Number(state.finances.cash) || 0) - netProceeds);
           creditBankAccount(payoutAccount.id, netProceeds);
         });
       } else {
         listing.payoutAccountId = 'cash';
       }
     }
-    state.properties = state.properties.filter(item => item.id !== property.id);
+    state.assets.properties = state.assets.properties.filter(item => item.id !== property.id);
     listing.status = 'sold';
-    listing.soldDate = { year: Number(state.simulationYear) || 1, month: Number(state.simulationMonth) || 0, day: Number(state.simulationDay) || 1 };
+    listing.soldDate = { year: Number(state.simulation.year) || 1, month: Number(state.simulation.month) || 0, day: Number(state.simulation.day) || 1 };
     listing.commissionPaid = commission;
     listing.mortgagePayoff = mortgagePayoff;
     listing.netProceeds = netProceeds;
@@ -393,7 +393,7 @@ function processDailyCorredoraSales() {
   });
 
   if (typeof updateMonthlyDebtTotal === 'function') updateMonthlyDebtTotal();
-  if (completedSales.length && state.activeHudTab === 'corredora') renderCorredoraSalesManagement();
+  if (completedSales.length && state.interface.activeHudTab === 'corredora') renderCorredoraSalesManagement();
   if (typeof updateHUD === 'function') updateHUD();
   if (completedSales.length && typeof alertUpcomingBankFeature === 'function') {
     const saleMessages = completedSales.map(sale => `${sale.propertyName}: venta $${sale.price.toLocaleString('es-CL')}, comisión $${sale.commission.toLocaleString('es-CL')}${sale.mortgagePayoff ? `, saldo hipotecario $${sale.mortgagePayoff.toLocaleString('es-CL')}` : ''}, neto recibido $${sale.netProceeds.toLocaleString('es-CL')}`).join('<br/>');
@@ -415,8 +415,8 @@ function renderCorredoraRentalManagement() {
   if (titleElem) titleElem.innerText = 'Gestionar Arriendo';
   if (subtitleElem) subtitleElem.innerText = 'Publica tus propiedades y administra los ingresos por arriendo';
 
-  const properties = Array.isArray(state.properties) ? state.properties : [];
-  const listings = Array.isArray(state.propertyRentalListings) ? state.propertyRentalListings : [];
+  const properties = Array.isArray(state.assets.properties) ? state.assets.properties : [];
+  const listings = Array.isArray(state.assets.propertyRentalListings) ? state.assets.propertyRentalListings : [];
   const activePropertyIds = new Set(listings.filter(listing => ['active', 'rented'].includes(listing.status)).map(listing => listing.propertyInstanceId));
   const availableProperties = properties.filter(property => !activePropertyIds.has(property.id));
   const activeOffers = listings.filter(listing => listing.status === 'active');
@@ -474,9 +474,9 @@ function renderCorredoraRentalManagement() {
 }
 
 function openCorredoraRentalModal(propertyId, listingId = null) {
-  const property = (state.properties || []).find(item => item.id === propertyId);
+  const property = (state.assets.properties || []).find(item => item.id === propertyId);
   const listing = listingId
-    ? (state.propertyRentalListings || []).find(item => item.id === listingId && item.status === 'active')
+    ? (state.assets.propertyRentalListings || []).find(item => item.id === listingId && item.status === 'active')
     : null;
   const modalRoot = document.getElementById('banco-modal-root');
   if (!property || !modalRoot || (listingId && !listing)) return;
@@ -510,7 +510,7 @@ function openCorredoraRentalModal(propertyId, listingId = null) {
 }
 
 function updateCorredoraRentalPreview(propertyId) {
-  const property = (state.properties || []).find(item => item.id === propertyId);
+  const property = (state.assets.properties || []).find(item => item.id === propertyId);
   const preview = document.getElementById('corredora-rent-preview');
   if (!property || !preview) return;
   const askingRent = Math.max(0, Number(document.getElementById('corredora-rent-price')?.value) || 0);
@@ -518,14 +518,14 @@ function updateCorredoraRentalPreview(propertyId) {
 }
 
 function publishCorredoraRental(propertyId, listingId = '') {
-  const property = (state.properties || []).find(item => item.id === propertyId);
+  const property = (state.assets.properties || []).find(item => item.id === propertyId);
   if (!property) return;
-  if (!Array.isArray(state.propertyRentalListings)) state.propertyRentalListings = [];
+  if (!Array.isArray(state.assets.propertyRentalListings)) state.assets.propertyRentalListings = [];
   const existingListing = listingId
-    ? state.propertyRentalListings.find(listing => listing.id === listingId && listing.status === 'active')
+    ? state.assets.propertyRentalListings.find(listing => listing.id === listingId && listing.status === 'active')
     : null;
   if (listingId && !existingListing) return;
-  if (!existingListing && state.propertyRentalListings.some(listing => listing.propertyInstanceId === property.id && ['active', 'rented'].includes(listing.status))) return;
+  if (!existingListing && state.assets.propertyRentalListings.some(listing => listing.propertyInstanceId === property.id && ['active', 'rented'].includes(listing.status))) return;
   const askingRent = Math.round(Number(document.getElementById('corredora-rent-price')?.value) || 0);
   const payoutAccountId = document.getElementById('corredora-rent-payout')?.value || 'cash';
   const error = document.getElementById('corredora-rent-error');
@@ -541,7 +541,7 @@ function publishCorredoraRental(propertyId, listingId = '') {
     existingListing.askingRent = askingRent;
     existingListing.payoutAccountId = payoutAccountId;
   } else {
-    state.propertyRentalListings.push({
+    state.assets.propertyRentalListings.push({
       id: `rental_listing_${property.id}_${Date.now()}`,
       propertyInstanceId: property.id,
       propertyName: property.name,
@@ -551,7 +551,7 @@ function publishCorredoraRental(propertyId, listingId = '') {
       payoutAccountId,
       elapsedMonths: 0,
       status: 'active',
-      listedDate: { year: Number(state.simulationYear) || 1, month: Number(state.simulationMonth) || 0, day: Number(state.simulationDay) || 1 }
+      listedDate: { year: Number(state.simulation.year) || 1, month: Number(state.simulation.month) || 0, day: Number(state.simulation.day) || 1 }
     });
   }
   closeBancoModal();
@@ -559,28 +559,28 @@ function publishCorredoraRental(propertyId, listingId = '') {
 }
 
 function processDailyCorredoraRentals() {
-  if (!Array.isArray(state.propertyRentalListings)) state.propertyRentalListings = [];
+  if (!Array.isArray(state.assets.propertyRentalListings)) state.assets.propertyRentalListings = [];
   const evaluationDays = [6, 15, 28];
-  const day = Number(state.simulationDay) || 1;
+  const day = Number(state.simulation.day) || 1;
   if (!evaluationDays.includes(day)) return;
   const newTenants = [];
-  state.propertyRentalListings.forEach(listing => {
+  state.assets.propertyRentalListings.forEach(listing => {
     if (listing.status !== 'active') return;
-    const evaluationKey = `${Number(state.simulationYear) || 1}-${Number(state.simulationMonth) || 0}-${day}`;
+    const evaluationKey = `${Number(state.simulation.year) || 1}-${Number(state.simulation.month) || 0}-${day}`;
     if (listing.lastEvaluationDate === evaluationKey) return;
     listing.lastEvaluationDate = evaluationKey;
-    const property = (state.properties || []).find(item => item.id === listing.propertyInstanceId);
+    const property = (state.assets.properties || []).find(item => item.id === listing.propertyInstanceId);
     if (!property) {
       listing.status = 'closed';
       return;
     }
     const listedDate = listing.listedDate || {};
-    listing.elapsedMonths = Math.max(0, ((Number(state.simulationYear) - (Number(listedDate.year) || 1)) * 12)
-      + Number(state.simulationMonth) - (Number(listedDate.month) || 0));
+    listing.elapsedMonths = Math.max(0, ((Number(state.simulation.year) - (Number(listedDate.year) || 1)) * 12)
+      + Number(state.simulation.month) - (Number(listedDate.month) || 0));
     if (Math.random() >= getCorredoraSaleProbability(listing.askingRent, listing.marketRent)) return;
     listing.status = 'rented';
-    listing.tenantStartDate = { year: Number(state.simulationYear) || 1, month: Number(state.simulationMonth) || 0, day };
-    listing.nextRentMonthIndex = getCorredoraMonthIndex(state.simulationYear, state.simulationMonth) + 1;
+    listing.tenantStartDate = { year: Number(state.simulation.year) || 1, month: Number(state.simulation.month) || 0, day };
+    listing.nextRentMonthIndex = getCorredoraMonthIndex(state.simulation.year, state.simulation.month) + 1;
     listing.monthsPaid = 0;
     listing.netIncomeTotal = 0;
     listing.commissionTotal = 0;
@@ -589,24 +589,24 @@ function processDailyCorredoraRentals() {
   if (newTenants.length && typeof alertUpcomingBankFeature === 'function') {
     alertUpcomingBankFeature(newTenants.length === 1 ? '¡Propiedad arrendada!' : '¡Propiedades arrendadas!', newTenants.map(name => `${name} encontró arrendatario.`).join('<br/>'));
   }
-  if (newTenants.length && state.activeHudTab === 'corredora') renderCorredoraRentalManagement();
+  if (newTenants.length && state.interface.activeHudTab === 'corredora') renderCorredoraRentalManagement();
 }
 
 function processMonthlyCorredoraRentals() {
-  if (!Array.isArray(state.propertyRentalListings)) return;
-  const monthIndex = getCorredoraMonthIndex(state.simulationYear, state.simulationMonth);
-  state.propertyRentalListings.forEach(listing => {
+  if (!Array.isArray(state.assets.propertyRentalListings)) return;
+  const monthIndex = getCorredoraMonthIndex(state.simulation.year, state.simulation.month);
+  state.assets.propertyRentalListings.forEach(listing => {
     if (listing.status !== 'rented' || monthIndex < Number(listing.nextRentMonthIndex)) return;
     const grossRent = Math.max(0, Math.round(Number(listing.askingRent) || 0));
     const commission = Math.round(grossRent * 0.05);
     const netRent = grossRent - commission;
-    const account = (state.bankAccounts || []).find(item => item.id === listing.payoutAccountId && item.type !== 'credit');
+    const account = (state.finances.bankAccounts || []).find(item => item.id === listing.payoutAccountId && item.type !== 'credit');
     const depositDetail = `Arriendo mensual recibido: ${listing.propertyName}`;
     const commissionDetail = `Comisión corredora (5%): ${listing.propertyName}`;
 
     if (listing.payoutAccountId === 'cash' || !account) {
-      withFinancialMovementDetail(depositDetail, () => { state.cash = (Number(state.cash) || 0) + grossRent; });
-      withFinancialMovementDetail(commissionDetail, () => { state.cash = Math.max(0, (Number(state.cash) || 0) - commission); });
+      withFinancialMovementDetail(depositDetail, () => { state.finances.cash = (Number(state.finances.cash) || 0) + grossRent; });
+      withFinancialMovementDetail(commissionDetail, () => { state.finances.cash = Math.max(0, (Number(state.finances.cash) || 0) - commission); });
     } else {
       withFinancialMovementDetail(depositDetail, () => creditBankAccount(account.id, grossRent));
       withFinancialMovementDetail(commissionDetail, () => debitBankAccountWithCreditLine(account.id, commission));
@@ -616,30 +616,30 @@ function processMonthlyCorredoraRentals() {
     listing.commissionTotal = (Number(listing.commissionTotal) || 0) + commission;
     if (!Array.isArray(listing.rentPaymentHistory)) listing.rentPaymentHistory = [];
     listing.rentPaymentHistory.push({
-      year: Number(state.simulationYear) || 1,
-      month: Number(state.simulationMonth) || 0,
-      day: Number(state.simulationDay) || 1,
+      year: Number(state.simulation.year) || 1,
+      month: Number(state.simulation.month) || 0,
+      day: Number(state.simulation.day) || 1,
       amount: netRent
     });
     listing.nextRentMonthIndex = monthIndex + 1;
   });
-  if (state.activeHudTab === 'corredora') renderCorredoraRentalManagement();
+  if (state.interface.activeHudTab === 'corredora') renderCorredoraRentalManagement();
   if (typeof updateHUD === 'function') updateHUD();
 }
 
 function cancelCorredoraRentalListing(listingId) {
-  const listing = (state.propertyRentalListings || []).find(item => item.id === listingId && item.status === 'active');
+  const listing = (state.assets.propertyRentalListings || []).find(item => item.id === listingId && item.status === 'active');
   if (!listing) return;
   listing.status = 'withdrawn';
-  listing.withdrawnDate = { year: Number(state.simulationYear) || 1, month: Number(state.simulationMonth) || 0, day: Number(state.simulationDay) || 1 };
+  listing.withdrawnDate = { year: Number(state.simulation.year) || 1, month: Number(state.simulation.month) || 0, day: Number(state.simulation.day) || 1 };
   renderCorredoraRentalManagement();
 }
 
 function closeCorredoraRentalContract(listingId) {
-  const listing = (state.propertyRentalListings || []).find(item => item.id === listingId && item.status === 'rented');
+  const listing = (state.assets.propertyRentalListings || []).find(item => item.id === listingId && item.status === 'rented');
   if (!listing || !window.confirm(`¿Terminar el arriendo de ${listing.propertyName}?`)) return;
   listing.status = 'closed';
-  listing.closedDate = { year: Number(state.simulationYear) || 1, month: Number(state.simulationMonth) || 0, day: Number(state.simulationDay) || 1 };
+  listing.closedDate = { year: Number(state.simulation.year) || 1, month: Number(state.simulation.month) || 0, day: Number(state.simulation.day) || 1 };
   renderCorredoraRentalManagement();
 }
 
@@ -650,9 +650,9 @@ function openCorredoraTransactionModal(propertyId, transactionType, returnMode =
 
   const isPurchase = transactionType === 'compra';
   const today = {
-    year: Number(state.simulationYear) || 1,
-    month: Number(state.simulationMonth) || 0,
-    day: Number(state.simulationDay) || 1
+    year: Number(state.simulation.year) || 1,
+    month: Number(state.simulation.month) || 0,
+    day: Number(state.simulation.day) || 1
   };
   const monthLength = getCorredoraMonthLength(today.year, today.month);
   const initialProratedRent = isPurchase
@@ -660,9 +660,9 @@ function openCorredoraTransactionModal(propertyId, transactionType, returnMode =
     : Math.round(property.monthlyRent * (monthLength - today.day + 1) / monthLength);
   const amount = isPurchase ? property.value : property.monthlyRent + initialProratedRent;
   const fundingSources = getCorredoraFundingSources();
-  const accounts = (state.bankAccounts || []).filter(account => account.type !== 'credit');
+  const accounts = (state.finances.bankAccounts || []).filter(account => account.type !== 'credit');
   const defaultSource = fundingSources.find(source => {
-    if (source.id === 'cash') return (Number(state.cash) || 0) >= amount;
+    if (source.id === 'cash') return (Number(state.finances.cash) || 0) >= amount;
     const account = accounts.find(item => item.id === source.id);
     return (Number(account?.balance) || 0) >= amount;
   }) || fundingSources[0];
@@ -699,9 +699,9 @@ function confirmCorredoraTransaction(propertyId, transactionType, returnMode = '
   if (!property || !['compra', 'arriendo'].includes(transactionType)) return;
 
   const date = {
-    year: Number(state.simulationYear) || 1,
-    month: Number(state.simulationMonth) || 0,
-    day: Number(state.simulationDay) || 1
+    year: Number(state.simulation.year) || 1,
+    month: Number(state.simulation.month) || 0,
+    day: Number(state.simulation.day) || 1
   };
   const initialProratedRent = transactionType === 'arriendo'
     ? Math.round(property.monthlyRent * (getCorredoraMonthLength(date.year, date.month) - date.day + 1) / getCorredoraMonthLength(date.year, date.month))
@@ -709,9 +709,9 @@ function confirmCorredoraTransaction(propertyId, transactionType, returnMode = '
   const amount = transactionType === 'compra' ? property.value : property.monthlyRent + initialProratedRent;
   const account = sourceId === 'cash'
     ? null
-    : (state.bankAccounts || []).find(item => item.id === sourceId && item.type !== 'credit');
+    : (state.finances.bankAccounts || []).find(item => item.id === sourceId && item.type !== 'credit');
   const available = sourceId === 'cash'
-    ? Number(state.cash) || 0
+    ? Number(state.finances.cash) || 0
     : account ? getBankAccountSpendableBalance(account.id) : 0;
   if (available < amount || (sourceId !== 'cash' && !account)) {
     if (errorEl) {
@@ -725,13 +725,13 @@ function confirmCorredoraTransaction(propertyId, transactionType, returnMode = '
     ? `Compra de propiedad: ${property.name}`
     : `Pago de garantía y arriendo inicial: ${property.name}`;
   withFinancialMovementDetail(movementDetail, () => {
-    if (sourceId === 'cash') state.cash = available - amount;
+    if (sourceId === 'cash') state.finances.cash = available - amount;
     else debitBankAccountWithCreditLine(account.id, amount);
   });
 
   if (transactionType === 'compra') {
-    if (!Array.isArray(state.properties)) state.properties = [];
-    state.properties.push({
+    if (!Array.isArray(state.assets.properties)) state.assets.properties = [];
+    state.assets.properties.push({
       id: `corredora_${property.id}_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
       catalogId: property.id,
       name: property.name,
@@ -745,8 +745,8 @@ function confirmCorredoraTransaction(propertyId, transactionType, returnMode = '
       purchaseDate: date
     });
   } else {
-    if (!Array.isArray(state.rentedProperties)) state.rentedProperties = [];
-    state.rentedProperties.push({
+    if (!Array.isArray(state.assets.rentedProperties)) state.assets.rentedProperties = [];
+    state.assets.rentedProperties.push({
       id: `arriendo_${property.id}_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
       catalogId: property.id,
       name: property.name,
@@ -790,12 +790,12 @@ function getCorredoraDepositRefundPercent(wellbeingPercent) {
 function chargeCorredoraSource(sourceId, amount, detail = 'Pago de arriendo') {
   const charge = Math.max(0, Math.round(Number(amount) || 0));
   if (sourceId === 'cash') {
-    const available = Number(state.cash) || 0;
+    const available = Number(state.finances.cash) || 0;
     const paid = Math.min(available, charge);
-    withFinancialMovementDetail(detail, () => { state.cash = available - paid; });
+    withFinancialMovementDetail(detail, () => { state.finances.cash = available - paid; });
     return paid;
   }
-  const account = (state.bankAccounts || []).find(item => item.id === sourceId && item.type !== 'credit');
+  const account = (state.finances.bankAccounts || []).find(item => item.id === sourceId && item.type !== 'credit');
   if (!account) return 0;
   const available = Number(account.balance) || 0;
   const paid = Math.min(available, charge);
@@ -806,22 +806,22 @@ function chargeCorredoraSource(sourceId, amount, detail = 'Pago de arriendo') {
 function creditCorredoraSource(sourceId, amount, detail = 'Abono de arriendo') {
   const credit = Math.max(0, Math.round(Number(amount) || 0));
   if (sourceId === 'cash') {
-    withFinancialMovementDetail(detail, () => { state.cash = (Number(state.cash) || 0) + credit; });
+    withFinancialMovementDetail(detail, () => { state.finances.cash = (Number(state.finances.cash) || 0) + credit; });
     return;
   }
-  const account = (state.bankAccounts || []).find(item => item.id === sourceId && item.type !== 'credit');
+  const account = (state.finances.bankAccounts || []).find(item => item.id === sourceId && item.type !== 'credit');
   if (account) withFinancialMovementDetail(detail, () => { account.balance = (Number(account.balance) || 0) + credit; });
-  else withFinancialMovementDetail(detail, () => { state.cash = (Number(state.cash) || 0) + credit; });
+  else withFinancialMovementDetail(detail, () => { state.finances.cash = (Number(state.finances.cash) || 0) + credit; });
 }
 
 function processMonthlyCorredoraPayments() {
-  if (!Array.isArray(state.rentedProperties)) state.rentedProperties = [];
-  const previousMonthIndex = getCorredoraMonthIndex(state.simulationYear, state.simulationMonth) - 1;
+  if (!Array.isArray(state.assets.rentedProperties)) state.assets.rentedProperties = [];
+  const previousMonthIndex = getCorredoraMonthIndex(state.simulation.year, state.simulation.month) - 1;
   if (previousMonthIndex < 0) return;
   const year = Math.floor(previousMonthIndex / 12) + 1;
   const month = previousMonthIndex % 12;
 
-  state.rentedProperties.forEach(rental => {
+  state.assets.rentedProperties.forEach(rental => {
     if (!rental.active || previousMonthIndex <= Number(rental.lastRentChargedMonthIndex ?? rental.startMonthIndex ?? -1)) return;
     const due = getCorredoraProratedRent(rental, year, month, getCorredoraMonthLength(year, month))
       + (Number(rental.unpaidRent) || 0);
@@ -829,16 +829,16 @@ function processMonthlyCorredoraPayments() {
     rental.unpaidRent = Math.max(0, due - paid);
     rental.lastRentChargedMonthIndex = previousMonthIndex;
   });
-  if (state.activeHudTab === 'corredora') renderCorredoraMain();
+  if (state.interface.activeHudTab === 'corredora') renderCorredoraMain();
 }
 
 function endCorredoraRental(rentalId, returnMode = 'main') {
-  const rental = (state.rentedProperties || []).find(item => item.id === rentalId && item.active);
+  const rental = (state.assets.rentedProperties || []).find(item => item.id === rentalId && item.active);
   if (!rental || !window.confirm(`¿Terminar el arriendo de ${rental.name}?`)) return;
   const endDate = {
-    year: Number(state.simulationYear) || 1,
-    month: Number(state.simulationMonth) || 0,
-    day: Number(state.simulationDay) || 1
+    year: Number(state.simulation.year) || 1,
+    month: Number(state.simulation.month) || 0,
+    day: Number(state.simulation.day) || 1
   };
   const endMonthIndex = getCorredoraMonthIndex(endDate.year, endDate.month);
   const endMonthLength = getCorredoraMonthLength(endDate.year, endDate.month);
@@ -854,7 +854,7 @@ function endCorredoraRental(rentalId, returnMode = 'main') {
   const pendingRent = Number(rental.unpaidRent) || 0;
   const finalRentPaid = chargeCorredoraSource(rental.paymentSourceId, finalRent + pendingRent, `Arriendo proporcional de salida: ${rental.name}`);
   const remainingRentDue = Math.max(0, finalRent + pendingRent - finalRentPaid);
-  const wellbeing = Math.max(0, Math.min(100, Number(state.mentalPeace) || 0));
+  const wellbeing = Math.max(0, Math.min(100, Number(state.wellbeing.mentalPeace) || 0));
   const refundPercent = getCorredoraDepositRefundPercent(wellbeing);
   const depositRefund = Math.round((Number(rental.securityDeposit) || 0) * refundPercent / 100);
   creditCorredoraSource(rental.paymentSourceId, depositRefund, `Devolución de mes de garantía: ${rental.name}`);

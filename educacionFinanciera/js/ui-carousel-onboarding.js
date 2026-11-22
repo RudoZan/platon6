@@ -52,12 +52,12 @@
         return;
       }
 
-      const homes = (state.selectedHomes || [0, 1]).map(i => homeOptions[i] || homeOptions[0]);
-      const jobs = (state.selectedJobs || [0, 1]).map(i => jobOptions[i] || jobOptions[0]);
-      const transports = (state.selectedTransports || [1, 2]).map(i => transportOptions[i] || transportOptions[0]);
+      const homes = (state.persona.selectedHomes || [0, 1]).map(i => homeOptions[i] || homeOptions[0]);
+      const jobs = (state.persona.selectedJobs || [0, 1]).map(i => jobOptions[i] || jobOptions[0]);
+      const transports = (state.persona.selectedTransports || [1, 2]).map(i => transportOptions[i] || transportOptions[0]);
 
       // Lista de intereses prioritarios para el texto narrativo (los 4 más altos, sin íconos en el texto)
-      const sortedCats = [...state.categories].sort((a, b) => b.dots - a.dots);
+      const sortedCats = [...state.persona.categories].sort((a, b) => b.dots - a.dots);
       const mainInterests = sortedCats.slice(0, 4);
       const interestNames = mainInterests.map(c => {
         const cleanName = c.name.replace(/^[^\p{L}\p{N}]+\s*/u, '').trim();
@@ -144,7 +144,7 @@
 
     // SELECCIONAR Y ACTIVAR UNA DIAPOSITIVA
     function selectSlide(idx, triggerScroll = true) {
-      state.currentSlideIdx = idx;
+      state.simulation.currentSlideIdx = idx;
       const slide = slidesData[idx];
       if (!slide) return;
 
@@ -181,7 +181,7 @@
 
     // AVANZAR O RETROCEDER CON BOTONES ◀ / ▶
     function scrollSlideBy(dir) {
-      let newIdx = state.currentSlideIdx + dir;
+      let newIdx = state.simulation.currentSlideIdx + dir;
       if (newIdx < 0) newIdx = 0;
       if (newIdx >= slidesData.length) newIdx = slidesData.length - 1;
       selectSlide(newIdx);
@@ -200,7 +200,7 @@
         const closestIdx = Math.round(track.scrollLeft / cardWidth);
         const validIdx = Math.max(0, Math.min(slidesData.length - 1, closestIdx));
 
-        if (validIdx !== state.currentSlideIdx) {
+        if (validIdx !== state.simulation.currentSlideIdx) {
           selectSlide(validIdx, false);
         }
       }, 120);
@@ -257,7 +257,7 @@
     function activateInteractiveView(slide) {
       // El icono del dock solo debe estar marcado cuando en el centro se muestra lo del icono.
       // Al cambiar la diapositiva y modificarse el centro, se desmarca cualquier icono activo.
-      state.activeHudTab = null;
+      state.interface.activeHudTab = null;
       document.querySelectorAll('.hud-dock-tab').forEach(t => t.classList.remove('active'));
 
       // Ocultar todas las vistas
@@ -311,7 +311,7 @@
         }
         return;
       }
-      state.sessionCode = code;
+      state.persona.sessionCode = code;
       if (feedback) {
         feedback.style.display = 'block';
         feedback.style.color = '#059669';
@@ -330,7 +330,7 @@
 
       const starSvg = `<svg class="star-svg" viewBox="0 0 20 20"><polygon points="10,1 12.6,6.8 19,7.5 14.3,12 15.6,18.5 10,15.2 4.4,18.5 5.7,12 1,7.5 7.4,6.8" /></svg>`;
 
-      state.categories.forEach((cat, idx) => {
+      state.persona.categories.forEach((cat, idx) => {
         const row = document.createElement('div');
         row.className = 'category-row';
         row.innerHTML = `
@@ -355,9 +355,9 @@
 
     // GESTIÓN DE TOQUE DIRECTO EN LAS ESTRELLAS
     function onDotClick(catIdx, slotNum) {
-      const cat = state.categories[catIdx];
-      const currentAssigned = state.categories.reduce((acc, c) => acc + c.dots, 0);
-      const available = state.totalBolitas - currentAssigned;
+      const cat = state.persona.categories[catIdx];
+      const currentAssigned = state.persona.categories.reduce((acc, c) => acc + c.dots, 0);
+      const available = state.persona.totalBolitas - currentAssigned;
 
       // Caso 1: El usuario pincha una estrella ya activa (para quitarla o reducirla)
       if (slotNum <= cat.dots) {
@@ -409,21 +409,21 @@
     }
 
     function calculateTotalBolitas() {
-      const sum = state.categories.reduce((acc, c) => acc + c.dots, 0);
-      state.assignedBolitas = sum;
+      const sum = state.persona.categories.reduce((acc, c) => acc + c.dots, 0);
+      state.persona.assignedBolitas = sum;
 
       const assignedEl = document.getElementById('assigned-bolitas');
       if (assignedEl) assignedEl.innerText = sum;
 
       const maxEl = document.getElementById('max-bolitas');
-      if (maxEl) maxEl.innerText = state.totalBolitas;
+      if (maxEl) maxEl.innerText = state.persona.totalBolitas;
 
       updateInterestsValidation();
     }
 
     // VALIDACIÓN DE INTERESES (DEBE PRIORIZAR AL MENOS UN INTERÉS CON > 1 ESTRELLA)
     function updateInterestsValidation() {
-      const hasPrioritized = state.categories && state.categories.some(c => c.dots > 1);
+      const hasPrioritized = state.persona.categories && state.persona.categories.some(c => c.dots > 1);
       const btn = document.getElementById('btn-next-interests');
       if (btn) {
         btn.disabled = !hasPrioritized;
@@ -435,7 +435,7 @@
     }
 
     function confirmInterestsAndContinue() {
-      const hasPrioritized = state.categories && state.categories.some(c => c.dots > 1);
+      const hasPrioritized = state.persona.categories && state.persona.categories.some(c => c.dots > 1);
       if (!hasPrioritized) {
         const warningEl = document.getElementById('interests-warning-msg');
         if (warningEl) {
@@ -463,14 +463,14 @@
 
     // SELECCIÓN DE 2 OPCIONES LIBRES EN ESTILO DE VIDA (VIVIENDA, TRABAJO, TRANSPORTE)
     function selectAnchor(type, idx, elem, label) {
-      if (!state.selectedHomes) state.selectedHomes = [];
-      if (!state.selectedJobs) state.selectedJobs = [];
-      if (!state.selectedTransports) state.selectedTransports = [];
+      if (!state.persona.selectedHomes) state.persona.selectedHomes = [];
+      if (!state.persona.selectedJobs) state.persona.selectedJobs = [];
+      if (!state.persona.selectedTransports) state.persona.selectedTransports = [];
 
       let list;
-      if (type === 'home') list = state.selectedHomes;
-      else if (type === 'job') list = state.selectedJobs;
-      else if (type === 'transport') list = state.selectedTransports;
+      if (type === 'home') list = state.persona.selectedHomes;
+      else if (type === 'job') list = state.persona.selectedJobs;
+      else if (type === 'transport') list = state.persona.selectedTransports;
 
       const pos = list.indexOf(idx);
       if (pos !== -1) {
@@ -491,21 +491,21 @@
 
       // Sincronizar compatibilidad con opción primaria (la primera de las 2)
       if (type === 'home') {
-        state.selectedHome = list.length > 0 ? list[0] : null;
-        state.lifestyleChoices.home = list.map(i => homeOptions[i] ? homeOptions[i].name : '').filter(Boolean).join(' / ');
+        state.persona.selectedHome = list.length > 0 ? list[0] : null;
+        state.persona.lifestyleChoices.home = list.map(i => homeOptions[i] ? homeOptions[i].name : '').filter(Boolean).join(' / ');
       } else if (type === 'job') {
-        state.selectedJob = list.length > 0 ? list[0] : null;
-        state.lifestyleChoices.job = list.map(i => jobOptions[i] ? jobOptions[i].name : '').filter(Boolean).join(' / ');
+        state.persona.selectedJob = list.length > 0 ? list[0] : null;
+        state.persona.lifestyleChoices.job = list.map(i => jobOptions[i] ? jobOptions[i].name : '').filter(Boolean).join(' / ');
       } else if (type === 'transport') {
-        state.selectedTransport = list.length > 0 ? list[0] : null;
-        state.lifestyleChoices.transport = list.map(i => transportOptions[i] ? transportOptions[i].name : '').filter(Boolean).join(' / ');
+        state.persona.selectedTransport = list.length > 0 ? list[0] : null;
+        state.persona.lifestyleChoices.transport = list.map(i => transportOptions[i] ? transportOptions[i].name : '').filter(Boolean).join(' / ');
       }
 
       // Habilitar botón Siguiente solo cuando las 3 categorías tengan exactamente 2 opciones
       const isComplete = Boolean(
-        state.selectedHomes.length === 2 &&
-        state.selectedJobs.length === 2 &&
-        state.selectedTransports.length === 2
+        state.persona.selectedHomes.length === 2 &&
+        state.persona.selectedJobs.length === 2 &&
+        state.persona.selectedTransports.length === 2
       );
       const btn = document.getElementById('btn-confirm-anchors');
       if (btn) btn.disabled = !isComplete;
@@ -520,9 +520,9 @@
     // CONFIRMAR ESTILO DE VIDA Y CONTINUAR A LA FICHA DE RESUMEN
     function confirmAnchorsAndContinue() {
       const missing = [];
-      if (!state.selectedHomes || state.selectedHomes.length < 2) missing.push('Vivienda (2 opciones)');
-      if (!state.selectedJobs || state.selectedJobs.length < 2) missing.push('Trabajo (2 opciones)');
-      if (!state.selectedTransports || state.selectedTransports.length < 2) missing.push('Transporte (2 opciones)');
+      if (!state.persona.selectedHomes || state.persona.selectedHomes.length < 2) missing.push('Vivienda (2 opciones)');
+      if (!state.persona.selectedJobs || state.persona.selectedJobs.length < 2) missing.push('Trabajo (2 opciones)');
+      if (!state.persona.selectedTransports || state.persona.selectedTransports.length < 2) missing.push('Transporte (2 opciones)');
 
       if (missing.length > 0) {
         flashMissingAnchors(missing);
@@ -539,17 +539,17 @@
         renderCharacterSummary();
         return;
       }
-      state.profileCompleted = true;
-      state.healthPhysical = 20;
-      state.healthEmotional = 40;
-      state.healthMental = 40;
-      state.mentalPeace = 100;
+      state.persona.profileCompleted = true;
+      state.wellbeing.healthPhysical = 20;
+      state.wellbeing.healthEmotional = 40;
+      state.wellbeing.healthMental = 40;
+      state.wellbeing.mentalPeace = 100;
 
       // Activar inmediatamente la vista central de Personal desde el dock
       selectHudTab('estado');
 
       // Avanzar el carrusel superior a la diapositiva 4 (Paso 5: Presupuesto)
-      state.currentSlideIdx = 4;
+      state.simulation.currentSlideIdx = 4;
       const slide = slidesData[4];
       if (slide) {
         const topModule = document.getElementById('slide-top-module');
@@ -577,9 +577,9 @@
     function flashMissingAnchors(missing) {
       if (!missing || missing.length === 0) {
         missing = [];
-        if (!state.selectedHomes || state.selectedHomes.length < 2) missing.push('Vivienda (2 opciones)');
-        if (!state.selectedJobs || state.selectedJobs.length < 2) missing.push('Trabajo (2 opciones)');
-        if (!state.selectedTransports || state.selectedTransports.length < 2) missing.push('Transporte (2 opciones)');
+        if (!state.persona.selectedHomes || state.persona.selectedHomes.length < 2) missing.push('Vivienda (2 opciones)');
+        if (!state.persona.selectedJobs || state.persona.selectedJobs.length < 2) missing.push('Trabajo (2 opciones)');
+        if (!state.persona.selectedTransports || state.persona.selectedTransports.length < 2) missing.push('Transporte (2 opciones)');
       }
       const warningEl = document.getElementById('anchors-warning-msg');
       if (warningEl) {

@@ -472,15 +472,21 @@
         ]
       },
       comercio: {
-        title: "🛍️ Comercio",
-        subtitle: "Compras, consumo y retail",
+        title: "🛍️ Comercio y Servicios",
+        subtitle: "Compras, consumo y servicios cotidianos",
         sections: [
           { name: "Comida", icon: "🛒" },
           { name: "Farmacia", icon: "💊" },
           { name: "Multitienda", icon: "🏬" },
           { name: "Muebles y Electrónicos", icon: "🛋️" },
           { name: "Automotora", icon: "🚗" },
-          { name: "Compra de Oro, Plata y Joyas", icon: "💍" }
+          { name: "Compra de Oro, Plata y Joyas", icon: "💍" },
+          { name: "Tienda de Hobbies", icon: "🎨" },
+          { name: "Ropa e implementos deportivos", icon: "🏅" },
+          { name: "Reparaciones del hogar", icon: "🛠️" },
+          { name: "Mecánico", icon: "🔧" },
+          { name: "Veterinario", icon: "🐾" },
+          { name: "Hospital y Urgencia", icon: "🏥" }
         ]
       },
       actividades: {

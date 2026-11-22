@@ -32,7 +32,6 @@ button, a { font: inherit; }
   width: min(100%, 520px);
   min-height: 100vh;
   margin: 0 auto;
-  overflow: hidden;
   background-color: #0d1527;
   background-image:
     radial-gradient(ellipse at 50% 30%, rgba(56, 189, 248, 0.2), transparent 55%),
@@ -43,11 +42,14 @@ button, a { font: inherit; }
 }
 
 .topbar {
-  position: sticky;
-  z-index: 5;
+  position: fixed;
+  z-index: 60;
   top: 0;
+  left: 50%;
+  width: min(100%, 520px);
+  transform: translateX(-50%);
   display: flex;
-  flex: 0 0 var(--header-height);
+  flex: none;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -150,8 +152,8 @@ button, a { font: inherit; }
   flex: 1 0 auto;
   flex-direction: column;
   justify-content: center;
-  min-height: calc(100vh - var(--header-height) - var(--footer-height));
-  padding: 38px 22px calc(var(--footer-height) + 24px);
+  min-height: 100vh;
+  padding: calc(var(--header-height) + 38px) 22px calc(var(--footer-height) + 24px);
 }
 
 .welcome-panel {
@@ -268,23 +270,18 @@ blockquote cite span { padding: 0 4px; color: var(--soft); }
   cursor: default;
 }
 
-.nav-icon { display: grid; width: 25px; height: 25px; flex: 0 0 25px; place-items: center; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.42); border-radius: 8px; color: #fff; font-size: 0.95rem; line-height: 1; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
-.nav-icon svg { display: block; width: 16px; height: 16px; }
-.icon-personal { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
-.icon-situation { background: linear-gradient(135deg, #06b6d4 0%, #0e7490 100%); }
-.icon-work { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); }
-.icon-finance { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
-.icon-products { background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%); }
-.icon-advisor { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+.nav-icon { display: grid; width: 27px; height: 27px; flex: 0 0 27px; place-items: center; color: #d8e6f3; }
+.nav-icon svg { display: block; width: 24px; height: 24px; }
 .nav-item span:last-child { display: block; width: 100%; min-height: 2.1em; overflow-wrap: anywhere; }
 
 @keyframes rise-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (min-width: 760px) {
   .app-frame { width: 100%; max-width: none; min-height: 100vh; }
+  .topbar { width: 100%; }
   .topbar { padding-right: 34px; padding-left: 34px; }
   .brand { font-size: 1.1rem; }
-  .main-content { min-height: calc(100vh - var(--header-height) - 92px); padding: 58px 40px 116px; }
+  .main-content { min-height: 100vh; padding: calc(var(--header-height) + 58px) 40px 116px; }
   .welcome-panel { max-width: 700px; padding: 42px 48px 38px; }
   .welcome-lead { max-width: 55ch; font-size: 1.08rem; }
   .welcome-copy { max-width: 68ch; font-size: 0.95rem; }
@@ -292,7 +289,8 @@ blockquote cite span { padding: 0 4px; color: var(--soft); }
   .bottom-bar { height: 92px; }
   .section-nav { max-width: 980px; margin: 0 auto; }
   .nav-item { gap: 6px; font-size: 0.68rem; }
-  .nav-icon { width: 29px; height: 29px; font-size: 1.08rem; }
+  .nav-icon { width: 30px; height: 30px; flex-basis: 30px; }
+  .nav-icon svg { width: 26px; height: 26px; }
 }
 
 @media (max-width: 390px) {
@@ -302,12 +300,13 @@ blockquote cite span { padding: 0 4px; color: var(--soft); }
   .brand-mark { flex-basis: 28px; width: 28px; height: 28px; }
   .topbar-actions { gap: 8px; }
   .simulation-date { font-size: 0.69rem; }
-  .main-content { padding: 26px 14px calc(var(--footer-height) + 24px); }
+  .main-content { padding: calc(var(--header-height) + 26px) 14px calc(var(--footer-height) + 24px); }
   .welcome-panel { padding: 25px 19px 22px; }
   h1 { font-size: 1.9rem; }
   .welcome-copy { font-size: 0.81rem; }
   .nav-item { gap: 3px; padding-right: 1px; padding-left: 1px; font-size: 0.49rem; }
-  .nav-icon { width: 23px; height: 23px; flex-basis: 23px; font-size: 0.86rem; }
+  .nav-icon { width: 24px; height: 24px; flex-basis: 24px; }
+  .nav-icon svg { width: 22px; height: 22px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

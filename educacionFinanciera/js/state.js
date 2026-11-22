@@ -1,62 +1,17 @@
 // Shared Global State & Cross-Module Helpers — educacionFinanciera
 
-    const SIMULATION_STORAGE_KEY = 'educacionFinanciera.simulationState.v1';
-    let simulationPersistenceEnabled = true;
-
-    function readPersistedSimulationState() {
-      let newestState = null;
-      let newestTimestamp = -1;
+    function clearLegacySavedProgress() {
+      const storageKey = 'educacionFinanciera.simulationState.v1';
       for (const storageName of ['localStorage', 'sessionStorage']) {
         try {
-          const serialized = window[storageName].getItem(SIMULATION_STORAGE_KEY);
-          const record = serialized ? JSON.parse(serialized) : null;
-          const savedState = record?.state && typeof record.state === 'object' ? record.state : record;
-          const timestamp = Number(record?.savedAt) || 0;
-          if (savedState && typeof savedState === 'object' && !Array.isArray(savedState) && timestamp >= newestTimestamp) {
-            newestState = savedState;
-            newestTimestamp = timestamp;
-          }
+          window[storageName].removeItem(storageKey);
         } catch (error) {
-          console.warn(`No se pudo leer el progreso desde ${storageName}.`, error);
-        }
-      }
-      return newestState;
-    }
-
-    function persistSimulationState(stateSnapshot) {
-      if (!simulationPersistenceEnabled) return false;
-      let serialized;
-      try {
-        serialized = JSON.stringify({ savedAt: Date.now(), state: stateSnapshot });
-      } catch (error) {
-        console.warn('No se pudo serializar el progreso de la simulación.', error);
-        return false;
-      }
-
-      try {
-        window.localStorage.setItem(SIMULATION_STORAGE_KEY, serialized);
-        return true;
-      } catch (error) {
-        console.warn('No se pudo guardar el progreso en localStorage.', error);
-      }
-      try {
-        window.sessionStorage.setItem(SIMULATION_STORAGE_KEY, serialized);
-        return true;
-      } catch (error) {
-        console.warn('No se pudo guardar el progreso en sessionStorage.', error);
-        return false;
-      }
-    }
-
-    function clearPersistedSimulationState() {
-      for (const storageName of ['localStorage', 'sessionStorage']) {
-        try {
-          window[storageName].removeItem(SIMULATION_STORAGE_KEY);
-        } catch (error) {
-          console.warn(`No se pudo borrar el progreso de ${storageName}.`, error);
+          console.warn(`No se pudo borrar el progreso antiguo de ${storageName}.`, error);
         }
       }
     }
+
+    clearLegacySavedProgress();
 
     let activeFinancialMovementDetail = '';
 
@@ -73,13 +28,13 @@
     function recordFinancialMovement({ detail, amount, direction, accountId, accountName }) {
       const value = Math.max(0, Math.round(Number(amount) || 0));
       if (!value) return;
-      if (!Array.isArray(state.financialMovements)) state.financialMovements = [];
-      state.financialMovements.push({
+      if (!Array.isArray(state.finances.financialMovements)) state.finances.financialMovements = [];
+      state.finances.financialMovements.push({
         id: `movement_${Date.now()}_${Math.floor(Math.random() * 100000)}`,
         timestamp: Date.now(),
-        year: Number(state.simulationYear) || 1,
-        month: Number(state.simulationMonth) || 0,
-        day: Number(state.simulationDay) || 1,
+        year: Number(state.simulation.year) || 1,
+        month: Number(state.simulation.month) || 0,
+        day: Number(state.simulation.day) || 1,
         detail: String(detail || 'Movimiento financiero'),
         expense: direction === 'expense' ? value : 0,
         income: direction === 'income' ? value : 0,
@@ -88,23 +43,9 @@
       });
     }
 
-    function createPersistentState(defaultState) {
-      let saveTimer = null;
+    function createState(defaultState) {
       let rootProxy;
       const proxies = new WeakMap();
-      let initialState = defaultState;
-
-      const savedState = readPersistedSimulationState();
-      if (savedState) initialState = { ...defaultState, ...savedState };
-
-      const save = () => {
-        if (!simulationPersistenceEnabled) return;
-        window.clearTimeout(saveTimer);
-        saveTimer = window.setTimeout(() => {
-          if (!simulationPersistenceEnabled) return;
-          persistSimulationState(rootProxy);
-        }, 100);
-      };
 
       const wrap = value => {
         if (!value || typeof value !== 'object') return value;
@@ -119,8 +60,8 @@
             if (changed && (property === 'cash' || property === 'balance')
               && Number.isFinite(Number(previousValue)) && Number.isFinite(Number(nextValue))
               && Number(previousValue) !== Number(nextValue)) {
-              const isCash = property === 'cash' && target === initialState;
-              const bankAccounts = isCash ? [] : rootProxy.bankAccounts;
+              const isCash = property === 'cash' && target === defaultState.finances;
+              const bankAccounts = isCash ? [] : rootProxy.finances.bankAccounts;
               const account = Array.isArray(bankAccounts)
                 ? bankAccounts.find(item => item === receiver)
                 : null;
@@ -136,110 +77,127 @@
                 });
               }
             }
-            save();
             return changed;
           },
-          deleteProperty(target, property) {
-            const deleted = Reflect.deleteProperty(target, property);
-            if (deleted) save();
-            return deleted;
-          }
+          deleteProperty: Reflect.deleteProperty
         });
         proxies.set(value, proxy);
         proxies.set(proxy, proxy);
         return proxy;
       };
 
-      rootProxy = wrap(initialState);
+      rootProxy = wrap(defaultState);
       return rootProxy;
     }
 
-    // ESTADO GLOBAL DEL PERSONAJE (CONFIGURACIÓN POR DEFECTO PARA DESARROLLO)
-    const state = createPersistentState({
-      currentSlideIdx: 0,
-      activeHudTab: null,
-      simulationDay: 1,
-      simulationMonth: 0,
-      simulationYear: 1,
-      simulationClockRunning: false,
-      profileCompleted: false,
-      totalBolitas: 25,
-      assignedBolitas: 21,
-      selectedHomes: [0, 1], // Casa o Depto y Departamento centro
-      selectedJobs: [0, 1],  // Freelance y Trabajo dependiente
-      selectedTransports: [1, 2], // City Car y Locomoción colectiva
-      selectedHome: 1, // Opción activa / primaria
-      selectedJob: 1,  // Opción activa / primaria
-      selectedTransport: 1, // Opción activa / primaria
-      lifestyleChoices: {
-        home: 'Casa o Depto / Departamento centro',
-        job: 'Freelance / Trabajo dependiente',
-        transport: 'City Car / Locomoción colectiva'
+    const state = createState({
+      persona: {
+        profileCompleted: false,
+        totalBolitas: 25,
+        assignedBolitas: 21,
+        selectedHomes: [0, 1],
+        selectedJobs: [0, 1],
+        selectedTransports: [1, 2],
+        selectedHome: 1,
+        selectedJob: 1,
+        selectedTransport: 1,
+        lifestyleChoices: {
+          home: 'Casa o Depto / Departamento centro',
+          job: 'Freelance / Trabajo dependiente',
+          transport: 'City Car / Locomoción colectiva'
+        },
+        categories: [
+          { id: 'vivienda', name: '🏠 Hogar & Decoración', dots: 2 },
+          { id: 'movilidad', name: '🚗 Comodidad al movilizarse', dots: 1 },
+          { id: 'mascotas', name: '🐾 Mascotas & Animales', dots: 1 },
+          { id: 'tech', name: '💻 Tecnología & Herramientas', dots: 2 },
+          { id: 'viajes', name: '✈️ Viajes & Vacaciones', dots: 2 },
+          { id: 'gastronomia', name: '🍽️ Gastronomía & Salidas', dots: 2 },
+          { id: 'conciertos', name: '🎸 Conciertos & Festivales', dots: 1 },
+          { id: 'educacion', name: '📚 Educación & Aprendizaje', dots: 2 },
+          { id: 'seguridad', name: '🛡️ Paz Financiera y Reservas', dots: 2 },
+          { id: 'hobbies', name: '🎨 Hobbies & Pasatiempos', dots: 1 },
+          { id: 'deporte', name: '🏋️ Deporte & Salud Física', dots: 1 },
+          { id: 'naturaleza', name: '🏕️ Naturaleza & Vida al Aire Libre', dots: 1 },
+          { id: 'moda', name: '👗 Moda, Imagen & Estilo', dots: 1 },
+          { id: 'gaming', name: '🎮 Gaming & Ocio Digital', dots: 1 },
+          { id: 'familia', name: '🤝 Familia & Amigos', dots: 1 }
+        ],
+        sessionCode: null
       },
-      cash: 5000000, // Dinero físico en efectivo inicial (siempre presente)
-      bankAccounts: [], // Al partir no tiene cuentas bancarias contratadas (solo figuran si han sido contratadas)
-      financialMovements: [],
-      creditCard: null, // Al partir no tiene tarjeta de crédito contratada
-      creditLine: null, // Al partir no tiene línea de crédito contratada
-      insurances: [], // Al partir no tiene seguros contratados
-      termDeposits: [], // Al partir no tiene depósitos a plazo contratados
-      mutualFunds: [], // Al partir no tiene fondos mutuos contratados
-      otherInvestments: [], // Al partir no tiene instrumentos en Otras Inversiones
-      foreignCurrencies: {}, // Saldos en moneda extranjera (USD, EUR, JPY, PEN, ARS, BRL)
-      debts: [], // Al partir no tiene deudas contratadas (cada crédito aparecerá individualmente al contraerlo)
-      reserves: 0, // Al partir no tiene fondo de reserva acumulado
-      invested: 0, // Al partir no tiene inversiones activas
-      monthlyDebt: 0, // Al partir no tiene deudas contraídas
-      healthPhysical: 20, // Salud Física: 20/20 pts (20% del bienestar total)
-      healthEmotional: 40, // Salud Emocional: 40/40 pts (40% del bienestar total)
-      healthMental: 40, // Salud Mental: 40/40 pts (40% del bienestar total)
-      mentalPeace: 100, // Bienestar Total (20 + 40 + 40 = 100)
-      currentJob: null, // Al partir no tiene empleo
-      courses: [], // Al partir no tiene cursos o especializaciones cursadas
-      enrolledCourses: [],
-      jobHistory: [], // Historial de empleos previos desempeñados
-      workExperienceMonths: 0,
-      properties: [],      // Al partir no tiene propiedades
-      propertyListings: [],
-      propertyRentalListings: [],
-      rentedProperties: [],
-      vehicles: [],        // Al partir no tiene vehículos
-      riskTestResult: null, // Al partir no ha hecho el test de perfil de riesgo
-      budgetItems: [
-        { id: 'vivienda', name: 'Vivienda', desc: 'Arriendo o dividendo + gastos comunes', icon: '🏠', budget: 0, real: 0 },
-        { id: 'servicios', name: 'Servicios', desc: 'Luz, agua, gas, internet y telefonía', icon: '💡', budget: 0, real: 0 },
-        { id: 'alimentacion', name: 'Alimentación', desc: 'Supermercado y despensa básica', icon: '🛒', budget: 0, real: 0 },
-        { id: 'bencina_tags', name: 'Bencina + Tags', desc: 'Combustible y peajes', icon: '⛽', budget: 0, real: 0 },
-        { id: 'tarjeta_bip', name: 'Tarjeta bip!', desc: 'Locomoción colectiva (metro/micro)', icon: '🚌', budget: 0, real: 0 },
-        { id: 'salidas_ocio', name: 'Salidas y Ocio', desc: 'Restaurantes, delivery, cafés y panoramas', icon: '🍽️', budget: 0, real: 0 },
-        { id: 'suscripciones', name: 'Suscripciones y Hobbies', desc: 'Streaming, gimnasio y recreación', icon: '🎮', budget: 0, real: 0 },
-        { id: 'vestuario', name: 'Vestuario y Cuidado Personal', desc: 'Ropa, peluquería y artículos personales', icon: '👕', budget: 0, real: 0 },
-        { id: 'reserva', name: 'Fondo de Reserva', desc: 'Ahorro para emergencias o proyectos', icon: '🛡️', budget: 0, real: 0 }
-      ],
-      customBudgetItems: [],
-      showAddBudgetForm: false,
-      newBudgetType: 'free',
-      newBudgetInvestType: 'alcancia',
-      categories: [
-        { id: 'vivienda', name: '🏠 Hogar & Decoración', dots: 2 },
-        { id: 'movilidad', name: '🚗 Comodidad al movilizarse', dots: 1 },
-        { id: 'mascotas', name: '🐾 Mascotas & Animales', dots: 1 },
-        { id: 'tech', name: '💻 Tecnología & Herramientas', dots: 2 },
-        { id: 'viajes', name: '✈️ Viajes & Vacaciones', dots: 2 },
-        { id: 'gastronomia', name: '🍽️ Gastronomía & Salidas', dots: 2 },
-        { id: 'conciertos', name: '🎸 Conciertos & Festivales', dots: 1 },
-        { id: 'educacion', name: '📚 Educación & Aprendizaje', dots: 2 },
-        { id: 'seguridad', name: '🛡️ Paz Financiera y Reservas', dots: 2 },
-        { id: 'hobbies', name: '🎨 Hobbies & Pasatiempos', dots: 1 },
-        { id: 'deporte', name: '🏋️ Deporte & Salud Física', dots: 1 },
-        { id: 'naturaleza', name: '🏕️ Naturaleza & Vida al Aire Libre', dots: 1 },
-        { id: 'moda', name: '👗 Moda, Imagen & Estilo', dots: 1 },
-        { id: 'gaming', name: '🎮 Gaming & Ocio Digital', dots: 1 },
-        { id: 'familia', name: '🤝 Familia & Amigos', dots: 1 }
-      ],
-      apvAccount: null, // Cuenta APV contratada (régimen, multifondo, saldo y aporte mensual)
-      cuenta2Account: null, // Cuenta 2 AFP contratada (multifondo, saldo y aporte mensual)
+      config: { simulationSpeedMsPerDay: 2000 },
+      simulation: {
+        currentSlideIdx: 0,
+        day: 1,
+        month: 0,
+        year: 1,
+        clockRunning: false,
+        maxYears: 50
+      },
+      finances: {
+        cash: 5000000,
+        bankAccounts: [],
+        financialMovements: [],
+        creditCard: null,
+        creditLine: null,
+        insurances: [],
+        termDeposits: [],
+        mutualFunds: [],
+        otherInvestments: [],
+        foreignCurrencies: {},
+        debts: [],
+        reserves: 0,
+        invested: 0,
+        monthlyDebt: 0,
+        budgetItems: [
+          { id: 'vivienda', name: 'Vivienda', desc: 'Arriendo o dividendo + gastos comunes', icon: '🏠', budget: 0, real: 0 },
+          { id: 'servicios', name: 'Servicios', desc: 'Luz, agua, gas, internet y telefonía', icon: '💡', budget: 0, real: 0 },
+          { id: 'alimentacion', name: 'Alimentación', desc: 'Supermercado y despensa básica', icon: '🛒', budget: 0, real: 0 },
+          { id: 'bencina_tags', name: 'Bencina + Tags', desc: 'Combustible y peajes', icon: '⛽', budget: 0, real: 0 },
+          { id: 'tarjeta_bip', name: 'Tarjeta bip!', desc: 'Locomoción colectiva (metro/micro)', icon: '🚌', budget: 0, real: 0 },
+          { id: 'salidas_ocio', name: 'Salidas y Ocio', desc: 'Restaurantes, delivery, cafés y panoramas', icon: '🍽️', budget: 0, real: 0 },
+          { id: 'suscripciones', name: 'Suscripciones y Hobbies', desc: 'Streaming, gimnasio y recreación', icon: '🎮', budget: 0, real: 0 },
+          { id: 'vestuario', name: 'Vestuario y Cuidado Personal', desc: 'Ropa, peluquería y artículos personales', icon: '👕', budget: 0, real: 0 },
+          { id: 'reserva', name: 'Fondo de Reserva', desc: 'Ahorro para emergencias o proyectos', icon: '🛡️', budget: 0, real: 0 }
+        ],
+        customBudgetItems: [],
+        apvAccount: null,
+        cuenta2Account: null
+      },
+      assets: {
+        properties: [],
+        propertyListings: [],
+        propertyRentalListings: [],
+        rentedProperties: [],
+        vehicles: []
+      },
+      work: {
+        currentJob: null,
+        courses: [],
+        enrolledCourses: [],
+        jobHistory: [],
+        workExperienceMonths: 0,
+        appliedCourseRaises: [],
+        promotionsEarned: 0
+      },
+      wellbeing: {
+        healthPhysical: 20,
+        healthEmotional: 40,
+        healthMental: 40,
+        mentalPeace: 100,
+        riskTestResult: null
+      },
+      interface: {
+        activeHudTab: null,
+        activeInvestmentSubView: null,
+        showAddBudgetForm: false,
+        newBudgetType: 'free',
+        newBudgetInvestType: 'alcancia',
+        riskTempAnswers: []
+      }
     });
+
+    window.getSimulationDebugState = () => state;
 
     let simulationClockInterval = null;
 
@@ -247,26 +205,34 @@
       const dateElement = document.getElementById('slide-top-date');
       if (!dateElement) return;
       const monthLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-      const day = String(state.simulationDay).padStart(2, '0');
-      const year = String(state.simulationYear).padStart(2, '0');
-      dateElement.textContent = `${day}-${monthLabels[state.simulationMonth]}-Año${year}`;
+      const day = String(state.simulation.day).padStart(2, '0');
+      const year = String(state.simulation.year).padStart(2, '0');
+      dateElement.textContent = `${day}-${monthLabels[state.simulation.month]}-Año${year}`;
     }
 
     function advanceSimulationDay() {
       if (document.visibilityState !== 'visible' || !document.hasFocus()) return;
-      const monthLengths = [31, isSimulationLeapYear(state.simulationYear) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-      state.simulationDay += 1;
-      if (state.simulationDay > monthLengths[state.simulationMonth]) {
-        state.simulationDay = 1;
-        state.simulationMonth += 1;
-        if (state.simulationMonth >= monthLengths.length) {
-          state.simulationMonth = 0;
-          state.simulationYear += 1;
+      if (state.simulation.year >= state.simulation.maxYears
+        && state.simulation.month === 11 && state.simulation.day === 31) {
+        state.simulation.clockRunning = false;
+        stopSimulationClock();
+        const startButton = document.getElementById('simulation-start-button');
+        if (startButton) startButton.innerHTML = '<span>Límite de 50 años alcanzado</span>';
+        return;
+      }
+      const monthLengths = [31, isSimulationLeapYear(state.simulation.year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      state.simulation.day += 1;
+      if (state.simulation.day > monthLengths[state.simulation.month]) {
+        state.simulation.day = 1;
+        state.simulation.month += 1;
+        if (state.simulation.month >= monthLengths.length) {
+          state.simulation.month = 0;
+          state.simulation.year += 1;
         }
       }
       renderSimulationDate();
       if (typeof processDailyFinancialEvents === 'function') processDailyFinancialEvents();
-      if (state.simulationDay === 1 && typeof processMonthlyFinancialEvents === 'function') {
+      if (state.simulation.day === 1 && typeof processMonthlyFinancialEvents === 'function') {
         processMonthlyFinancialEvents();
       }
     }
@@ -275,21 +241,21 @@
       return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
     }
 
-    function getCurrentJobTenureMonths(job = state.currentJob) {
+    function getCurrentJobTenureMonths(job = state.work.currentJob) {
       const start = job && job.tenureStartDate;
       if (!start || !Number.isFinite(Number(start.year)) || !Number.isFinite(Number(start.month)) || !Number.isFinite(Number(start.day))) {
         return Math.max(0, Number(job && job.tenureMonths) || 0);
       }
-      const monthDifference = ((Number(state.simulationYear) - Number(start.year)) * 12)
-        + Number(state.simulationMonth) - Number(start.month);
-      return Math.max(0, monthDifference - (Number(state.simulationDay) < Number(start.day) ? 1 : 0));
+      const monthDifference = ((Number(state.simulation.year) - Number(start.year)) * 12)
+        + Number(state.simulation.month) - Number(start.month);
+      return Math.max(0, monthDifference - (Number(state.simulation.day) < Number(start.day) ? 1 : 0));
     }
 
-    function getSimulationMonthIndex(year = state.simulationYear, month = state.simulationMonth) {
+    function getSimulationMonthIndex(year = state.simulation.year, month = state.simulation.month) {
       return ((Number(year) || 1) - 1) * 12 + (Number(month) || 0);
     }
 
-    function getCurrentJobMonthNumber(job = state.currentJob, monthIndex = getSimulationMonthIndex()) {
+    function getCurrentJobMonthNumber(job = state.work.currentJob, monthIndex = getSimulationMonthIndex()) {
       if (!job) return 0;
       const start = job.tenureStartDate;
       if (!start || !Number.isFinite(Number(start.year)) || !Number.isFinite(Number(start.month))) {
@@ -301,7 +267,7 @@
     function depositJobSalary(job, amount) {
       const payment = Math.max(0, Math.round(Number(amount) || 0));
       const account = job && job.salaryAccountId && job.salaryAccountId !== 'cash'
-        ? (state.bankAccounts || []).find(item => item.id === job.salaryAccountId && item.type !== 'credit')
+        ? (state.finances.bankAccounts || []).find(item => item.id === job.salaryAccountId && item.type !== 'credit')
         : null;
       if (account) {
         withFinancialMovementDetail('Pago de sueldo', () => creditBankAccount(account.id, payment));
@@ -309,7 +275,7 @@
       }
       if (job && job.salaryAccountId && job.salaryAccountId !== 'cash') job.salaryAccountId = 'cash';
       withFinancialMovementDetail('Pago de sueldo', () => {
-        state.cash = (Number(state.cash) || 0) + payment;
+        state.finances.cash = (Number(state.finances.cash) || 0) + payment;
       });
     }
 
@@ -319,22 +285,22 @@
       const payment = Math.max(0, Math.round(Number(amount) || 0));
       job.salaryPaymentHistory.push({
         amount: payment,
-        year: Number(date?.year) || Number(state.simulationYear) || 1,
+        year: Number(date?.year) || Number(state.simulation.year) || 1,
         month: Number(date?.month) || 0,
-        day: Number(date?.day) || Number(state.simulationDay) || 1,
+        day: Number(date?.day) || Number(state.simulation.day) || 1,
         timestamp: Date.now()
       });
       if (job.salaryPaymentHistory.length > 12) job.salaryPaymentHistory.splice(0, job.salaryPaymentHistory.length - 12);
       job.lastNetSalary = payment;
       job.lastSalaryPaidDate = {
-        year: Number(date?.year) || Number(state.simulationYear) || 1,
+        year: Number(date?.year) || Number(state.simulation.year) || 1,
         month: Number(date?.month) || 0,
-        day: Number(date?.day) || Number(state.simulationDay) || 1
+        day: Number(date?.day) || Number(state.simulation.day) || 1
       };
     }
 
     function debitBankAccountWithCreditLine(accountId, amount) {
-      const account = (state.bankAccounts || []).find(item => item.id === accountId && item.type !== 'credit');
+      const account = (state.finances.bankAccounts || []).find(item => item.id === accountId && item.type !== 'credit');
       const debit = Math.max(0, Math.round(Number(amount) || 0));
       if (!account || debit <= 0) return false;
       const balance = Number(account.balance) || 0;
@@ -346,7 +312,7 @@
       }
 
       const isCheckingAccount = account.id === 'acc_corriente' || account.type === 'corriente';
-      const line = state.creditLine;
+      const line = state.finances.creditLine;
       const shortfall = debit - Math.max(0, balance);
       const availableCredit = Math.max(0, (Number(line?.limit) || 0) - (Number(line?.used) || 0)
         - (Number(line?.accruedInterest) || 0) - (Number(line?.currentDayInterest) || 0));
@@ -367,34 +333,34 @@
     }
 
     function getBankAccountSpendableBalance(accountId) {
-      const account = (state.bankAccounts || []).find(item => item.id === accountId && item.type !== 'credit');
+      const account = (state.finances.bankAccounts || []).find(item => item.id === accountId && item.type !== 'credit');
       if (!account) return 0;
       const balance = Math.max(0, Number(account.balance) || 0);
       const isCheckingAccount = account.id === 'acc_corriente' || account.type === 'corriente';
-      if (!isCheckingAccount || !state.creditLine) return balance;
-      return balance + Math.max(0, (Number(state.creditLine.limit) || 0) - (Number(state.creditLine.used) || 0)
-        - (Number(state.creditLine.accruedInterest) || 0) - (Number(state.creditLine.currentDayInterest) || 0));
+      if (!isCheckingAccount || !state.finances.creditLine) return balance;
+      return balance + Math.max(0, (Number(state.finances.creditLine.limit) || 0) - (Number(state.finances.creditLine.used) || 0)
+        - (Number(state.finances.creditLine.accruedInterest) || 0) - (Number(state.finances.creditLine.currentDayInterest) || 0));
     }
 
     function creditBankAccount(accountId, amount) {
-      const account = (state.bankAccounts || []).find(item => item.id === accountId && item.type !== 'credit');
+      const account = (state.finances.bankAccounts || []).find(item => item.id === accountId && item.type !== 'credit');
       const credit = Math.max(0, Math.round(Number(amount) || 0));
       if (!account || credit <= 0) return false;
       let remainingCredit = credit;
       const isCheckingAccount = account.id === 'acc_corriente' || account.type === 'corriente';
-      if (isCheckingAccount && state.creditLine) {
-        const accruedInterest = Number(state.creditLine.accruedInterest) || 0;
+      if (isCheckingAccount && state.finances.creditLine) {
+        const accruedInterest = Number(state.finances.creditLine.accruedInterest) || 0;
         const interestPayment = Math.min(remainingCredit, accruedInterest);
-        state.creditLine.accruedInterest = accruedInterest - interestPayment;
+        state.finances.creditLine.accruedInterest = accruedInterest - interestPayment;
         remainingCredit -= interestPayment;
 
-        const currentDayInterest = Number(state.creditLine.currentDayInterest) || 0;
+        const currentDayInterest = Number(state.finances.creditLine.currentDayInterest) || 0;
         const currentInterestPayment = Math.min(remainingCredit, currentDayInterest);
-        state.creditLine.currentDayInterest = currentDayInterest - currentInterestPayment;
+        state.finances.creditLine.currentDayInterest = currentDayInterest - currentInterestPayment;
         remainingCredit -= currentInterestPayment;
 
-        const repayment = Math.min(remainingCredit, Number(state.creditLine.used) || 0);
-        state.creditLine.used -= repayment;
+        const repayment = Math.min(remainingCredit, Number(state.finances.creditLine.used) || 0);
+        state.finances.creditLine.used -= repayment;
         remainingCredit -= repayment;
         if (repayment > 0) {
           recordFinancialMovement({
@@ -403,7 +369,7 @@
               : 'Pago de Línea de Crédito',
             amount: repayment,
             direction: 'expense',
-            accountId: state.creditLine.id,
+            accountId: state.finances.creditLine.id,
             accountName: 'Línea de Crédito'
           });
         }
@@ -416,10 +382,10 @@
       return true;
     }
 
-    function getWorkPerformance(job = state.currentJob, monthIndex = getSimulationMonthIndex()) {
-      const healthPhysical = Math.max(0, Math.min(20, Number(state.healthPhysical) || 0));
-      const healthEmotional = Math.max(0, Math.min(40, Number(state.healthEmotional) || 0));
-      const healthMental = Math.max(0, Math.min(40, Number(state.healthMental) || 0));
+    function getWorkPerformance(job = state.work.currentJob, monthIndex = getSimulationMonthIndex()) {
+      const healthPhysical = Math.max(0, Math.min(20, Number(state.wellbeing.healthPhysical) || 0));
+      const healthEmotional = Math.max(0, Math.min(40, Number(state.wellbeing.healthEmotional) || 0));
+      const healthMental = Math.max(0, Math.min(40, Number(state.wellbeing.healthMental) || 0));
       const rawScore = Math.round((healthMental * 0.5) + (healthEmotional * 0.3) + (healthPhysical * 0.2));
       const jobMonth = getCurrentJobMonthNumber(job, monthIndex);
       const maximumByTenure = jobMonth <= 3 ? 21 : jobMonth === 4 ? 25 : jobMonth === 5 ? 29 : 36;
@@ -463,14 +429,14 @@
     }
 
     function getTotalWorkExperienceMonths() {
-      return Math.max(0, Number(state.workExperienceMonths) || 0) + getCurrentJobTenureMonths();
+      return Math.max(0, Number(state.work.workExperienceMonths) || 0) + getCurrentJobTenureMonths();
     }
 
     function archiveCurrentJobExperience() {
-      const job = state.currentJob;
+      const job = state.work.currentJob;
       if (!job) return 0;
       const completedMonths = getCurrentJobTenureMonths(job);
-      state.workExperienceMonths = (Number(state.workExperienceMonths) || 0) + completedMonths;
+      state.work.workExperienceMonths = (Number(state.work.workExperienceMonths) || 0) + completedMonths;
       return completedMonths;
     }
 
@@ -485,15 +451,29 @@
 
     function startSimulationClock() {
       if (simulationClockInterval) return;
-      state.simulationClockRunning = true;
+      state.simulation.clockRunning = true;
       if (document.visibilityState !== 'visible' || !document.hasFocus()) return;
       const startButton = document.getElementById('simulation-start-button');
       if (startButton) {
         startButton.disabled = true;
         startButton.innerHTML = '<span>Simulación en curso</span>';
       }
-      simulationClockInterval = window.setInterval(advanceSimulationDay, 2000);
+      const speed = Number(state.config.simulationSpeedMsPerDay) || 2000;
+      simulationClockInterval = window.setInterval(advanceSimulationDay, speed);
     }
+
+    function setSimulationSpeed(millisecondsPerDay) {
+      const speed = Number(millisecondsPerDay);
+      if (![1000, 2000, 3000].includes(speed)) return false;
+      state.config.simulationSpeedMsPerDay = speed;
+      if (simulationClockInterval) {
+        window.clearInterval(simulationClockInterval);
+        simulationClockInterval = window.setInterval(advanceSimulationDay, speed);
+      }
+      return true;
+    }
+
+    window.setSimulationSpeed = setSimulationSpeed;
 
     function stopSimulationClock() {
       if (simulationClockInterval) window.clearInterval(simulationClockInterval);
@@ -502,7 +482,7 @@
 
     function syncSimulationClockVisibility() {
       if (document.visibilityState === 'visible' && document.hasFocus()) {
-        if (state.simulationClockRunning && !simulationClockInterval) startSimulationClock();
+        if (state.simulation.clockRunning && !simulationClockInterval) startSimulationClock();
         return;
       }
       stopSimulationClock();
@@ -510,23 +490,20 @@
 
     function handleSimulationVisibilityChange() {
       syncSimulationClockVisibility();
-      if (document.visibilityState !== 'visible') persistSimulationState(state);
     }
 
     function resetSimulators() {
       if (!window.confirm('Se reiniciarán la fecha y todas las decisiones de la simulación. ¿Continuar?')) return;
       stopSimulationClock();
-      simulationPersistenceEnabled = false;
-      clearPersistedSimulationState();
       window.location.reload();
     }
 
     // COMPROBACIÓN DE PERFIL COMPLETO (INTERESES PRIORIZADOS + ESTILO DE VIDA CON 2 OPCIONES C/U)
     function checkProfileCompletion() {
-      const hasPrioritizedInterests = state.categories && state.categories.some(c => c.dots > 1);
-      const hasHome = Boolean(state.selectedHomes && state.selectedHomes.length === 2);
-      const hasJob = Boolean(state.selectedJobs && state.selectedJobs.length === 2);
-      const hasTransport = Boolean(state.selectedTransports && state.selectedTransports.length === 2);
+      const hasPrioritizedInterests = state.persona.categories && state.persona.categories.some(c => c.dots > 1);
+      const hasHome = Boolean(state.persona.selectedHomes && state.persona.selectedHomes.length === 2);
+      const hasJob = Boolean(state.persona.selectedJobs && state.persona.selectedJobs.length === 2);
+      const hasTransport = Boolean(state.persona.selectedTransports && state.persona.selectedTransports.length === 2);
       const isComplete = Boolean(hasPrioritizedInterests && hasHome && hasJob && hasTransport);
       return {
         isComplete,
@@ -541,23 +518,23 @@
     function syncDefaultAnchorsUI() {
       const homeOptionsEls = document.querySelectorAll('#anchor-home .anchor-option');
       homeOptionsEls.forEach((el, idx) => {
-        el.classList.toggle('selected', Boolean(state.selectedHomes && state.selectedHomes.includes(idx)));
+        el.classList.toggle('selected', Boolean(state.persona.selectedHomes && state.persona.selectedHomes.includes(idx)));
       });
 
       const jobOptionsEls = document.querySelectorAll('#anchor-job .anchor-option');
       jobOptionsEls.forEach((el, idx) => {
-        el.classList.toggle('selected', Boolean(state.selectedJobs && state.selectedJobs.includes(idx)));
+        el.classList.toggle('selected', Boolean(state.persona.selectedJobs && state.persona.selectedJobs.includes(idx)));
       });
 
       const transOptionsEls = document.querySelectorAll('#anchor-transport .anchor-option');
       transOptionsEls.forEach((el, idx) => {
-        el.classList.toggle('selected', Boolean(state.selectedTransports && state.selectedTransports.includes(idx)));
+        el.classList.toggle('selected', Boolean(state.persona.selectedTransports && state.persona.selectedTransports.includes(idx)));
       });
 
       const isComplete = (
-        state.selectedHomes && state.selectedHomes.length === 2 &&
-        state.selectedJobs && state.selectedJobs.length === 2 &&
-        state.selectedTransports && state.selectedTransports.length === 2
+        state.persona.selectedHomes && state.persona.selectedHomes.length === 2 &&
+        state.persona.selectedJobs && state.persona.selectedJobs.length === 2 &&
+        state.persona.selectedTransports && state.persona.selectedTransports.length === 2
       );
       const btn = document.getElementById('btn-confirm-anchors');
       if (btn) btn.disabled = !isComplete;
@@ -573,7 +550,7 @@
       syncDefaultAnchorsUI();
       updateHUD();
       updateInterestsValidation();
-      const restoredSlide = Math.min(Math.max(0, Number(state.currentSlideIdx) || 0), slidesData.length - 1);
+      const restoredSlide = Math.min(Math.max(0, Number(state.simulation.currentSlideIdx) || 0), slidesData.length - 1);
       selectSlide(restoredSlide);
       syncSimulationClockVisibility();
     });
@@ -582,10 +559,7 @@
     window.addEventListener('blur', syncSimulationClockVisibility);
     window.addEventListener('pageshow', syncSimulationClockVisibility);
     document.addEventListener('visibilitychange', handleSimulationVisibilityChange);
-    window.addEventListener('pagehide', () => {
-      stopSimulationClock();
-      persistSimulationState(state);
-    });
+    window.addEventListener('pagehide', stopSimulationClock);
 
 
     function getAssetInsurancePricing(insuranceId, assetId, assetObj) {
@@ -612,8 +586,8 @@
     function getUserInsuranceAssets(insuranceId) {
       if (insuranceId === 'automotriz') {
         const list = [];
-        if (Array.isArray(state.vehicles) && state.vehicles.length > 0) {
-          state.vehicles.forEach((v, idx) => {
+        if (Array.isArray(state.assets.vehicles) && state.assets.vehicles.length > 0) {
+          state.assets.vehicles.forEach((v, idx) => {
             const id = typeof v === 'object' ? (v.id || `veh_${idx}`) : `veh_${idx}`;
             const name = typeof v === 'object' ? (v.name || 'Vehículo propio') : v;
             const sub = typeof v === 'object' ? (v.sub || v.model || 'Auto registrado') : 'Vehículo registrado';
@@ -626,8 +600,8 @@
       }
       if (insuranceId === 'vivienda') {
         const list = [];
-        if (Array.isArray(state.properties) && state.properties.length > 0) {
-          state.properties.forEach((p, idx) => {
+        if (Array.isArray(state.assets.properties) && state.assets.properties.length > 0) {
+          state.assets.properties.forEach((p, idx) => {
             const id = typeof p === 'object' ? (p.id || `prop_${idx}`) : `prop_${idx}`;
             const name = typeof p === 'object' ? (p.name || 'Inmueble propio') : p;
             const sub = typeof p === 'object' ? (p.sub || p.desc || 'Inmueble propio') : 'Inmueble registrado';
@@ -639,7 +613,7 @@
         return list;
       }
       if (insuranceId === 'incendio_sismo') {
-        return (state.debts || [])
+        return (state.finances.debts || [])
           .filter(debt => debt.loanType === 'hipotecario')
           .map(debt => ({
             id: debt.id,
@@ -650,25 +624,25 @@
       }
       if (insuranceId === 'fraude') {
         const list = [];
-        (state.bankAccounts || []).forEach(a => {
+        (state.finances.bankAccounts || []).forEach(a => {
           const isAhorro = a.type === 'ahorro' || (a.id || '').includes('ahorro') || (a.name || '').toLowerCase().includes('ahorro');
           if (!isAhorro) {
             list.push({ id: a.id, name: a.name, sub: 'Cuenta bancaria', price: 1150 });
           }
         });
-        if (state.creditCard) list.push({ id: 'tarjeta', name: 'Tarjeta de Crédito', sub: 'Línea de crédito rotativo', price: 1150 });
+        if (state.finances.creditCard) list.push({ id: 'tarjeta', name: 'Tarjeta de Crédito', sub: 'Línea de crédito rotativo', price: 1150 });
         return list;
       }
       if (insuranceId === 'desgravamen') {
         const list = [];
-        if (state.creditLine) list.push({ id: 'linea', name: 'Línea de Crédito ($500.000)', sub: 'Sobregiro en Cuenta Corriente', price: 1900 });
-        (state.debts || []).forEach(d => list.push({ id: d.id, name: d.name || 'Crédito', sub: `Saldo: $${(d.amount || 0).toLocaleString('es-CL')}`, price: 1900 }));
+        if (state.finances.creditLine) list.push({ id: 'linea', name: 'Línea de Crédito ($500.000)', sub: 'Sobregiro en Cuenta Corriente', price: 1900 });
+        (state.finances.debts || []).forEach(d => list.push({ id: d.id, name: d.name || 'Crédito', sub: `Saldo: $${(d.amount || 0).toLocaleString('es-CL')}`, price: 1900 }));
         return list;
       }
       if (insuranceId === 'cesantia') {
         const list = [];
-        if (state.creditLine) list.push({ id: 'linea', name: 'Línea de Crédito ($500.000)', sub: 'Sobregiro', price: 4500 });
-        (state.debts || []).forEach(d => list.push({ id: d.id, name: d.name || 'Crédito', sub: 'Compromiso de pago', price: 4500 }));
+        if (state.finances.creditLine) list.push({ id: 'linea', name: 'Línea de Crédito ($500.000)', sub: 'Sobregiro', price: 4500 });
+        (state.finances.debts || []).forEach(d => list.push({ id: d.id, name: d.name || 'Crédito', sub: 'Compromiso de pago', price: 4500 }));
         return list;
       }
       return [];
@@ -801,7 +775,7 @@
       if (tabName !== 'trabajo') {
         initNegChat();
       }
-      state.activeHudTab = tabName;
+      state.interface.activeHudTab = tabName;
       document.querySelectorAll('.hud-dock-tab').forEach(t => t.classList.toggle('active', t.id === `tab-${tabName}`));
 
       // Ocultar vistas de diapositivas en la zona central
@@ -816,9 +790,9 @@
     // VOLVER A LA VISTA DE LA DIAPOSITIVA ACTIVA
     function returnToSlideView() {
       initNegChat();
-      state.activeHudTab = null;
+      state.interface.activeHudTab = null;
       document.querySelectorAll('.hud-dock-tab').forEach(t => t.classList.remove('active'));
-      const currentSlide = slidesData[state.currentSlideIdx];
+      const currentSlide = slidesData[state.simulation.currentSlideIdx];
       if (currentSlide) {
         activateInteractiveView(currentSlide);
       }

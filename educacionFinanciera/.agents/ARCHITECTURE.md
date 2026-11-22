@@ -1,3 +1,4 @@
+-   - 7 places: `"Banco"`, `"Otras Inversiones"`, `"Corredora"`, `"Comercio y Servicios"`, `"Actividades"`, `"Trabajo"`, `"Mi Estado"` (`Personal`).
 # Architecture — `educacionFinanciera`
 
 ## 1. Dual-Screen Operation (Facilitator vs. Participant)

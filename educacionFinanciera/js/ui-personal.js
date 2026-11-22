@@ -22,24 +22,24 @@
           : 'Vida personal, bienestar y finanzas';
       }
 
-      const homes = (state.selectedHomes && state.selectedHomes.length >= 2)
-        ? state.selectedHomes.map(i => homeOptions[i] || homeOptions[0])
+      const homes = (state.persona.selectedHomes && state.persona.selectedHomes.length >= 2)
+        ? state.persona.selectedHomes.map(i => homeOptions[i] || homeOptions[0])
         : [homeOptions[1], homeOptions[0]];
 
-      const jobs = (state.selectedJobs && state.selectedJobs.length >= 2)
-        ? state.selectedJobs.map(i => jobOptions[i] || jobOptions[0])
+      const jobs = (state.persona.selectedJobs && state.persona.selectedJobs.length >= 2)
+        ? state.persona.selectedJobs.map(i => jobOptions[i] || jobOptions[0])
         : [jobOptions[1], jobOptions[0]];
 
-      const transports = (state.selectedTransports && state.selectedTransports.length >= 2)
-        ? state.selectedTransports.map(i => transportOptions[i] || transportOptions[0])
+      const transports = (state.persona.selectedTransports && state.persona.selectedTransports.length >= 2)
+        ? state.persona.selectedTransports.map(i => transportOptions[i] || transportOptions[0])
         : [transportOptions[1], transportOptions[2]];
 
       // Realidad actual del personaje:
       // Máximo 1 trabajo, pero puede tener múltiples propiedades y múltiples vehículos.
       // Al partir no tiene nada; si no tiene trabajo, propiedades o vehículos, simplemente no se muestra.
-      const currentJob = state.currentJob;
-      const properties = Array.isArray(state.properties) ? state.properties : [];
-      const vehicles = Array.isArray(state.vehicles) ? state.vehicles : [];
+      const currentJob = state.work.currentJob;
+      const properties = Array.isArray(state.assets.properties) ? state.assets.properties : [];
+      const vehicles = Array.isArray(state.assets.vehicles) ? state.assets.vehicles : [];
 
       let assetItemsHtml = '';
 
@@ -89,11 +89,11 @@
         </div>
       ` : '';
 
-      // Cuentas líquidas contratadas (solo las que existen en state.bankAccounts)
-      const liquidAccounts = (state.bankAccounts || []).filter(acc =>
+      // Cuentas líquidas contratadas (solo las que existen en state.finances.bankAccounts)
+      const liquidAccounts = (state.finances.bankAccounts || []).filter(acc =>
         acc.isLiquid || ['corriente', 'vista', 'rut'].some(k => (acc.id || '').toLowerCase().includes(k) || (acc.name || '').toLowerCase().includes(k))
       );
-      const totalLiquid = (state.cash || 0) + liquidAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
+      const totalLiquid = (state.finances.cash || 0) + liquidAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
 
       // Si no tiene empleo, el sueldo refleja estrictamente 0
       const salary = currentJob ? (currentJob.salary || 0) : 0;
@@ -105,9 +105,9 @@
             <div class="personal-kpi-card kpi-bienestar">
               <div class="personal-kpi-top">
                 <span class="personal-kpi-label">Bienestar</span>
-                <span class="personal-kpi-icon" style="font-size: 1.15rem;">${getBienestarFace(state.mentalPeace)}</span>
+                <span class="personal-kpi-icon" style="font-size: 1.15rem;">${getBienestarFace(state.wellbeing.mentalPeace)}</span>
               </div>
-              ${renderHeartsMeter(state.mentalPeace)}
+              ${renderHeartsMeter(state.wellbeing.mentalPeace)}
             </div>
 
             <div class="personal-kpi-card kpi-efectivo">
@@ -127,7 +127,7 @@
                 <div class="personal-access-icon">🎯</div>
                 <div class="personal-access-texts">
                   <div class="personal-access-name">
-                    Perfil de Inversionista${state.riskTestResult ? `: <span style="color: ${state.riskTestResult.color}; font-weight: 800;">${state.riskTestResult.label}</span>` : ''}
+                    Perfil de Inversionista${state.wellbeing.riskTestResult ? `: <span style="color: ${state.wellbeing.riskTestResult.color}; font-weight: 800;">${state.wellbeing.riskTestResult.label}</span>` : ''}
                   </div>
                   <div class="personal-access-desc">Tolerancia al riesgo, liquidez y horizonte</div>
                 </div>
@@ -184,7 +184,7 @@
           ${actualSituationHtml}
         `;
       } else if (subView === 'inversionista') {
-        const result = state.riskTestResult;
+        const result = state.wellbeing.riskTestResult;
 
         let statusBoxHtml = '';
         if (!result) {
@@ -243,8 +243,8 @@
           </div>
         `;
       } else if (subView === 'presupuesto') {
-        const baseItems = Array.isArray(state.budgetItems) ? state.budgetItems : [];
-        const debtItems = (Array.isArray(state.debts) && state.debts.length > 0) ? state.debts.map(d => ({
+        const baseItems = Array.isArray(state.finances.budgetItems) ? state.finances.budgetItems : [];
+        const debtItems = (Array.isArray(state.finances.debts) && state.finances.debts.length > 0) ? state.finances.debts.map(d => ({
           id: d.id,
           name: d.name,
           desc: d.desc || 'Cuota mensual de deuda',
@@ -253,7 +253,7 @@
           real: d.real !== undefined ? d.real : (d.monthlyPayment || d.budget || 0),
           isDebt: true
         })) : [];
-        const customItems = Array.isArray(state.customBudgetItems) ? state.customBudgetItems : [];
+        const customItems = Array.isArray(state.finances.customBudgetItems) ? state.finances.customBudgetItems : [];
         const allBudgetItems = [...baseItems, ...debtItems, ...customItems];
 
         const totalBudget = allBudgetItems.reduce((acc, i) => acc + (i.budget || 0), 0);
@@ -304,7 +304,7 @@
                         <span style="margin-right: 2px;">💵</span> Efectivo
                       </td>
                       <td style="padding: 4px 2px; text-align: right; font-weight: 700; color: #0f172a; font-size: 0.70rem; white-space: nowrap;">
-                        $${(state.cash || 0).toLocaleString('es-CL')}
+                        $${(state.finances.cash || 0).toLocaleString('es-CL')}
                       </td>
                     </tr>
                     ${accountsRowsHtml}
@@ -400,7 +400,7 @@
 
             <!-- BOTÓN Y FORMULARIO PARA AGREGAR ÍTEMS -->
             <div style="margin-bottom: 7px;">
-              ${!state.showAddBudgetForm ? `
+              ${!state.interface.showAddBudgetForm ? `
                 <button type="button" onclick="toggleAddBudgetForm(true)" style="width: 100%; padding: 7px; border: 1.5px dashed #cbd5e1; background: #ffffff; border-radius: 6px; font-size: 0.72rem; font-weight: 700; color: #0284c7; cursor: pointer;">
                   + Agregar ítem
                 </button>
@@ -410,10 +410,10 @@
                   
                   <!-- Selector Tipo Libre vs Ahorro/Inversión -->
                   <div style="display: flex; gap: 6px; margin-bottom: 7px;">
-                    <button type="button" onclick="changeNewBudgetType('free')" style="flex: 1; padding: 5px; border-radius: 5px; border: 1px solid ${state.newBudgetType === 'free' ? '#0284c7' : '#cbd5e1'}; background: ${state.newBudgetType === 'free' ? '#e0f2fe' : '#f8fafc'}; font-size: 0.68rem; font-weight: 700; color: ${state.newBudgetType === 'free' ? '#0369a1' : '#64748b'}; cursor: pointer;">
+                    <button type="button" onclick="changeNewBudgetType('free')" style="flex: 1; padding: 5px; border-radius: 5px; border: 1px solid ${state.interface.newBudgetType === 'free' ? '#0284c7' : '#cbd5e1'}; background: ${state.interface.newBudgetType === 'free' ? '#e0f2fe' : '#f8fafc'}; font-size: 0.68rem; font-weight: 700; color: ${state.interface.newBudgetType === 'free' ? '#0369a1' : '#64748b'}; cursor: pointer;">
                       🏷️ Tipo Libre
                     </button>
-                    <button type="button" onclick="changeNewBudgetType('invest')" style="flex: 1; padding: 5px; border-radius: 5px; border: 1px solid ${state.newBudgetType === 'invest' ? '#8b5cf6' : '#cbd5e1'}; background: ${state.newBudgetType === 'invest' ? '#ede9fe' : '#f8fafc'}; font-size: 0.68rem; font-weight: 700; color: ${state.newBudgetType === 'invest' ? '#6d28d9' : '#64748b'}; cursor: pointer;">
+                    <button type="button" onclick="changeNewBudgetType('invest')" style="flex: 1; padding: 5px; border-radius: 5px; border: 1px solid ${state.interface.newBudgetType === 'invest' ? '#8b5cf6' : '#cbd5e1'}; background: ${state.interface.newBudgetType === 'invest' ? '#ede9fe' : '#f8fafc'}; font-size: 0.68rem; font-weight: 700; color: ${state.interface.newBudgetType === 'invest' ? '#6d28d9' : '#64748b'}; cursor: pointer;">
                       💎 Ahorro / Inversión
                     </button>
                   </div>
@@ -424,22 +424,22 @@
                       <input type="text" id="new-budget-name" placeholder="Ej: Fondo vacaciones / Ahorro auto" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 5px; padding: 5px 7px; font-size: 0.70rem;" />
                     </div>
 
-                    ${state.newBudgetType === 'invest' ? `
+                    ${state.interface.newBudgetType === 'invest' ? `
                       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
                         <div>
                           <label style="font-size: 0.62rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px;">Instrumento</label>
                           <select id="new-budget-invest-type" onchange="changeInvestInstrument(this.value)" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 5px; padding: 4px 6px; font-size: 0.68rem; background: #ffffff;">
-                            <option value="alcancia" ${state.newBudgetInvestType === 'alcancia' ? 'selected' : ''}>1. Alcancía / Colchón</option>
-                            <option value="dap" ${state.newBudgetInvestType === 'dap' ? 'selected' : ''}>2. Depósito a Plazo (DAP)</option>
-                            <option value="dolares" ${state.newBudgetInvestType === 'dolares' ? 'selected' : ''}>3. Compra de Dólares</option>
-                            <option value="fondos" ${state.newBudgetInvestType === 'fondos' ? 'selected' : ''}>4. Fondo Mutuo</option>
+                            <option value="alcancia" ${state.interface.newBudgetInvestType === 'alcancia' ? 'selected' : ''}>1. Alcancía / Colchón</option>
+                            <option value="dap" ${state.interface.newBudgetInvestType === 'dap' ? 'selected' : ''}>2. Depósito a Plazo (DAP)</option>
+                            <option value="dolares" ${state.interface.newBudgetInvestType === 'dolares' ? 'selected' : ''}>3. Compra de Dólares</option>
+                            <option value="fondos" ${state.interface.newBudgetInvestType === 'fondos' ? 'selected' : ''}>4. Fondo Mutuo</option>
                           </select>
                         </div>
                         <div>
                           <label style="font-size: 0.62rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px;">Origen del Dinero</label>
-                          <select id="new-budget-source" ${state.newBudgetInvestType === 'alcancia' ? 'disabled' : ''} style="width: 100%; border: 1px solid #cbd5e1; border-radius: 5px; padding: 4px 6px; font-size: 0.68rem; background: ${state.newBudgetInvestType === 'alcancia' ? '#f1f5f9' : '#ffffff'};">
+                          <select id="new-budget-source" ${state.interface.newBudgetInvestType === 'alcancia' ? 'disabled' : ''} style="width: 100%; border: 1px solid #cbd5e1; border-radius: 5px; padding: 4px 6px; font-size: 0.68rem; background: ${state.interface.newBudgetInvestType === 'alcancia' ? '#f1f5f9' : '#ffffff'};">
                             <option value="Efectivo">💵 Dinero en Efectivo</option>
-                            ${state.newBudgetInvestType !== 'alcancia' ? (state.bankAccounts || []).map(acc => `<option value="${acc.name}">${acc.icon || '💳'} ${acc.name}</option>`).join('') : ''}
+                            ${state.interface.newBudgetInvestType !== 'alcancia' ? (state.finances.bankAccounts || []).map(acc => `<option value="${acc.name}">${acc.icon || '💳'} ${acc.name}</option>`).join('') : ''}
                           </select>
                         </div>
                       </div>
@@ -461,16 +461,16 @@
           </div>
         `;
       } else if (subView === 'patrimonio') {
-        const liquidAccounts = (state.bankAccounts || []).filter(a => a.type !== 'credit');
-        const reservesAmount = state.reserves || 0;
-        const investedAmount = state.invested || 0;
-        const propertiesValue = (state.properties || []).reduce((acc, p) => acc + (p.value || 0), 0);
-        const vehiclesValue = (state.vehicles || []).reduce((acc, v) => acc + (v.value || 0), 0);
+        const liquidAccounts = (state.finances.bankAccounts || []).filter(a => a.type !== 'credit');
+        const reservesAmount = state.finances.reserves || 0;
+        const investedAmount = state.finances.invested || 0;
+        const propertiesValue = (state.assets.properties || []).reduce((acc, p) => acc + (p.value || 0), 0);
+        const vehiclesValue = (state.assets.vehicles || []).reduce((acc, v) => acc + (v.value || 0), 0);
         const totalAssets = totalLiquid + reservesAmount + investedAmount + propertiesValue + vehiclesValue;
-        const totalDebtBalance = (state.debts || []).reduce((acc, d) => acc + (d.totalDebt || d.monthlyPayment || 0), 0);
+        const totalDebtBalance = (state.finances.debts || []).reduce((acc, d) => acc + (d.totalDebt || d.monthlyPayment || 0), 0);
         const netWorth = totalAssets - totalDebtBalance;
 
-        const monthlyExpenses = (state.budgetItems || []).reduce((acc, i) => acc + (i.real !== undefined ? i.real : (i.budget || 0)), 0);
+        const monthlyExpenses = (state.finances.budgetItems || []).reduce((acc, i) => acc + (i.real !== undefined ? i.real : (i.budget || 0)), 0);
         const emergencyMonths = (monthlyExpenses > 0 && reservesAmount > 0) ? (reservesAmount / monthlyExpenses).toFixed(1) : 0;
 
         container.innerHTML = `
@@ -504,7 +504,7 @@
                 <div style="font-size: 0.68rem; color: #334155; display: flex; flex-direction: column; gap: 3px;">
                   <div style="display: flex; justify-content: space-between;">
                     <span>• Efectivo físico:</span>
-                    <strong>$${(state.cash || 0).toLocaleString('es-CL')}</strong>
+                    <strong>$${(state.finances.cash || 0).toLocaleString('es-CL')}</strong>
                   </div>
                   ${liquidAccounts.length > 0 ? liquidAccounts.map(a => `
                     <div style="display: flex; justify-content: space-between;">
@@ -533,16 +533,16 @@
               </div>
 
               <!-- 3. DEUDAS Y COMPROMISOS -->
-              <div style="background: #ffffff; border: 1px solid ${state.debts && state.debts.length > 0 ? '#fecaca' : '#e2e8f0'}; border-radius: 7px; padding: 7px 9px;">
+              <div style="background: #ffffff; border: 1px solid ${state.finances.debts && state.finances.debts.length > 0 ? '#fecaca' : '#e2e8f0'}; border-radius: 7px; padding: 7px 9px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <span style="font-size: 0.65rem; font-weight: 700; color: ${state.debts && state.debts.length > 0 ? '#b91c1c' : '#1e293b'};">💳 Deudas y Créditos</span>
-                  <strong style="font-size: 0.82rem; font-weight: 800; color: ${state.debts && state.debts.length > 0 ? '#b91c1c' : '#059669'};">
-                    ${state.debts && state.debts.length > 0 ? `Total: $${totalDebtBalance.toLocaleString('es-CL')}` : '$0'}
+                  <span style="font-size: 0.65rem; font-weight: 700; color: ${state.finances.debts && state.finances.debts.length > 0 ? '#b91c1c' : '#1e293b'};">💳 Deudas y Créditos</span>
+                  <strong style="font-size: 0.82rem; font-weight: 800; color: ${state.finances.debts && state.finances.debts.length > 0 ? '#b91c1c' : '#059669'};">
+                    ${state.finances.debts && state.finances.debts.length > 0 ? `Total: $${totalDebtBalance.toLocaleString('es-CL')}` : '$0'}
                   </strong>
                 </div>
-                ${state.debts && state.debts.length > 0 ? `
+                ${state.finances.debts && state.finances.debts.length > 0 ? `
                   <div style="font-size: 0.68rem; color: #334155; display: flex; flex-direction: column; gap: 3px;">
-                    ${state.debts.map(d => `
+                    ${state.finances.debts.map(d => `
                       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-top:1px solid #f1f5f9;padding-top:3px;">
                         <span style="min-width:0;">• ${d.name}</span>
                         <strong style="flex-shrink:0;text-align:right;color:#b91c1c;">Deuda total: $${Number(d.remainingBalance ?? d.totalDebt ?? d.amount ?? 0).toLocaleString('es-CL')}</strong>
@@ -591,8 +591,8 @@
         `;
       } else if (subView === 'movimientos') {
         const monthLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-        const allMovements = Array.isArray(state.financialMovements) ? state.financialMovements : [];
-        const currentYear = Number(state.simulationYear) || 1;
+        const allMovements = Array.isArray(state.finances.financialMovements) ? state.finances.financialMovements : [];
+        const currentYear = Number(state.simulation.year) || 1;
         const movementYears = [...new Set([currentYear, ...allMovements.map(movement => Number(movement.year) || 1)])]
           .sort((left, right) => right - left);
         const activeMovementYear = movementYears.includes(Number(selectedMovementYear))
@@ -640,15 +640,15 @@
             </div>
           </div>`;
       } else if (subView === 'secret_summary') {
-        const hPhysical = state.healthPhysical !== undefined ? state.healthPhysical : 20;
-        const hEmotional = state.healthEmotional !== undefined ? state.healthEmotional : 40;
-        const hMental = state.healthMental !== undefined ? state.healthMental : 40;
+        const hPhysical = state.wellbeing.healthPhysical !== undefined ? state.wellbeing.healthPhysical : 20;
+        const hEmotional = state.wellbeing.healthEmotional !== undefined ? state.wellbeing.healthEmotional : 40;
+        const hMental = state.wellbeing.healthMental !== undefined ? state.wellbeing.healthMental : 40;
         const peace = Math.max(0, Math.min(100, hPhysical + hEmotional + hMental));
         const peaceHearts = Math.min(20, Math.max(0, Math.round(peace / 5)));
         const peaceFace = getBienestarFace(peace);
 
         // Trabajo
-        const job = state.currentJob;
+        const job = state.work.currentJob;
         const jobName = job ? (typeof job === 'string' ? job : job.name) : null;
         const jobSalaryGross = job && job.grossSalary ? job.grossSalary : null;
         const jobSalaryNet = job && job.salary ? job.salary : (jobSalaryGross ? Math.round(jobSalaryGross * 0.81) : null);
@@ -657,14 +657,14 @@
         const jobReq = job && job.requirements ? job.requirements : null;
 
         // Cursos / Estudios cursados
-        const courses = Array.isArray(state.courses) ? state.courses : [];
+        const courses = Array.isArray(state.work.courses) ? state.work.courses : [];
 
         // Dinero y Liquidez
-        const cashPhysical = state.cash || 0;
-        const reservesAmount = state.reserves || 0;
-        const investedAmount = state.invested || 0;
-        const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
-        const debts = Array.isArray(state.debts) ? state.debts : [];
+        const cashPhysical = state.finances.cash || 0;
+        const reservesAmount = state.finances.reserves || 0;
+        const investedAmount = state.finances.invested || 0;
+        const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
+        const debts = Array.isArray(state.finances.debts) ? state.finances.debts : [];
 
         // Cuentas Bancarias específicas
         const findAccount = (patterns) => bankAccounts.find(a => patterns.some(p => (a.id || '').toLowerCase().includes(p) || (a.name || '').toLowerCase().includes(p)));
@@ -684,21 +684,21 @@
         const otherDebts = debts.filter(d => d !== debtTarjeta && d !== debtLinea && d !== debtConsumo && d !== debtAuto && d !== debtHipotecario);
 
         // Perfil de Inversionista
-        const risk = state.riskTestResult;
+        const risk = state.wellbeing.riskTestResult;
 
         // Estilo de vida valorado
-        const homeValued = (state.selectedHomes && state.selectedHomes.length > 0)
-          ? state.selectedHomes.map(i => homeOptions[i] ? homeOptions[i].name : '').filter(Boolean).join(' / ')
-          : (state.lifestyleChoices?.home || 'No definido');
-        const jobValued = (state.selectedJobs && state.selectedJobs.length > 0)
-          ? state.selectedJobs.map(i => jobOptions[i] ? jobOptions[i].name : '').filter(Boolean).join(' / ')
-          : (state.lifestyleChoices?.job || 'No definido');
-        const transportValued = (state.selectedTransports && state.selectedTransports.length > 0)
-          ? state.selectedTransports.map(i => transportOptions[i] ? transportOptions[i].name : '').filter(Boolean).join(' / ')
-          : (state.lifestyleChoices?.transport || 'No definido');
+        const homeValued = (state.persona.selectedHomes && state.persona.selectedHomes.length > 0)
+          ? state.persona.selectedHomes.map(i => homeOptions[i] ? homeOptions[i].name : '').filter(Boolean).join(' / ')
+          : (state.persona.lifestyleChoices?.home || 'No definido');
+        const jobValued = (state.persona.selectedJobs && state.persona.selectedJobs.length > 0)
+          ? state.persona.selectedJobs.map(i => jobOptions[i] ? jobOptions[i].name : '').filter(Boolean).join(' / ')
+          : (state.persona.lifestyleChoices?.job || 'No definido');
+        const transportValued = (state.persona.selectedTransports && state.persona.selectedTransports.length > 0)
+          ? state.persona.selectedTransports.map(i => transportOptions[i] ? transportOptions[i].name : '').filter(Boolean).join(' / ')
+          : (state.persona.lifestyleChoices?.transport || 'No definido');
 
         // Intereses (15 categorías)
-        const categories = Array.isArray(state.categories) ? state.categories : [];
+        const categories = Array.isArray(state.persona.categories) ? state.persona.categories : [];
 
         container.innerHTML = `
           <div class="personal-subview-box" style="max-height: 480px; overflow-y: auto; padding-right: 2px;">
@@ -864,16 +864,16 @@
             <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                 <span style="font-size: 0.70rem; font-weight: 800; color: #0f172a;">💳 Créditos & Deudas (Todas las Variables)</span>
-                <span style="font-size: 0.64rem; font-weight: 800; color: ${state.monthlyDebt > 0 ? '#b91c1c' : '#059669'};">
-                  ${state.monthlyDebt > 0 ? `$${state.monthlyDebt.toLocaleString('es-CL')}/mes` : 'Sin deudas ($0)'}
+                <span style="font-size: 0.64rem; font-weight: 800; color: ${state.finances.monthlyDebt > 0 ? '#b91c1c' : '#059669'};">
+                  ${state.finances.monthlyDebt > 0 ? `$${state.finances.monthlyDebt.toLocaleString('es-CL')}/mes` : 'Sin deudas ($0)'}
                 </span>
               </div>
 
               <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.65rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
                   <span style="color: #334155; font-weight: 600;">• Tarjeta de Crédito:</span>
-                  ${state.creditCard ? `
-                    <span style="font-size: 0.60rem; font-weight: 700; background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; padding: 1px 5px; border-radius: 4px;">Activa ($${(state.creditCard.limit || 950000).toLocaleString('es-CL')} cupo)</span>
+                  ${state.finances.creditCard ? `
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; padding: 1px 5px; border-radius: 4px;">Activa ($${(state.finances.creditCard.limit || 950000).toLocaleString('es-CL')} cupo)</span>
                   ` : (debtTarjeta ? `
                     <span style="font-size: 0.60rem; font-weight: 700; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 1px 5px; border-radius: 4px;">Deuda: $${(debtTarjeta.monthlyPayment || 0).toLocaleString('es-CL')}/mes</span>
                   ` : `
@@ -883,8 +883,8 @@
 
                 <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 3px; border-bottom: 1px dashed #f1f5f9;">
                   <span style="color: #334155; font-weight: 600;">• Línea de Crédito:</span>
-                  ${state.creditLine ? `
-                    <span style="font-size: 0.60rem; font-weight: 700; background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; padding: 1px 5px; border-radius: 4px;">Activa ($${(state.creditLine.limit || 500000).toLocaleString('es-CL')} cupo)</span>
+                  ${state.finances.creditLine ? `
+                    <span style="font-size: 0.60rem; font-weight: 700; background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; padding: 1px 5px; border-radius: 4px;">Activa ($${(state.finances.creditLine.limit || 500000).toLocaleString('es-CL')} cupo)</span>
                   ` : (debtLinea ? `
                     <span style="font-size: 0.60rem; font-weight: 700; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 1px 5px; border-radius: 4px;">Uso: $${(debtLinea.monthlyPayment || 0).toLocaleString('es-CL')}/mes</span>
                   ` : `
@@ -932,14 +932,14 @@
             <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <span style="font-size: 0.70rem; font-weight: 800; color: #0f172a;">🛡️ Pólizas de Seguro Activas</span>
-                <span style="font-size: 0.62rem; font-weight: 700; color: ${(state.insurances && state.insurances.length > 0) ? '#047857' : '#64748b'};">
-                  ${(state.insurances || []).length} pólizas
+                <span style="font-size: 0.62rem; font-weight: 700; color: ${(state.finances.insurances && state.finances.insurances.length > 0) ? '#047857' : '#64748b'};">
+                  ${(state.finances.insurances || []).length} pólizas
                 </span>
               </div>
               <div style="font-size: 0.64rem; color: #475569;">
-                ${(state.insurances && state.insurances.length > 0) ? `
+                ${(state.finances.insurances && state.finances.insurances.length > 0) ? `
                   <div style="display: flex; flex-direction: column; gap: 3px;">
-                    ${state.insurances.map(ins => {
+                    ${state.finances.insurances.map(ins => {
                       const insSub = ins.assetSub || (ins.type ? ((getUserInsuranceAssets(ins.type).find(a => a.id === ins.assetId || a.name === ins.associatedTo) || {}).sub) : '');
                       const displayTitle = (insSub && !ins.name.includes(insSub)) ? `${ins.name} (${insSub})` : ins.name;
                       return `
@@ -999,7 +999,7 @@
             <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin-bottom: 6px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                 <span style="font-size: 0.70rem; font-weight: 800; color: #0f172a;">🏷️ Intereses (${categories.length} categorías)</span>
-                <span style="font-size: 0.62rem; font-weight: 700; color: #0284c7;">${state.assignedBolitas || 21}/${state.totalBolitas || 25} bolitas</span>
+                <span style="font-size: 0.62rem; font-weight: 700; color: #0284c7;">${state.persona.assignedBolitas || 21}/${state.persona.totalBolitas || 25} bolitas</span>
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.62rem;">
@@ -1043,8 +1043,8 @@
 
             <!-- 10. SESIÓN Y AUDITORÍA -->
             <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 7px; padding: 6px 9px; font-size: 0.62rem; color: #64748b; display: flex; justify-content: space-between; align-items: center;">
-              <span>🏷️ Sesión Taller: <strong style="color: #0f172a;">${state.sessionCode || 'Sin código (Local)'}</strong></span>
-              <span>Diapositiva: <strong style="color: #0284c7;">N° ${state.currentSlideIdx + 1}</strong></span>
+              <span>🏷️ Sesión Taller: <strong style="color: #0f172a;">${state.persona.sessionCode || 'Sin código (Local)'}</strong></span>
+              <span>Diapositiva: <strong style="color: #0284c7;">N° ${state.simulation.currentSlideIdx + 1}</strong></span>
             </div>
 
           </div>
@@ -1055,26 +1055,26 @@
     // GESTIÓN INTERACTIVA DE ÍTEMS DE PRESUPUESTO
     function updateBudgetItem(itemId, val) {
       const num = Math.max(0, parseInt(val, 10) || 0);
-      if (state.debts) {
-        const dItem = state.debts.find(d => d.id === itemId);
+      if (state.finances.debts) {
+        const dItem = state.finances.debts.find(d => d.id === itemId);
         if (dItem) {
           dItem.budget = num;
           dItem.real = num;
           dItem.monthlyPayment = num;
-          state.monthlyDebt = state.debts.reduce((acc, d) => acc + (d.monthlyPayment || 0), 0);
+          state.finances.monthlyDebt = state.finances.debts.reduce((acc, d) => acc + (d.monthlyPayment || 0), 0);
           renderPersonalStage('presupuesto');
           return;
         }
       }
-      if (state.budgetItems) {
-        const item = state.budgetItems.find(i => i.id === itemId);
+      if (state.finances.budgetItems) {
+        const item = state.finances.budgetItems.find(i => i.id === itemId);
         if (item) {
           item.budget = num;
           item.real = num;
         }
       }
-      if (state.customBudgetItems) {
-        const cItem = state.customBudgetItems.find(i => i.id === itemId);
+      if (state.finances.customBudgetItems) {
+        const cItem = state.finances.customBudgetItems.find(i => i.id === itemId);
         if (cItem) {
           cItem.budget = num;
           cItem.real = num;
@@ -1084,17 +1084,17 @@
     }
 
     function toggleAddBudgetForm(show) {
-      state.showAddBudgetForm = show;
+      state.interface.showAddBudgetForm = show;
       renderPersonalStage('presupuesto');
     }
 
     function changeNewBudgetType(type) {
-      state.newBudgetType = type;
+      state.interface.newBudgetType = type;
       renderPersonalStage('presupuesto');
     }
 
     function changeInvestInstrument(val) {
-      state.newBudgetInvestType = val;
+      state.interface.newBudgetInvestType = val;
       renderPersonalStage('presupuesto');
     }
 
@@ -1106,8 +1106,8 @@
 
       const name = nameInput ? nameInput.value.trim() : '';
       const amount = amountInput ? Math.max(0, parseInt(amountInput.value, 10) || 0) : 0;
-      const isInvest = state.newBudgetType === 'invest';
-      const investType = investSelect ? investSelect.value : (state.newBudgetInvestType || 'alcancia');
+      const isInvest = state.interface.newBudgetType === 'invest';
+      const investType = investSelect ? investSelect.value : (state.interface.newBudgetInvestType || 'alcancia');
       const source = (isInvest && investType === 'alcancia') ? 'Efectivo' : (sourceSelect ? sourceSelect.value : 'Efectivo');
 
       if (!name) {
@@ -1115,7 +1115,7 @@
         return;
       }
 
-      if (!state.customBudgetItems) state.customBudgetItems = [];
+      if (!state.finances.customBudgetItems) state.finances.customBudgetItems = [];
 
       const investIcons = {
         alcancia: '🐖',
@@ -1131,7 +1131,7 @@
         fondos: 'Fondo Mutuo'
       };
 
-      state.customBudgetItems.push({
+      state.finances.customBudgetItems.push({
         id: 'custom_' + Date.now(),
         name,
         desc: isInvest ? `${investLabels[investType] || 'Inversión'} (Origen: ${source})` : 'Gasto libre',
@@ -1143,26 +1143,26 @@
         source
       });
 
-      state.showAddBudgetForm = false;
+      state.interface.showAddBudgetForm = false;
       renderPersonalStage('presupuesto');
     }
 
     function deleteCustomBudgetItem(itemId) {
-      if (state.customBudgetItems) {
-        state.customBudgetItems = state.customBudgetItems.filter(i => i.id !== itemId);
+      if (state.finances.customBudgetItems) {
+        state.finances.customBudgetItems = state.finances.customBudgetItems.filter(i => i.id !== itemId);
         renderPersonalStage('presupuesto');
       }
     }
 
 
     function startRiskTest() {
-      if (!state.riskTempAnswers) state.riskTempAnswers = [];
+      if (!state.interface.riskTempAnswers) state.interface.riskTempAnswers = [];
       renderRiskTestQuestion(0);
     }
 
     function selectRiskAnswer(qIdx, points) {
-      if (!state.riskTempAnswers) state.riskTempAnswers = [];
-      state.riskTempAnswers[qIdx] = points;
+      if (!state.interface.riskTempAnswers) state.interface.riskTempAnswers = [];
+      state.interface.riskTempAnswers[qIdx] = points;
 
       // Actualizar visualmente las opciones en el DOM sin recargar la pantalla completa (evita parpadeo/saltos)
       const optButtons = document.querySelectorAll('.risk-opt-btn');
@@ -1183,7 +1183,7 @@
       // Actualizar contador de respondidas
       const countEl = document.getElementById('risk-answered-count');
       if (countEl) {
-        const answeredCount = state.riskTempAnswers.filter(v => v !== undefined && v !== null).length;
+        const answeredCount = state.interface.riskTempAnswers.filter(v => v !== undefined && v !== null).length;
         countEl.textContent = `${answeredCount} de 5 respondidas`;
       }
 
@@ -1199,9 +1199,9 @@
       const q = officialRiskQuestions[qIdx];
       if (!q) return;
 
-      if (!state.riskTempAnswers) state.riskTempAnswers = [];
-      const currentSelected = state.riskTempAnswers[qIdx];
-      const answeredCount = state.riskTempAnswers.filter(v => v !== undefined && v !== null).length;
+      if (!state.interface.riskTempAnswers) state.interface.riskTempAnswers = [];
+      const currentSelected = state.interface.riskTempAnswers[qIdx];
+      const answeredCount = state.interface.riskTempAnswers.filter(v => v !== undefined && v !== null).length;
 
       container.innerHTML = `
         <div class="personal-subview-box">
@@ -1262,11 +1262,11 @@
     }
 
     function goToRiskFinalScreen() {
-      if (!state.riskTempAnswers) state.riskTempAnswers = [];
+      if (!state.interface.riskTempAnswers) state.interface.riskTempAnswers = [];
 
       const unanswered = [];
       for (let i = 0; i < officialRiskQuestions.length; i++) {
-        if (state.riskTempAnswers[i] === undefined || state.riskTempAnswers[i] === null) {
+        if (state.interface.riskTempAnswers[i] === undefined || state.interface.riskTempAnswers[i] === null) {
           unanswered.push(i + 1);
         }
       }
@@ -1276,7 +1276,7 @@
         renderRiskIncompleteScreen(unanswered);
       } else {
         // Pantalla final con resultado oficial
-        const totalScore = state.riskTempAnswers.reduce((a, b) => a + b, 0);
+        const totalScore = state.interface.riskTempAnswers.reduce((a, b) => a + b, 0);
         let result = {};
 
         if (totalScore <= 8) {
@@ -1305,7 +1305,7 @@
           };
         }
 
-        state.riskTestResult = result;
+        state.wellbeing.riskTestResult = result;
         renderRiskTestSummary(result);
       }
     }

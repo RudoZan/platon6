@@ -17,11 +17,12 @@
 5. **Secret Subview `"Variables del Personaje"` (`secret_summary`):** Clicking top-left icon (`#hub-stage-icon-box`) opens full state audit (`Física: 20/20`, `Emocional: 40/40`, `Mental: 40/40`, accounts, debts, owned assets).
 
 ## UC-04: `"Trabajo"` Hub (Job Search, Training & Salary Negotiation)
-1. **`"Búsqueda de Trabajo"`:** 2-col catalog of 6 jobs (gross/net salary, experience/course requirements). Supports immediate hire (`"Postular"`) or resignation (`"Renunciar"`).
+1. **`"Búsqueda de Trabajo"`:** 2-col catalog of 6 jobs (gross/net salary, cumulative completed-month experience and certified-course requirements). Supports immediate hire (`"Postular"`) or resignation (`"Renunciar"`).
 2. **`"Capacitaciones y Certificaciones"`:** 8 courses across 4 areas (`"Nivel Intermedio"` required before `"Nivel Avanzado"`). Related courses grant +10% (Intermedio) or +15% + promotion eligibility (Avanzado).
 3. **`"Negociación Salarial y Ascensos"` (Chat Simulator):**
    - If `"Independiente / Freelance"`, informs user has no boss.
    - If employed, opens gender-neutral boss chat (3 random reply variants) to greet, request raise, or request promotion, validating mental/emotional health ($\ge 20$) and completed courses. Blocks repeat requests in same session; resets on exit (`initNegChat()`).
+4. **Employment status:** The main view shows role description, estimated monthly income, start date, tenure, performance level and score. Performance affects freelance income, commercial commissions, raises/promotions, and dependent-employment review outcomes.
 
 ## UC-05: `"Banco"` Hub (All 8 Sections Active: Accounts, Checking Bundle, Cards, FFMM, DAP & Seguros)
 1. **Account Operations (`"Cuenta Ahorro"`, `"Cuenta RUT / Vista"`, `"Cuenta Corriente"`):** Open at `$0` (`"Abrir cuenta"`), modal actions: `"Depositar"`, `"Girar / Transferir"` (with `"Todo el saldo"` button), and `"Cerrar cuenta"` (transfers balance to `"Efectivo"`).
@@ -76,3 +77,6 @@
 1. The simulated calendar advances while the application is visible and focused, pauses in the background, and resumes when the user returns.
 2. Daily and monthly processing handles investment returns, wallet interest, rent, premiums, maintenance, credit interest, mortgage payments and term-deposit maturity.
 3. Simulation state is persisted in the browser and restored from the most recent valid local/session storage backup; restarting clears both backups.
+## UC-14: `"Comercio y Servicios"` Categories
+1. The dock opens the renamed `"Comercio y Servicios"` hub.
+2. Its catalog displays the existing options plus `"Tienda de Hobbies"`, `"Ropa e implementos deportivos"`, `"Reparaciones del hogar"`, `"Mecánico"`, `"Veterinario"`, and `"Hospital y Urgencia"`.

@@ -48,7 +48,18 @@
 | 5 | `"Independiente / Freelance"` | Variable | ~\$950.000 est. | None | Self-employed (direct course boost) |
 | 6 | `"Apoyo Operativo"` | \$556.000 | \$450.000 | None | 1 (Lvl 1 → 2) |
 
-### 2.5. Training Courses Matrix (8 Courses in 4 Areas)
+### 2.5. Employment and Training Lifecycle
+- **Cumulative experience:** Roles requiring prior experience require 12 completed months across jobs. Completed months accumulate across separate positions and unemployment gaps, remain after resignation/job changes, and appear in job search. Legacy job history has no duration data, so experience before this rule was introduced cannot be reconstructed.
+- **Salary history:** Up to 12 recent net salary payments are retained for financial assessment.
+- **Performance score (36 points):** Mental health `0–40 × 50%` (max 20), emotional health `0–40 × 30%` (max 12), and physical health `0–20 × 20%` (max 4).
+- **Performance levels:** Excepcional `≥34`; Destacable `≥30`; Bueno `≥26`; Satisfactorio `≥22`; Regular `≥18`; Deficiente `≥14`; Paupérrimo `≥10`; below 10 is Perjudicial para la empresa in dependent employment and Perjudicial para uno mismo in freelance work.
+- **Dependent employment rules:** Satisfactorio and Regular block promotions. Deficiente, Paupérrimo and below 10 block raises and promotions. Three consecutive monthly scores below 10 start a six-month review period to reach Regular (18); failure to reach it by the deadline ends the contract. Freelance work has no review or dismissal for low performance.
+- **Freelance income multipliers:** Excepcional ×3; Destacable ×2.5; Bueno ×2; Satisfactorio ×1.5; Regular ×1; Deficiente ×0.7; Paupérrimo ×0.5; below 10 ×0.3.
+- **Commercial commissions** (multiplier of base salary): Excepcional ×1.5; Destacable ×1.1; Bueno ×0.6; Satisfactorio ×0.3; Regular ×0.2; Deficiente ×0.1; Paupérrimo/below 10 ×0. Commission is added to base salary.
+- **Tenure cap:** A new job recognizes at most Regular during months 1–3, Satisfactorio in month 4, Bueno in month 5, and Excepcional in month 6; from month 7 it recognizes the actual wellbeing score. The cap resets on each new job.
+- **Course lifecycle:** Enrollment begins on day 1 of the following simulated month. Start/end dates are displayed; certification is granted only after the course duration elapses. In-progress enrollment does not satisfy certification requirements.
+- **Course lifecycle:** Enrollment begins on day 1 of the following simulated month. Start/end dates are displayed; certification is granted only after the course duration elapses. In-progress enrollment does not satisfy certification requirements.
+#### Training Course Matrix (8 Courses in 4 Areas)
 - **Areas:** `"Capacitación"` (`a` Intermedio, `b` Avanzado), `"Comercial"` (`c` Intermedio, `d` Avanzado), `"Administración"` (`e` Intermedio, `f` Avanzado), `"Especialización"` (`g` Intermedio, `h` Avanzado).
 - **Strict prerequisite:** `"Nivel Avanzado"` requires passing `"Nivel Intermedio"` of the same area first.
 - **Salary & promotion impact:** Matching Intermedio (⭐) = **+10%**; Matching Avanzado (🌟) = **+15% + unlocks 1 promotion**. Non-matching = +2% to +5%, no promotion.
@@ -99,10 +110,10 @@
 - `state.financialMovements` stores dated cash/account changes. The persistent-state proxy detects balance mutations; `withFinancialMovementDetail()` attaches a contextual cause, while `recordFinancialMovement()` records credit-product events not represented as cash transfers.
 - `job.salaryPaymentHistory` retains recent net salary records. Mortgage assessment averages up to three recent salary months and net rent receipts: first-mortgage capacity is 33% of salary average; subsequent capacity is 50% of salary and net rent averages less existing mortgage payments.
 - Revolving credit daily rates are 0.09% for the credit line and 0.08% for the card, consolidated monthly. Corriente deposits are applied to outstanding line principal and unpaid interest first.
-- Consumer credit supports amortized terms and full payoff. Mortgage payments are scheduled monthly against a selected eligible source.
+- Consumer credit requires six months' employment tenure, supports amortized terms (12 months by default) and full payoff, and offers optional desgravamen and unemployment insurance. Mortgage credit requires desgravamen and fire/earthquake insurance, with optional unemployment insurance; payments are scheduled monthly against a selected eligible source. Eligibility thresholds are not exposed in the UI.
 
 ### Simulation Clock and Persistence
-- The simulated calendar advances one day every two seconds while the page is visible/focused. Daily processing handles accrued interest and scheduled events; monthly processing consolidates credit interest and runs monthly account, investment, rent, and debt events.
+- The simulated calendar advances one day every two seconds while the page is visible/focused. Daily processing accrues wallet, credit-line and card interest. Monthly processing consolidates revolving interest and processes investment/FFMM returns, APV/Cuenta 2 contributions, rent, DAP maturity, premiums, maintenance, salary/tenure updates, mortgage payments and other account/debt events. Manual time-advance controls are removed; renewable DAPs retain the collection action during their grace period.
 - Persistent state is restored from the newest timestamped localStorage/sessionStorage backup; hiding or leaving the page forces a save, and restart clears both.
 
 ## 3. Session Room ID & Supabase Tables

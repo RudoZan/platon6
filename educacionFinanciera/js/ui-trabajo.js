@@ -22,8 +22,8 @@
       if (titleElem) titleElem.innerText = '💼 Trabajo';
       if (subtitleElem) subtitleElem.innerText = 'Desarrollo profesional e ingresos laborales';
 
-      const curJob = state.currentJob;
-      const salaryAccounts = (state.bankAccounts || []).filter(account => account.type !== 'credit');
+      const curJob = state.work.currentJob;
+      const salaryAccounts = (state.finances.bankAccounts || []).filter(account => account.type !== 'credit');
       const salaryAccountId = curJob && salaryAccounts.some(account => account.id === curJob.salaryAccountId)
         ? curJob.salaryAccountId
         : 'cash';
@@ -212,8 +212,8 @@
         `;
       } else if (subView === 'capacitacion') {
         // VISTA DE CAPACITACIÓN Y CERTIFICACIONES
-        const completedCourseIds = (state.courses || []).map(c => typeof c === 'string' ? c : c.id);
-        const enrolledCourses = Array.isArray(state.enrolledCourses) ? state.enrolledCourses : [];
+        const completedCourseIds = (state.work.courses || []).map(c => typeof c === 'string' ? c : c.id);
+        const enrolledCourses = Array.isArray(state.work.enrolledCourses) ? state.work.enrolledCourses : [];
 
         container.innerHTML = `
           <div class="personal-subview-box">
@@ -266,7 +266,7 @@
         `;
       } else if (subView === 'negociacion') {
         // VISTA DE NEGOCIACIÓN SALARIAL (TIPO CHAT O CASO FREELANCE / DESEMPLEADO)
-        if (!state.currentJob) {
+        if (!state.work.currentJob) {
           container.innerHTML = `
             <div class="personal-subview-box">
               <div class="personal-subview-top">
@@ -290,7 +290,7 @@
           return;
         }
 
-        if (state.currentJob.isFreelance) {
+        if (state.work.currentJob.isFreelance) {
           container.innerHTML = `
             <div class="personal-subview-box">
               <div class="personal-subview-top">
@@ -329,7 +329,7 @@
                 <div class="neg-chat-avatar">👔</div>
                 <div>
                   <div style="font-size: 0.76rem; font-weight: 800;">Jefatura Directa</div>
-                  <div style="font-size: 0.60rem; color: #94a3b8;">${state.currentJob.name}</div>
+                  <div style="font-size: 0.60rem; color: #94a3b8;">${state.work.currentJob.name}</div>
                 </div>
               </div>
 
@@ -354,7 +354,7 @@
     // LÓGICA DE MATRÍCULA Y PAGO DE CURSOS DE CAPACITACIÓN
     // ==========================================================================
     function getCourseSchedule(course) {
-      const currentMonthIndex = (Number(state.simulationYear) - 1) * 12 + Number(state.simulationMonth);
+      const currentMonthIndex = (Number(state.simulation.year) - 1) * 12 + Number(state.simulation.month);
       const startMonthIndex = currentMonthIndex + 1;
       const endMonthIndex = currentMonthIndex + Number(course.durationMonths);
       const toDate = (monthIndex, day) => ({
@@ -387,8 +387,8 @@
       const modalRoot = document.getElementById('job-modal-root');
       if (!modalRoot) return;
 
-      const cash = state.cash || 0;
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const cash = state.finances.cash || 0;
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
       const totalAvailable = cash + bankAccounts.reduce((sum, account) => sum + getBankAccountSpendableBalance(account.id), 0);
       const canAfford = totalAvailable >= course.price;
 
@@ -474,22 +474,22 @@
     function confirmCourseEnrollment(courseId) {
       const course = coursesCatalogData.find(c => c.id === courseId);
       if (!course) return;
-      if ((state.courses || []).some(item => (typeof item === 'string' ? item : item.id) === course.id)
-        || (state.enrolledCourses || []).some(item => item.id === course.id)) return;
+      if ((state.work.courses || []).some(item => (typeof item === 'string' ? item : item.id) === course.id)
+        || (state.work.enrolledCourses || []).some(item => item.id === course.id)) return;
 
       const selectedInput = document.querySelector('input[name="payment_source"]:checked');
       const paymentSource = selectedInput ? selectedInput.value : 'cash';
 
       // Descontar fondos
       if (paymentSource === 'cash') {
-        if ((state.cash || 0) < course.price) {
+        if ((state.finances.cash || 0) < course.price) {
           alert('No tienes suficiente efectivo para pagar este curso.');
           return;
         }
-        state.cash -= course.price;
+        state.finances.cash -= course.price;
       } else if (paymentSource.startsWith('account_')) {
         const accIdx = parseInt(paymentSource.replace('account_', ''), 10);
-        const account = state.bankAccounts && state.bankAccounts[accIdx];
+        const account = state.finances.bankAccounts && state.finances.bankAccounts[accIdx];
         if (!account || getBankAccountSpendableBalance(account.id) < course.price) {
           alert('La cuenta seleccionada no tiene saldo suficiente.');
           return;
@@ -498,8 +498,8 @@
       }
 
       const schedule = getCourseSchedule(course);
-      if (!Array.isArray(state.enrolledCourses)) state.enrolledCourses = [];
-      state.enrolledCourses.push({
+      if (!Array.isArray(state.work.enrolledCourses)) state.work.enrolledCourses = [];
+      state.work.enrolledCourses.push({
         id: course.id,
         code: course.code,
         name: course.name,
@@ -521,10 +521,10 @@
     }
 
     function processDailyCourseEvents() {
-      if (!Array.isArray(state.enrolledCourses) || !state.enrolledCourses.length) return;
-      const currentDate = { year: Number(state.simulationYear), month: Number(state.simulationMonth), day: Number(state.simulationDay) };
+      if (!Array.isArray(state.work.enrolledCourses) || !state.work.enrolledCourses.length) return;
+      const currentDate = { year: Number(state.simulation.year), month: Number(state.simulation.month), day: Number(state.simulation.day) };
       const completed = [];
-      state.enrolledCourses = state.enrolledCourses.filter(enrollment => {
+      state.work.enrolledCourses = state.work.enrolledCourses.filter(enrollment => {
         const endDate = enrollment.completionDate;
         const hasFinished = currentDate.year > endDate.year
           || (currentDate.year === endDate.year && currentDate.month > endDate.month)
@@ -534,22 +534,22 @@
       });
 
       if (!completed.length) return;
-      if (!Array.isArray(state.courses)) state.courses = [];
+      if (!Array.isArray(state.work.courses)) state.work.courses = [];
       const messages = completed.map(enrollment => {
         const course = coursesCatalogData.find(item => item.id === enrollment.id);
-        if (!state.courses.some(item => (typeof item === 'string' ? item : item.id) === enrollment.id)) {
-          state.courses.push({ ...enrollment, completedAt: currentDate });
+        if (!state.work.courses.some(item => (typeof item === 'string' ? item : item.id) === enrollment.id)) {
+          state.work.courses.push({ ...enrollment, completedAt: currentDate });
         }
-        if (course && state.currentJob && state.currentJob.isFreelance) {
-          const performance = getWorkPerformance(state.currentJob);
+        if (course && state.work.currentJob && state.work.currentJob.isFreelance) {
+          const performance = getWorkPerformance(state.work.currentJob);
           if (performance.score < 18) {
             return `<div>¡Felicitaciones! Has completado el curso de <strong>${enrollment.name}</strong>. Tu nivel de desempeño (${performance.level}) no permite aplicar todavía el aumento asociado al curso.</div>`;
           }
-          const gainRate = course.favorsJobs.includes(state.currentJob.id) ? course.gainFavored : course.gainBase;
-          const raiseAmount = Math.round((state.currentJob.salary || 950000) * gainRate);
-          state.currentJob.salary = (state.currentJob.salary || 950000) + raiseAmount;
-          if (!Array.isArray(state.appliedCourseRaises)) state.appliedCourseRaises = [];
-          if (!state.appliedCourseRaises.includes(course.id)) state.appliedCourseRaises.push(course.id);
+          const gainRate = course.favorsJobs.includes(state.work.currentJob.id) ? course.gainFavored : course.gainBase;
+          const raiseAmount = Math.round((state.work.currentJob.salary || 950000) * gainRate);
+          state.work.currentJob.salary = (state.work.currentJob.salary || 950000) + raiseAmount;
+          if (!Array.isArray(state.work.appliedCourseRaises)) state.work.appliedCourseRaises = [];
+          if (!state.work.appliedCourseRaises.includes(course.id)) state.work.appliedCourseRaises.push(course.id);
           return `<div>¡Felicitaciones! Has completado el curso de <strong>${enrollment.name}</strong>. Tus ingresos independientes aumentan $${raiseAmount.toLocaleString('es-CL')}.</div>`;
         }
         return `<div>¡Felicitaciones! Has completado el curso de <strong>${enrollment.name}</strong>.</div>`;
@@ -595,16 +595,16 @@
 
     function renderNegChatOptions() {
       const container = document.getElementById('neg-chat-options-container');
-      if (!container || !state.currentJob) return;
+      if (!container || !state.work.currentJob) return;
 
-      if (!Array.isArray(state.appliedCourseRaises)) state.appliedCourseRaises = [];
-      const completedIds = (state.courses || []).map(c => typeof c === 'string' ? c : c.id);
-      const pendingCourses = coursesCatalogData.filter(c => completedIds.includes(c.id) && !state.appliedCourseRaises.includes(c.id));
+      if (!Array.isArray(state.work.appliedCourseRaises)) state.work.appliedCourseRaises = [];
+      const completedIds = (state.work.courses || []).map(c => typeof c === 'string' ? c : c.id);
+      const pendingCourses = coursesCatalogData.filter(c => completedIds.includes(c.id) && !state.work.appliedCourseRaises.includes(c.id));
 
       if (pendingCourses.length > 0) {
         pendingCourses.sort((a, b) => {
-          const aFav = a.favorsJobs.includes(state.currentJob.id) ? 1 : 0;
-          const bFav = b.favorsJobs.includes(state.currentJob.id) ? 1 : 0;
+          const aFav = a.favorsJobs.includes(state.work.currentJob.id) ? 1 : 0;
+          const bFav = b.favorsJobs.includes(state.work.currentJob.id) ? 1 : 0;
           return bFav - aFav;
         });
       }
@@ -730,7 +730,7 @@
     }
 
     function handleNegChatOption(optionType) {
-      if (!state.currentJob) return;
+      if (!state.work.currentJob) return;
 
       const optionsContainer = document.getElementById('neg-chat-options-container');
       if (optionsContainer && optionType !== 'despedir' && optionType !== 'despedir_agradecer' && optionType !== 'despedir_entendido' && optionType !== 'despedir_salud') {
@@ -760,14 +760,14 @@
         }, 350);
       } else if (optionType === 'aumento') {
         negChatAskedRaise = true;
-        if (!Array.isArray(state.appliedCourseRaises)) state.appliedCourseRaises = [];
-        const completedIds = (state.courses || []).map(c => typeof c === 'string' ? c : c.id);
-        const pendingCourses = coursesCatalogData.filter(c => completedIds.includes(c.id) && !state.appliedCourseRaises.includes(c.id));
+        if (!Array.isArray(state.work.appliedCourseRaises)) state.work.appliedCourseRaises = [];
+        const completedIds = (state.work.courses || []).map(c => typeof c === 'string' ? c : c.id);
+        const pendingCourses = coursesCatalogData.filter(c => completedIds.includes(c.id) && !state.work.appliedCourseRaises.includes(c.id));
 
         if (pendingCourses.length > 0) {
           pendingCourses.sort((a, b) => {
-            const aFav = a.favorsJobs.includes(state.currentJob.id) ? 1 : 0;
-            const bFav = b.favorsJobs.includes(state.currentJob.id) ? 1 : 0;
+            const aFav = a.favorsJobs.includes(state.work.currentJob.id) ? 1 : 0;
+            const bFav = b.favorsJobs.includes(state.work.currentJob.id) ? 1 : 0;
             return bFav - aFav;
           });
         }
@@ -781,7 +781,7 @@
         renderNegChatMessages();
 
         setTimeout(() => {
-          const performance = getWorkPerformance(state.currentJob);
+          const performance = getWorkPerformance(state.work.currentJob);
           if (performance.score < 18) {
             negChatMessages.push({ sender: 'boss', text: `Tu nivel actual es <strong>${performance.level}</strong> (${performance.score}/36). Para optar a un aumento necesitas alcanzar al menos el nivel Regular (18/36).` });
             negChatStep = 'ended';
@@ -791,7 +791,7 @@
           }
 
           // 1. Validar salud mental o emocional
-          if ((state.healthMental || 40) < 20 || (state.healthEmotional || 40) < 20) {
+          if ((state.wellbeing.healthMental || 40) < 20 || (state.wellbeing.healthEmotional || 40) < 20) {
             const healthLowReplies = [
               'Te veo con cara de cansancio nivel zombi... Primero recupera el sueño y la salud, después hablamos de números.',
               'Antes de asumir más carga o exigencias, necesitas descansar un poco. ¡Recupera energías primero y luego lo vemos!',
@@ -809,15 +809,15 @@
 
           // 2. Revisar si hay curso para aumento
           if (bestCourse) {
-            const isFav = bestCourse.favorsJobs.includes(state.currentJob.id);
+            const isFav = bestCourse.favorsJobs.includes(state.work.currentJob.id);
             const rate = isFav ? bestCourse.gainFavored : bestCourse.gainBase;
-            const raise = Math.round((state.currentJob.salary || 0) * rate);
+            const raise = Math.round((state.work.currentJob.salary || 0) * rate);
 
-            state.currentJob.salary = (state.currentJob.salary || 0) + raise;
-            if (state.currentJob.grossSalary) {
-              state.currentJob.grossSalary = Math.round(state.currentJob.grossSalary * (1 + rate));
+            state.work.currentJob.salary = (state.work.currentJob.salary || 0) + raise;
+            if (state.work.currentJob.grossSalary) {
+              state.work.currentJob.grossSalary = Math.round(state.work.currentJob.grossSalary * (1 + rate));
             }
-            state.appliedCourseRaises.push(bestCourse.id);
+            state.work.appliedCourseRaises.push(bestCourse.id);
 
             const raiseApprovedReplies = [
               `¡Justo me llegó el aviso de que aprobaste <strong>'${bestCourse.name}'</strong>! Da gusto ver ese compromiso, así que te ganaste un aumento de $${raise.toLocaleString('es-CL')}. ¡Bien merecido!`,
@@ -834,7 +834,7 @@
             if (typeof updateHUD === 'function') updateHUD();
           } else {
             // Recomendar cursos (hasta 2 si están disponibles)
-            const favoredCourses = coursesCatalogData.filter(c => c.favorsJobs.includes(state.currentJob.id) && !completedIds.includes(c.id));
+            const favoredCourses = coursesCatalogData.filter(c => c.favorsJobs.includes(state.work.currentJob.id) && !completedIds.includes(c.id));
             const availableToSuggest = favoredCourses.length > 0 
               ? favoredCourses 
               : coursesCatalogData.filter(c => !completedIds.includes(c.id));
@@ -864,7 +864,7 @@
         renderNegChatMessages();
 
         setTimeout(() => {
-          const performance = getWorkPerformance(state.currentJob);
+          const performance = getWorkPerformance(state.work.currentJob);
           if (performance.score < 26) {
             negChatMessages.push({ sender: 'boss', text: `Tu nivel actual es <strong>${performance.level}</strong> (${performance.score}/36). Para postular a un ascenso necesitas alcanzar al menos el nivel Bueno (26/36).` });
             negChatStep = 'ended';
@@ -874,7 +874,7 @@
           }
 
           // 1. Validar salud mental y emocional
-          if ((state.healthMental || 40) < 20 || (state.healthEmotional || 40) < 20) {
+          if ((state.wellbeing.healthMental || 40) < 20 || (state.wellbeing.healthEmotional || 40) < 20) {
             const healthLowReplies = [
               'Te veo con cara de cansancio nivel zombi... Primero recupera el sueño y la salud, después hablamos de números.',
               'Antes de asumir más carga o exigencias, necesitas descansar un poco. ¡Recupera energías primero y luego lo vemos!',
@@ -891,35 +891,35 @@
           }
 
           // 2. Verificar curso Nivel Avanzado que favorezca su puesto (🌟)
-          if (!Array.isArray(state.promotionsEarned)) state.promotionsEarned = [];
-          const completedIds = (state.courses || []).map(c => typeof c === 'string' ? c : c.id);
-          const advCoursesFavored = coursesCatalogData.filter(c => c.level === 'avanzado' && c.favorsJobs.includes(state.currentJob.id));
+          if (!Array.isArray(state.work.promotionsEarned)) state.work.promotionsEarned = [];
+          const completedIds = (state.work.courses || []).map(c => typeof c === 'string' ? c : c.id);
+          const advCoursesFavored = coursesCatalogData.filter(c => c.level === 'avanzado' && c.favorsJobs.includes(state.work.currentJob.id));
 
           // Buscar si tiene alguno aprobado que no haya usado para ascenso
-          const availableAdv = advCoursesFavored.find(c => completedIds.includes(c.id) && !state.promotionsEarned.includes(c.id));
+          const availableAdv = advCoursesFavored.find(c => completedIds.includes(c.id) && !state.work.promotionsEarned.includes(c.id));
 
           if (availableAdv) {
             // Ascender
-            const currentLevel = state.currentJob.level || 1;
+            const currentLevel = state.work.currentJob.level || 1;
             const newLevel = currentLevel + 1;
-            state.currentJob.level = newLevel;
+            state.work.currentJob.level = newLevel;
 
             // Formatear nombre: ej. "Gestión Operativa Nivel 2"
-            let baseName = state.currentJob.name.replace(/\s+Nivel\s+\d+/i, '').replace(/\s*\/\s*Administrativa/i, '').trim();
-            state.currentJob.name = `${baseName} Nivel ${newLevel}`;
+            let baseName = state.work.currentJob.name.replace(/\s+Nivel\s+\d+/i, '').replace(/\s*\/\s*Administrativa/i, '').trim();
+            state.work.currentJob.name = `${baseName} Nivel ${newLevel}`;
 
             // Aumento de sueldo por ascenso (+15%)
-            const raise = Math.round((state.currentJob.salary || 0) * 0.15);
-            state.currentJob.salary = (state.currentJob.salary || 0) + raise;
-            if (state.currentJob.grossSalary) {
-              state.currentJob.grossSalary = Math.round(state.currentJob.grossSalary * 1.15);
+            const raise = Math.round((state.work.currentJob.salary || 0) * 0.15);
+            state.work.currentJob.salary = (state.work.currentJob.salary || 0) + raise;
+            if (state.work.currentJob.grossSalary) {
+              state.work.currentJob.grossSalary = Math.round(state.work.currentJob.grossSalary * 1.15);
             }
-            state.promotionsEarned.push(availableAdv.id);
+            state.work.promotionsEarned.push(availableAdv.id);
 
             const promoApprovedReplies = [
-              `Déjame ver en el sistema... ¡oh, veo que aprobaste <strong>'${availableAdv.name}'</strong>! Eso cambia todo: desde hoy asumes como '${state.currentJob.name}' con un aumento de $${raise.toLocaleString('es-CL')} en tu sueldo. ¡Felicitaciones!`,
-              `¡Me enteré de que completaste <strong>'${availableAdv.name}'</strong>! Era justo el requisito que faltaba para postularte: a partir de hoy eres '${state.currentJob.name}' con un aumento de $${raise.toLocaleString('es-CL')}.`,
-              `Justamente me llegó la confirmación de tu certificación en <strong>'${availableAdv.name}'</strong>. Valida totalmente tu ascenso: desde hoy pasas a '${state.currentJob.name}' con $${raise.toLocaleString('es-CL')} más de sueldo.`
+              `Déjame ver en el sistema... ¡oh, veo que aprobaste <strong>'${availableAdv.name}'</strong>! Eso cambia todo: desde hoy asumes como '${state.work.currentJob.name}' con un aumento de $${raise.toLocaleString('es-CL')} en tu sueldo. ¡Felicitaciones!`,
+              `¡Me enteré de que completaste <strong>'${availableAdv.name}'</strong>! Era justo el requisito que faltaba para postularte: a partir de hoy eres '${state.work.currentJob.name}' con un aumento de $${raise.toLocaleString('es-CL')}.`,
+              `Justamente me llegó la confirmación de tu certificación en <strong>'${availableAdv.name}'</strong>. Valida totalmente tu ascenso: desde hoy pasas a '${state.work.currentJob.name}' con $${raise.toLocaleString('es-CL')} más de sueldo.`
             ];
             negChatMessages.push({
               sender: 'boss',
@@ -1124,9 +1124,9 @@
                   </div>
                 </div>
 
-                ${state.currentJob ? `
+                ${state.work.currentJob ? `
                   <div style="font-size: 0.62rem; color: #b45309; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 6px; padding: 4px 6px; text-align: center; margin-bottom: 8px;">
-                    ⚠️ Nota: Esta opción reemplazará tu ocupación actual (<em>${state.currentJob.name}</em>).
+                    ⚠️ Nota: Esta opción reemplazará tu ocupación actual (<em>${state.work.currentJob.name}</em>).
                   </div>
                 ` : ''}
 
@@ -1192,10 +1192,10 @@
     }
 
     function setCurrentJobSalaryAccount(accountId) {
-      const job = state.currentJob;
+      const job = state.work.currentJob;
       if (!job) return;
       const accountExists = accountId === 'cash'
-        || (state.bankAccounts || []).some(account => account.id === accountId && account.type !== 'credit');
+        || (state.finances.bankAccounts || []).some(account => account.id === accountId && account.type !== 'credit');
       if (!accountExists) return;
       job.salaryAccountId = accountId;
     }
@@ -1205,23 +1205,23 @@
       const job = jobOffersData.find(j => j.id === jobId);
       if (!job) return;
 
-      if (!Array.isArray(state.jobHistory)) state.jobHistory = [];
-      if (state.currentJob) {
+      if (!Array.isArray(state.work.jobHistory)) state.work.jobHistory = [];
+      if (state.work.currentJob) {
         payCurrentJobThroughToday();
         archiveCurrentJobExperience();
-        if (!state.jobHistory.some(h => h.id === state.currentJob.id)) {
-          state.jobHistory.push({ id: state.currentJob.id, name: state.currentJob.name });
+        if (!state.work.jobHistory.some(h => h.id === state.work.currentJob.id)) {
+          state.work.jobHistory.push({ id: state.work.currentJob.id, name: state.work.currentJob.name });
         }
       }
 
-      state.currentJob = {
+      state.work.currentJob = {
         id: job.id,
         name: job.name,
         salary: job.salary,
         tenureStartDate: {
-          year: Number(state.simulationYear) || 1,
-          month: Number(state.simulationMonth) || 0,
-          day: Number(state.simulationDay) || 1
+          year: Number(state.simulation.year) || 1,
+          month: Number(state.simulation.month) || 0,
+          day: Number(state.simulation.day) || 1
         },
         tenureMonths: 0,
         performanceHistory: [],
@@ -1239,8 +1239,8 @@
         requirements: job.requirements
       };
 
-      if (!state.jobHistory.some(h => h.id === job.id)) {
-        state.jobHistory.push({ id: job.id, name: job.name });
+      if (!state.work.jobHistory.some(h => h.id === job.id)) {
+        state.work.jobHistory.push({ id: job.id, name: job.name });
       }
 
       closeJobModal();
@@ -1249,11 +1249,11 @@
 
     // MODAL DE CONFIRMACIÓN DE RENUNCIA
     function confirmResignationModal() {
-      if (!state.currentJob) return;
+      if (!state.work.currentJob) return;
       const modalRoot = document.getElementById('job-modal-root');
       if (!modalRoot) return;
 
-      const job = state.currentJob;
+      const job = state.work.currentJob;
       const isFreelance = Boolean(job.isFreelance);
 
       modalRoot.innerHTML = `
@@ -1307,15 +1307,15 @@
     // EJECUTAR RENUNCIA TRAS CONFIRMACIÓN
     function executeResignation() {
       let finalSalaryPayment = 0;
-      if (state.currentJob) {
+      if (state.work.currentJob) {
         finalSalaryPayment = payCurrentJobThroughToday();
         archiveCurrentJobExperience();
-        if (!Array.isArray(state.jobHistory)) state.jobHistory = [];
-        if (!state.jobHistory.some(h => h.id === state.currentJob.id)) {
-          state.jobHistory.push({ id: state.currentJob.id, name: state.currentJob.name });
+        if (!Array.isArray(state.work.jobHistory)) state.work.jobHistory = [];
+        if (!state.work.jobHistory.some(h => h.id === state.work.currentJob.id)) {
+          state.work.jobHistory.push({ id: state.work.currentJob.id, name: state.work.currentJob.name });
         }
       }
-      state.currentJob = null;
+      state.work.currentJob = null;
       const inBusqueda = document.querySelector('.jobs-grid-2col');
       closeJobModal();
       if (inBusqueda) {

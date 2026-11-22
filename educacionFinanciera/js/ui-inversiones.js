@@ -1422,16 +1422,16 @@
     }
 
     function getForeignCurrenciesTotalCLP() {
-      if (!state.foreignCurrencies || typeof state.foreignCurrencies !== 'object') return 0;
+      if (!state.finances.foreignCurrencies || typeof state.finances.foreignCurrencies !== 'object') return 0;
       return foreignCurrenciesCatalog.reduce((sum, curr) => {
-        const units = Number(state.foreignCurrencies[curr.id]) || 0;
+        const units = Number(state.finances.foreignCurrencies[curr.id]) || 0;
         return sum + Math.round(units * curr.sellPrice);
       }, 0);
     }
 
     function getActiveForeignCurrenciesCount() {
-      if (!state.foreignCurrencies || typeof state.foreignCurrencies !== 'object') return 0;
-      return foreignCurrenciesCatalog.filter(curr => (Number(state.foreignCurrencies[curr.id]) || 0) > 0).length;
+      if (!state.finances.foreignCurrencies || typeof state.finances.foreignCurrencies !== 'object') return 0;
+      return foreignCurrenciesCatalog.filter(curr => (Number(state.finances.foreignCurrencies[curr.id]) || 0) > 0).length;
     }
 
     function findOtherInvCatalogItem(itemId) {
@@ -1467,22 +1467,22 @@
     }
 
     function getDigitalWalletAccount() {
-      return (Array.isArray(state.bankAccounts) ? state.bankAccounts : []).find(account =>
+      return (Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : []).find(account =>
         account.id === 'acc_wallet_remunerada' || account.type === 'digital_wallet'
       ) || null;
     }
 
     function migrateDigitalWalletPosition() {
-      if (getDigitalWalletAccount() || !Array.isArray(state.otherInvestments)) return;
-      const positionIndex = state.otherInvestments.findIndex(position =>
+      if (getDigitalWalletAccount() || !Array.isArray(state.finances.otherInvestments)) return;
+      const positionIndex = state.finances.otherInvestments.findIndex(position =>
         position.categoryId === 'billeteras' && position.itemTypeId === 'wallet_remunerada'
       );
       if (positionIndex < 0) return;
 
-      const position = state.otherInvestments[positionIndex];
+      const position = state.finances.otherInvestments[positionIndex];
       const balance = Number(position.currentBalance) || 0;
-      if (!Array.isArray(state.bankAccounts)) state.bankAccounts = [];
-      state.bankAccounts.push({
+      if (!Array.isArray(state.finances.bankAccounts)) state.finances.bankAccounts = [];
+      state.finances.bankAccounts.push({
         id: 'acc_wallet_remunerada',
         name: 'Billetera Digital',
         type: 'digital_wallet',
@@ -1495,7 +1495,7 @@
         currentDayInterest: 0,
         openedAt: new Date().toISOString()
       });
-      state.otherInvestments.splice(positionIndex, 1);
+      state.finances.otherInvestments.splice(positionIndex, 1);
       if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
     }
 
@@ -1506,8 +1506,8 @@
         return;
       }
 
-      if (!Array.isArray(state.bankAccounts)) state.bankAccounts = [];
-      state.bankAccounts.push({
+      if (!Array.isArray(state.finances.bankAccounts)) state.finances.bankAccounts = [];
+      state.finances.bankAccounts.push({
         id: 'acc_wallet_remunerada',
         name: 'Billetera Digital',
         type: 'digital_wallet',
@@ -1533,7 +1533,7 @@
       const accruedInterest = Number(account.accruedInterest) || 0;
       const dailyBase = (Number(account.balance) || 0) + accruedInterest + currentDayInterest;
       const interest = Math.round(dailyBase * dailyRate);
-      if (Number(state.simulationDay) === 1) {
+      if (Number(state.simulation.day) === 1) {
         account.currentDayInterest = currentDayInterest + interest;
       } else {
         account.accruedInterest = accruedInterest + interest;
@@ -1579,7 +1579,7 @@
 
     function applyScheduledContribution(account) {
       if (!account?.monthlyActive || !account.monthlyContribution || !account.debitAccountId) return;
-      const source = (state.bankAccounts || []).find(item => item.id === account.debitAccountId);
+      const source = (state.finances.bankAccounts || []).find(item => item.id === account.debitAccountId);
       const amount = Math.round(Number(account.monthlyContribution) || 0);
       if (!source || amount <= 0 || getBankAccountSpendableBalance(source.id) < amount) return;
       debitBankAccountWithCreditLine(source.id, amount);
@@ -1599,13 +1599,13 @@
         }
         walletAccount.accruedInterest = Number(walletAccount.currentDayInterest) || 0;
         walletAccount.currentDayInterest = 0;
-        if (state.activeHudTab === 'inversiones' && state.activeInvestmentSubView === 'billeteras') {
+        if (state.interface.activeHudTab === 'inversiones' && state.interface.investmentSubView === 'billeteras') {
           renderDigitalWalletView();
         }
       }
 
-      if (!Array.isArray(state.otherInvestments)) state.otherInvestments = [];
-      state.otherInvestments.forEach(position => {
+      if (!Array.isArray(state.finances.otherInvestments)) state.finances.otherInvestments = [];
+      state.finances.otherInvestments.forEach(position => {
         const monthlyReturn = randomMonthlyReturn(
           Number(position.expectedMonthlyRate) || 0,
           Number(position.monthlyVolatility) || 0
@@ -1621,11 +1621,11 @@
 
         if (position.categoryId === 'fraccionada' && Number(position.propertyValue) > 0) {
           const rent = Math.round((Number(position.monthlyRent) || 0) * (Number(position.contributedCapital) || 0) / Number(position.propertyValue));
-          state.cash = (Number(state.cash) || 0) + rent;
+          state.finances.cash = (Number(state.finances.cash) || 0) + rent;
         }
       });
 
-      (state.mutualFunds || []).forEach(position => {
+      (state.finances.mutualFunds || []).forEach(position => {
         const monthlyReturn = randomMonthlyReturn(
           Number(position.expectedMonthlyRate) || 0,
           Number(position.monthlyVolatility) || 0
@@ -1635,10 +1635,10 @@
         position.monthsSimulated = (Number(position.monthsSimulated) || 0) + 1;
       });
 
-      [state.apvAccount, state.cuenta2Account].forEach(account => {
+      [state.finances.apvAccount, state.finances.cuenta2Account].forEach(account => {
         if (!account) return;
         applyScheduledContribution(account);
-        const type = account === state.apvAccount ? 'apv' : 'cuenta2';
+        const type = account === state.finances.apvAccount ? 'apv' : 'cuenta2';
         const { expected, volatility } = getMonthlyInvestmentRate(type, account.fund, account.regime);
         account.balance = Math.max(0, Math.round((Number(account.balance) || 0) * (1 + randomMonthlyReturn(expected, volatility))));
         account.monthsSimulated = (Number(account.monthsSimulated) || 0) + 1;
@@ -1656,7 +1656,7 @@
     function renderDigitalWalletView() {
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
-      state.activeInvestmentSubView = 'billeteras';
+      state.interface.investmentSubView = 'billeteras';
       migrateDigitalWalletPosition();
 
       const account = getDigitalWalletAccount();
@@ -1707,7 +1707,7 @@
     function renderInversionesStage(subView = 'main') {
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
-      state.activeInvestmentSubView = subView;
+      state.interface.investmentSubView = subView;
 
       const titleElem = document.getElementById('hub-stage-title');
       const subtitleElem = document.getElementById('hub-stage-subtitle');
@@ -1723,8 +1723,8 @@
       if (titleElem) titleElem.innerText = '📈 Otros Instrumentos';
       if (subtitleElem) subtitleElem.innerText = 'Instrumentos previsionales, bursátiles, divisas y capital de riesgo';
 
-      if (!Array.isArray(state.otherInvestments)) state.otherInvestments = [];
-      if (!state.foreignCurrencies || typeof state.foreignCurrencies !== 'object') state.foreignCurrencies = {};
+      if (!Array.isArray(state.finances.otherInvestments)) state.finances.otherInvestments = [];
+      if (!state.finances.foreignCurrencies || typeof state.finances.foreignCurrencies !== 'object') state.finances.foreignCurrencies = {};
       if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
 
       if (subView === 'moneda_ext') {
@@ -1738,8 +1738,8 @@
       }
 
       const digitalWallet = getDigitalWalletAccount();
-      const totalOtherBalance = state.otherInvestments.reduce((sum, inv) => sum + (Number(inv.currentBalance) || 0), 0) + getForeignCurrenciesTotalCLP() + (Number(state.apvAccount?.balance) || 0) + (Number(state.cuenta2Account?.balance) || 0) + (Number(digitalWallet?.balance) || 0);
-      const totalOtherCount = state.otherInvestments.length + getActiveForeignCurrenciesCount() + Number(Boolean(state.apvAccount)) + Number(Boolean(state.cuenta2Account)) + Number(Boolean(digitalWallet));
+      const totalOtherBalance = state.finances.otherInvestments.reduce((sum, inv) => sum + (Number(inv.currentBalance) || 0), 0) + getForeignCurrenciesTotalCLP() + (Number(state.finances.apvAccount?.balance) || 0) + (Number(state.finances.cuenta2Account?.balance) || 0) + (Number(digitalWallet?.balance) || 0);
+      const totalOtherCount = state.finances.otherInvestments.length + getActiveForeignCurrenciesCount() + Number(Boolean(state.finances.apvAccount)) + Number(Boolean(state.finances.cuenta2Account)) + Number(Boolean(digitalWallet));
 
       container.innerHTML = `
         <div class="personal-subview-box">
@@ -1766,7 +1766,7 @@
                 ? getActiveForeignCurrenciesCount()
                 : sec.id === 'billeteras'
                   ? Number(Boolean(getDigitalWalletAccount()))
-                  : state.otherInvestments.filter(inv => inv.categoryId === sec.id).length + (sec.id === 'apv' && state.apvAccount ? 1 : 0) + (sec.id === 'cuenta2' && state.cuenta2Account ? 1 : 0);
+                  : state.finances.otherInvestments.filter(inv => inv.categoryId === sec.id).length + (sec.id === 'apv' && state.finances.apvAccount ? 1 : 0) + (sec.id === 'cuenta2' && state.finances.cuenta2Account ? 1 : 0);
               return `
                 <div class="hub-option-card" onclick="renderInversionesStage('${sec.id}')">
                   <div class="hub-option-icon">${sec.icon || '💎'}</div>
@@ -1789,8 +1789,8 @@
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
 
-      if (!state.foreignCurrencies || typeof state.foreignCurrencies !== 'object') {
-        state.foreignCurrencies = {};
+      if (!state.finances.foreignCurrencies || typeof state.finances.foreignCurrencies !== 'object') {
+        state.finances.foreignCurrencies = {};
       }
       if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
 
@@ -1805,7 +1805,7 @@
 
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
             ${foreignCurrenciesCatalog.map(curr => {
-              const ownedUnits = Number(state.foreignCurrencies[curr.id]) || 0;
+              const ownedUnits = Number(state.finances.foreignCurrencies[curr.id]) || 0;
               return `
                 <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px;">
                   <div>
@@ -1853,8 +1853,8 @@
       const curr = foreignCurrenciesCatalog.find(c => c.id === currId);
       if (!curr) return;
 
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
-      const cash = Number(state.cash) || 0;
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
+      const cash = Number(state.finances.cash) || 0;
 
       const fundingOptions = [
         { id: 'cash', label: `💵 Dinero en Efectivo (Disponible: $${cash.toLocaleString('es-CL')})`, balance: cash },
@@ -1951,7 +1951,7 @@
       }
 
       if (sourceId === 'cash') {
-        const available = Number(state.cash) || 0;
+        const available = Number(state.finances.cash) || 0;
         if (totalCLP > available) {
           if (errorEl) {
             errorEl.style.display = 'block';
@@ -1959,9 +1959,9 @@
           }
           return;
         }
-        state.cash = available - totalCLP;
+        state.finances.cash = available - totalCLP;
       } else {
-        const acc = (state.bankAccounts || []).find(a => a.id === sourceId);
+        const acc = (state.finances.bankAccounts || []).find(a => a.id === sourceId);
         if (!acc || getBankAccountSpendableBalance(acc.id) < totalCLP) {
           if (errorEl) {
             errorEl.style.display = 'block';
@@ -1972,10 +1972,10 @@
         debitBankAccountWithCreditLine(acc.id, totalCLP);
       }
 
-      if (!state.foreignCurrencies || typeof state.foreignCurrencies !== 'object') {
-        state.foreignCurrencies = {};
+      if (!state.finances.foreignCurrencies || typeof state.finances.foreignCurrencies !== 'object') {
+        state.finances.foreignCurrencies = {};
       }
-      state.foreignCurrencies[curr.id] = (Number(state.foreignCurrencies[curr.id]) || 0) + units;
+      state.finances.foreignCurrencies[curr.id] = (Number(state.finances.foreignCurrencies[curr.id]) || 0) + units;
 
       if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
       closeBancoModal();
@@ -1990,10 +1990,10 @@
       const curr = foreignCurrenciesCatalog.find(c => c.id === currId);
       if (!curr) return;
 
-      const ownedUnits = Number(state.foreignCurrencies && state.foreignCurrencies[curr.id]) || 0;
+      const ownedUnits = Number(state.finances.foreignCurrencies && state.finances.foreignCurrencies[curr.id]) || 0;
       if (ownedUnits <= 0) return;
 
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
       const destOptions = [
         { id: 'cash', label: '💵 Dinero en Efectivo' },
         ...bankAccounts.map(a => ({
@@ -2093,7 +2093,7 @@
       }
 
       if (sourceId === 'cash') {
-        const available = Number(state.cash) || 0;
+        const available = Number(state.finances.cash) || 0;
         if (totalCLP > available) {
           if (errorEl) {
             errorEl.style.display = 'block';
@@ -2101,9 +2101,9 @@
           }
           return;
         }
-        state.cash = available + totalCLP;
+        state.finances.cash = available + totalCLP;
       } else {
-        const acc = (state.bankAccounts || []).find(a => a.id === sourceId);
+        const acc = (state.finances.bankAccounts || []).find(a => a.id === sourceId);
         if (!acc) {
           if (errorEl) {
             errorEl.style.display = 'block';
@@ -2114,7 +2114,7 @@
         creditBankAccount(acc.id, totalCLP);
       }
 
-      state.foreignCurrencies[curr.id] = (Number(state.foreignCurrencies[curr.id]) || 0) - units;
+      state.finances.foreignCurrencies[curr.id] = (Number(state.finances.foreignCurrencies[curr.id]) || 0) - units;
 
       if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
       closeBancoModal();
@@ -2135,11 +2135,11 @@
       if (!found) return;
       const { section, item } = found;
       const alreadyParticipating = section.id === 'fraccionada'
-        && (state.otherInvestments || []).some(position => position.categoryId === section.id && position.itemTypeId === item.id);
+        && (state.finances.otherInvestments || []).some(position => position.categoryId === section.id && position.itemTypeId === item.id);
       if (alreadyParticipating) return;
 
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
-      const cash = Number(state.cash) || 0;
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
+      const cash = Number(state.finances.cash) || 0;
 
       const fundingOptions = [
         { id: 'cash', label: `💵 Dinero en Efectivo (Disponible: $${cash.toLocaleString('es-CL')})`, balance: cash, name: 'Dinero en Efectivo' },
@@ -2263,11 +2263,11 @@
     }
 
     function consolidateInvestmentPositions(categoryId) {
-      if (!['acciones', 'bonos_corp', 'bonos_estado', 'startups', 'etf'].includes(categoryId) || !Array.isArray(state.otherInvestments)) return;
+      if (!['acciones', 'bonos_corp', 'bonos_estado', 'startups', 'etf'].includes(categoryId) || !Array.isArray(state.finances.otherInvestments)) return;
 
       const positionsByItemId = new Map();
       const consolidatedPositions = [];
-      state.otherInvestments.forEach(position => {
+      state.finances.otherInvestments.forEach(position => {
         if (position.categoryId !== categoryId) {
           consolidatedPositions.push(position);
           return;
@@ -2285,7 +2285,7 @@
         existingPosition.monthsSimulated = Math.max(Number(existingPosition.monthsSimulated) || 0, Number(position.monthsSimulated) || 0);
       });
 
-      state.otherInvestments = consolidatedPositions;
+      state.finances.otherInvestments = consolidatedPositions;
     }
 
     function executeContractOtherInv(itemId) {
@@ -2300,7 +2300,7 @@
       const sourceId = sourceSelect ? sourceSelect.value : 'cash';
       const amount = Math.round(Number(amountInput ? amountInput.value : 0));
 
-      if (section.id === 'fraccionada' && (state.otherInvestments || []).some(position => position.categoryId === section.id && position.itemTypeId === item.id)) {
+      if (section.id === 'fraccionada' && (state.finances.otherInvestments || []).some(position => position.categoryId === section.id && position.itemTypeId === item.id)) {
         if (errorEl) {
           errorEl.style.display = 'block';
           errorEl.textContent = 'Ya tienes una participación activa en esta propiedad.';
@@ -2321,7 +2321,7 @@
       }
 
       if (sourceId === 'cash') {
-        const available = Number(state.cash) || 0;
+        const available = Number(state.finances.cash) || 0;
         if (amount > available) {
           if (errorEl) {
             errorEl.style.display = 'block';
@@ -2329,9 +2329,9 @@
           }
           return;
         }
-        state.cash = available - amount;
+        state.finances.cash = available - amount;
       } else {
-        const acc = (state.bankAccounts || []).find(a => a.id === sourceId);
+        const acc = (state.finances.bankAccounts || []).find(a => a.id === sourceId);
         if (!acc || getBankAccountSpendableBalance(acc.id) < amount) {
           if (errorEl) {
             errorEl.style.display = 'block';
@@ -2345,7 +2345,7 @@
       const entryFee = calculateOtherInvTransactionFee(item, amount);
       const netInitialBalance = amount - entryFee;
 
-      if (!Array.isArray(state.otherInvestments)) state.otherInvestments = [];
+      if (!Array.isArray(state.finances.otherInvestments)) state.finances.otherInvestments = [];
       const newPosition = {
         id: 'other_inv_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
         categoryId: section.id,
@@ -2383,13 +2383,13 @@
         monthsSimulated: 0
       };
       const existingInstrumentPosition = ['acciones', 'bonos_corp', 'bonos_estado', 'startups', 'etf'].includes(section.id)
-        ? state.otherInvestments.find(position => position.categoryId === section.id && position.itemTypeId === item.id)
+        ? state.finances.otherInvestments.find(position => position.categoryId === section.id && position.itemTypeId === item.id)
         : null;
       if (existingInstrumentPosition) {
         existingInstrumentPosition.contributedCapital = (Number(existingInstrumentPosition.contributedCapital) || 0) + (section.id === 'acciones' ? netInitialBalance : amount);
         existingInstrumentPosition.currentBalance = (Number(existingInstrumentPosition.currentBalance) || 0) + netInitialBalance;
       } else {
-        state.otherInvestments.push(newPosition);
+        state.finances.otherInvestments.push(newPosition);
       }
 
       if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
@@ -2399,8 +2399,8 @@
     }
 
     function simulateMonthOtherInv(posId) {
-      if (!Array.isArray(state.otherInvestments)) return;
-      const pos = state.otherInvestments.find(p => p.id === posId);
+      if (!Array.isArray(state.finances.otherInvestments)) return;
+      const pos = state.finances.otherInvestments.find(p => p.id === posId);
       if (!pos) return;
 
       const u1 = Math.max(1e-7, Math.random());
@@ -2439,14 +2439,14 @@
     }
 
     function openRedeemOtherInvModal(posId, presetAmount = null, presetDestId = null) {
-      if (!Array.isArray(state.otherInvestments)) return;
-      const pos = state.otherInvestments.find(p => p.id === posId);
+      if (!Array.isArray(state.finances.otherInvestments)) return;
+      const pos = state.finances.otherInvestments.find(p => p.id === posId);
       if (!pos) return;
 
       const modalRoot = document.getElementById('banco-modal-root');
       if (!modalRoot) return;
 
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
       const destOptions = [{ id: 'cash', label: '💵 Dinero en Efectivo' }, ...bankAccounts.map(a => ({
         id: a.id,
         label: `${a.icon || '🏦'} ${a.name} (Saldo: $${(Number(a.balance) || 0).toLocaleString('es-CL')})`
@@ -2505,7 +2505,7 @@
 
     function updateRedeemOtherInvPreview(posId) {
       const inputEl = document.getElementById('redeem-other-amount-input');
-      const pos = state.otherInvestments.find(p => p.id === posId);
+      const pos = state.finances.otherInvestments.find(p => p.id === posId);
       if (!inputEl || !pos) return;
       const balance = Number(pos.currentBalance) || 0;
       const amount = Math.round(Number(inputEl.value) || 0);
@@ -2534,7 +2534,7 @@
     }
 
     function confirmRedeemOtherInv(posId, destId) {
-      const position = (state.otherInvestments || []).find(item => item.id === posId);
+      const position = (state.finances.otherInvestments || []).find(item => item.id === posId);
       const inputEl = document.getElementById('redeem-other-amount-input');
       if (!position || !inputEl) return;
       const gross = Math.round(Number(inputEl.value) || 0);
@@ -2543,12 +2543,12 @@
     }
 
     function executeRedeemOtherInv(posId, grossAmount, netAmount, destId) {
-      if (!Array.isArray(state.otherInvestments)) {
+      if (!Array.isArray(state.finances.otherInvestments)) {
         return;
       }
-      const idx = state.otherInvestments.findIndex(p => p.id === posId);
+      const idx = state.finances.otherInvestments.findIndex(p => p.id === posId);
       if (idx < 0) return;
-      const pos = state.otherInvestments[idx];
+      const pos = state.finances.otherInvestments[idx];
       const gross = Math.round(Number(grossAmount) || 0);
       const net = Math.round(Number(netAmount) || 0);
       const balance = Number(pos.currentBalance) || 0;
@@ -2575,15 +2575,15 @@
       window.redeemOtherInvExecuting = true;
 
       if (destId === 'cash') {
-        state.cash = (Number(state.cash) || 0) + net;
+        state.finances.cash = (Number(state.finances.cash) || 0) + net;
       } else {
-        const account = (state.bankAccounts || []).find(a => a.id === destId);
+        const account = (state.finances.bankAccounts || []).find(a => a.id === destId);
         if (account) creditBankAccount(account.id, net);
-        else state.cash = (Number(state.cash) || 0) + net;
+        else state.finances.cash = (Number(state.finances.cash) || 0) + net;
       }
 
       if (isFull) {
-        state.otherInvestments.splice(idx, 1);
+        state.finances.otherInvestments.splice(idx, 1);
       } else {
         const fraction = gross / Number(pos.currentBalance);
         pos.contributedCapital = Math.max(0, Math.round(Number(pos.contributedCapital) * (1 - fraction)));
@@ -2625,7 +2625,7 @@
     function executeAPVContract() {
       const regime = document.querySelector('input[name="apv-contract-regime"]:checked')?.value || 'A';
       const fund = document.querySelector('input[name="apv-contract-fund"]:checked')?.value || 'C';
-      state.apvAccount = {
+      state.finances.apvAccount = {
         id: 'apv_' + Date.now(), regime, fund, balance: 0, contributedCapital: 0,
         monthlyContribution: 0, monthlyActive: false, debitAccountId: null, monthlySource: null
       };
@@ -2635,18 +2635,18 @@
     }
 
     function ensureAPVAccount() {
-      if (!state.apvAccount) state.apvAccount = null;
+      if (!state.finances.apvAccount) state.finances.apvAccount = null;
     }
 
     function openAPVManagementModal(action = 'cancel') {
-      if (!state.apvAccount || action !== 'cancel') return;
+      if (!state.finances.apvAccount || action !== 'cancel') return;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!modalRoot) return;
       modalRoot.innerHTML = `<div class="job-modal-backdrop"><div class="job-modal-card" style="max-width:420px;"><div class="job-modal-header" style="background:#b91c1c;color:#fff;padding:12px 14px;"><div class="job-modal-title" style="color:#fff;">Cancelar APV</div></div><div class="job-modal-body" style="padding:13px 15px;"><div style="font-size:.64rem;color:#475569;margin-bottom:12px;">Se cancelará la cuenta APV y se detendrá cualquier aporte mensual.</div><div style="display:flex;gap:8px;"><button onclick="closeBancoModal(); renderOtherInvestmentCategoryView('apv')" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">Volver</button><button onclick="cancelAPV()" style="flex:1.3;padding:8px;border:none;border-radius:6px;background:#b91c1c;color:#fff;font-weight:800;">Confirmar cancelación</button></div></div></div></div>`;
     }
 
     function openAPVChoiceModal(type) {
-      const apv = state.apvAccount;
+      const apv = state.finances.apvAccount;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!apv || !modalRoot || (type !== 'regime' && type !== 'fund')) return;
       const isRegime = type === 'regime';
@@ -2664,32 +2664,32 @@
     function applyAPVChoice(type) {
       const radioName = type === 'regime' ? 'apv-choice-regime' : 'apv-choice-fund';
       const value = document.querySelector(`input[name="${radioName}"]:checked`)?.value;
-      if (!state.apvAccount || !value) return;
-      if (type === 'regime') state.apvAccount.regime = value;
-      else if (type === 'fund') state.apvAccount.fund = value;
+      if (!state.finances.apvAccount || !value) return;
+      if (type === 'regime') state.finances.apvAccount.regime = value;
+      else if (type === 'fund') state.finances.apvAccount.fund = value;
       closeBancoModal();
       renderOtherInvestmentCategoryView('apv');
     }
 
     function openAPVIndividualContributionModal() {
-      const apv = state.apvAccount;
+      const apv = state.finances.apvAccount;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!apv || !modalRoot) return;
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
-      const sourceOptions = [`<option value="cash">Efectivo disponible ($${(Number(state.cash) || 0).toLocaleString('es-CL')})</option>`, ...bankAccounts.map(account => `<option value="${account.id}">${account.icon || '🏦'} ${account.name} ($${(Number(account.balance) || 0).toLocaleString('es-CL')})</option>`)].join('');
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
+      const sourceOptions = [`<option value="cash">Efectivo disponible ($${(Number(state.finances.cash) || 0).toLocaleString('es-CL')})</option>`, ...bankAccounts.map(account => `<option value="${account.id}">${account.icon || '🏦'} ${account.name} ($${(Number(account.balance) || 0).toLocaleString('es-CL')})</option>`)].join('');
       modalRoot.innerHTML = `<div class="job-modal-backdrop" onclick="if(event.target === this) closeBancoModal()"><div class="job-modal-card" style="max-width:420px;border-color:#0284c7;"><div class="job-modal-header" style="background:#0284c7;color:#fff;padding:12px 14px;"><div class="job-modal-title" style="color:#fff;">Aporte individual APV</div></div><div class="job-modal-body" style="padding:13px 15px;"><label for="apv-individual-amount" style="display:block;font-size:.64rem;font-weight:800;margin-bottom:4px;">Monto (mínimo $10.000)</label><input id="apv-individual-amount" type="number" min="10000" step="1000" value="10000" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:10px;"><label for="apv-individual-source" style="display:block;font-size:.64rem;font-weight:800;margin-bottom:4px;">Cuenta de cargo</label><select id="apv-individual-source" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:12px;">${sourceOptions}</select><div style="display:flex;gap:8px;"><button onclick="closeBancoModal(); renderOtherInvestmentCategoryView('apv')" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">Cancelar</button><button onclick="contributeAPV()" style="flex:1.3;padding:8px;border:none;border-radius:6px;background:#047857;color:#fff;font-weight:800;">Aportar</button></div></div></div></div>`;
     }
 
     function contributeAPV() {
-      const apv = state.apvAccount;
+      const apv = state.finances.apvAccount;
       const amount = Math.round(Number(document.getElementById('apv-individual-amount')?.value || 0));
       const sourceId = document.getElementById('apv-individual-source')?.value || 'cash';
       if (!apv || amount < 10000) return;
       if (sourceId === 'cash') {
-        if (amount > (Number(state.cash) || 0)) return;
-        state.cash -= amount;
+        if (amount > (Number(state.finances.cash) || 0)) return;
+        state.finances.cash -= amount;
       } else {
-        const account = (state.bankAccounts || []).find(item => item.id === sourceId);
+        const account = (state.finances.bankAccounts || []).find(item => item.id === sourceId);
         if (!account || getBankAccountSpendableBalance(account.id) < amount) return;
         debitBankAccountWithCreditLine(account.id, amount);
       }
@@ -2701,10 +2701,10 @@
     }
 
     function openAPVMonthlyManagementModal() {
-      const apv = state.apvAccount;
+      const apv = state.finances.apvAccount;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!apv || !modalRoot) return;
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
       const hasSavedAccount = bankAccounts.some(account => account.id === apv.debitAccountId);
       const accountOptions = bankAccounts.length
         ? bankAccounts.map(account => `<option value="${account.id}" ${apv.debitAccountId === account.id ? 'selected' : ''}>${account.icon || '🏦'} ${account.name}</option>`).join('')
@@ -2726,11 +2726,11 @@
     }
 
     function saveAPVMonthlyContribution() {
-      const apv = state.apvAccount;
+      const apv = state.finances.apvAccount;
       if (!apv) return;
       const amount = Math.round(Number(document.getElementById('apv-monthly-amount')?.value || 0));
       const accountId = document.getElementById('apv-monthly-account')?.value;
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
       if (amount < 10000 || !bankAccounts.some(account => account.id === accountId)) return;
       apv.monthlyActive = true;
       apv.monthlyContribution = amount;
@@ -2741,7 +2741,7 @@
     }
 
     function stopAPVMonthlyContribution() {
-      const apv = state.apvAccount;
+      const apv = state.finances.apvAccount;
       if (!apv) return;
       apv.monthlyActive = false;
       apv.monthlyContribution = 0;
@@ -2755,7 +2755,7 @@
       openAPVMonthlyManagementModal();
     }
 
-    function cancelAPV(){ state.apvAccount=null; closeBancoModal(); renderOtherInvestmentCategoryView('apv'); }
+    function cancelAPV(){ state.finances.apvAccount=null; closeBancoModal(); renderOtherInvestmentCategoryView('apv'); }
 
     function openCuenta2ContractWizard() {
       const modalRoot = document.getElementById('banco-modal-root');
@@ -2766,7 +2766,7 @@
 
     function executeCuenta2Contract() {
       const fund = document.querySelector('input[name="cuenta2-contract-fund"]:checked')?.value || 'C';
-      state.cuenta2Account = {
+      state.finances.cuenta2Account = {
         id: 'cuenta2_' + Date.now(), fund, balance: 0, contributedCapital: 0,
         monthlyContribution: 0, monthlyActive: false, debitAccountId: null, monthlySource: null
       };
@@ -2777,7 +2777,7 @@
     }
 
     function openCuenta2FundChoiceModal() {
-      const account = state.cuenta2Account;
+      const account = state.finances.cuenta2Account;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!account || !modalRoot) return;
       const fundLabels = ['Más riesgoso', 'Riesgoso', 'Moderado', 'Conservador', 'Más conservador'];
@@ -2786,31 +2786,31 @@
 
     function applyCuenta2FundChoice() {
       const fund = document.querySelector('input[name="cuenta2-change-fund"]:checked')?.value;
-      if (!state.cuenta2Account || !fund) return;
-      state.cuenta2Account.fund = fund;
+      if (!state.finances.cuenta2Account || !fund) return;
+      state.finances.cuenta2Account.fund = fund;
       closeBancoModal();
       renderOtherInvestmentCategoryView('cuenta2');
     }
 
     function openCuenta2IndividualContributionModal() {
-      const account = state.cuenta2Account;
+      const account = state.finances.cuenta2Account;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!account || !modalRoot) return;
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
-      const sourceOptions = [`<option value="cash">Efectivo disponible ($${(Number(state.cash) || 0).toLocaleString('es-CL')})</option>`, ...bankAccounts.map(bank => `<option value="${bank.id}">${bank.icon || '🏦'} ${bank.name} ($${(Number(bank.balance) || 0).toLocaleString('es-CL')})</option>`)].join('');
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
+      const sourceOptions = [`<option value="cash">Efectivo disponible ($${(Number(state.finances.cash) || 0).toLocaleString('es-CL')})</option>`, ...bankAccounts.map(bank => `<option value="${bank.id}">${bank.icon || '🏦'} ${bank.name} ($${(Number(bank.balance) || 0).toLocaleString('es-CL')})</option>`)].join('');
       modalRoot.innerHTML = `<div class="job-modal-backdrop" onclick="if(event.target === this) closeBancoModal()"><div class="job-modal-card" style="max-width:420px;border-color:#0284c7;"><div class="job-modal-header" style="background:#0284c7;color:#fff;padding:12px 14px;"><div class="job-modal-title" style="color:#fff;">Aporte individual Cuenta 2</div></div><div class="job-modal-body" style="padding:13px 15px;"><label for="cuenta2-individual-amount" style="display:block;font-size:.64rem;font-weight:800;margin-bottom:4px;">Monto (mínimo $5.000)</label><input id="cuenta2-individual-amount" type="number" min="5000" step="1000" value="5000" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:10px;"><label for="cuenta2-individual-source" style="display:block;font-size:.64rem;font-weight:800;margin-bottom:4px;">Cuenta de cargo</label><select id="cuenta2-individual-source" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:12px;">${sourceOptions}</select><div style="display:flex;gap:8px;"><button onclick="closeBancoModal(); renderOtherInvestmentCategoryView('cuenta2')" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">Cancelar</button><button onclick="contributeCuenta2()" style="flex:1.3;padding:8px;border:none;border-radius:6px;background:#047857;color:#fff;font-weight:800;">Aportar</button></div></div></div></div>`;
     }
 
     function contributeCuenta2() {
-      const account = state.cuenta2Account;
+      const account = state.finances.cuenta2Account;
       const amount = Math.round(Number(document.getElementById('cuenta2-individual-amount')?.value || 0));
       const sourceId = document.getElementById('cuenta2-individual-source')?.value || 'cash';
       if (!account || amount < 5000) return;
       if (sourceId === 'cash') {
-        if (amount > (Number(state.cash) || 0)) return;
-        state.cash -= amount;
+        if (amount > (Number(state.finances.cash) || 0)) return;
+        state.finances.cash -= amount;
       } else {
-        const bank = (state.bankAccounts || []).find(item => item.id === sourceId);
+        const bank = (state.finances.bankAccounts || []).find(item => item.id === sourceId);
         if (!bank || getBankAccountSpendableBalance(bank.id) < amount) return;
         debitBankAccountWithCreditLine(bank.id, amount);
       }
@@ -2823,10 +2823,10 @@
     }
 
     function openCuenta2MonthlyManagementModal() {
-      const account = state.cuenta2Account;
+      const account = state.finances.cuenta2Account;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!account || !modalRoot) return;
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
       const accountOptions = bankAccounts.length
         ? bankAccounts.map(bank => `<option value="${bank.id}" ${account.debitAccountId === bank.id ? 'selected' : ''}>${bank.icon || '🏦'} ${bank.name}</option>`).join('')
         : '<option value="">No tienes cuentas bancarias</option>';
@@ -2834,10 +2834,10 @@
     }
 
     function saveCuenta2MonthlyContribution() {
-      const account = state.cuenta2Account;
+      const account = state.finances.cuenta2Account;
       const amount = Math.round(Number(document.getElementById('cuenta2-monthly-amount')?.value || 0));
       const bankId = document.getElementById('cuenta2-monthly-account')?.value;
-      const bankAccounts = Array.isArray(state.bankAccounts) ? state.bankAccounts : [];
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
       if (!account || amount < 5000 || !bankAccounts.some(bank => bank.id === bankId)) return;
       account.monthlyActive = true;
       account.monthlyContribution = amount;
@@ -2848,7 +2848,7 @@
     }
 
     function stopCuenta2MonthlyContribution() {
-      const account = state.cuenta2Account;
+      const account = state.finances.cuenta2Account;
       if (!account) return;
       account.monthlyActive = false;
       account.monthlyContribution = 0;
@@ -2859,14 +2859,14 @@
     }
 
     function openCuenta2CancelModal() {
-      if (!state.cuenta2Account) return;
+      if (!state.finances.cuenta2Account) return;
       const modalRoot = document.getElementById('banco-modal-root');
       if (!modalRoot) return;
       modalRoot.innerHTML = `<div class="job-modal-backdrop"><div class="job-modal-card" style="max-width:420px;"><div class="job-modal-header" style="background:#b91c1c;color:#fff;padding:12px 14px;"><div class="job-modal-title" style="color:#fff;">Cancelar Cuenta 2</div></div><div class="job-modal-body" style="padding:13px 15px;"><div style="font-size:.64rem;color:#475569;margin-bottom:12px;">Se cancelará la Cuenta 2 y se detendrá cualquier aporte mensual.</div><div style="display:flex;gap:8px;"><button onclick="closeBancoModal(); renderOtherInvestmentCategoryView('cuenta2')" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;">Volver</button><button onclick="cancelCuenta2()" style="flex:1.3;padding:8px;border:none;border-radius:6px;background:#b91c1c;color:#fff;font-weight:800;">Confirmar cancelación</button></div></div></div></div>`;
     }
 
     function cancelCuenta2() {
-      state.cuenta2Account = null;
+      state.finances.cuenta2Account = null;
       if (typeof syncInvestedTotal === 'function') syncInvestedTotal();
       closeBancoModal();
       renderOtherInvestmentCategoryView('cuenta2');
@@ -2883,12 +2883,12 @@
         renderDigitalWalletView();
         return;
       }
-      if (!Array.isArray(state.otherInvestments)) state.otherInvestments = [];
+      if (!Array.isArray(state.finances.otherInvestments)) state.finances.otherInvestments = [];
       consolidateInvestmentPositions(categoryId);
 
-      const positions = state.otherInvestments.filter(inv => inv.categoryId === categoryId);
-      const apvContract = sec.id === 'apv' ? state.apvAccount : null;
-      const cuenta2Contract = sec.id === 'cuenta2' ? state.cuenta2Account : null;
+      const positions = state.finances.otherInvestments.filter(inv => inv.categoryId === categoryId);
+      const apvContract = sec.id === 'apv' ? state.finances.apvAccount : null;
+      const cuenta2Contract = sec.id === 'cuenta2' ? state.finances.cuenta2Account : null;
       const apvMonthlyLabel = apvContract && apvContract.monthlyActive
         ? '$' + Number(apvContract.monthlyContribution || 0).toLocaleString('es-CL')
         : 'Detenido';
