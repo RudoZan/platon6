@@ -446,8 +446,8 @@
         ]
       },
       inversiones: {
-        title: "📈 Otros Instrumentos",
-        subtitle: "Instrumentos y vehículos de inversión",
+        title: "📈 Cuentas e inversiones",
+        subtitle: "Cuentas, créditos, seguros, inversiones e inmuebles",
         sections: [
           { id: "apv", name: "Ahorro Previsional Voluntario (APV)", icon: "🧓", desc: "Ahorro para pensión con beneficio estatal (15% Régimen A o tributario B)." },
           { id: "cuenta2", name: "Ahorro Cuenta 2", icon: "📈", desc: "Inversión libre en multifondos AFP con bajas comisiones y hasta 24 giros/año." },
@@ -511,7 +511,7 @@
         ]
       },
       estado: {
-        title: "Personal",
+        title: "Mi perfil",
         subtitle: "Vida personal, bienestar y finanzas del personaje",
         sections: [
           { name: "Grado de Bienestar", icon: "🧘", desc: "Tranquilidad, calidad de vida y salud integral" },
@@ -520,6 +520,11 @@
           { name: "Patrimonio & Liquidez", icon: "💰", desc: "Efectivo disponible, reservas e inversiones totales" },
           { name: "Perfil de Inversionista", icon: "🎯", desc: "Tolerancia al riesgo, liquidez y horizonte" }
         ]
+      },
+      asesor: {
+        title: "🧭 Asesor Financiero",
+        subtitle: "Guía práctica de conceptos y decisiones financieras",
+        sections: []
       }
     };
 
@@ -1014,6 +1019,277 @@
           { text: "B) Entre 10% y 25% (ahorro e inversión sostenida)", points: 2 },
           { text: "C) Más del 25% (apuesta fuerte al crecimiento)", points: 3 }
         ]
+      }
+    ];
+
+    const financialDilemmasConfig = {
+      nombre: "Dilemas financieros",
+      textos: {
+        cerrar: "Cerrar"
+      },
+      preguntas: [
+        {
+          id: "compra_computador",
+          nombre: "Compra de computador",
+          icono: "💻",
+          texto: "Tienes un computador de varios años que está lento y debes reiniciarlo con frecuencia. Decides comprar uno nuevo que cuesta $600.000 y tiene todo lo que necesitas. ¿Qué haces?",
+          opciones: [
+            {
+              id: "comprar_a_credito",
+              texto: "Lo compraría a crédito en 12 cuotas mensuales de $57.800."
+            },
+            {
+              id: "ahorrar_antes_de_comprar",
+              texto: "Ahorraría $50.000 cada mes durante un año antes de comprarlo."
+            }
+          ]
+        },
+        {
+          id: "ahorro_sorpresa",
+          nombre: "Ahorro sorpresa",
+          icono: "💰",
+          texto: "Cuando empezaste a trabajar, aceptaste que se descontara automáticamente de tu sueldo un monto destinado a la Cuenta 2 de tu AFP. Olvidaste ese ahorro y recién descubres que, después de varios meses, tienes $1.200.000. Es tu único ahorro y no tienes deudas. ¿Qué haces?",
+          opciones: [
+            {
+              id: "mantener_fondo_emergencia",
+              texto: "Lo dejaría ahí como fondo de emergencia."
+            },
+            {
+              id: "retirar_parte_para_un_gusto",
+              texto: "Retiraría una parte para darme un gusto."
+            },
+            {
+              id: "retirar_todo_para_invertir",
+              texto: "Retiraría todo el dinero para invertirlo en algo más rentable."
+            }
+          ]
+        },
+        {
+          id: "aumento_de_sueldo",
+          nombre: "Aumento de sueldo",
+          icono: "📈",
+          texto: "Recibes un aumento de sueldo de $200.000 mensuales. No tienes deudas, pero vives al justo. ¿Qué haces?",
+          opciones: [
+            {
+              id: "aumentar_gastos_mensuales",
+              texto: "Mejoraría inmediatamente mi estilo de vida e incorporaría la mayor parte del aumento a mis gastos mensuales."
+            },
+            {
+              id: "destinar_aumento_ahorro_inversion",
+              texto: "Mantendría mi nivel de gastos actual y usaría el aumento para ahorrar o invertir."
+            }
+          ]
+        },
+        {
+          id: "auto_nuevo",
+          nombre: "El auto",
+          icono: "🚗",
+          texto: "Tienes un automóvil que funciona bien, pero tiene muchos años. ¿Qué haces?",
+          opciones: [
+            {
+              id: "actualizar_auto",
+              texto: "Lo cambiaría por uno más nuevo, aunque tuviera que comprarlo a crédito."
+            },
+            {
+              id: "retirar_parte_para_un_gusto",
+              texto: "Seguiría usando el mío mientras funcione para priorizar otros gastos o inversiones."
+            }
+          ]
+        },
+        {
+          id: "series_de_streaming",
+          nombre: "Series y películas",
+          icono: "📺",
+          texto: "Te gustan varias series que están repartidas entre dos plataformas de streaming. ¿Qué haces?",
+          opciones: [
+            {
+              id: "contrato_las_dos",
+              texto: "Contrataría ambas plataformas para no perderme ninguna serie o película."
+            },
+            {
+              id: "alterno_entre_las_dos",
+              texto: "Alternaría entre las dos plataformas. Contrataría una por unos meses y luego cancelaría el servicio para contratar la otra."
+            }
+          ]
+        },
+        {
+          id: "tarjetas",
+          nombre: "Las Tarjetas",
+          icono: "💳",
+          texto: "Tienes tres tarjetas, de débito y crédito. ¿Qué haces?",
+          opciones: [
+            {
+              id: "ando_con_todas",
+              texto: "Ando siempre con todas las tarjetas por si las necesitara."
+            },
+            {
+              id: "solo_la_que_uso",
+              texto: "Saldría solo con la tarjeta o las tarjetas que sé que usaré."
+            }
+          ]
+        }
+      ]
+    };
+
+    const asesorTopicsCatalog = [
+      {
+        id: "regla_50_30_20",
+        title: "Regla de 50/30/20 para presupuesto personal",
+        icon: "📊",
+        desc: "Guía práctica para distribuir ingresos entre gastos fijos, estilo de vida y ahorro.",
+        lead: "La regla 50/30/20 propone dividir el ingreso líquido mensual en tres grandes bloques para equilibrar necesidades presentes, disfrute cotidiano y respaldo futuro.",
+        blocks: [
+          {
+            title: "🏠 50% · Necesidades y gastos fijos",
+            body: "Cubre los compromisos indispensables para vivir: arriendo o dividendo, servicios básicos (agua, luz, gas, internet), alimentación esencial, transporte obligatorio, salud y cuotas mínimas de deudas."
+          },
+          {
+            title: "🎉 30% · Estilo de vida y gustos",
+            body: "Incluye los gastos flexibles que aportan bienestar y recreación: salidas, restaurantes, suscripciones digitales, vestuario no esencial, pasatiempos y panoramas."
+          },
+          {
+            title: "🛡️ 20% · Ahorro, inversión y metas",
+            body: "Se destina a construir un fondo de emergencia (idealmente de 3 a 6 meses de gastos básicos), ahorrar para proyectos, invertir a mediano o largo plazo o prepagar deudas costosas."
+          }
+        ],
+        tip: "Consejo práctico: úsala como punto de referencia flexible. Si hoy tus gastos fijos superan el 50%, prioriza revisar compromisos recurrentes antes de dejar el ahorro en 0%; incluso comenzar con un 5% o 10% crea el hábito y protege tu tranquilidad."
+      },
+      {
+        id: "no_todos_huevos",
+        title: "“No poner todos los huevos en la misma canasta”",
+        icon: "🧺",
+        desc: "Cómo la diversificación reduce el riesgo de perder patrimonio por una sola mala decisión.",
+        lead: "Esta regla resume el principio de diversificación: repartir tus recursos en distintas alternativas para que un mal resultado en una inversión no comprometa toda tu estabilidad financiera.",
+        blocks: [
+          {
+            title: "⚖️ ¿Por qué funciona?",
+            body: "Los activos reaccionan de forma diferente frente a cambios en la economía, tasas de interés, inflación o crisis sectoriales. Mientras una inversión baja temporalmente, otra puede mantenerse estable o compensar parte de la caída."
+          },
+          {
+            title: "🧩 Formas concretas de diversificar",
+            bullets: [
+              "<strong>Por tipo de instrumento:</strong> combinar liquidez (cuenta de ahorro), renta fija (DAP o bonos) y renta variable (ETF o acciones).",
+              "<strong>Por plazo:</strong> separar el dinero que necesitarás pronto del capital invertido para metas a varios años.",
+              "<strong>Por moneda o geografía:</strong> no depender exclusivamente de un solo país, empresa o sector económico."
+            ]
+          },
+          {
+            title: "⚠️ Error frecuente",
+            body: "Tener dinero repartido en tres productos muy parecidos (por ejemplo, tres acciones del mismo rubro o tres criptomonedas) no diversifica realmente el riesgo, porque tienden a caer al mismo tiempo."
+          }
+        ],
+        tip: "Consejo práctico: antes de buscar la inversión más rentable, asegúrate de contar con un fondo de emergencia líquido y separado de tus inversiones de mayor riesgo."
+      },
+      {
+        id: "conceptos_clave",
+        title: "Conceptos clave en inversiones",
+        icon: "💡",
+        desc: "Rentabilidad, liquidez y riesgo: los tres criterios básicos antes de invertir.",
+        lead: "Toda alternativa de ahorro o inversión se puede analizar comparando tres pilares fundamentales: rentabilidad, liquidez y riesgo.",
+        blocks: [
+          {
+            title: "📈 Rentabilidad",
+            body: "Es la ganancia que genera una inversión en relación con el capital invertido. Los instrumentos de renta fija entregan una ganancia baja pero segura. Mientras que los instrumentos de renta variable no aseguran la ganancia e incluso pueden implicar pérdidas.",
+            extra: "Al evaluar rentabilidad, conviene revisar siempre la ganancia real (descontando inflación, comisiones e impuestos) y no solo el porcentaje promocionado."
+          },
+          {
+            title: "💧 Liquidez",
+            body: "Es la facilidad con que un activo puede convertirse en dinero efectivo. En una cuenta de ahorro o fondo mutuo se puede tener el dinero en horas o días, mientras que con un bien raíz esto puede tomar meses o años.",
+            extra: "Si eliges un instrumento poco líquido, asegúrate de no necesitar ese capital en el corto plazo para evitar vender apuradamente y perder valor."
+          },
+          {
+            title: "⚡ Riesgo",
+            body: "Es la probabilidad de que una inversión no genere el retorno esperado o incluso pierda valor. Usualmente un mayor riesgo se asocia a una posible alta rentabilidad.",
+            extra: "Incluye tanto la posibilidad de pérdida definitiva como la volatilidad (subidas y bajadas fuertes), que puede presionar decisiones apresuradas si no se comprende bien el instrumento."
+          }
+        ],
+        tip: "Consejo práctico: antes de invertir, responde tres preguntas: ¿cuánto puede ganar?, ¿cuánto podría perder? y ¿en cuánto tiempo puedo recuperar el dinero en efectivo?"
+      },
+      {
+        id: "triangulo_inversion",
+        title: "Triángulo de la inversión",
+        icon: "🔺",
+        desc: "Relación entre rentabilidad, liquidez y riesgo con ejemplos concretos.",
+        lead: "Intentar maximizar o minimizar cualquiera de los extremos del triángulo afecta a los otros. Ningún instrumento real ofrece al mismo tiempo rentabilidad altísima, liquidez inmediata y cero riesgo.",
+        hasTriangle: true,
+        blocks: [
+          {
+            title: "📈 Rentabilidad · Ejemplos",
+            bullets: [
+              "<strong>Alta rentabilidad:</strong> Startups o acciones tecnológicas.",
+              "<strong>Baja rentabilidad:</strong> Depósitos a plazo o cuentas de ahorro ofrecen entre 1% y 4% anual."
+            ]
+          },
+          {
+            title: "💧 Liquidez · Ejemplos",
+            bullets: [
+              "<strong>Alta liquidez:</strong> Fondos mutuos de dinero o cuentas de ahorro.",
+              "<strong>Baja liquidez:</strong> Bienes raíces o inversiones en startups pueden tardar meses o años en venderse."
+            ]
+          },
+          {
+            title: "⚡ Riesgo · Ejemplos",
+            bullets: [
+              "<strong>Alto riesgo:</strong> Criptomonedas, pueden subir o bajar más del 10% en un solo día.",
+              "<strong>Bajo riesgo:</strong> Bonos del Estado o fondos indexados diversificados."
+            ]
+          }
+        ],
+        tip: "Señal de alerta: si alguien promete ganancias extraordinarias, retiro inmediato en cualquier momento y riesgo cero, desconfía y verifica siempre si la entidad está regulada (por ejemplo, por la CMF)."
+      },
+      {
+        id: "perfil_riesgo",
+        title: "Perfil de riesgo",
+        icon: "🎯",
+        desc: "Conservador, moderado o arriesgado según tolerancia, situación y horizonte.",
+        lead: "El perfil de riesgo es la combinación de características personales que determinan cuánto riesgo puedes y decides asumir al invertir. Incluye tu tolerancia emocional al riesgo, tu situación financiera y tu horizonte de inversión.",
+        blocks: [
+          {
+            title: "🛡️ Perfil conservador → renta fija, bajo riesgo",
+            body: "Prioriza proteger el capital y mantener estabilidad por sobre buscar ganancias elevadas. Suele preferir cuentas de ahorro, depósitos a plazo, bonos soberanos o fondos de renta fija de corto plazo."
+          },
+          {
+            title: "⚖️ Perfil moderado → mezcla de renta fija y variable",
+            body: "Busca un equilibrio entre crecimiento y seguridad, aceptando oscilaciones intermedias en el mediano plazo mediante carteras mixtas (bonos, fondos balanceados y ETFs diversificados)."
+          },
+          {
+            title: "🚀 Perfil arriesgado → renta variable, largo plazo",
+            body: "Tolera caídas temporales pronunciadas con el objetivo de maximizar el crecimiento patrimonial a varios años, invirtiendo principalmente en acciones, fondos de renta variable o capital de riesgo."
+          },
+          {
+            title: "🕒 Factores que lo cambian con el tiempo",
+            body: "Tu perfil no es estático: puede variar según la estabilidad de tus ingresos, tus cargas o compromisos financieros, tus reservas disponibles y cuánto tiempo falta para usar el dinero."
+          }
+        ],
+        tip: "Consejo práctico: puedes evaluar tu tolerancia en cualquier momento respondiendo el Test de Perfil de Inversionista en la sección Mi perfil.",
+        ctaLabel: "Ir al Test de Perfil de Inversionista",
+        ctaAction: "selectHudTab('estado'); renderPersonalStage('inversionista');"
+      },
+      {
+        id: "cae",
+        title: "CAE · Carga Anual Equivalente",
+        icon: "🧾",
+        desc: "Indicador del costo total real de un crédito para comparar ofertas correctamente.",
+        lead: "Refleja el costo total del crédito incluyendo intereses, las comisiones por apertura y seguros asociados como desgravamen o cesantía.",
+        blocks: [
+          {
+            title: "🔍 ¿Qué incluye la CAE?",
+            bullets: [
+              "<strong>Tasa de interés del crédito:</strong> el costo base del dinero prestado.",
+              "<strong>Gastos y comisiones:</strong> apertura, administración, impuestos y gastos operacionales.",
+              "<strong>Seguros asociados:</strong> como seguro de desgravamen, cesantía o incendio/sismo según el tipo de crédito."
+            ]
+          },
+          {
+            title: "⚖️ Cómo usarla para comparar ofertas",
+            body: "La CAE se expresa como un porcentaje anual estandarizado. Para comparar correctamente dos cotizaciones, pide ambas por el mismo monto y el mismo número de cuotas: en igualdad de condiciones, conviene la alternativa con menor CAE."
+          },
+          {
+            title: "💵 Revisa también el CTC (Costo Total del Crédito)",
+            body: "Además del porcentaje de la CAE, fija tu atención en el Costo Total del Crédito (CTC): muestra la suma total en pesos que terminarás pagando al completar todas las cuotas. Un plazo más largo reduce la cuota mensual, pero suele aumentar considerablemente el CTC."
+          }
+        ],
+        tip: "Consejo práctico: nunca compares créditos solo por la tasa mensual o por el valor de la cuota. Revisa siempre CAE, CTC y condiciones de prepago antes de firmar."
       }
     ];
 

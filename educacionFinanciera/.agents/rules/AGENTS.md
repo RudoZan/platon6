@@ -4,16 +4,16 @@
 - **Workspace aliases:** `educacionFinanciera (web)` (`platon6/sitio-web/educacionFinanciera/`) and `educacionFinanciera (docs)` (`platon6/docs/educacionFinanciera/`).
 
 ## Code Files (`platon6/sitio-web/educacionFinanciera/` — Read only target file)
-- `index.html` (`401L`): HTML shell (3 zones, onboarding containers, modals, HUD Dock; loads Corredora UI).
-- `css/styles.css` (`2390L`): Styles, tokens & 3D perspective background.
-- `data/catalogs.js` (`1013L`): Static catalogs, including housing choices and rental market values.
-- `js/state.js` (`829L`): Persistent state, financial movements, credit helpers and simulated daily/monthly events.
-- `js/ui-carousel-onboarding.js` (`607L`): Top PPT carousel (`N° 1`–`N° 42`) and 3-step Onboarding (`#view-step-4`, `#view-anchors`, `#view-character-summary`).
+- `index.html` (`407L`): HTML shell (sticky topbar with menu, central stage with welcome/settings/about/onboarding/hub views, 6-tab HUD Dock).
+- `css/styles.css` (`2987L`): Styles, tokens, 3D perspective background, topbar/menu, welcome/settings/about, dilemmas, filter bar & Asesor Financiero views.
+- `data/catalogs.js` (`1295L`): Static catalogs including housing/rents, `financialDilemmasConfig` (6 dilemmas), and `asesorTopicsCatalog` (6 educational topics).
+- `js/state.js` (`808L`): In-memory domain state, financial movements, credit helpers, simulation clock/speed controls (`1s/2s/3s/5s`) and daily/monthly events.
+- `js/ui-carousel-onboarding.js` (`638L`): Topbar menu (`Configuración`, `Acerca de`), welcome screen, 3-step Onboarding (`#view-step-4`, `#view-anchors`, `#view-character-summary`) and `"Asesor Financiero"` hub.
 - `js/ui-trabajo.js` (`1338L`): `"Trabajo"` hub, employment/performance, courses, salary destination and payment history.
-- `js/ui-banco-seguros.js` (`4309L`): `"Banco"` & `"Seguros"`; accounts, consumer/mortgage credit, revolving credit, FFMM, DAP and insurance.
-- `js/ui-inversiones.js` (`3031L`): Other investments, wallet, purchase/redemption flows and investment returns.
-- `js/ui-corredora.js` (`879L`): Property sale/rental listings, matching, settlement and contracts.
-- `js/ui-personal.js` (`1380L`): `"Mi Estado"`; wellbeing, budget, assets/liabilities and financial movement history.
+- `js/ui-banco-seguros.js` (`4315L`): Bank & insurance detail flows (accounts, credits, FFMM, DAP, insurance) returning to `"Cuentas e inversiones"`.
+- `js/ui-inversiones.js` (`3143L`): Unified `"Cuentas e inversiones"` hub (24 options across Banco + Inversiones + Corredora with 10 category filters), wallet, purchase/redemption flows and returns.
+- `js/ui-corredora.js` (`835L`): Property sale/rental listings, matching, settlement and contracts integrated under `"Cuentas e inversiones"`.
+- `js/ui-personal.js` (`1505L`): `"Mi perfil"`; wellbeing, `"Dilemas financieros"` (6-dilemma modal flow), budget, assets/liabilities and financial movement history.
 
 ## Doc Index (Read only required file/line range)
 - **Living State (`platon6/sitio-web/educacionFinanciera/.agents/`):**

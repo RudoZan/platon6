@@ -123,6 +123,7 @@
           { id: 'gaming', name: '🎮 Gaming & Ocio Digital', dots: 1 },
           { id: 'familia', name: '🤝 Familia & Amigos', dots: 1 }
         ],
+        dilemmaAnswers: {},
         sessionCode: null
       },
       config: { simulationSpeedMsPerDay: 2000 },
@@ -190,6 +191,7 @@
       interface: {
         activeHudTab: null,
         activeInvestmentSubView: null,
+        investmentFilter: 'all',
         showAddBudgetForm: false,
         newBudgetType: 'free',
         newBudgetInvestType: 'alcancia',
@@ -204,20 +206,19 @@
     function renderSimulationDate() {
       const dateElement = document.getElementById('slide-top-date');
       if (!dateElement) return;
-      const monthLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
       const day = String(state.simulation.day).padStart(2, '0');
-      const year = String(state.simulation.year).padStart(2, '0');
-      dateElement.textContent = `${day}-${monthLabels[state.simulation.month]}-Año${year}`;
+      const status = state.simulation.clockRunning ? '' : ' · Detenido';
+      const yearSpan = document.createElement('span');
+      yearSpan.textContent = `Año ${state.simulation.year}${status}`;
+      dateElement.replaceChildren(`${day} de ${monthNames[state.simulation.month]} `, yearSpan);
     }
 
     function advanceSimulationDay() {
       if (document.visibilityState !== 'visible' || !document.hasFocus()) return;
       if (state.simulation.year >= state.simulation.maxYears
         && state.simulation.month === 11 && state.simulation.day === 31) {
-        state.simulation.clockRunning = false;
-        stopSimulationClock();
-        const startButton = document.getElementById('simulation-start-button');
-        if (startButton) startButton.innerHTML = '<span>Límite de 50 años alcanzado</span>';
+        setSimulationRunning(false);
         return;
       }
       const monthLengths = [31, isSimulationLeapYear(state.simulation.year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -452,28 +453,40 @@
     function startSimulationClock() {
       if (simulationClockInterval) return;
       state.simulation.clockRunning = true;
+      renderSimulationDate();
       if (document.visibilityState !== 'visible' || !document.hasFocus()) return;
-      const startButton = document.getElementById('simulation-start-button');
-      if (startButton) {
-        startButton.disabled = true;
-        startButton.innerHTML = '<span>Simulación en curso</span>';
-      }
       const speed = Number(state.config.simulationSpeedMsPerDay) || 2000;
       simulationClockInterval = window.setInterval(advanceSimulationDay, speed);
     }
 
+    function setSimulationRunning(running) {
+      state.simulation.clockRunning = Boolean(running);
+      stopSimulationClock();
+      if (state.simulation.clockRunning) startSimulationClock();
+      renderSimulationDate();
+      const settingsView = document.getElementById('view-settings');
+      if (settingsView && !settingsView.classList.contains('hidden') && typeof renderSettingsScreen === 'function') {
+        renderSettingsScreen();
+      }
+    }
+
     function setSimulationSpeed(millisecondsPerDay) {
       const speed = Number(millisecondsPerDay);
-      if (![1000, 2000, 3000].includes(speed)) return false;
+      if (![1000, 2000, 3000, 5000].includes(speed)) return false;
       state.config.simulationSpeedMsPerDay = speed;
       if (simulationClockInterval) {
         window.clearInterval(simulationClockInterval);
         simulationClockInterval = window.setInterval(advanceSimulationDay, speed);
       }
+      const settingsView = document.getElementById('view-settings');
+      if (settingsView && !settingsView.classList.contains('hidden') && typeof renderSettingsScreen === 'function') {
+        renderSettingsScreen();
+      }
       return true;
     }
 
     window.setSimulationSpeed = setSimulationSpeed;
+    window.setSimulationRunning = setSimulationRunning;
 
     function stopSimulationClock() {
       if (simulationClockInterval) window.clearInterval(simulationClockInterval);
@@ -543,15 +556,13 @@
     // INICIALIZACIÓN
     window.addEventListener('DOMContentLoaded', () => {
       renderSimulationDate();
-      renderSlideCarousel();
-      initSlideTrackInteractions();
+      if (typeof initTopMenu === 'function') initTopMenu();
       renderBolitas();
       calculateTotalBolitas();
       syncDefaultAnchorsUI();
       updateHUD();
       updateInterestsValidation();
-      const restoredSlide = Math.min(Math.max(0, Number(state.simulation.currentSlideIdx) || 0), slidesData.length - 1);
-      selectSlide(restoredSlide);
+      if (typeof showWelcomeScreen === 'function') showWelcomeScreen();
       syncSimulationClockVisibility();
     });
 
@@ -672,7 +683,7 @@
             </svg>
           `;
         }
-        if (titleElem) titleElem.innerText = 'Personal';
+        if (titleElem) titleElem.innerText = 'Mi perfil';
         if (subtitleElem) subtitleElem.innerText = 'Vida personal, bienestar y finanzas';
         renderPersonalStage('main');
         return;
@@ -683,18 +694,13 @@
         return;
       }
 
-      if (tabName === 'banco') {
-        renderBancoStage('main');
-        return;
-      }
-
-      if (tabName === 'inversiones') {
+      if (tabName === 'banco' || tabName === 'inversiones' || tabName === 'corredora') {
         renderInversionesStage('main');
         return;
       }
 
-      if (tabName === 'corredora') {
-        renderCorredoraMain();
+      if (tabName === 'asesor') {
+        renderAsesorStage('main');
         return;
       }
 
@@ -775,10 +781,14 @@
       if (tabName !== 'trabajo') {
         initNegChat();
       }
+      if (typeof closeTopMenu === 'function') closeTopMenu();
       state.interface.activeHudTab = tabName;
       document.querySelectorAll('.hud-dock-tab').forEach(t => t.classList.toggle('active', t.id === `tab-${tabName}`));
 
-      // Ocultar vistas de diapositivas en la zona central
+      const mainStage = document.getElementById('main-stage');
+      if (mainStage) mainStage.classList.remove('is-welcome-view');
+
+      // Ocultar vistas secundarias en la zona central
       document.querySelectorAll('.step-view').forEach(v => v.classList.add('hidden'));
 
       // Renderizar y mostrar las secciones del lugar en la zona central
@@ -787,15 +797,10 @@
       if (hubView) hubView.classList.remove('hidden');
     }
 
-    // VOLVER A LA VISTA DE LA DIAPOSITIVA ACTIVA
+    // VOLVER A LA PANTALLA DE BIENVENIDA
     function returnToSlideView() {
       initNegChat();
-      state.interface.activeHudTab = null;
-      document.querySelectorAll('.hud-dock-tab').forEach(t => t.classList.remove('active'));
-      const currentSlide = slidesData[state.simulation.currentSlideIdx];
-      if (currentSlide) {
-        activateInteractiveView(currentSlide);
-      }
+      if (typeof showWelcomeScreen === 'function') showWelcomeScreen();
     }
 
     function updateHUD() {

@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Finanzas Personales y Bienestar | Taller Vivencial</title>
+  <title>Finanzas y Bienestar</title>
   <meta name="description"
-    content="Simulador vivencial de Finanzas Personales y Bienestar. Aprende a gestionar ingresos, controlar compromisos y construir patrimonio de manera interactiva.">
+    content="Simulador de decisiones financieras: una experiencia sobre economía cotidiana y bienestar personal.">
 
   <!-- Google Fonts: Outfit (Titulares) & Inter (Lectura y datos) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,37 +26,55 @@
   <div class="mobile-frame">
 
     <!-- ======================================================================
-         1. ZONA SUPERIOR: DIAPOSITIVAS PPT FONDO CLARO (100% ANCHO) (~22% altura)
+         1. BARRA SUPERIOR (TÍTULO, FECHA DE SIMULACIÓN Y MENÚ)
          ====================================================================== -->
-    <header class="top-slide-zone">
-      <!-- Barra Superior Institucional: Iniciativa Actualízate OnLine • UAH • Experian -->
-      <div class="slide-top-bar">
-        <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
-          <button type="button" class="slide-nav-square" onclick="scrollSlideBy(-1)" title="Diapositiva anterior" aria-label="Anterior">◀</button>
-          <div class="slide-workshop-title" id="slide-top-module">ACTUALÍZATE ONLINE • UAH • EXPERIAN</div>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-          <div class="slide-date-display" id="slide-top-date">01-Ene-Año01</div>
-          <button type="button" class="slide-nav-square" onclick="scrollSlideBy(1)" title="Siguiente diapositiva" aria-label="Siguiente">▶</button>
-        </div>
-      </div>
+    <header class="topbar">
+      <a class="brand" id="topbar-brand" href="#inicio" aria-label="Finanzas y Bienestar, inicio">
+        <span class="brand-mark" aria-hidden="true">F</span>
+        <span>Finanzas y Bienestar</span>
+      </a>
 
-      <!-- Pista Horizontal de Diapositivas (Navegación fluida por scroll / swipe) -->
-      <div class="slide-carousel-track" id="slide-track" onscroll="onTrackScroll()">
-        <!-- Las diapositivas se renderizan dinámicamente con JS -->
+      <div class="topbar-actions">
+        <p class="simulation-date" id="slide-top-date">01 de enero <span>Año 1 · Detenido</span></p>
+        <div class="menu-wrap">
+          <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="top-menu">
+            <span></span><span></span><span></span>
+          </button>
+          <div class="top-menu" id="top-menu" hidden>
+            <button type="button" data-menu-action="configuracion">Configuración</button>
+            <button type="button" data-menu-action="acerca">Acerca de</button>
+          </div>
+        </div>
       </div>
     </header>
 
 
     <!-- ======================================================================
-         2. ZONA MEDIA: ESCENARIO DINÁMICO INTERACTIVO (~64% altura)
+         2. ZONA CENTRAL: ESCENARIO DINÁMICO INTERACTIVO
          ====================================================================== -->
-    <main class="main-interactive-zone" id="main-stage">
+    <main class="main-interactive-zone is-welcome-view" id="main-stage">
 
       <!-- ==================================================================
-           VISTA 1: SETEO DE BOLITAS DE INTERÉS (PRIMER PASO DEL TALLER)
+           VISTA 0: BIENVENIDA
            ================================================================== -->
-      <section id="view-step-4" class="step-view">
+      <section id="view-welcome" class="step-view" aria-labelledby="welcome-title">
+        <div class="welcome-panel">
+          <h1 id="welcome-title">Simulador de<br><span>decisiones financieras</span></h1>
+          <p class="welcome-lead">Experimenta el impacto de tus decisiones.</p>
+          <p class="welcome-copy">Vive de manera interactiva cómo tus decisiones financieras influyen tanto en tu dinero como en tu bienestar personal.</p>
+          <div class="panel-rule" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+          <blockquote>
+            <span class="quote-mark" aria-hidden="true">“</span>
+            <p>La riqueza no es un fin en sí misma, sino un medio para tener la libertad de llevar el tipo de vida que valoramos.</p>
+            <cite>Amartya Sen <span>·</span> 2000</cite>
+          </blockquote>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VISTA 1: SETEO DE BOLITAS DE INTERÉS
+           ================================================================== -->
+      <section id="view-step-4" class="step-view hidden">
         <!-- Lengüetas Superiores: Intereses, Preferencias, Resumen -->
         <div class="setup-tabs-bar">
           <button class="setup-tab-btn active" onclick="goToInterestsScreen()">
@@ -276,17 +294,11 @@
         </div>
       </section>
 
-      <!-- Contenedor de entrada de sesión (Diapo 1) -->
-      <section id="view-generic" class="step-view hidden">
-        <div class="glass-card">
-          <div class="glass-card-title" id="generic-title">Paso Activo</div>
-          <p class="glass-card-subtitle" id="generic-desc">Contenido dinámico sincronizado con el facilitador.</p>
-          <div style="padding: 24px 10px; text-align: center; color: var(--text-dim);">
-            <div style="font-size: 2.2rem; margin-bottom: 8px;" id="generic-icon">💡</div>
-            <div id="generic-msg">Desliza las diapositivas arriba para seguir el tema que expone el facilitador.</div>
-          </div>
-        </div>
-      </section>
+      <!-- Vista de Configuración (Menú superior) -->
+      <section id="view-settings" class="step-view hidden" aria-label="Configuración"></section>
+
+      <!-- Vista de Acerca de (Menú superior) -->
+      <section id="view-about" class="step-view hidden" aria-label="Acerca de"></section>
 
       <!-- Vista de Lugares de Oportunidades en la Zona Central -->
       <section id="view-hub-stage" class="step-view hidden">
@@ -297,7 +309,7 @@
               <!-- Inyectado dinámicamente -->
             </div>
             <div class="hub-stage-header-text">
-              <div class="glass-card-title hub-stage-header-title" id="hub-stage-title">Personal</div>
+              <div class="glass-card-title hub-stage-header-title" id="hub-stage-title">Mi perfil</div>
               <div class="hub-stage-header-subtitle" id="hub-stage-subtitle">Vida personal, bienestar y finanzas</div>
             </div>
           </div>
@@ -311,39 +323,33 @@
 
 
     <!-- ======================================================================
-         3. ZONA INFERIOR: HUD FLOTANTE CON 6 LUGARES DE OPORTUNIDADES
+         3. ZONA INFERIOR: HUD FLOTANTE CON 6 SECCIONES PRINCIPALES
          ====================================================================== -->
     <footer class="bottom-hud-zone">
-      <!-- Barra Dock con los 7 Lugares de Oportunidades (Solo íconos y texto, sin cifras) -->
+      <!-- Barra Dock con las 6 Secciones Principales -->
       <nav class="hud-dock-bar">
-        <!-- 1. Banco -->
-        <button class="hud-dock-tab tab-banco" onclick="selectHudTab('banco')" id="tab-banco" title="Banco">
-          <div class="dock-icon-box icon-banco">
-            <span>🏦</span>
+        <!-- 1. Mi perfil -->
+        <button class="hud-dock-tab tab-estado" onclick="selectHudTab('estado')" id="tab-estado" title="Mi perfil">
+          <div class="dock-icon-box icon-estado">
+            <svg viewBox="0 0 52 52" style="width: 17px; height: 17px; display: block;" fill="none">
+              <circle cx="26" cy="14" r="8" fill="#ffffff" />
+              <path d="M10 40C10 31.5 17 25 26 25C35 25 42 31.5 42 40" fill="#ffffff" fill-opacity="0.45"
+                stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+            </svg>
           </div>
-          <span class="dock-tab-title">Banco</span>
+          <span class="dock-tab-title">Mi perfil</span>
         </button>
 
-        <!-- 2. Otros Instrumentos -->
+        <!-- 2. Cuentas e inversiones -->
         <button class="hud-dock-tab tab-inversiones" onclick="selectHudTab('inversiones')" id="tab-inversiones"
-          title="Otros Instrumentos">
+          title="Cuentas e inversiones">
           <div class="dock-icon-box icon-inversiones">
             <span>📈</span>
           </div>
-          <span class="dock-tab-title">Otros Instrumentos</span>
+          <span class="dock-tab-title">Cuentas e inversiones</span>
         </button>
 
-        <!-- 3. Corredora -->
-        <button class="hud-dock-tab tab-corredora" onclick="selectHudTab('corredora')" id="tab-corredora"
-          title="Corredora">
-          <div class="dock-icon-box icon-corredora">
-            <span>🏠</span>
-          </div>
-          <span class="dock-tab-title">Corredora</span>
-        </button>
-
-        <!-- 4. Comercio -->
-        <!-- 4. Comercio y Servicios -->
+        <!-- 3. Comercio y Servicios -->
         <button class="hud-dock-tab tab-comercio" onclick="selectHudTab('comercio')" id="tab-comercio" title="Comercio y Servicios">
           <div class="dock-icon-box icon-comercio">
             <span>🛍️</span>
@@ -351,7 +357,7 @@
           <span class="dock-tab-title">Comercio y Servicios</span>
         </button>
 
-        <!-- 5. Actividades -->
+        <!-- 4. Actividades -->
         <button class="hud-dock-tab tab-actividades" onclick="selectHudTab('actividades')" id="tab-actividades"
           title="Actividades">
           <div class="dock-icon-box icon-actividades">
@@ -360,7 +366,7 @@
           <span class="dock-tab-title">Actividades</span>
         </button>
 
-        <!-- 6. Trabajo -->
+        <!-- 5. Trabajo -->
         <button class="hud-dock-tab tab-trabajo" onclick="selectHudTab('trabajo')" id="tab-trabajo" title="Trabajo">
           <div class="dock-icon-box icon-trabajo">
             <span>💼</span>
@@ -368,16 +374,12 @@
           <span class="dock-tab-title">Trabajo</span>
         </button>
 
-        <!-- 7. Personal -->
-        <button class="hud-dock-tab tab-estado" onclick="selectHudTab('estado')" id="tab-estado" title="Personal">
-          <div class="dock-icon-box icon-estado">
-            <svg viewBox="0 0 52 52" style="width: 17px; height: 17px; display: block;" fill="none">
-              <circle cx="26" cy="14" r="8" fill="#ffffff" />
-              <path d="M10 40C10 31.5 17 25 26 25C35 25 42 31.5 42 40" fill="#ffffff" fill-opacity="0.45"
-                stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
-            </svg>
+        <!-- 6. Asesor Financiero -->
+        <button class="hud-dock-tab tab-asesor" onclick="selectHudTab('asesor')" id="tab-asesor" title="Asesor Financiero">
+          <div class="dock-icon-box icon-asesor">
+            <span>🧭</span>
           </div>
-          <span class="dock-tab-title">Personal</span>
+          <span class="dock-tab-title">Asesor Financiero</span>
         </button>
       </nav>
     </footer>

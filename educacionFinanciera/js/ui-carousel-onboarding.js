@@ -78,248 +78,306 @@
       `;
     }
 
-    // RENDERIZAR CARRUSEL DE DIAPOSITIVAS HORIZONTAL (100% ANCHO, FONDO CLARO, SIN PUNTOS)
-    function renderSlideCarousel() {
-      const track = document.getElementById('slide-track');
-      if (!track) return;
-      track.innerHTML = '';
+    // NAVEGACIÓN PRINCIPAL, MENÚ SUPERIOR, CONFIGURACIÓN Y ACERCA DE
+    const simulationSpeedOptions = [
+      { ms: 1000, label: 'Rápida', detail: '1 día por segundo' },
+      { ms: 2000, label: 'Normal', detail: '1 día cada 2 segundos' },
+      { ms: 3000, label: 'Lenta', detail: '1 día cada 3 segundos' },
+      { ms: 5000, label: 'Muy lenta', detail: '1 día cada 5 segundos' }
+    ];
 
-      slidesData.forEach((slide, idx) => {
-        const card = document.createElement('div');
-        const isSplit = slide.hasTriangle || slide.figureIcon;
-        card.className = `slide-card ${isSplit ? 'split-layout' : ''} ${idx === 0 ? 'active' : ''}`;
-        card.id = `slide-card-${idx}`;
-        card.onclick = () => {
-          if (track.dataset.isDragging === 'true') return;
-          selectSlide(idx);
-        };
-
-        const slideNumBadge = `<span style="display: inline-flex; align-items: center; justify-content: center; background: #0284c7; color: #ffffff; font-weight: 900; font-size: 0.85rem; padding: 2px 8px; border-radius: 6px; margin-right: 6px; box-shadow: 0 1px 3px rgba(2,132,199,0.3); vertical-align: middle;">N° ${idx + 1}</span>`;
-
-        if (slide.hasTriangle) {
-          card.innerHTML = `
-            <div class="slide-split-text">
-              <div class="slide-card-title">${slideNumBadge}${slide.title}</div>
-              <div class="slide-card-desc">${slide.desc}</div>
-            </div>
-            <div class="slide-split-visual" title="Gráfico del Triángulo de la Inversión">
-              <svg viewBox="0 0 110 90" class="slide-mini-triangle">
-                <polygon points="55,14 14,78 96,78" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />
-                <line x1="55" y1="14" x2="55" y2="55" stroke="#e2e8f0" stroke-dasharray="2" />
-                <line x1="14" y1="78" x2="55" y2="55" stroke="#e2e8f0" stroke-dasharray="2" />
-                <line x1="96" y1="78" x2="55" y2="55" stroke="#e2e8f0" stroke-dasharray="2" />
-                <circle cx="55" cy="14" r="5" fill="#059669" />
-                <text x="55" y="8" font-size="7.5" font-weight="800" text-anchor="middle" fill="#059669">RENTABILIDAD</text>
-                <circle cx="14" cy="78" r="5" fill="#0284c7" />
-                <text x="6" y="88" font-size="7.5" font-weight="800" fill="#0284c7">LIQUIDEZ</text>
-                <circle cx="96" cy="78" r="5" fill="#d97706" />
-                <text x="104" y="88" font-size="7.5" font-weight="800" text-anchor="end" fill="#d97706">RIESGO</text>
-                <circle cx="55" cy="55" r="4.5" fill="#7c3aed" />
-              </svg>
-            </div>
-          `;
-        } else if (slide.figureIcon) {
-          card.innerHTML = `
-            <div class="slide-split-visual slide-figure-box" title="Figura">
-              ${slide.figureSvg || `<span style="font-size: 2rem; line-height: 1;">${slide.figureIcon}</span>`}
-            </div>
-            <div class="slide-split-text">
-              <div class="slide-card-title">${slideNumBadge}${slide.title}</div>
-              <div class="slide-card-desc">${slide.desc}</div>
-            </div>
-          `;
-        } else {
-          card.innerHTML = `
-            <div class="slide-card-title">${slideNumBadge}${slide.title}</div>
-            <div class="slide-card-desc">${slide.desc}</div>
-          `;
-        }
-        track.appendChild(card);
-      });
-    }
-
-    // CONTROL DE SCROLL PROGRAMÁTICO Y NAVEGACIÓN
-    let isProgrammaticScroll = false;
-    let programmaticScrollTimer = null;
-
-    // SELECCIONAR Y ACTIVAR UNA DIAPOSITIVA
-    function selectSlide(idx, triggerScroll = true) {
-      state.simulation.currentSlideIdx = idx;
-      const slide = slidesData[idx];
-      if (!slide) return;
-
-      // Actualizar título de módulo dinámico en la barra superior
-      const topModule = document.getElementById('slide-top-module');
-      if (topModule) {
-        topModule.innerText = slide.tag;
+    function closeTopMenu() {
+      const menuToggle = document.getElementById('menu-toggle');
+      const topMenu = document.getElementById('top-menu');
+      if (menuToggle) {
+        menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.setAttribute('aria-label', 'Abrir menú');
       }
-
-      // Actualizar clase activa en tarjetas
-      document.querySelectorAll('.slide-card').forEach((el, i) => {
-        el.classList.toggle('active', i === idx);
-      });
-
-      // Hacer scroll suave para alinear exactamente la diapositiva en el track
-      const track = document.getElementById('slide-track');
-      if (track && triggerScroll) {
-        isProgrammaticScroll = true;
-        clearTimeout(programmaticScrollTimer);
-        programmaticScrollTimer = setTimeout(() => {
-          isProgrammaticScroll = false;
-        }, 450);
-
-        const targetLeft = idx * track.clientWidth;
-        track.scrollTo({
-          left: targetLeft,
-          behavior: 'smooth'
-        });
-      }
-
-      // Sincronizar la zona media interactiva
-      activateInteractiveView(slide);
+      if (topMenu) topMenu.hidden = true;
     }
 
-    // AVANZAR O RETROCEDER CON BOTONES ◀ / ▶
-    function scrollSlideBy(dir) {
-      let newIdx = state.simulation.currentSlideIdx + dir;
-      if (newIdx < 0) newIdx = 0;
-      if (newIdx >= slidesData.length) newIdx = slidesData.length - 1;
-      selectSlide(newIdx);
-    }
-
-    // DETECCIÓN DE SCROLL / SWIPE MANUAL CON EL DEDO EN EL TRACK
-    let scrollTimeout;
-    function onTrackScroll() {
-      if (isProgrammaticScroll) return;
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        if (isProgrammaticScroll) return;
-        const track = document.getElementById('slide-track');
-        if (!track) return;
-        const cardWidth = track.clientWidth || 1;
-        const closestIdx = Math.round(track.scrollLeft / cardWidth);
-        const validIdx = Math.max(0, Math.min(slidesData.length - 1, closestIdx));
-
-        if (validIdx !== state.simulation.currentSlideIdx) {
-          selectSlide(validIdx, false);
-        }
-      }, 120);
-    }
-
-    // SOPORTE DE RUEDA DE RATÓN Y ARRASTRE (DRAG) EN ESCRITORIO
-    function initSlideTrackInteractions() {
-      const track = document.getElementById('slide-track');
-      if (!track || track.dataset.interactionsInit) return;
-      track.dataset.interactionsInit = 'true';
-
-      // Rueda vertical convertida a desplazamiento horizontal en track
-      track.addEventListener('wheel', (e) => {
-        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-          e.preventDefault();
-          track.scrollLeft += e.deltaY;
-        }
-      }, { passive: false });
-
-      // Arrastre con clic de ratón (Drag to scroll)
-      let isDown = false;
-      let startX = 0;
-      let scrollLeft = 0;
-
-      track.addEventListener('mousedown', (e) => {
-        isDown = true;
-        track.dataset.isDragging = 'false';
-        track.style.cursor = 'grabbing';
-        startX = e.pageX - track.offsetLeft;
-        scrollLeft = track.scrollLeft;
-      });
-
-      window.addEventListener('mouseup', () => {
-        if (!isDown) return;
-        isDown = false;
-        track.style.cursor = 'grab';
-        setTimeout(() => {
-          track.dataset.isDragging = 'false';
-        }, 80);
-      });
-
-      track.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        const x = e.pageX - track.offsetLeft;
-        const walk = x - startX;
-        if (Math.abs(walk) > 6) {
-          track.dataset.isDragging = 'true';
-          track.scrollLeft = scrollLeft - walk;
-        }
-      });
-    }
-
-    // ACTIVAR LA VISTA DE LA ZONA MEDIA
-    function activateInteractiveView(slide) {
-      // El icono del dock solo debe estar marcado cuando en el centro se muestra lo del icono.
-      // Al cambiar la diapositiva y modificarse el centro, se desmarca cualquier icono activo.
+    function showMainStepView(viewId) {
+      closeTopMenu();
       state.interface.activeHudTab = null;
       document.querySelectorAll('.hud-dock-tab').forEach(t => t.classList.remove('active'));
-
-      // Ocultar todas las vistas
       document.querySelectorAll('.step-view').forEach(view => view.classList.add('hidden'));
 
-      if (!slide.view) return;
-
-      if (slide.view === 'view-generic') {
-        const genView = document.getElementById('view-generic');
-        document.getElementById('generic-title').innerText = slide.genericTitle || slide.title;
-        const descEl = document.getElementById('generic-desc');
-        if (descEl) {
-          descEl.innerText = slide.genericDesc || '';
-          descEl.style.display = slide.genericDesc ? 'block' : 'none';
-        }
-        const iconEl = document.getElementById('generic-icon');
-        if (iconEl) {
-          iconEl.innerText = slide.genericIcon || '';
-          iconEl.style.display = slide.genericIcon ? 'block' : 'none';
-        }
-        const msgEl = document.getElementById('generic-msg');
-        if (msgEl) {
-          if (slide.genericBodyHtml) {
-            msgEl.innerHTML = slide.genericBodyHtml;
-          } else {
-            msgEl.innerText = slide.genericMsg || '';
-          }
-        }
-        genView.classList.remove('hidden');
-      } else {
-        const targetView = document.getElementById(slide.view);
-        if (targetView) targetView.classList.remove('hidden');
+      const mainStage = document.getElementById('main-stage');
+      if (mainStage) {
+        mainStage.classList.toggle('is-welcome-view', viewId === 'view-welcome');
       }
 
-      if (slide.view === 'view-character-summary') {
+      const targetView = document.getElementById(viewId);
+      if (targetView) targetView.classList.remove('hidden');
+
+      if (viewId === 'view-character-summary') {
         renderCharacterSummary();
       }
     }
 
-    // GESTIÓN DEL CÓDIGO DE SESIÓN EN LA DIAPO 1
-    function handleEnterSessionCode() {
-      const input = document.getElementById('session-code-input');
-      const feedback = document.getElementById('session-code-feedback');
-      if (!input) return;
-      const code = input.value.trim().toUpperCase();
-      if (!code) {
-        if (feedback) {
-          feedback.style.display = 'block';
-          feedback.style.color = '#e11d48';
-          feedback.innerText = 'Por favor escribe un código antes de ingresar.';
+    function showWelcomeScreen() {
+      showMainStepView('view-welcome');
+    }
+
+    function createSettingsGroup(titleText) {
+      const group = document.createElement('section');
+      group.className = 'settings-group';
+      const title = document.createElement('h3');
+      title.textContent = titleText;
+      group.append(title);
+      return group;
+    }
+
+    function renderSettingsScreen() {
+      const container = document.getElementById('view-settings');
+      if (!container) return;
+
+      const panel = document.createElement('div');
+      panel.className = 'settings-panel';
+
+      const heading = document.createElement('h2');
+      heading.textContent = 'Configuración';
+
+      const speedGroup = createSettingsGroup('Velocidad del simulador');
+      const speedList = document.createElement('div');
+      speedList.className = 'settings-speed-list';
+      const currentSpeedMs = Number(state.config.simulationSpeedMsPerDay) || 2000;
+
+      for (const speed of simulationSpeedOptions) {
+        const isSelected = currentSpeedMs === speed.ms;
+        const speedButton = document.createElement('button');
+        speedButton.type = 'button';
+        speedButton.className = `settings-speed-option${isSelected ? ' is-selected' : ''}`;
+        speedButton.setAttribute('aria-pressed', String(isSelected));
+        const speedLabel = document.createElement('span');
+        speedLabel.className = 'settings-speed-label';
+        speedLabel.textContent = speed.label;
+        speedButton.append(speedLabel);
+        speedButton.addEventListener('click', () => setSimulationSpeed(speed.ms));
+        speedList.append(speedButton);
+      }
+
+      const selectedSpeed = simulationSpeedOptions.find(s => s.ms === currentSpeedMs) || simulationSpeedOptions[1];
+      const speedSummary = document.createElement('p');
+      speedSummary.className = 'settings-speed-summary';
+      speedSummary.textContent = `${selectedSpeed.label}: ${selectedSpeed.detail}`;
+      speedGroup.append(speedList, speedSummary);
+
+      const controlGroup = createSettingsGroup('Control del simulador');
+      const isRunning = Boolean(state.simulation.clockRunning);
+      const status = document.createElement('p');
+      status.className = `settings-status${isRunning ? ' is-running' : ''}`;
+      status.textContent = isRunning ? 'El simulador está en marcha.' : 'El simulador está detenido.';
+
+      const toggleButton = document.createElement('button');
+      toggleButton.type = 'button';
+      toggleButton.className = 'settings-button';
+      toggleButton.textContent = isRunning ? 'Detener simulador' : 'Activar simulador';
+      toggleButton.addEventListener('click', () => setSimulationRunning(!state.simulation.clockRunning));
+
+      const resetRow = document.createElement('div');
+      resetRow.className = 'settings-reset-row';
+      const resetButton = document.createElement('button');
+      resetButton.type = 'button';
+      resetButton.className = 'settings-button settings-button--danger settings-button--small';
+      resetButton.textContent = 'Reiniciar simulador';
+      resetButton.addEventListener('click', resetSimulators);
+      resetRow.append(resetButton);
+
+      controlGroup.append(status, toggleButton, resetRow);
+
+      panel.append(heading, speedGroup, controlGroup);
+      container.replaceChildren(panel);
+      showMainStepView('view-settings');
+    }
+
+    function renderAboutScreen() {
+      const container = document.getElementById('view-about');
+      if (!container) return;
+
+      const panel = document.createElement('div');
+      panel.className = 'settings-panel about-panel';
+
+      const kicker = document.createElement('p');
+      kicker.className = 'about-kicker';
+      kicker.textContent = 'Acerca de';
+
+      const title = document.createElement('h2');
+      title.textContent = 'Finanzas y Bienestar';
+
+      const createAboutBlock = (labelText, content) => {
+        const block = document.createElement('section');
+        block.className = 'about-block';
+        const label = document.createElement('h3');
+        label.textContent = labelText;
+        const text = document.createElement('p');
+        if (typeof content === 'string') text.textContent = content;
+        else text.append(...content);
+        block.append(label, text);
+        return block;
+      };
+
+      const authorName = document.createElement('strong');
+      authorName.textContent = 'Astutosoft 2026';
+
+      const closeButton = document.createElement('button');
+      closeButton.type = 'button';
+      closeButton.className = 'settings-button';
+      closeButton.textContent = 'Cerrar';
+      closeButton.addEventListener('click', showWelcomeScreen);
+
+      panel.append(
+        kicker,
+        title,
+        createAboutBlock('Aplicación', 'Simulador de decisiones financieras que permite experimentar de forma interactiva cómo las decisiones cotidianas influyen tanto en el dinero como en el bienestar personal.'),
+        createAboutBlock('Créditos', ['Desarrollado por ', authorName]),
+        closeButton
+      );
+
+      container.replaceChildren(panel);
+      showMainStepView('view-about');
+    }
+
+    function initTopMenu() {
+      const brand = document.getElementById('topbar-brand');
+      const menuToggle = document.getElementById('menu-toggle');
+      const topMenu = document.getElementById('top-menu');
+      if (!menuToggle || !topMenu || menuToggle.dataset.topMenuInit) return;
+      menuToggle.dataset.topMenuInit = 'true';
+
+      if (brand) {
+        brand.addEventListener('click', (event) => {
+          event.preventDefault();
+          showWelcomeScreen();
+        });
+      }
+
+      menuToggle.addEventListener('click', () => {
+        const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+        menuToggle.setAttribute('aria-expanded', String(!isExpanded));
+        menuToggle.setAttribute('aria-label', isExpanded ? 'Abrir menú' : 'Cerrar menú');
+        topMenu.hidden = isExpanded;
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('.menu-wrap')) {
+          closeTopMenu();
         }
+      });
+
+      const menuActions = {
+        configuracion: renderSettingsScreen,
+        acerca: renderAboutScreen
+      };
+      Object.entries(menuActions).forEach(([action, handler]) => {
+        const btn = topMenu.querySelector(`[data-menu-action="${action}"]`);
+        if (btn) {
+          btn.addEventListener('click', () => {
+            closeTopMenu();
+            handler();
+          });
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !topMenu.hidden) {
+          closeTopMenu();
+          menuToggle.focus();
+        }
+      });
+    }
+
+    // SECCIÓN ASESOR FINANCIERO (GUÍA DE CONCEPTOS Y PANTALLAS INFORMATIVAS)
+    function renderAsesorStage(topicId = 'main') {
+      const container = document.getElementById('hub-stage-sections');
+      if (!container) return;
+
+      const titleElem = document.getElementById('hub-stage-title');
+      const subtitleElem = document.getElementById('hub-stage-subtitle');
+      const iconBox = document.getElementById('hub-stage-icon-box');
+
+      if (iconBox) {
+        iconBox.style.cursor = 'default';
+        iconBox.onclick = null;
+        iconBox.removeAttribute('title');
+        iconBox.className = 'hub-stage-header-icon dock-icon-box icon-asesor';
+        iconBox.innerHTML = '<span>🧭</span>';
+      }
+      if (titleElem) titleElem.innerText = '🧭 Asesor Financiero';
+      if (subtitleElem) subtitleElem.innerText = 'Guía práctica de conceptos y decisiones financieras';
+
+      const topics = Array.isArray(asesorTopicsCatalog) ? asesorTopicsCatalog : [];
+
+      if (topicId === 'main') {
+        container.innerHTML = `
+          <div class="personal-subview-box">
+            <div class="hub-grid-2col">
+              ${topics.map(topic => `
+                <div class="hub-option-card" onclick="renderAsesorStage('${topic.id}')">
+                  <div class="hub-option-icon">${topic.icon}</div>
+                  <div class="hub-option-text">
+                    <div class="hub-option-name">${topic.title}</div>
+                    <div class="hub-option-desc">${topic.desc}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
         return;
       }
-      state.persona.sessionCode = code;
-      if (feedback) {
-        feedback.style.display = 'block';
-        feedback.style.color = '#059669';
-        feedback.innerText = `✓ Código ${code} conectado con éxito. Avanzando...`;
+
+      const topic = topics.find(item => item.id === topicId);
+      if (!topic) {
+        renderAsesorStage('main');
+        return;
       }
-      setTimeout(() => {
-        selectSlide(1);
-      }, 700);
+
+      const triangleHtml = topic.hasTriangle ? `
+        <div class="asesor-triangle-wrap">
+          <svg viewBox="0 0 220 175" class="asesor-triangle-svg" role="img" aria-label="Triángulo de la inversión: Rentabilidad, Liquidez y Riesgo">
+            <polygon points="110,28 30,148 190,148" fill="#ffffff" stroke="#cbd5e1" stroke-width="2.5" />
+            <circle cx="110" cy="28" r="8" fill="#059669" />
+            <text x="110" y="14" font-size="11" font-weight="800" text-anchor="middle" fill="#059669">RENTABILIDAD</text>
+            <circle cx="30" cy="148" r="8" fill="#0284c7" />
+            <text x="14" y="168" font-size="11" font-weight="800" fill="#0284c7">LIQUIDEZ</text>
+            <circle cx="190" cy="148" r="8" fill="#d97706" />
+            <text x="206" y="168" font-size="11" font-weight="800" text-anchor="end" fill="#d97706">RIESGO</text>
+          </svg>
+        </div>
+      ` : '';
+
+      const blocksHtml = (topic.blocks || []).map(block => `
+        <section class="asesor-block">
+          <h3 class="asesor-block-title">${block.title}</h3>
+          ${block.body ? `<p>${block.body}</p>` : ''}
+          ${block.extra ? `<p>${block.extra}</p>` : ''}
+          ${Array.isArray(block.bullets) ? `
+            <ul class="asesor-list">
+              ${block.bullets.map(item => `<li>${item}</li>`).join('')}
+            </ul>
+          ` : ''}
+        </section>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="personal-subview-box">
+          <div class="personal-subview-top">
+            <span style="font-size: 0.82rem; font-weight: 800; color: #0f766e;">${topic.icon} ${topic.title}</span>
+            <button type="button" class="personal-subview-back-btn" onclick="renderAsesorStage('main')">
+              <span>◀ Volver</span>
+            </button>
+          </div>
+
+          <article class="asesor-article">
+            ${topic.lead ? `<p class="asesor-lead">${topic.lead}</p>` : ''}
+            ${triangleHtml}
+            ${blocksHtml}
+            ${topic.tip ? `<div class="asesor-tip"><strong>Clave práctica:</strong> ${topic.tip.replace(/^Consejo práctico:\s*/i, '')}</div>` : ''}
+            ${topic.ctaLabel && topic.ctaAction ? `<button type="button" class="asesor-action-btn" onclick="${topic.ctaAction}">${topic.ctaLabel}</button>` : ''}
+          </article>
+        </div>
+      `;
     }
 
     // RENDERIZAR ESTRELLAS EN UN SOLO LISTADO SENCILLO (SIN BLOQUES)
@@ -449,16 +507,16 @@
 
     // NAVEGACIÓN ENTRE PASOS DE CONFIGURACIÓN DEL PERSONAJE
     function goToInterestsScreen() {
-      selectSlide(1);
+      showMainStepView('view-step-4');
     }
 
     function goToAnchorsScreen() {
-      selectSlide(2);
+      showMainStepView('view-anchors');
     }
 
     function goToSummaryScreen() {
       renderCharacterSummary();
-      selectSlide(3);
+      showMainStepView('view-character-summary');
     }
 
     // SELECCIÓN DE 2 OPCIONES LIBRES EN ESTILO DE VIDA (VIVIENDA, TRABAJO, TRANSPORTE)
@@ -547,31 +605,6 @@
 
       // Activar inmediatamente la vista central de Personal desde el dock
       selectHudTab('estado');
-
-      // Avanzar el carrusel superior a la diapositiva 4 (Paso 5: Presupuesto)
-      state.simulation.currentSlideIdx = 4;
-      const slide = slidesData[4];
-      if (slide) {
-        const topModule = document.getElementById('slide-top-module');
-        if (topModule) topModule.innerText = slide.tag;
-
-        document.querySelectorAll('.slide-card').forEach((el, i) => {
-          el.classList.toggle('active', i === 4);
-        });
-
-        const track = document.getElementById('slide-track');
-        if (track) {
-          isProgrammaticScroll = true;
-          clearTimeout(programmaticScrollTimer);
-          programmaticScrollTimer = setTimeout(() => {
-            isProgrammaticScroll = false;
-          }, 450);
-          track.scrollTo({
-            left: 4 * track.clientWidth,
-            behavior: 'smooth'
-          });
-        }
-      }
     }
 
     function flashMissingAnchors(missing) {

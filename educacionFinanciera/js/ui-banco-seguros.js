@@ -98,6 +98,12 @@
         return;
       }
 
+      // Al volver al menú principal desde cualquier producto bancario, regresar a Cuentas e inversiones
+      if (typeof renderInversionesStage === 'function') {
+        renderInversionesStage('main');
+        return;
+      }
+
       // VISTA PRINCIPAL DEL BANCO
       container.innerHTML = `
         <div class="personal-subview-box">

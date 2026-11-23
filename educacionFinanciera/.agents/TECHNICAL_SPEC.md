@@ -5,16 +5,16 @@
 - **Frontend:** Pure Vanilla HTML5, CSS3, ES6+ JS (zero bundlers; works via local `file://` and GitHub Pages).
 - **Backend/BaaS:** Supabase JS SDK v2 (`../js/supabaseClient.js` via `getPlaton6Supabase()`).
 - **Modular File Architecture:**
-  - `index.html` (`401 lines`): Clean HTML shell (3 zones, onboarding containers, modals, HUD Dock and module script order).
-  - `css/styles.css` (`2,390 lines`): Design tokens, 3D perspective background, and component styles.
-  - `data/catalogs.js` (`1,013 lines`): Static catalogs, including eight Corredora housing options, prices and reference rents.
-  - `js/state.js` (`829 lines`): Persistent shared state, balance mutation tracking, financial history, credit helpers and simulated daily/monthly event scheduler.
-  - `js/ui-carousel-onboarding.js` (`607 lines`): Top PPT carousel (with `N° 1`–`N° 42` badges) and 3-step Onboarding (`#view-step-4`, `#view-anchors`, `#view-character-summary`).
+  - `index.html` (`407 lines`): HTML shell (sticky `.topbar`, welcome/settings/about/onboarding/hub views, modals, 6-tab HUD Dock and module script order).
+  - `css/styles.css` (`2,987 lines`): Design tokens, 3D perspective background, topbar/menu, welcome/settings/about, dilemmas, filter bar and Asesor Financiero styles.
+  - `data/catalogs.js` (`1,295 lines`): Static catalogs including housing options/rents, `financialDilemmasConfig` (6 dilemmas), and `asesorTopicsCatalog` (6 educational topics).
+  - `js/state.js` (`808 lines`): In-memory domain state (`persona`, `config`, `simulation`, `finances`, `assets`, `work`, `wellbeing`, `interface`), financial movements, credit helpers and daily/monthly event scheduler (`1000/2000/3000/5000` ms/day).
+  - `js/ui-carousel-onboarding.js` (`638 lines`): Topbar menu (`Configuración`, `Acerca de`), welcome screen, 3-step Onboarding (`#view-step-4`, `#view-anchors`, `#view-character-summary`), and `"Asesor Financiero"` (`renderAsesorStage`).
   - `js/ui-trabajo.js` (`1,338 lines`): `"Trabajo"` hub, employment/performance, course lifecycle, salary routing and payment history.
-  - `js/ui-banco-seguros.js` (`4,309 lines`): `"Banco"` & `"Seguros"`; account operations, consumer/mortgage credit, revolving credit, FFMM, DAP, insurance and financial event handlers.
-  - `js/ui-personal.js` (`1,380 lines`): `"Mi Estado"`; wellbeing, budget, assets/liabilities and financial movement history.
-  - `js/ui-inversiones.js` (`3,031 lines`): Other investments, wallet, shared purchase/redemption flows and investment returns.
-  - `js/ui-corredora.js` (`879 lines`): Property sale/rental listings, matching, settlement and contracts.
+  - `js/ui-banco-seguros.js` (`4,315 lines`): Bank & insurance detail views returning to `"Cuentas e inversiones"`.
+  - `js/ui-personal.js` (`1,505 lines`): `"Mi perfil"`; wellbeing, `"Dilemas financieros"` modal flow, budget, assets/liabilities and financial movement history.
+  - `js/ui-inversiones.js` (`3,143 lines`): Unified `"Cuentas e inversiones"` hub (24 options, 10 category filters), wallet, purchase/redemption flows and investment returns.
+  - `js/ui-corredora.js` (`835 lines`): Property sale/rental listings, matching, settlement and contracts routed under `"Cuentas e inversiones"`.
 
 ## 2. State Model (`state`) & Character Variables
 ### 2.1. Unified `"Bienestar"` Breakdown (100 Points)

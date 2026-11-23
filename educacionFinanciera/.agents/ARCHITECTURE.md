@@ -1,27 +1,20 @@
--   - 7 places: `"Banco"`, `"Otras Inversiones"`, `"Corredora"`, `"Comercio y Servicios"`, `"Actividades"`, `"Trabajo"`, `"Mi Estado"` (`Personal`).
 # Architecture — `educacionFinanciera`
 
-## 1. Dual-Screen Operation (Facilitator vs. Participant)
-- **PPT (Facilitator on Zoom/Projector):** All 46 theoretical/guided moments.
-- **Web Simulator (Participant on Mobile):** Only interactive milestones and passive `"Simulador corriendo"` states.
-- **Modes:**
-  1. **Autonomous (Default):** Local navigation via `[ ◀ ]` / `[ ▶ ]` on voice cue; zero network dependency.
-  2. **Synchronized (Supabase Realtime):** Facilitator pushes current slide and aggregates live metrics via `getPlaton6Supabase()` (`platon6_finanzas_sesiones` / `platon6_finanzas_respuestas`).
-
-## 2. 3-Zone Mobile Layout (`mobile-frame`, `max-width: 480px`)
+## 1. Layout (`mobile-frame`, `max-width: 480px`)
 Rendered over a **3D spatial perspective background** (32% horizon, radial `#7dd3fc` conic lines, logarithmic horizontal lines):
-1. **Top Zone — PPT Carousel (100% width):**
-   - Navy header (`#0f172a` to `#1e3a8a`) with `[ ◀ ]` / `[ ▶ ]`, dynamic left title, and compact right date (`01-Ene-Año01`).
-   - `.slide-card` strip with button, mouse wheel, and drag-to-scroll support.
-2. **Middle Zone — Dynamic Action Stage:**
-   - Toggles between active slide interactive content (e.g., 3 Onboarding tabs) and the 2-column showcase (`hub-grid-2col`) of the selected bottom dock place (`view-hub-stage`).
-3. **Bottom Zone — HUD Dock Bar (7 Places):**
-   - Fixed bottom bar (`bottom: 0`, constant 80% opacity `rgba(..., 0.80)`, ocean-to-night blue gradient, `#38bdf8` top border).
-   - 7 places: `"Banco"`, `"Otras Inversiones"`, `"Corredora"`, `"Comercio"`, `"Actividades"`, `"Trabajo"`, `"Mi Estado"` (`Personal`).
-   - **Strict Sync Rule:** A dock icon is `.active` (`#7dd3fc` + 28px bar) ONLY when its showcase (`view-hub-stage`) is open in the middle zone. Changing the top slide sets `state.activeHudTab = null` and unmarks the dock icon.
+1. **Top Bar (`.topbar`, sticky):**
+   - Left: brand mark `F` + `"Finanzas y Bienestar"` (clicking returns to `#view-welcome`).
+   - Right: 2-line simulation date (`01 de enero` / `Año 1 · Detenido`) and hamburger menu (`#menu-toggle` / `#top-menu`) opening `"Configuración"` (`#view-settings`) and `"Acerca de"` (`#view-about`).
+   - Legacy PPT slide carousel and `◀`/`▶` slide controls are removed.
+2. **Middle Zone — Dynamic Action Stage (`#main-stage`):**
+   - Reaches directly up to `.topbar`.
+   - Toggles between `#view-welcome` (Amartya Sen quote), `#view-settings`, `#view-about`, 3 Onboarding tabs (`#view-step-4`, `#view-anchors`, `#view-character-summary`), and `#view-hub-stage` for the selected bottom dock tab.
+3. **Bottom Zone — HUD Dock Bar (6 Places):**
+   - Fixed bottom bar (`bottom: 0`, `repeat(6, 1fr)`): `"Mi perfil"`, `"Cuentas e inversiones"`, `"Comercio y Servicios"`, `"Actividades"`, `"Trabajo"`, `"Asesor Financiero"`.
+   - `"Banco"` and `"Corredora"` dock tabs were merged into `"Cuentas e inversiones"`.
+   - **Strict Sync Rule:** A dock icon is `.active` (`#7dd3fc` + 28px bar) ONLY when its showcase (`view-hub-stage`) is open in the middle zone. Opening welcome/settings/about/onboarding clears `state.interface.activeHudTab = null` and unmarks all dock tabs.
 
-## 3. Simulated Financial Event Flow
-- `state.js` owns the simulated calendar and invokes daily and month-boundary handlers while the page is visible/focused; the clock pauses in the background.
+## 2. Simulated Financial Event Flow
+- `state.js` owns the simulated calendar (`1s/2s/3s/5s` per day via `setSimulationSpeed`, start/pause via `setSimulationRunning`, reset via `resetSimulators`) and invokes daily and month-boundary handlers while visible/focused.
 - Domain handlers in `ui-banco-seguros.js`, `ui-inversiones.js`, `ui-trabajo.js`, and `ui-corredora.js` process credit interest/payments, investment returns, salary, property sales/rentals, account fees and maturities.
-- Persistent state records cash/account mutations as financial movements. Operation wrappers provide contextual descriptions so `ui-personal.js` can render a chronological, year-filtered ledger.
-- Browser persistence uses localStorage with sessionStorage fallback and selects the newest timestamped backup on restore.
+- State lives in memory per session; cash/account mutations are tracked as financial movements via `withFinancialMovementDetail()` so `ui-personal.js` renders a chronological, year-filtered ledger.

@@ -1704,6 +1704,107 @@
         </div>`;
     }
 
+    const cuentasInversionesFilters = [
+      { id: 'all', label: 'Mostrar todo' },
+      { id: 'cuentas', label: 'Cuentas' },
+      { id: 'creditos', label: 'Créditos' },
+      { id: 'seguros', label: 'Seguros' },
+      { id: 'fondos_dap', label: 'Fondos mutuos y depósitos a plazo' },
+      { id: 'bonos_acciones', label: 'Bonos y acciones' },
+      { id: 'afp', label: 'AFP' },
+      { id: 'monedas_cripto', label: 'Monedas y Cripto' },
+      { id: 'inmuebles', label: 'Inmuebles' },
+      { id: 'startup', label: 'Startup' }
+    ];
+
+    function setInversionesFilter(filterId) {
+      state.interface.investmentFilter = filterId || 'all';
+      renderInversionesStage('main');
+    }
+
+    function getCuentasInversionesItems() {
+      const bankAccounts = Array.isArray(state.finances.bankAccounts) ? state.finances.bankAccounts : [];
+      const activeDebts = Array.isArray(state.finances.debts) ? state.finances.debts : [];
+      const bankMap = Object.fromEntries((hubsData.banco?.sections || []).map(sec => [sec.id, sec]));
+      const invMap = Object.fromEntries((hubsData.inversiones?.sections || []).map(sec => [sec.id, sec]));
+      const corrSections = hubsData.corredora?.sections || [];
+
+      const countBankAcc = (key) => bankAccounts.filter(a => {
+        const id = String(a.id || '');
+        const type = String(a.type || '');
+        const name = String(a.name || '');
+        if (key === 'ahorro') return id.includes('ahorro') || type.includes('ahorro');
+        if (key === 'rut_vista') return id.includes('rut') || id.includes('vista') || name.includes('RUT');
+        if (key === 'corriente') return id === 'acc_corriente' || type === 'corriente';
+        return false;
+      }).length;
+
+      const countOtherInv = (secId) => {
+        if (secId === 'moneda_ext') return getActiveForeignCurrenciesCount();
+        if (secId === 'billeteras') return Number(Boolean(getDigitalWalletAccount()));
+        return state.finances.otherInvestments.filter(inv => inv.categoryId === secId).length
+          + (secId === 'apv' && state.finances.apvAccount ? 1 : 0)
+          + (secId === 'cuenta2' && state.finances.cuenta2Account ? 1 : 0);
+      };
+
+      const makeBankItem = (id, category, action, count = 0) => {
+        const sec = bankMap[id];
+        if (!sec) return null;
+        return { id: `banco_${id}`, category, name: sec.name, icon: sec.icon || '🏦', desc: sec.desc || '', action, count };
+      };
+
+      const makeInvItem = (id, category) => {
+        const sec = invMap[id];
+        if (!sec) return null;
+        return { id: `inv_${id}`, category, name: sec.name, icon: sec.icon || '💎', desc: sec.desc || '', action: `renderInversionesStage('${sec.id}')`, count: countOtherInv(sec.id) };
+      };
+
+      const makeCorrItem = (idx, id, count = 0) => {
+        const sec = corrSections[idx];
+        if (!sec) return null;
+        return { id: `corr_${id}`, category: 'inmuebles', name: sec.name, icon: sec.icon || '🏠', desc: sec.desc || '', action: sec.action, count };
+      };
+
+      const activeSalesCount = (state.assets.propertyListings || []).filter(l => l.status === 'active').length;
+      const activeRentalsOffersCount = (state.assets.propertyRentalListings || []).filter(l => ['active', 'rented'].includes(l.status)).length;
+
+      return [
+        // Cuentas
+        makeBankItem('ahorro', 'cuentas', "renderBancoStage('cuenta_ahorro')", countBankAcc('ahorro')),
+        makeBankItem('rut_vista', 'cuentas', "renderBancoStage('cuenta_rut_vista')", countBankAcc('rut_vista')),
+        makeBankItem('corriente', 'cuentas', "renderBancoStage('cuenta_corriente')", countBankAcc('corriente')),
+        makeInvItem('billeteras', 'cuentas'),
+        // Créditos
+        makeBankItem('linea', 'creditos', "renderBancoStage('linea')", state.finances.creditLine ? 1 : 0),
+        makeBankItem('tarjeta', 'creditos', "renderBancoStage('tarjeta')", state.finances.creditCard ? 1 : 0),
+        makeBankItem('credito_consumo', 'creditos', "renderBancoStage('credito_consumo')", activeDebts.filter(d => d.loanType !== 'hipotecario').length),
+        makeBankItem('credito_hipotecario', 'creditos', "renderBancoStage('credito_hipotecario')", activeDebts.filter(d => d.loanType === 'hipotecario').length),
+        // Seguros
+        makeBankItem('seguros', 'seguros', "renderBancoStage('seguros')", (state.finances.insurances || []).length),
+        // Fondos mutuos y depósitos a plazo
+        makeBankItem('fondos', 'fondos_dap', "renderBancoStage('fondos')", (state.finances.mutualFunds || []).length),
+        makeBankItem('dap', 'fondos_dap', "renderBancoStage('depositos')", (state.finances.termDeposits || []).length),
+        makeInvItem('etf', 'fondos_dap'),
+        // Bonos y acciones
+        makeInvItem('acciones', 'bonos_acciones'),
+        makeInvItem('bonos_corp', 'bonos_acciones'),
+        makeInvItem('bonos_estado', 'bonos_acciones'),
+        // AFP
+        makeInvItem('apv', 'afp'),
+        makeInvItem('cuenta2', 'afp'),
+        // Monedas y Cripto
+        makeInvItem('moneda_ext', 'monedas_cripto'),
+        makeInvItem('cripto', 'monedas_cripto'),
+        // Inmuebles
+        makeCorrItem(0, 'propiedades', (state.assets.properties || []).length),
+        makeCorrItem(1, 'venta', activeSalesCount),
+        makeCorrItem(2, 'arriendo', activeRentalsOffersCount),
+        makeInvItem('fraccionada', 'inmuebles'),
+        // Startup
+        makeInvItem('startups', 'startup')
+      ].filter(Boolean);
+    }
+
     function renderInversionesStage(subView = 'main') {
       const container = document.getElementById('hub-stage-sections');
       if (!container) return;
@@ -1720,8 +1821,8 @@
         iconBox.className = 'hub-stage-header-icon dock-icon-box icon-inversiones';
         iconBox.innerHTML = '<span>📈</span>';
       }
-      if (titleElem) titleElem.innerText = '📈 Otros Instrumentos';
-      if (subtitleElem) subtitleElem.innerText = 'Instrumentos previsionales, bursátiles, divisas y capital de riesgo';
+      if (titleElem) titleElem.innerText = '📈 Cuentas e inversiones';
+      if (subtitleElem) subtitleElem.innerText = 'Cuentas, créditos, seguros, inversiones e inmuebles';
 
       if (!Array.isArray(state.finances.otherInvestments)) state.finances.otherInvestments = [];
       if (!state.finances.foreignCurrencies || typeof state.finances.foreignCurrencies !== 'object') state.finances.foreignCurrencies = {};
@@ -1737,50 +1838,61 @@
         return;
       }
 
-      const digitalWallet = getDigitalWalletAccount();
-      const totalOtherBalance = state.finances.otherInvestments.reduce((sum, inv) => sum + (Number(inv.currentBalance) || 0), 0) + getForeignCurrenciesTotalCLP() + (Number(state.finances.apvAccount?.balance) || 0) + (Number(state.finances.cuenta2Account?.balance) || 0) + (Number(digitalWallet?.balance) || 0);
-      const totalOtherCount = state.finances.otherInvestments.length + getActiveForeignCurrenciesCount() + Number(Boolean(state.finances.apvAccount)) + Number(Boolean(state.finances.cuenta2Account)) + Number(Boolean(digitalWallet));
+      const activeFilter = state.interface.investmentFilter || 'all';
+      const allItems = getCuentasInversionesItems();
+      const visibleItems = activeFilter === 'all'
+        ? allItems
+        : allItems.filter(item => item.category === activeFilter);
+
+      const activeRentals = (state.assets.rentedProperties || []).filter(rental => rental.active);
+      const showActiveRentals = activeRentals.length > 0 && (activeFilter === 'all' || activeFilter === 'inmuebles');
+      const fundingSources = showActiveRentals && typeof getCorredoraFundingSources === 'function'
+        ? getCorredoraFundingSources()
+        : [];
 
       container.innerHTML = `
         <div class="personal-subview-box">
-          <!-- RESUMEN GLOBAL DE OTROS INSTRUMENTOS -->
-          <div style="background: linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%); border: 1.5px solid #c4b5fd; border-radius: 9px; padding: 9px 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <div style="font-size: 0.58rem; font-weight: 700; color: #5b21b6; text-transform: uppercase;">Cartera en Otros Instrumentos</div>
-              <div style="font-size: 1.15rem; font-weight: 800, color: #6d28d9; font-family: var(--font-title);">
-                $${totalOtherBalance.toLocaleString('es-CL')}
-              </div>
-            </div>
-            <div style="text-align: right;">
-              <div style="font-size: 0.58rem; color: #64748b;">Posiciones activas</div>
-              <div style="font-size: 0.88rem; font-weight: 800; color: #0284c7;">
-                ${totalOtherCount} ${totalOtherCount === 1 ? 'instrumento' : 'instrumentos'}
-              </div>
-            </div>
+          <!-- BOTONES DE FILTRO -->
+          <div class="inv-filter-bar" role="group" aria-label="Filtrar opciones de cuentas e inversiones">
+            ${cuentasInversionesFilters.map(filter => `
+              <button type="button" class="inv-filter-btn ${activeFilter === filter.id ? 'active' : ''}"
+                aria-pressed="${activeFilter === filter.id}"
+                onclick="setInversionesFilter('${filter.id}')">${filter.label}</button>
+            `).join('')}
           </div>
 
-          <!-- GRID 2 COLUMNAS DE LAS 11 SECCIONES -->
+          <!-- GRID 2 COLUMNAS DE OPCIONES FILTRADAS -->
           <div class="hub-grid-2col">
-            ${hubsData.inversiones.sections.map(sec => {
-              const countInSec = sec.id === 'moneda_ext'
-                ? getActiveForeignCurrenciesCount()
-                : sec.id === 'billeteras'
-                  ? Number(Boolean(getDigitalWalletAccount()))
-                  : state.finances.otherInvestments.filter(inv => inv.categoryId === sec.id).length + (sec.id === 'apv' && state.finances.apvAccount ? 1 : 0) + (sec.id === 'cuenta2' && state.finances.cuenta2Account ? 1 : 0);
-              return `
-                <div class="hub-option-card" onclick="renderInversionesStage('${sec.id}')">
-                  <div class="hub-option-icon">${sec.icon || '💎'}</div>
-                  <div class="hub-option-text">
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
-                      <div class="hub-option-name">${sec.name}</div>
-                      ${countInSec > 0 ? `<span style="font-size: 0.54rem; font-weight: 800; background: #dcfce7; color: #166534; padding: 1px 5px; border-radius: 999px; flex-shrink: 0;">${countInSec}</span>` : ''}
-                    </div>
-                    ${sec.desc ? `<div class="hub-option-desc">${sec.desc}</div>` : ''}
+            ${visibleItems.map(item => `
+              <div class="hub-option-card" onclick="${item.action}">
+                <div class="hub-option-icon">${item.icon}</div>
+                <div class="hub-option-text">
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+                    <div class="hub-option-name">${item.name}</div>
+                    ${item.count > 0 ? `<span style="font-size: 0.54rem; font-weight: 800; background: #dcfce7; color: #166534; padding: 1px 5px; border-radius: 999px; flex-shrink: 0;">${item.count}</span>` : ''}
                   </div>
+                  ${item.desc ? `<div class="hub-option-desc">${item.desc}</div>` : ''}
                 </div>
-              `;
-            }).join('')}
+              </div>
+            `).join('')}
           </div>
+
+          ${showActiveRentals ? `
+            <section style="margin-top:12px;border-top:1px solid #e2e8f0;padding-top:10px;">
+              <div style="font-size:.76rem;font-weight:800;color:#0f172a;margin-bottom:7px;">Mis arriendos</div>
+              <div style="display:grid;gap:7px;">
+                ${activeRentals.map(rental => `
+                  <article style="display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,.8fr);align-items:center;gap:8px;padding:8px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;">
+                    <div style="min-width:0;"><div style="font-size:.65rem;font-weight:800;color:#0f172a;">${rental.name}</div><div style="font-size:.57rem;color:#475569;">Arriendo mensual: $${Number(rental.monthlyRent).toLocaleString('es-CL')}</div>${Number(rental.unpaidRent) > 0 ? `<div style="font-size:.54rem;color:#b91c1c;">Arriendo pendiente: $${Number(rental.unpaidRent).toLocaleString('es-CL')}</div>` : ''}</div>
+                    <label style="display:grid;gap:3px;font-size:.53rem;font-weight:700;color:#475569;">Descontar arriendo desde
+                      <select onchange="changeCorredoraRentalSource('${rental.id}',this.value)" style="width:100%;min-width:0;padding:6px;border:1px solid #cbd5e1;border-radius:5px;background:#fff;font-size:.58rem;">
+                        ${fundingSources.map(source => `<option value="${source.id}" ${source.id === rental.paymentSourceId ? 'selected' : ''}>${source.label}</option>`).join('')}
+                      </select>
+                    </label>
+                    <button type="button" onclick="endCorredoraRental('${rental.id}','main')" style="grid-column:1/-1;padding:7px 9px;border:1px solid #b91c1c;border-radius:5px;background:#fff;color:#b91c1c;font-size:.56rem;font-weight:800;cursor:pointer;">Terminar arriendo</button>
+                  </article>`).join('')}
+              </div>
+            </section>` : ''}
         </div>
       `;
     }

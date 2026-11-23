@@ -15,7 +15,7 @@
         iconBox.onclick = () => renderPersonalStage('secret_summary');
       }
 
-      if (titleElem) titleElem.innerText = 'Personal';
+      if (titleElem) titleElem.innerText = 'Mi perfil';
       if (subtitleElem) {
         subtitleElem.innerText = subView === 'secret_summary'
           ? 'Resumen secreto de variables del personaje'
@@ -135,6 +135,19 @@
               <span class="personal-access-arrow">➔</span>
             </button>
 
+            <button type="button" class="personal-access-btn" onclick="renderPersonalStage('dilemas')">
+              <div class="personal-access-left">
+                <div class="personal-access-icon">⚖️</div>
+                <div class="personal-access-texts">
+                  <div class="personal-access-name">
+                    Dilemas financieros${Object.keys(state.persona.dilemmaAnswers || {}).length > 0 ? `: <span style="color: #059669; font-weight: 800;">${Object.keys(state.persona.dilemmaAnswers || {}).length} / ${financialDilemmasConfig.preguntas.length}</span>` : ''}
+                  </div>
+                  <div class="personal-access-desc">Decisiones cotidianas sobre consumo, ahorro y crédito</div>
+                </div>
+              </div>
+              <span class="personal-access-arrow">➔</span>
+            </button>
+
             <button type="button" class="personal-access-btn" onclick="renderPersonalStage('presupuesto')">
               <div class="personal-access-left">
                 <div class="personal-access-icon">📊</div>
@@ -242,6 +255,20 @@
             ${statusBoxHtml}
           </div>
         `;
+      } else if (subView === 'dilemas') {
+        container.innerHTML = `
+          <div class="personal-subview-box">
+            <div class="personal-subview-top">
+              <span style="font-size: 0.85rem; font-weight: 800; color: #059669;">⚖️ Dilemas financieros</span>
+              <button type="button" class="personal-subview-back-btn" onclick="renderPersonalStage('main')">
+                <span>◀ Volver</span>
+              </button>
+            </div>
+            <div id="personal-dilemmas-grid" class="dilemma-grid"></div>
+          </div>
+        `;
+        const grid = document.getElementById('personal-dilemmas-grid');
+        if (grid) renderPersonalDilemmasGrid(grid);
       } else if (subView === 'presupuesto') {
         const baseItems = Array.isArray(state.finances.budgetItems) ? state.finances.budgetItems : [];
         const debtItems = (Array.isArray(state.finances.debts) && state.finances.debts.length > 0) ? state.finances.debts.map(d => ({
@@ -1375,6 +1402,104 @@
           </div>
         </div>
       `;
+    }
+
+    function renderPersonalDilemmasGrid(grid) {
+      if (!state.persona.dilemmaAnswers || typeof state.persona.dilemmaAnswers !== 'object') {
+        state.persona.dilemmaAnswers = {};
+      }
+      grid.replaceChildren();
+
+      for (const question of financialDilemmasConfig.preguntas) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'dilemma-button';
+
+        const icon = document.createElement('span');
+        icon.className = 'dilemma-button-icon';
+        icon.textContent = question.icono;
+        icon.setAttribute('aria-hidden', 'true');
+
+        const name = document.createElement('span');
+        name.className = 'dilemma-button-name';
+        name.textContent = question.nombre;
+
+        const answerSummary = document.createElement('span');
+        answerSummary.className = 'dilemma-button-answer';
+        const selectedOption = question.opciones.find(option => option.id === state.persona.dilemmaAnswers[question.id]);
+        answerSummary.textContent = selectedOption ? `Respuesta: ${selectedOption.texto}` : '';
+        button.classList.toggle('is-answered', Boolean(selectedOption));
+
+        button.append(icon, name, answerSummary);
+        button.addEventListener('click', () => openFinancialDilemmaDialog(question, answerSummary, button));
+        grid.append(button);
+      }
+    }
+
+    function openFinancialDilemmaDialog(question, answerSummary, triggerButton) {
+      if (!state.persona.dilemmaAnswers || typeof state.persona.dilemmaAnswers !== 'object') {
+        state.persona.dilemmaAnswers = {};
+      }
+
+      const dialog = document.createElement('dialog');
+      dialog.className = 'dilemma-dialog';
+      const titleId = `dilemma-${question.id}-title`;
+      dialog.setAttribute('aria-labelledby', titleId);
+
+      const body = document.createElement('div');
+      body.className = 'dilemma-dialog-body';
+
+      const title = document.createElement('h2');
+      title.id = titleId;
+      title.className = 'dilemma-title';
+      title.textContent = `${question.icono} ${question.nombre}`;
+
+      const text = document.createElement('p');
+      text.className = 'dilemma-text';
+      text.textContent = question.texto;
+
+      const options = document.createElement('div');
+      options.className = 'dilemma-options';
+
+      const optionButtons = question.opciones.map(option => {
+        const optionButton = document.createElement('button');
+        optionButton.type = 'button';
+        optionButton.className = 'dilemma-option';
+        optionButton.textContent = option.texto;
+        optionButton.addEventListener('click', () => {
+          state.persona.dilemmaAnswers[question.id] = option.id;
+          answerSummary.textContent = `Respuesta: ${option.texto}`;
+          if (triggerButton) triggerButton.classList.add('is-answered');
+          markSelectedOption();
+        });
+        options.append(optionButton);
+        return { option, optionButton };
+      });
+
+      function markSelectedOption() {
+        for (const { option, optionButton } of optionButtons) {
+          const isSelected = state.persona.dilemmaAnswers[question.id] === option.id;
+          optionButton.classList.toggle('is-selected', isSelected);
+          optionButton.setAttribute('aria-pressed', String(isSelected));
+        }
+      }
+      markSelectedOption();
+
+      const closeButton = document.createElement('button');
+      closeButton.type = 'button';
+      closeButton.className = 'dilemma-close';
+      closeButton.textContent = financialDilemmasConfig.textos.cerrar;
+      closeButton.addEventListener('click', () => dialog.close());
+
+      dialog.addEventListener('close', () => dialog.remove());
+      dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+      });
+
+      body.append(title, text, options, closeButton);
+      dialog.append(body);
+      document.body.append(dialog);
+      dialog.showModal();
     }
 
     // ACCIÓN AL PINCHAR UN ICONO DE LA ZONA INFERIOR

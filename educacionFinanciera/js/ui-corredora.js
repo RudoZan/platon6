@@ -1,6 +1,7 @@
 function renderCorredoraStage(mode) {
   const container = document.getElementById('hub-stage-sections');
   if (!container || !['venta', 'arriendo', 'ambos'].includes(mode)) return;
+  state.interface.investmentSubView = `corredora_${mode}`;
 
   const isRental = mode === 'arriendo';
   const isCombined = mode === 'ambos';
@@ -23,7 +24,7 @@ function renderCorredoraStage(mode) {
     <div class="personal-subview-box">
       <div class="personal-subview-top">
         <span style="font-size:.86rem;font-weight:800;color:#0369a1;">${title}</span>
-        <button type="button" class="personal-subview-back-btn" onclick="renderHubCentralStage('corredora')"><span>◀ Volver</span></button>
+        <button type="button" class="personal-subview-back-btn" onclick="renderInversionesStage('main')"><span>◀ Volver</span></button>
       </div>
       <div class="hub-grid-2col">
         ${corredoraHousingCatalog.map(property => {
@@ -100,56 +101,9 @@ function getCorredoraFundingSourceLabel(sourceId) {
 }
 
 function renderCorredoraMain() {
-  const container = document.getElementById('hub-stage-sections');
-  if (!container) return;
-  const titleElem = document.getElementById('hub-stage-title');
-  const subtitleElem = document.getElementById('hub-stage-subtitle');
-  const iconBox = document.getElementById('hub-stage-icon-box');
-  if (titleElem) titleElem.innerText = hubsData.corredora.title;
-  if (subtitleElem) subtitleElem.innerText = hubsData.corredora.subtitle;
-  if (iconBox) {
-    iconBox.style.cursor = 'default';
-    iconBox.onclick = null;
-    iconBox.removeAttribute('title');
-    iconBox.className = 'hub-stage-header-icon dock-icon-box icon-corredora';
-    iconBox.innerHTML = '<span>🏠</span>';
+  if (typeof renderInversionesStage === 'function') {
+    renderInversionesStage('main');
   }
-
-  const [propertyOption, ...otherOptions] = hubsData.corredora.sections;
-  const activeRentals = (state.assets.rentedProperties || []).filter(rental => rental.active);
-  const fundingSources = getCorredoraFundingSources();
-  container.innerHTML = `
-    <div class="personal-subview-box">
-      <div style="display:grid;grid-template-columns:minmax(0,1fr);margin-bottom:8px;">
-        <div class="hub-option-card" style="width:100%;box-sizing:border-box;justify-content:center;" onclick="${propertyOption.action}">
-          <div class="hub-option-icon">${propertyOption.icon}</div>
-          <div class="hub-option-text"><div class="hub-option-name">${propertyOption.name}</div><div class="hub-option-desc">${propertyOption.desc}</div></div>
-        </div>
-      </div>
-      <div class="hub-grid-2col">
-        ${otherOptions.map(option => `
-          <div class="hub-option-card" ${option.action ? `onclick="${option.action}"` : ''}>
-            <div class="hub-option-icon">${option.icon}</div>
-            <div class="hub-option-text"><div class="hub-option-name">${option.name}</div><div class="hub-option-desc">${option.desc}</div></div>
-          </div>`).join('')}
-      </div>
-      ${activeRentals.length ? `
-        <section style="margin-top:12px;border-top:1px solid #e2e8f0;padding-top:10px;">
-          <div style="font-size:.76rem;font-weight:800;color:#0f172a;margin-bottom:7px;">Mis arriendos</div>
-          <div style="display:grid;gap:7px;">
-            ${activeRentals.map(rental => `
-              <article style="display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,.8fr);align-items:center;gap:8px;padding:8px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;">
-                <div style="min-width:0;"><div style="font-size:.65rem;font-weight:800;color:#0f172a;">${rental.name}</div><div style="font-size:.57rem;color:#475569;">Arriendo mensual: $${Number(rental.monthlyRent).toLocaleString('es-CL')}</div>${Number(rental.unpaidRent) > 0 ? `<div style="font-size:.54rem;color:#b91c1c;">Arriendo pendiente: $${Number(rental.unpaidRent).toLocaleString('es-CL')}</div>` : ''}</div>
-                <label style="display:grid;gap:3px;font-size:.53rem;font-weight:700;color:#475569;">Descontar arriendo desde
-                  <select onchange="changeCorredoraRentalSource('${rental.id}',this.value)" style="width:100%;min-width:0;padding:6px;border:1px solid #cbd5e1;border-radius:5px;background:#fff;font-size:.58rem;">
-                    ${fundingSources.map(source => `<option value="${source.id}" ${source.id === rental.paymentSourceId ? 'selected' : ''}>${source.label}</option>`).join('')}
-                  </select>
-                </label>
-                <button type="button" onclick="endCorredoraRental('${rental.id}','main')" style="grid-column:1/-1;padding:7px 9px;border:1px solid #b91c1c;border-radius:5px;background:#fff;color:#b91c1c;font-size:.56rem;font-weight:800;cursor:pointer;">Terminar arriendo</button>
-              </article>`).join('')}
-          </div>
-        </section>` : ''}
-    </div>`;
 }
 
 function changeCorredoraRentalSource(rentalId, sourceId) {
@@ -162,6 +116,7 @@ function changeCorredoraRentalSource(rentalId, sourceId) {
 function renderCorredoraSalesManagement() {
   const container = document.getElementById('hub-stage-sections');
   if (!container) return;
+  state.interface.investmentSubView = 'corredora_ventas';
   const titleElem = document.getElementById('hub-stage-title');
   const subtitleElem = document.getElementById('hub-stage-subtitle');
   const monthLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -393,7 +348,7 @@ function processDailyCorredoraSales() {
   });
 
   if (typeof updateMonthlyDebtTotal === 'function') updateMonthlyDebtTotal();
-  if (completedSales.length && state.interface.activeHudTab === 'corredora') renderCorredoraSalesManagement();
+  if (completedSales.length && state.interface.activeHudTab === 'inversiones' && state.interface.investmentSubView === 'corredora_ventas') renderCorredoraSalesManagement();
   if (typeof updateHUD === 'function') updateHUD();
   if (completedSales.length && typeof alertUpcomingBankFeature === 'function') {
     const saleMessages = completedSales.map(sale => `${sale.propertyName}: venta $${sale.price.toLocaleString('es-CL')}, comisión $${sale.commission.toLocaleString('es-CL')}${sale.mortgagePayoff ? `, saldo hipotecario $${sale.mortgagePayoff.toLocaleString('es-CL')}` : ''}, neto recibido $${sale.netProceeds.toLocaleString('es-CL')}`).join('<br/>');
@@ -410,6 +365,7 @@ function getCorredoraMarketRent(property) {
 function renderCorredoraRentalManagement() {
   const container = document.getElementById('hub-stage-sections');
   if (!container) return;
+  state.interface.investmentSubView = 'corredora_arriendos';
   const titleElem = document.getElementById('hub-stage-title');
   const subtitleElem = document.getElementById('hub-stage-subtitle');
   if (titleElem) titleElem.innerText = 'Gestionar Arriendo';
@@ -589,7 +545,7 @@ function processDailyCorredoraRentals() {
   if (newTenants.length && typeof alertUpcomingBankFeature === 'function') {
     alertUpcomingBankFeature(newTenants.length === 1 ? '¡Propiedad arrendada!' : '¡Propiedades arrendadas!', newTenants.map(name => `${name} encontró arrendatario.`).join('<br/>'));
   }
-  if (newTenants.length && state.interface.activeHudTab === 'corredora') renderCorredoraRentalManagement();
+  if (newTenants.length && state.interface.activeHudTab === 'inversiones' && state.interface.investmentSubView === 'corredora_arriendos') renderCorredoraRentalManagement();
 }
 
 function processMonthlyCorredoraRentals() {
@@ -623,7 +579,7 @@ function processMonthlyCorredoraRentals() {
     });
     listing.nextRentMonthIndex = monthIndex + 1;
   });
-  if (state.interface.activeHudTab === 'corredora') renderCorredoraRentalManagement();
+  if (state.interface.activeHudTab === 'inversiones' && state.interface.investmentSubView === 'corredora_arriendos') renderCorredoraRentalManagement();
   if (typeof updateHUD === 'function') updateHUD();
 }
 
@@ -769,7 +725,7 @@ function confirmCorredoraTransaction(propertyId, transactionType, returnMode = '
 
 function openCorredoraMortgage(propertyId) {
   closeBancoModal();
-  selectHudTab('banco');
+  selectHudTab('inversiones');
   renderBancoStage('credito_hipotecario', propertyId);
 }
 
@@ -829,7 +785,7 @@ function processMonthlyCorredoraPayments() {
     rental.unpaidRent = Math.max(0, due - paid);
     rental.lastRentChargedMonthIndex = previousMonthIndex;
   });
-  if (state.interface.activeHudTab === 'corredora') renderCorredoraMain();
+  if (state.interface.activeHudTab === 'inversiones' && state.interface.investmentSubView === 'main') renderCorredoraMain();
 }
 
 function endCorredoraRental(rentalId, returnMode = 'main') {

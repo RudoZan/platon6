@@ -1,20 +1,21 @@
 # Active Use Cases — `educacionFinanciera` (`platon6/sitio-web/educacionFinanciera/index.html`)
 
-## UC-01: Session Entry & Top PPT Carousel Navigation
-- **Slide 1:** Displays Amartya Sen (2000) quote + session code input (`YYYYMM` + 4 digits `1000-9999`).
-- **Navigation:** Top `[ ◀ ]` / `[ ▶ ]` buttons, mouse wheel, or drag-to-scroll across 42 numbered slides (`N° 1`–`N° 42`). Only slides 1–4 and 7, 22, 36, 37, 38 define a central onboarding/summary view; slides 5–6, 8–21, 23–35, and 39–42 have no central placeholder card.
+## UC-01: Top Bar, Welcome Screen, Configuración & Acerca de
+- **Welcome (`#view-welcome`):** Initial landing screen displaying title `"Simulador de decisiones financieras"` and Amartya Sen (2000) quote; clicking `"Finanzas y Bienestar"` in `.topbar` returns here.
+- **Top Menu (`#menu-toggle`):** Opens `"Configuración"` (speed selector `1s/2s/3s/5s`, `Activar`/`Detener simulador`, `Reiniciar simulador`) and `"Acerca de"` (app summary, credits `Astutosoft 2026`, `Cerrar` button).
 
 ## UC-02: Character Onboarding (3 Tabs)
-1. **`Intereses`:** Allocate 20 marbles across 14 categories (1–3 scale).
+1. **`Intereses`:** Allocate up to 25 stars across personal interest categories (1–3 scale), accessible from `"Mi perfil"`.
 2. **`Preferencias`:** Pick 2 of 4 options each in `"Vivienda"`, `"Trabajo"`, and `"Transporte"`.
 3. **`Resumen`:** 2nd-person profile summary + starting financial diagnosis.
 
-## UC-03: `"Mi Estado"` (`Personal` Hub)
-1. **Wellbeing & Cash Card:** Displays `"Bienestar"` (starts at 100%, 20 SVG hearts filled vertically 2 per column + 11-level dynamic emoji) and physical `"Efectivo"`.
-2. **`"Presupuesto Mensual"` (3-Column Table):** Headers for `"Dinero disponible"` and `"Ingreso estimado"`. Columns: `Ítem / Presupuesto / Gasto Real` (9 base items at `$0` + contracted debts) + **`+ Agregar ítem`** button (`Libre` or `Ahorro / Inversión` linked to `"Alcancía"`, `"DAP"`, `"Dólares"`, `"Fondo Mutuo"`).
-3. **`"Patrimonio & Liquidez"`:** Real breakdown of physical cash + active bank accounts, debts, and emergency coverage in months.
-4. **`"Test de Perfil de Inversionista"`:** 5-question flow with manual navigation (`◀ Anterior` / `Siguiente ▶`), answer persistence, and official diagnosis (`"Conservador"`, `"Moderado"`, `"Arriesgado"`, 5–15 pts).
-5. **Secret Subview `"Variables del Personaje"` (`secret_summary`):** Clicking top-left icon (`#hub-stage-icon-box`) opens full state audit (`Física: 20/20`, `Emocional: 40/40`, `Mental: 40/40`, accounts, debts, owned assets).
+## UC-03: `"Mi perfil"` Hub (First Tab on Left)
+1. **Wellbeing & Cash Card:** Displays `"Bienestar"` (starts at 100%, 20 SVG hearts filled vertically 2 per column + 11-level dynamic emoji) and `"Dinero Disponible"`.
+2. **`"Perfil de Inversionista"`:** 5-question flow with manual navigation (`◀ Anterior` / `Siguiente ▶`), answer persistence, and official diagnosis (`"Conservador"`, `"Moderado"`, `"Arriesgado"`, 5–15 pts).
+3. **`"Dilemas financieros"`:** Right below `"Perfil de Inversionista"`, opens a 2-column grid of 6 everyday financial dilemmas (`Compra de computador`, `Ahorro sorpresa`, `Aumento de sueldo`, `El auto`, `Series y películas`, `Las Tarjetas`). Clicking a dilemma opens a `<dialog>` modal with selectable options; chosen answers stay marked and display `Respuesta: ...` on the 6-card grid.
+4. **`"Presupuesto Mensual"` (3-Column Table):** Headers for `"Dinero disponible"` and `"Ingreso estimado"`. Columns: `Ítem / Presupuesto / Gasto Real` (9 base items at `$0` + contracted debts) + **`+ Agregar ítem`** button.
+5. **`"Patrimonio & Liquidez"` & `"Movimientos de cuentas y efectivo"`:** Real breakdown of cash, bank accounts, debts, emergency coverage, and year-filtered financial ledger.
+6. **Secret Subview `"Variables del Personaje"` (`secret_summary`):** Clicking top-left icon (`#hub-stage-icon-box`) opens full state audit.
 
 ## UC-04: `"Trabajo"` Hub (Job Search, Training & Salary Negotiation)
 1. **`"Búsqueda de Trabajo"`:** 2-col catalog of 6 jobs (gross/net salary, cumulative completed-month experience and certified-course requirements). Supports immediate hire (`"Postular"`) or resignation (`"Renunciar"`).
@@ -80,3 +81,7 @@
 ## UC-14: `"Comercio y Servicios"` Categories
 1. The dock opens the renamed `"Comercio y Servicios"` hub.
 2. Its catalog displays the existing options plus `"Tienda de Hobbies"`, `"Ropa e implementos deportivos"`, `"Reparaciones del hogar"`, `"Mecánico"`, `"Veterinario"`, and `"Hospital y Urgencia"`.
+
+## UC-15: Unified `"Cuentas e inversiones"` & `"Asesor Financiero"`
+1. **`"Cuentas e inversiones"`:** Consolidates all 10 Bank products, 11 Investment instruments, and 3 Corredora options (24 total) into a single hub with 10 filter buttons (`Mostrar todo`, `Cuentas`, `Créditos`, `Seguros`, `Fondos mutuos y depósitos a plazo`, `Bonos y acciones`, `AFP`, `Monedas y Cripto`, `Inmuebles`, `Startup`) plus the `"Mis arriendos"` block when rentals are active. All detail subviews return here on `◀ Volver`.
+2. **`"Asesor Financiero"`:** 6th dock tab (right of `"Trabajo"`) offering 6 educational topic buttons (`Regla de 50/30/20`, `“No poner todos los huevos en la misma canasta”`, `Conceptos clave en inversiones`, `Triángulo de la inversión` with SVG diagram, `Perfil de riesgo` with shortcut to Investor Test, and `CAE · Carga Anual Equivalente`), each opening a structured info screen with `◀ Volver`.
